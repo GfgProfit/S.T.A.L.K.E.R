@@ -1,0 +1,1270 @@
+fileFormatVersion: 2
+guid: 09cd29a7d7aa950489948a8c8dac3705
+TextureImporter:
+  internalIDToNameTable: []
+  externalObjects: {}
+  serializedVersion: 13
+  mipmaps:
+    mipMapMode: 0
+    enableMipMap: 0
+    sRGBTexture: 1
+    linearTexture: 0
+    fadeOut: 0
+    borderMipMap: 0
+    mipMapsPreserveCoverage: 0
+    alphaTestReferenceValue: 0.5
+    mipMapFadeDistanceStart: 1
+    mipMapFadeDistanceEnd: 3
+  bumpmap:
+    convertToNormalMap: 0
+    externalNormalMap: 0
+    heightScale: 0.25
+    normalMapFilter: 0
+    flipGreenChannel: 0
+  isReadable: 0
+  streamingMipmaps: 0
+  streamingMipmapsPriority: 0
+  vTOnly: 0
+  ignoreMipmapLimit: 0
+  grayScaleToAlpha: 0
+  generateCubemap: 6
+  cubemapConvolution: 0
+  seamlessCubemap: 0
+  textureFormat: 1
+  maxTextureSize: 2048
+  textureSettings:
+    serializedVersion: 2
+    filterMode: 2
+    aniso: 1
+    mipBias: 0
+    wrapU: 1
+    wrapV: 1
+    wrapW: 0
+  nPOTScale: 0
+  lightmap: 0
+  compressionQuality: 50
+  spriteMode: 2
+  spriteExtrude: 1
+  spriteMeshType: 1
+  alignment: 0
+  spritePivot: {x: 0.5, y: 0.5}
+  spritePixelsToUnits: 100
+  spriteBorder: {x: 0, y: 0, z: 0, w: 0}
+  spriteGenerateFallbackPhysicsShape: 1
+  alphaUsage: 1
+  alphaIsTransparency: 1
+  spriteTessellationDetail: -1
+  textureType: 8
+  textureShape: 1
+  singleChannelComponent: 0
+  flipbookRows: 1
+  flipbookColumns: 1
+  maxTextureSizeSet: 0
+  compressionQualitySet: 0
+  textureFormatSet: 0
+  ignorePngGamma: 0
+  applyGammaDecoding: 0
+  swizzle: 50462976
+  cookieLightType: 0
+  platformSettings:
+  - serializedVersion: 4
+    buildTarget: DefaultTexturePlatform
+    maxTextureSize: 4096
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 0
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  - serializedVersion: 4
+    buildTarget: Standalone
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 1
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  spriteSheet:
+    serializedVersion: 2
+    sprites:
+    - serializedVersion: 2
+      name: ui_hud_14
+      rect:
+        serializedVersion: 2
+        x: 2187
+        y: 3292
+        width: 1332
+        height: 738
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: abb2d7968c59177418e07e9e1ba58a39
+      internalID: -767074714
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: ui_hud_17
+      rect:
+        serializedVersion: 2
+        x: 3738
+        y: 3907
+        width: 56
+        height: 80
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: f052fb356e5f2b048874215915fbf5f0
+      internalID: -86639996
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: ui_hud_39
+      rect:
+        serializedVersion: 2
+        x: 3738
+        y: 3803
+        width: 56
+        height: 80
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 8df717df70481724fb6308be75b036a7
+      internalID: 1264002315
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: ui_hud_40
+      rect:
+        serializedVersion: 2
+        x: 172
+        y: 3814
+        width: 45
+        height: 45
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 1d9a217ba865ab749b0649b514630f6a
+      internalID: -624984789
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: ui_hud_41
+      rect:
+        serializedVersion: 2
+        x: 236
+        y: 3814
+        width: 45
+        height: 45
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 966835a5417283546ad7b793c64680db
+      internalID: -529580285
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: ui_hud_42
+      rect:
+        serializedVersion: 2
+        x: 300
+        y: 3814
+        width: 45
+        height: 45
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 429c76494c587d34d9acd01628887884
+      internalID: -780829973
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: ui_hud_43
+      rect:
+        serializedVersion: 2
+        x: 364
+        y: 3814
+        width: 45
+        height: 46
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 94a09f0a3f3140947a0e2e2451d3d8eb
+      internalID: 1585733632
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: ui_hud_48
+      rect:
+        serializedVersion: 2
+        x: 171
+        y: 3750
+        width: 46
+        height: 45
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: cbb4c8820eec8c148a68167b2283c521
+      internalID: -828522010
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: ui_hud_49
+      rect:
+        serializedVersion: 2
+        x: 236
+        y: 3750
+        width: 45
+        height: 55
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 612544c90121dff47a61877c58fab742
+      internalID: -511005480
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: ui_hud_50
+      rect:
+        serializedVersion: 2
+        x: 300
+        y: 3750
+        width: 45
+        height: 45
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 9ad6ce69d3948bb49bc48a32dbd5526d
+      internalID: 947703744
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: ui_hud_51
+      rect:
+        serializedVersion: 2
+        x: 364
+        y: 3750
+        width: 45
+        height: 46
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 52c97a4484d8290409bef14275c893ce
+      internalID: -533344362
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: ui_hud_61
+      rect:
+        serializedVersion: 2
+        x: 3706
+        y: 3648
+        width: 108
+        height: 106
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 3a97d3abaa0565445855e1abf83f822d
+      internalID: -1612840045
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: ui_hud_74
+      rect:
+        serializedVersion: 2
+        x: 3731
+        y: 3458
+        width: 56
+        height: 154
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 3fea3461b31bd2649bb8a0c37d16c30c
+      internalID: 149896150
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: ui_hud_132
+      rect:
+        serializedVersion: 2
+        x: 3731
+        y: 3291
+        width: 57
+        height: 153
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: ac07dca73b4e3aa458d62e0e1ecd0e5c
+      internalID: 226029881
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: ui_hud_179
+      rect:
+        serializedVersion: 2
+        x: 200
+        y: 3286
+        width: 100
+        height: 10
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 3b0df331860f3154e8bef1eed32f1c2f
+      internalID: 1069785444
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: ui_hud_210
+      rect:
+        serializedVersion: 2
+        x: 2568
+        y: 3166
+        width: 788
+        height: 46
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: babab8216f97aba45a29fd6419888186
+      internalID: 1103068209
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: ui_hud_252
+      rect:
+        serializedVersion: 2
+        x: 0
+        y: 3076
+        width: 90
+        height: 92
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 24b9b016fd45d7b41b60290759cb0f5b
+      internalID: 1284637093
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: ui_hud_256
+      rect:
+        serializedVersion: 2
+        x: 90
+        y: 3076
+        width: 92
+        height: 92
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: d230624c2f1106845bf28ab59315caf5
+      internalID: 288344443
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: ui_hud_259
+      rect:
+        serializedVersion: 2
+        x: 1708
+        y: 2994
+        width: 788
+        height: 171
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 1fcc13eae3330ce43b9bf698c50eeffc
+      internalID: 1343443416
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: ui_hud_264
+      rect:
+        serializedVersion: 2
+        x: 2568
+        y: 3068
+        width: 788
+        height: 51
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: e08ec3b85372a3a4e9dca17740908c2f
+      internalID: -1122957343
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: ui_hud_314
+      rect:
+        serializedVersion: 2
+        x: 2570
+        y: 2977
+        width: 786
+        height: 49
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 13096407c5a6aad4ba1882b8668700b7
+      internalID: 985279528
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: ui_hud_351
+      rect:
+        serializedVersion: 2
+        x: 0
+        y: 1685
+        width: 1255
+        height: 1244
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 2f21d87e1f359974993f02097210750d
+      internalID: 1103173385
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: ui_hud_352
+      rect:
+        serializedVersion: 2
+        x: 1260
+        y: 1685
+        width: 1247
+        height: 1243
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 48090523d68c8e542b1db313562f2e96
+      internalID: 1173627950
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: ui_hud_353
+      rect:
+        serializedVersion: 2
+        x: 2568
+        y: 2890
+        width: 786
+        height: 52
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 36c1d48e493519b4da2c75ce3e8d2eb3
+      internalID: -69931023
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: ui_hud_393
+      rect:
+        serializedVersion: 2
+        x: 4
+        y: 2156
+        width: 4
+        height: 100
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: fd15d5a63e11ae44ca38e30ef31e68bc
+      internalID: 389104147
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: ui_hud_394
+      rect:
+        serializedVersion: 2
+        x: 2563
+        y: 2204
+        width: 1145
+        height: 581
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 58d7162e5940a994c8ca06754a4d90c9
+      internalID: -871767540
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: ui_hud_395
+      rect:
+        serializedVersion: 2
+        x: 3709
+        y: 2204
+        width: 4
+        height: 4
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: e0f0a8c821089a2489d682f2ebf81c9e
+      internalID: 73209058
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: ui_hud_396
+      rect:
+        serializedVersion: 2
+        x: 27
+        y: 584
+        width: 835
+        height: 1050
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: a80332a1c98c4a643bde777f5de77c93
+      internalID: 838293604
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: ui_hud_398
+      rect:
+        serializedVersion: 2
+        x: 1119
+        y: 558
+        width: 1096
+        height: 1078
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 6f097d5f31f2669478432b692b2484d7
+      internalID: 1488897412
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: ui_hud_399
+      rect:
+        serializedVersion: 2
+        x: 2568
+        y: 700
+        width: 1301
+        height: 1348
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 01a2f951a6c43bc41b4b0df0a98f541c
+      internalID: 478816509
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: ui_hud_401
+      rect:
+        serializedVersion: 2
+        x: 9
+        y: 209
+        width: 402
+        height: 336
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: cd4d7d0ab880f194884b7bf5e0a75925
+      internalID: -1686480039
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: ui_hud_211
+      rect:
+        serializedVersion: 2
+        x: 2570
+        y: 2804
+        width: 785
+        height: 53
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 84af9d432396d874e8151afaae4d0fa0
+      internalID: -91816634
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: ui_hud_0
+      rect:
+        serializedVersion: 2
+        x: 108
+        y: 3814
+        width: 45
+        height: 45
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 1adff3efd825ef044a17ab7e1c150f6c
+      internalID: 1706235893
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: ui_hud_1
+      rect:
+        serializedVersion: 2
+        x: 108
+        y: 3750
+        width: 45
+        height: 45
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: a1738db33a8c0e64daafe63345779703
+      internalID: 563034500
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    outline: []
+    customData: 
+    physicsShape: []
+    bones: []
+    spriteID: 5e97eb03825dee720800000000000000
+    internalID: 0
+    vertices: []
+    indices: 
+    edges: []
+    weights: []
+    secondaryTextures: []
+    spriteCustomMetadata:
+      entries:
+      - key: SpriteEditor.SliceSettings
+        value: '{"sliceOnImport":false,"gridCellCount":{"x":1.0,"y":1.0},"gridSpriteSize":{"x":64.0,"y":64.0},"gridSpriteOffset":{"x":0.0,"y":0.0},"gridSpritePadding":{"x":0.0,"y":0.0},"pivot":{"x":0.5,"y":0.5},"pivotPixels":{"x":0.0,"y":0.0},"autoSlicingMethod":0,"spriteAlignment":0,"pivotUnitMode":0,"slicingType":0,"keepEmptyRects":false,"isAlternate":false}'
+    nameFileIdTable:
+      ui_hud_0: 1706235893
+      ui_hud_1: 563034500
+      ui_hud_10: 306529596
+      ui_hud_100: 1155382611
+      ui_hud_101: -1699173121
+      ui_hud_102: 48356343
+      ui_hud_103: 1607046716
+      ui_hud_104: 553294460
+      ui_hud_105: 1043263609
+      ui_hud_106: 648527109
+      ui_hud_107: -1745954483
+      ui_hud_108: -868706857
+      ui_hud_109: -1957684301
+      ui_hud_11: -117543842
+      ui_hud_110: 1273588463
+      ui_hud_111: 953911960
+      ui_hud_112: 1771717935
+      ui_hud_113: 477134122
+      ui_hud_114: 192204710
+      ui_hud_115: 560490479
+      ui_hud_116: 493805960
+      ui_hud_117: -770796762
+      ui_hud_118: -688751644
+      ui_hud_119: -3282184
+      ui_hud_12: -1253360837
+      ui_hud_120: -1176853199
+      ui_hud_121: -1775070074
+      ui_hud_122: -784592147
+      ui_hud_123: -755758979
+      ui_hud_124: 1399768977
+      ui_hud_125: -2142196743
+      ui_hud_126: -1791272129
+      ui_hud_127: 1014660755
+      ui_hud_128: -657468086
+      ui_hud_129: -580616686
+      ui_hud_13: -14891720
+      ui_hud_130: -742383363
+      ui_hud_131: 280845100
+      ui_hud_132: 226029881
+      ui_hud_133: -1368466984
+      ui_hud_134: 842014022
+      ui_hud_135: -712810090
+      ui_hud_136: -360853034
+      ui_hud_137: 1232073525
+      ui_hud_138: -112678280
+      ui_hud_139: -829522248
+      ui_hud_14: -767074714
+      ui_hud_140: -1403907125
+      ui_hud_141: 1726983115
+      ui_hud_142: 1084448755
+      ui_hud_143: 1674323018
+      ui_hud_144: 1708210833
+      ui_hud_145: 527118763
+      ui_hud_146: 1676791389
+      ui_hud_147: 758994896
+      ui_hud_148: -924493736
+      ui_hud_149: -1386302555
+      ui_hud_15: 1949716022
+      ui_hud_150: -57105889
+      ui_hud_151: -686407521
+      ui_hud_152: 936639708
+      ui_hud_153: 543386722
+      ui_hud_154: 1706098184
+      ui_hud_155: -1814181845
+      ui_hud_156: -217300994
+      ui_hud_157: -1536334199
+      ui_hud_158: -293662776
+      ui_hud_159: 474940506
+      ui_hud_16: 1861565312
+      ui_hud_160: 1308629188
+      ui_hud_161: 401861874
+      ui_hud_162: -786985377
+      ui_hud_163: 1184194744
+      ui_hud_164: -345423472
+      ui_hud_165: -1915903604
+      ui_hud_166: -137924680
+      ui_hud_167: 1619625565
+      ui_hud_168: -1511673005
+      ui_hud_169: -98512216
+      ui_hud_17: -86639996
+      ui_hud_170: 1000984159
+      ui_hud_171: -830143483
+      ui_hud_172: -1015507922
+      ui_hud_173: 924931563
+      ui_hud_174: -1187946097
+      ui_hud_175: -1120902662
+      ui_hud_176: 1073826442
+      ui_hud_177: -1300690884
+      ui_hud_178: 871620259
+      ui_hud_179: 1069785444
+      ui_hud_18: 457862222
+      ui_hud_180: -483172345
+      ui_hud_181: -973962613
+      ui_hud_182: -1400966059
+      ui_hud_183: -909615346
+      ui_hud_184: -1229359519
+      ui_hud_185: 99473175
+      ui_hud_186: -844975849
+      ui_hud_187: -857258359
+      ui_hud_188: -1616193297
+      ui_hud_189: 737154127
+      ui_hud_19: -1111287443
+      ui_hud_190: -1417894413
+      ui_hud_191: -252306665
+      ui_hud_192: 436033937
+      ui_hud_193: -110265921
+      ui_hud_194: -1205283508
+      ui_hud_195: 794694100
+      ui_hud_196: -934105942
+      ui_hud_197: 1604540520
+      ui_hud_198: 425806106
+      ui_hud_199: 1662076515
+      ui_hud_2: -1156422445
+      ui_hud_20: 150011027
+      ui_hud_200: -1330745542
+      ui_hud_201: 1191307406
+      ui_hud_202: 1049026367
+      ui_hud_203: -1429704569
+      ui_hud_204: 472042876
+      ui_hud_205: 1181409667
+      ui_hud_206: 890433529
+      ui_hud_207: 1595710591
+      ui_hud_208: 429467027
+      ui_hud_209: -2079126021
+      ui_hud_21: -612086773
+      ui_hud_210: 1103068209
+      ui_hud_211: -91816634
+      ui_hud_212: 607398580
+      ui_hud_213: 340497328
+      ui_hud_214: -962110880
+      ui_hud_215: 198909063
+      ui_hud_216: -620629551
+      ui_hud_217: 71909990
+      ui_hud_218: -1905120518
+      ui_hud_219: 413027591
+      ui_hud_22: -514366379
+      ui_hud_220: -1049462145
+      ui_hud_221: 2136022385
+      ui_hud_222: 729520643
+      ui_hud_223: 1139514956
+      ui_hud_224: 1077566260
+      ui_hud_225: 1027253835
+      ui_hud_226: -773792606
+      ui_hud_227: 1099030636
+      ui_hud_228: -1065104490
+      ui_hud_229: 1063819122
+      ui_hud_23: 1468536595
+      ui_hud_230: 30521180
+      ui_hud_231: -737534190
+      ui_hud_232: -1946536046
+      ui_hud_233: 1612444576
+      ui_hud_234: 2109710997
+      ui_hud_235: 1851762798
+      ui_hud_236: -1481942892
+      ui_hud_237: -566571963
+      ui_hud_238: -808357371
+      ui_hud_239: -831402965
+      ui_hud_24: -1701210178
+      ui_hud_240: 1591649887
+      ui_hud_241: -94244100
+      ui_hud_242: 652218046
+      ui_hud_243: 1085056923
+      ui_hud_244: -1903589250
+      ui_hud_245: 1473866934
+      ui_hud_246: -1951169662
+      ui_hud_247: 1127013432
+      ui_hud_248: -2064572695
+      ui_hud_249: -1624751257
+      ui_hud_25: 1872148158
+      ui_hud_250: 1521732566
+      ui_hud_251: 294748350
+      ui_hud_252: 1284637093
+      ui_hud_253: -42294840
+      ui_hud_254: -2001316904
+      ui_hud_255: 1795884671
+      ui_hud_256: 288344443
+      ui_hud_257: -206610056
+      ui_hud_258: 2146017594
+      ui_hud_259: 1343443416
+      ui_hud_26: -149402417
+      ui_hud_260: -690576369
+      ui_hud_261: -1119842341
+      ui_hud_262: -674723588
+      ui_hud_263: 1030622356
+      ui_hud_264: -1122957343
+      ui_hud_265: 1074354235
+      ui_hud_266: -669581585
+      ui_hud_267: 2044428396
+      ui_hud_268: -45672060
+      ui_hud_269: -1073436503
+      ui_hud_27: 1929756923
+      ui_hud_270: 1203897148
+      ui_hud_271: -1730747319
+      ui_hud_272: -857223667
+      ui_hud_273: 49293828
+      ui_hud_274: 1836406529
+      ui_hud_275: 196625563
+      ui_hud_276: -553991188
+      ui_hud_277: -1044075958
+      ui_hud_278: -317959767
+      ui_hud_279: 1290507280
+      ui_hud_28: 45839419
+      ui_hud_280: 197513911
+      ui_hud_281: 1752486226
+      ui_hud_282: -61147426
+      ui_hud_283: 1177254129
+      ui_hud_284: 1150020829
+      ui_hud_285: 934364919
+      ui_hud_286: 1864595009
+      ui_hud_287: 71612739
+      ui_hud_288: 1906019094
+      ui_hud_289: -1803296774
+      ui_hud_29: 982382850
+      ui_hud_290: -122319470
+      ui_hud_291: -39018526
+      ui_hud_292: 2124208412
+      ui_hud_293: -1474588147
+      ui_hud_294: -1783968066
+      ui_hud_295: 1152666452
+      ui_hud_296: -1844086119
+      ui_hud_297: -1500138898
+      ui_hud_298: -343509967
+      ui_hud_299: -1422375638
+      ui_hud_3: 316784742
+      ui_hud_30: 415727055
+      ui_hud_300: -1240322563
+      ui_hud_301: -1278300487
+      ui_hud_302: -1107350051
+      ui_hud_303: -1258163128
+      ui_hud_304: -1611270211
+      ui_hud_305: -1303274089
+      ui_hud_306: -1088314084
+      ui_hud_307: -1294261783
+      ui_hud_308: 266317711
+      ui_hud_309: -346596300
+      ui_hud_31: 150818566
+      ui_hud_310: -1699606767
+      ui_hud_311: -1366810201
+      ui_hud_312: -340128579
+      ui_hud_313: 1141826895
+      ui_hud_314: 985279528
+      ui_hud_315: 856059157
+      ui_hud_316: -2127294075
+      ui_hud_317: -2144721281
+      ui_hud_318: 1912840947
+      ui_hud_319: -2028706432
+      ui_hud_32: -173316290
+      ui_hud_320: -1905681463
+      ui_hud_321: 1393118332
+      ui_hud_322: 1032955626
+      ui_hud_323: -1692469643
+      ui_hud_324: -1090244481
+      ui_hud_325: -1186725765
+      ui_hud_326: -1696421300
+      ui_hud_327: 165506562
+      ui_hud_328: -321738995
+      ui_hud_329: -580160992
+      ui_hud_33: -314552477
+      ui_hud_330: -1046907163
+      ui_hud_331: -1114911068
+      ui_hud_332: -1558546390
+      ui_hud_333: 1765072838
+      ui_hud_334: 494798610
+      ui_hud_335: -1073578751
+      ui_hud_336: 1433526674
+      ui_hud_337: 675654188
+      ui_hud_338: 408486768
+      ui_hud_339: 865311875
+      ui_hud_34: -1436372036
+      ui_hud_340: 1226798680
+      ui_hud_341: 2014350961
+      ui_hud_342: -1419140826
+      ui_hud_343: -688593075
+      ui_hud_344: 2031624131
+      ui_hud_345: 1407060205
+      ui_hud_346: 1449901585
+      ui_hud_347: 1794732417
+      ui_hud_348: -2065209643
+      ui_hud_349: -1825570399
+      ui_hud_35: 1881916009
+      ui_hud_350: 63960375
+      ui_hud_351: 1103173385
+      ui_hud_352: 1173627950
+      ui_hud_353: -69931023
+      ui_hud_354: -1287802868
+      ui_hud_355: 122577745
+      ui_hud_356: -216035023
+      ui_hud_357: -826961378
+      ui_hud_358: -608638216
+      ui_hud_359: -441410683
+      ui_hud_36: 1510195993
+      ui_hud_360: -1439864914
+      ui_hud_361: -243578977
+      ui_hud_362: 1702779542
+      ui_hud_363: 1551104693
+      ui_hud_364: -2124967570
+      ui_hud_365: 1026043275
+      ui_hud_366: -1031793530
+      ui_hud_367: -92025820
+      ui_hud_368: 1135745051
+      ui_hud_369: -25512904
+      ui_hud_37: 1401708805
+      ui_hud_370: 360559338
+      ui_hud_371: -375828500
+      ui_hud_372: -28674583
+      ui_hud_373: 209617245
+      ui_hud_374: 247389306
+      ui_hud_375: 1075623696
+      ui_hud_376: 1325242911
+      ui_hud_377: 328991565
+      ui_hud_378: -1676425329
+      ui_hud_379: -1214490569
+      ui_hud_38: -1534395883
+      ui_hud_380: -871168911
+      ui_hud_381: -824450562
+      ui_hud_382: -52256804
+      ui_hud_383: 807672730
+      ui_hud_384: -1226976332
+      ui_hud_385: 694756026
+      ui_hud_386: -801892165
+      ui_hud_387: -1118060404
+      ui_hud_388: 382779068
+      ui_hud_389: 149691944
+      ui_hud_39: 1264002315
+      ui_hud_390: 613168204
+      ui_hud_391: -1981254257
+      ui_hud_392: -651918172
+      ui_hud_393: 389104147
+      ui_hud_394: -871767540
+      ui_hud_395: 73209058
+      ui_hud_396: 838293604
+      ui_hud_397: 691459391
+      ui_hud_398: 1488897412
+      ui_hud_399: 478816509
+      ui_hud_4: -203861848
+      ui_hud_40: -624984789
+      ui_hud_400: 1682472905
+      ui_hud_401: -1686480039
+      ui_hud_402: -958527609
+      ui_hud_41: -529580285
+      ui_hud_42: -780829973
+      ui_hud_43: 1585733632
+      ui_hud_44: -403906333
+      ui_hud_45: -1545404518
+      ui_hud_46: 789299218
+      ui_hud_47: -500173575
+      ui_hud_48: -828522010
+      ui_hud_49: -511005480
+      ui_hud_5: 1623230752
+      ui_hud_50: 947703744
+      ui_hud_51: -533344362
+      ui_hud_52: 1289688084
+      ui_hud_53: 1756409092
+      ui_hud_54: 552534680
+      ui_hud_55: 600860946
+      ui_hud_56: -1083861749
+      ui_hud_57: 1467290816
+      ui_hud_58: -695981867
+      ui_hud_59: -233983789
+      ui_hud_6: -1141308217
+      ui_hud_60: -23039408
+      ui_hud_61: -1612840045
+      ui_hud_62: 1378541683
+      ui_hud_63: -538858534
+      ui_hud_64: 1732930579
+      ui_hud_65: 1030189142
+      ui_hud_66: -985841178
+      ui_hud_67: -818460310
+      ui_hud_68: -1416792906
+      ui_hud_69: 2055290532
+      ui_hud_7: 496802811
+      ui_hud_70: -678016416
+      ui_hud_71: 958806246
+      ui_hud_72: 1722825034
+      ui_hud_73: 43172943
+      ui_hud_74: 149896150
+      ui_hud_75: 1522936730
+      ui_hud_76: -192431844
+      ui_hud_77: 265205890
+      ui_hud_78: -1477442244
+      ui_hud_79: 1288342400
+      ui_hud_8: -2103075546
+      ui_hud_80: 731012527
+      ui_hud_81: 131552271
+      ui_hud_82: 251440234
+      ui_hud_83: -580957745
+      ui_hud_84: 1341801966
+      ui_hud_85: 1017614730
+      ui_hud_86: -2043447093
+      ui_hud_87: 74654623
+      ui_hud_88: 1339761639
+      ui_hud_89: -51875247
+      ui_hud_9: -2024690416
+      ui_hud_90: -597964237
+      ui_hud_91: 1770172022
+      ui_hud_92: 1324782102
+      ui_hud_93: 218074217
+      ui_hud_94: -1872337706
+      ui_hud_95: 1626623794
+      ui_hud_96: -520939433
+      ui_hud_97: -714929942
+      ui_hud_98: -546193621
+      ui_hud_99: -2025181785
+  mipmapLimitGroupName: 
+  pSDRemoveMatte: 0
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
