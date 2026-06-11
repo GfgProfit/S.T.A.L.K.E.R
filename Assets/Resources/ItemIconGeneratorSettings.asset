@@ -1,0 +1,69 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b06dd121fcdbba44c912211061d6d344, type: 3}
+  m_Name: ItemIconGeneratorSettings
+  m_EditorClassIdentifier: Assembly-CSharp::ItemIconGeneratorSettings
+  renderLayer: 31
+  renderingLayer: 7
+  renderOrigin: {x: 0, y: 0, z: 0}
+  excludeIconLayerFromSceneLights: 1
+  rendererLightProbeUsage: 0
+  rendererReflectionProbeUsage: 2
+  rendererReceiveShadows: 0
+  renderTextureFormat: 2
+  allowHdr: 1
+  useCameraMsaa: 1
+  cameraDistanceMultiplier: 3
+  cameraDistanceOffset: 1
+  nearClipPlane: 0.01
+  farClipBoundsMultiplier: 8
+  farClipOffset: 10
+  enableDirectSpecularLighting: 0
+  enableExposureControl: 1
+  enableAtmosphericScattering: 1
+  enablePostProcess: 1
+  enableColorGrading: 1
+  enableTonemapping: 1
+  enableVolumetrics: 1
+  enableSkyReflection: 1
+  useFrontFillLight: 1
+  frontFillLightIntensityMultiplier: 0.65
+  frontFillLightCameraDirection: {x: 0, y: 0.15, z: 1}
+  useSideFillLight: 1
+  sideFillLightIntensityMultiplier: 0.5
+  sideFillLightCameraDirection: {x: -0.85, y: 0.1, z: 1}
+  useRimLight: 1
+  rimLightIntensityMultiplier: 0.25
+  rimLightCameraDirection: {x: 0.35, y: 0.2, z: -1}
+  generatedLightShadows: 0
+  skyAmbientMode: 1
+  skyRenderingSpace: 0
+  physicallyBasedSkyModel: 1
+  physicallyBasedSkyGroundTint: {r: 0.122641504, g: 0.1043775, b: 0.09313812, a: 1}
+  fogEnabled: 1
+  fogColorMode: 1
+  maxFogDistance: 5000
+  meanFreePath: 400
+  enableVolumetricFog: 1
+  fogAnisotropy: 0.65
+  exposureMode: 4
+  fixedExposure: 0
+  exposureCompensation: 0.1
+  exposureLimitMin: 2
+  exposureLimitMax: 14
+  histogramPercentages: {x: 0, y: 50}
+  postExposure: 0.1
+  contrast: -30
+  colorFilter: {r: 1, g: 1, b: 1, a: 1}
+  hueShift: 0
+  saturation: 0
+  tonemappingMode: 1
