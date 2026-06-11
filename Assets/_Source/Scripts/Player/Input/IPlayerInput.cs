@@ -2,6 +2,8 @@ using UnityEngine;
 
 public interface IPlayerInput
 {
+    string InteractKeyDisplayName { get; }
+
     Vector2 GetMovementInput();
     Vector2 GetMouseDelta();
 

@@ -12,6 +12,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 737e751cd05516846acf43daad139c9e, type: 3}
   m_Name: GAUSS
   m_EditorClassIdentifier: 
+  itemName: "\u0410\u043A\u043A\u0443\u043C\u0443\u043B\u044F\u0442\u043E\u0440"
   width: 1
   height: 1
   itemIcon: {fileID: 0}

@@ -4,6 +4,8 @@ using UnityEngine;
 [CreateAssetMenu]
 public class ItemData : ScriptableObject
 {
+    [SerializeField] private string itemName;
+
     [Min(1)] public int width = 1;
     [Min(1)] public int height = 1;
 
@@ -33,6 +35,8 @@ public class ItemData : ScriptableObject
     [SerializeField] private bool iconUseDirectionalLight = true;
     [SerializeField] private Vector3 iconLightEulerAngles = new Vector3(50f, -30f, 0f);
     [SerializeField] private float iconLightIntensity = 1.5f;
+
+    public string ItemName => string.IsNullOrWhiteSpace(itemName) ? name : itemName;
 
     public Sprite FallbackIcon => itemIcon;
     public GameObject IconPrefab => iconPrefab;

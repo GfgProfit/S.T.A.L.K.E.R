@@ -6,6 +6,7 @@ public class WorldItem : MonoBehaviour
     [SerializeField] private bool destroyOnPickup = true;
 
     public ItemData ItemData => itemData;
+    public string ItemName => itemData == null ? string.Empty : itemData.ItemName;
 
     public bool TryPickUp(InventoryController inventoryController)
     {

@@ -12,6 +12,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 737e751cd05516846acf43daad139c9e, type: 3}
   m_Name: 556x45 AP
   m_EditorClassIdentifier: 
+  itemName: "5,56 \xD7 45 \u043C\u043C \u0411\u041F"
   width: 2
   height: 1
   itemIcon: {fileID: 0}

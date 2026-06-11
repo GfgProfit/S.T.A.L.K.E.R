@@ -2,6 +2,10 @@ using UnityEngine;
 
 public class LegacyPlayerInput : IPlayerInput
 {
+    private const KeyCode InteractKey = KeyCode.F;
+
+    public string InteractKeyDisplayName => InteractKey.ToString();
+
     public Vector2 GetMouseDelta()
     {
         float mouseX = Input.GetAxis("Mouse X");
@@ -19,9 +23,9 @@ public class LegacyPlayerInput : IPlayerInput
     public bool IsEscapePressed() => Input.GetKeyDown(KeyCode.Escape);
     public bool IsInventoryPressed() => Input.GetKeyDown(KeyCode.I);
 
-    public bool IsInteractPressed() => Input.GetKeyDown(KeyCode.F);
-    public bool IsInteractHold() => Input.GetKey(KeyCode.F);
-    public bool IsInteractUp() => Input.GetKeyUp(KeyCode.F);
+    public bool IsInteractPressed() => Input.GetKeyDown(InteractKey);
+    public bool IsInteractHold() => Input.GetKey(InteractKey);
+    public bool IsInteractUp() => Input.GetKeyUp(InteractKey);
     public bool IsInteractDenied() => Input.GetKeyDown(KeyCode.Mouse1);
 
     public bool IsJumpPressed() => Input.GetKeyDown(KeyCode.Space);

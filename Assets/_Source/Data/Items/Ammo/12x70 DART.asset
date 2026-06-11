@@ -12,6 +12,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 737e751cd05516846acf43daad139c9e, type: 3}
   m_Name: 12x70 DART
   m_EditorClassIdentifier: 
+  itemName: "12 \xD7 76 \u0434\u0440\u043E\u0442\u0438\u043A"
   width: 2
   height: 1
   itemIcon: {fileID: 0}

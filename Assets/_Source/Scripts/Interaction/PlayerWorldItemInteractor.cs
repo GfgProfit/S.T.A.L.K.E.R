@@ -7,10 +7,12 @@ public class PlayerWorldItemInteractor : MonoBehaviour
     [SerializeField] [Min(0.1f)] private float interactDistance = 3f;
     [SerializeField] private LayerMask interactLayers = ~0;
     [SerializeField] private QueryTriggerInteraction triggerInteraction = QueryTriggerInteraction.Collide;
+    [SerializeField] private WorldItemTooltipView tooltipView;
 
     [Inject] private IPlayerInput playerInput = null;
 
     private IPlayerInput fallbackPlayerInput;
+    private WorldItem hoveredWorldItem;
 
     private IPlayerInput PlayerInput
     {
@@ -37,16 +39,24 @@ public class PlayerWorldItemInteractor : MonoBehaviour
         {
             inventoryController = FindFirstObjectByType<InventoryController>();
         }
+
+        if (tooltipView == null)
+        {
+            tooltipView = FindFirstObjectByType<WorldItemTooltipView>(FindObjectsInactive.Include);
+        }
     }
 
     private void Update()
     {
-        if (PlayerInput.IsInteractPressed() == false)
+        if (inventoryController != null && inventoryController.IsOpen)
         {
+            SetHoveredWorldItem(null);
             return;
         }
 
-        if (inventoryController != null && inventoryController.IsOpen)
+        SetHoveredWorldItem(FindHoveredWorldItem());
+
+        if (PlayerInput.IsInteractPressed() == false)
         {
             return;
         }
@@ -56,21 +66,69 @@ public class PlayerWorldItemInteractor : MonoBehaviour
 
     private bool TryInteract()
     {
+        WorldItem worldItem = hoveredWorldItem != null ? hoveredWorldItem : FindHoveredWorldItem();
+        if (worldItem == null)
+        {
+            return false;
+        }
+
+        if (worldItem.TryPickUp(inventoryController) == false)
+        {
+            return false;
+        }
+
+        SetHoveredWorldItem(null);
+        return true;
+    }
+
+    private WorldItem FindHoveredWorldItem()
+    {
         Ray ray = raycastCamera != null
             ? new Ray(raycastCamera.transform.position, raycastCamera.transform.forward)
             : new Ray(transform.position, transform.forward);
 
         if (Physics.Raycast(ray, out RaycastHit hit, interactDistance, interactLayers, triggerInteraction) == false)
         {
-            return false;
+            return null;
         }
 
-        WorldItem worldItem = hit.collider.GetComponentInParent<WorldItem>();
-        if (worldItem == null)
+        return hit.collider.GetComponentInParent<WorldItem>();
+    }
+
+    private void SetHoveredWorldItem(WorldItem worldItem)
+    {
+        if (hoveredWorldItem == worldItem)
         {
-            return false;
+            return;
         }
 
-        return worldItem.TryPickUp(inventoryController);
+        hoveredWorldItem = worldItem;
+        RefreshTooltip();
+    }
+
+    private void RefreshTooltip()
+    {
+        if (tooltipView == null && hoveredWorldItem != null)
+        {
+            return;
+        }
+
+        if (tooltipView == null)
+        {
+            return;
+        }
+
+        if (hoveredWorldItem == null)
+        {
+            tooltipView.Hide();
+            return;
+        }
+
+        tooltipView.Show(hoveredWorldItem, PlayerInput.InteractKeyDisplayName);
+    }
+
+    private void OnDisable()
+    {
+        SetHoveredWorldItem(null);
     }
 }

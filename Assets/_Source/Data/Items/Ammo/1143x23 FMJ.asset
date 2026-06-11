@@ -12,7 +12,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 737e751cd05516846acf43daad139c9e, type: 3}
   m_Name: 1143x23 FMJ
   m_EditorClassIdentifier: 
-  width: 2
+  itemName: .45 ACP
+  width: 1
   height: 1
   itemIcon: {fileID: 0}
   generateIconAtRuntime: 1

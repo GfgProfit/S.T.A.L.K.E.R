@@ -12,6 +12,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 737e751cd05516846acf43daad139c9e, type: 3}
   m_Name: CS HEAVY
   m_EditorClassIdentifier: 
+  itemName: "\u0411\u0440\u043E\u043D\u0435\u0436\u0438\u043B\u0435\u0442 \u0427\u041D-3\u0430"
   width: 2
   height: 3
   itemIcon: {fileID: 0}

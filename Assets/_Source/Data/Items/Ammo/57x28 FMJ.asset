@@ -12,6 +12,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 737e751cd05516846acf43daad139c9e, type: 3}
   m_Name: 57x28 FMJ
   m_EditorClassIdentifier: 
+  itemName: "5,7 \xD7 28 \u043C\u043C FMJ"
   width: 2
   height: 1
   itemIcon: {fileID: 0}

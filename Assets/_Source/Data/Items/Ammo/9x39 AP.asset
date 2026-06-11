@@ -12,6 +12,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 737e751cd05516846acf43daad139c9e, type: 3}
   m_Name: 9x39 AP
   m_EditorClassIdentifier: 
+  itemName: "9 \xD7 39 \u043C\u043C \u0421\u041F-6"
   width: 2
   height: 1
   itemIcon: {fileID: 0}
