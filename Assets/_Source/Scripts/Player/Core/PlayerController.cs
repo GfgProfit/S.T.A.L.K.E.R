@@ -42,6 +42,7 @@ public partial class PlayerController : MonoBehaviour
     private Vector3 _rawInput;
     private Vector3 _cameraTargetLocalPos;
     private Vector3 _cameraDefaultLocalPos;
+    private bool _controlsEnabled = true;
 
     public bool IsGrounded { get; private set; }
     public bool IsSprinting { get; private set; }

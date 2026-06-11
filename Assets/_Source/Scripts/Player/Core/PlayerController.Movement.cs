@@ -60,4 +60,11 @@ public partial class PlayerController
 
         IsSprinting = CanSprinting && IsWalking && _playerInput.IsSprintHeld() && _rawInput.z > 0;
     }
+
+    private void ClearMotionInput()
+    {
+        _rawInput = Vector3.zero;
+        IsWalking = false;
+        IsSprinting = false;
+    }
 }

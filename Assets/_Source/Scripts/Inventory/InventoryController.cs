@@ -1,0 +1,440 @@
+﻿using System.Collections.Generic;
+using UnityEngine;
+using System.Collections;
+using Random = UnityEngine.Random;
+
+public class InventoryController : MonoBehaviour
+{
+    private InventoryGrid selectedItemGrid;
+
+    public InventoryGrid SelectedItemGrid
+    {
+        get => selectedItemGrid;
+        set
+        {
+            selectedItemGrid = value;
+            inventoryHighlight.SetParent(value);
+        }
+    }
+
+    [SerializeField] private List<ItemData> items;
+    [SerializeField] private GameObject itemPrefab;
+    [SerializeField] private Transform canvasTransform;
+    [SerializeField] private GameObject inventoryRoot;
+    [SerializeField] private CanvasGroup inventoryCanvasGroup;
+    [SerializeField] private InventoryGrid defaultItemGrid;
+    [SerializeField] private PlayerController playerController;
+    [SerializeField] private bool openOnStart;
+    [SerializeField] private bool unlockCursorWhileOpen = true;
+    [SerializeField] private bool disablePlayerControlsWhileOpen = true;
+    [SerializeField] private bool prewarmItemIconsOnStart = true;
+    [SerializeField] private bool logIconPrewarmProgress;
+
+    [Inject] private IPlayerInput playerInput = null;
+
+    private InventoryItem selectedItem;
+    private RectTransform rectTransform;
+    private InventoryItem itemToHighlight;
+    private InventoryHighlight inventoryHighlight;
+    private InventoryGrid dragOriginGrid;
+    private Vector2Int dragOriginPosition;
+    private bool dragOriginRotated;
+    private bool iconsReady;
+    private IPlayerInput fallbackPlayerInput;
+
+    public bool IsOpen { get; private set; }
+
+    private IPlayerInput PlayerInput
+    {
+        get
+        {
+            if (playerInput != null)
+            {
+                return playerInput;
+            }
+
+            fallbackPlayerInput ??= new LegacyPlayerInput();
+            return fallbackPlayerInput;
+        }
+    }
+
+    private void Awake()
+    {
+        inventoryHighlight = GetComponent<InventoryHighlight>();
+        iconsReady = prewarmItemIconsOnStart == false;
+
+        if (inventoryRoot == null && inventoryCanvasGroup != null)
+        {
+            inventoryRoot = inventoryCanvasGroup.gameObject;
+        }
+
+        if (inventoryCanvasGroup == null && inventoryRoot != null)
+        {
+            inventoryCanvasGroup = inventoryRoot.GetComponent<CanvasGroup>();
+        }
+
+        if (defaultItemGrid == null)
+        {
+            defaultItemGrid = FindFirstObjectByType<InventoryGrid>();
+        }
+
+        if (playerController == null)
+        {
+            playerController = FindFirstObjectByType<PlayerController>();
+        }
+
+        SetInventoryOpen(openOnStart, true);
+    }
+
+    private IEnumerator Start()
+    {
+        if (prewarmItemIconsOnStart == false)
+        {
+            yield break;
+        }
+
+        yield return ItemIconCache.PrewarmCoroutine(items, HandleIconPrewarmProgress);
+        iconsReady = true;
+    }
+
+    private void Update()
+    {
+        if (PlayerInput.IsInventoryPressed())
+        {
+            ToggleInventory();
+        }
+
+        if (IsOpen == false)
+        {
+            inventoryHighlight.Show(false);
+            return;
+        }
+
+        if (iconsReady == false)
+        {
+            inventoryHighlight.Show(false);
+            return;
+        }
+
+        ItemIconDrag();
+
+        if (Input.GetKeyUp(KeyCode.Mouse0))
+        {
+            ReleaseDraggedItem();
+        }
+
+        if (Input.GetKeyDown(KeyCode.R))
+        {
+            RotateSelectedItem();
+        }
+
+        if (selectedItemGrid == null) 
+        {
+            inventoryHighlight.Show(false);
+
+            return; 
+        }
+
+        HandleHighlight();
+
+        if (Input.GetKeyDown(KeyCode.Mouse0))
+        {
+            BeginDrag();
+        }
+    }
+
+    public bool TryInsertItem(ItemData itemData)
+    {
+        if (iconsReady == false) { return false; }
+        if (itemData == null) { return false; }
+
+        InventoryGrid insertionGrid = GetInsertionGrid();
+        if (insertionGrid == null) { return false; }
+
+        InventoryItem itemToInsert = CreateItem(itemData);
+
+        if (InsertItem(itemToInsert, insertionGrid))
+        {
+            return true;
+        }
+
+        Destroy(itemToInsert.gameObject);
+        return false;
+    }
+
+    private bool InsertItem(InventoryItem itemToInsert, InventoryGrid targetGrid)
+    {
+        if (targetGrid == null) { return false; }
+
+        if (TryPlaceItemInFirstAvailableSpace(itemToInsert, targetGrid))
+        {
+            return true;
+        }
+
+        if (itemToInsert.Width == itemToInsert.Height)
+        {
+            return false;
+        }
+
+        itemToInsert.Rotate();
+
+        if (TryPlaceItemInFirstAvailableSpace(itemToInsert, targetGrid))
+        {
+            return true;
+        }
+
+        itemToInsert.Rotate();
+        return false;
+    }
+
+    private bool TryPlaceItemInFirstAvailableSpace(InventoryItem itemToInsert, InventoryGrid targetGrid)
+    {
+        Vector2Int? posOnGrid = targetGrid.FindSpaceForObject(itemToInsert);
+
+        if (posOnGrid != null)
+        {
+            targetGrid.PlaceItem(itemToInsert, posOnGrid.Value.x, posOnGrid.Value.y);
+            return true;
+        }
+
+        return false;
+    }
+
+    private void HandleHighlight()
+    {
+        Vector2Int positionOnGrid = GetTileGridPosition();
+
+        if (selectedItem == null)
+        {
+            itemToHighlight = selectedItemGrid.GetItem(positionOnGrid.x, positionOnGrid.y);
+
+            if (itemToHighlight != null)
+            {
+                inventoryHighlight.Show(true);
+                inventoryHighlight.SetSize(selectedItemGrid, itemToHighlight);
+                inventoryHighlight.SetPosition(selectedItemGrid, itemToHighlight);
+            }
+            else
+            {
+                inventoryHighlight.Show(false);
+            }
+        }
+        else
+        {
+            inventoryHighlight.Show(selectedItemGrid.CanPlaceItem(selectedItem, positionOnGrid.x, positionOnGrid.y));
+            inventoryHighlight.SetSize(selectedItemGrid, selectedItem, positionOnGrid.x, positionOnGrid.y);
+            inventoryHighlight.SetPosition(selectedItemGrid, selectedItem, positionOnGrid.x, positionOnGrid.y);
+        }
+    }
+
+    private InventoryItem CreateItem(ItemData itemData)
+    {
+        InventoryItem inventoryItem = Instantiate(itemPrefab).GetComponent<InventoryItem>();
+        inventoryItem.Set(itemData);
+
+        return inventoryItem;
+    }
+
+    private InventoryGrid GetInsertionGrid()
+    {
+        return selectedItemGrid != null ? selectedItemGrid : defaultItemGrid;
+    }
+
+    private void BeginDrag()
+    {
+        if (selectedItem != null)
+        {
+            return;
+        }
+
+        Vector2Int tileGridPosition = GetTileGridPosition();
+        InventoryItem item = selectedItemGrid.GetItem(tileGridPosition.x, tileGridPosition.y);
+
+        if (item == null)
+        {
+            return;
+        }
+
+        dragOriginGrid = selectedItemGrid;
+        dragOriginPosition = new Vector2Int(item.onGridPositionX, item.onGridPositionY);
+        dragOriginRotated = item.rotated;
+
+        PickupItem(tileGridPosition);
+    }
+
+    private Vector2Int GetTileGridPosition()
+    {
+        return selectedItemGrid.GetTileGridPosition(Input.mousePosition, selectedItem);
+    }
+
+    private void RotateSelectedItem()
+    {
+        if (selectedItem == null) { return; }
+
+        selectedItem.Rotate();
+    }
+
+    private void ReleaseDraggedItem()
+    {
+        if (selectedItem == null)
+        {
+            return;
+        }
+
+        if (selectedItemGrid != null)
+        {
+            Vector2Int tileGridPosition = GetTileGridPosition();
+
+            if (TryPlaceDraggedItem(selectedItemGrid, tileGridPosition))
+            {
+                return;
+            }
+        }
+
+        ReturnDraggedItemToOrigin();
+    }
+
+    private bool TryPlaceDraggedItem(InventoryGrid targetGrid, Vector2Int tileGridPosition)
+    {
+        if (targetGrid == null || selectedItem == null)
+        {
+            return false;
+        }
+
+        if (targetGrid.CanPlaceItem(selectedItem, tileGridPosition.x, tileGridPosition.y) == false)
+        {
+            return false;
+        }
+
+        targetGrid.PlaceItem(selectedItem, tileGridPosition.x, tileGridPosition.y);
+        FinishDraggingItem();
+        return true;
+    }
+
+    private bool ReturnDraggedItemToOrigin()
+    {
+        if (selectedItem == null)
+        {
+            return true;
+        }
+
+        if (dragOriginGrid == null)
+        {
+            return false;
+        }
+
+        if (selectedItem.rotated != dragOriginRotated)
+        {
+            selectedItem.Rotate();
+        }
+
+        dragOriginGrid.PlaceItem(selectedItem, dragOriginPosition.x, dragOriginPosition.y);
+        FinishDraggingItem();
+        return true;
+    }
+
+    private void PickupItem(Vector2Int tileGridPosition)
+    {
+        selectedItem = selectedItemGrid.PickUpItem(tileGridPosition.x, tileGridPosition.y);
+
+        if (selectedItem != null)
+        {
+            StartDraggingItem(selectedItem);
+        }
+    }
+
+    private void StartDraggingItem(InventoryItem item)
+    {
+        selectedItem = item;
+        selectedItem.SetCellVisualsVisible(false);
+        rectTransform = selectedItem.GetComponent<RectTransform>();
+        rectTransform.SetParent(canvasTransform, false);
+        rectTransform.localScale = Vector3.one;
+        rectTransform.SetAsLastSibling();
+        rectTransform.position = Input.mousePosition;
+    }
+
+    private void ItemIconDrag()
+    {
+        if (selectedItem != null)
+        {
+            rectTransform.position = Input.mousePosition;
+        }
+    }
+
+    private void FinishDraggingItem()
+    {
+        selectedItem = null;
+        rectTransform = null;
+        dragOriginGrid = null;
+    }
+
+    private void HandleIconPrewarmProgress(int completedCount, int totalCount, ItemData itemData)
+    {
+        if (logIconPrewarmProgress == false)
+        {
+            return;
+        }
+
+        string itemName = itemData == null ? "None" : itemData.name;
+        Debug.Log($"Item icon bootstrap: {completedCount}/{totalCount} ({itemName})", this);
+    }
+
+    private void ToggleInventory()
+    {
+        SetInventoryOpen(IsOpen == false, false);
+    }
+
+    private void SetInventoryOpen(bool isOpen, bool force)
+    {
+        if (force == false && IsOpen == isOpen)
+        {
+            return;
+        }
+
+        if (isOpen == false && TryStashSelectedItem() == false)
+        {
+            return;
+        }
+
+        IsOpen = isOpen;
+
+        if (inventoryRoot != null && inventoryCanvasGroup == null)
+        {
+            inventoryRoot.SetActive(IsOpen);
+        }
+        else if (inventoryRoot != null && inventoryRoot.activeSelf == false)
+        {
+            inventoryRoot.SetActive(true);
+        }
+
+        if (inventoryCanvasGroup != null)
+        {
+            inventoryCanvasGroup.alpha = IsOpen ? 1f : 0f;
+            inventoryCanvasGroup.interactable = IsOpen;
+            inventoryCanvasGroup.blocksRaycasts = IsOpen;
+        }
+
+        if (unlockCursorWhileOpen)
+        {
+            Cursor.lockState = IsOpen ? CursorLockMode.None : CursorLockMode.Locked;
+            Cursor.visible = IsOpen;
+        }
+
+        if (disablePlayerControlsWhileOpen && playerController != null)
+        {
+            playerController.SetControlsEnabled(IsOpen == false);
+        }
+
+        if (IsOpen == false)
+        {
+            SelectedItemGrid = null;
+            inventoryHighlight.Show(false);
+        }
+    }
+
+    private bool TryStashSelectedItem()
+    {
+        return ReturnDraggedItemToOrigin();
+    }
+}

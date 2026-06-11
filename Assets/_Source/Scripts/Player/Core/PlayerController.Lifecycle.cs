@@ -22,10 +22,18 @@ public partial class PlayerController
 
     private void Update()
     {
-        Look();
-        SetRawInput();
-        UpdateMotionState();
-        HandleCrouch();
+        if (_controlsEnabled)
+        {
+            Look();
+            SetRawInput();
+            UpdateMotionState();
+            HandleCrouch();
+        }
+        else
+        {
+            ClearMotionInput();
+        }
+
         Move();
         UpdateCameraFieldOfView();
     }

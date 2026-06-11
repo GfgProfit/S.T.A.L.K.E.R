@@ -2,6 +2,16 @@ using UnityEngine;
 
 public partial class PlayerController
 {
+    public void SetControlsEnabled(bool controlsEnabled)
+    {
+        _controlsEnabled = controlsEnabled;
+
+        if (controlsEnabled == false)
+        {
+            ClearMotionInput();
+        }
+    }
+
     public void SetCanCrouching(bool canCrouching)
     {
         CanCrouching = canCrouching;
