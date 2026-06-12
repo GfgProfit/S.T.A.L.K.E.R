@@ -65,17 +65,17 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: "\u0446\u0443\u0446\u0443\u0446\u0443\u0446\u0443\u0446\u0443"
+  m_text: 
   m_isRightToLeft: 0
-  m_fontAsset: {fileID: 11400000, guid: 2ab96c5017cfd794cba23f621ab3a5fe, type: 2}
-  m_sharedMaterial: {fileID: -8303675138586539969, guid: 2ab96c5017cfd794cba23f621ab3a5fe, type: 2}
+  m_fontAsset: {fileID: 11400000, guid: 5d42b6420626b1a44839d8b205e274f7, type: 2}
+  m_sharedMaterial: {fileID: -6926319217153242524, guid: 5d42b6420626b1a44839d8b205e274f7, type: 2}
   m_fontSharedMaterials: []
   m_fontMaterial: {fileID: 0}
   m_fontMaterials: []
   m_fontColor32:
     serializedVersion: 2
     rgba: 4291223295
-  m_fontColor: {r: 1, g: 0.872414, b: 0.7764706, a: 1}
+  m_fontColor: {r: 1, g: 1, b: 1, a: 1}
   m_enableVertexGradient: 0
   m_colorMode: 3
   m_fontColorGradient:
@@ -202,10 +202,10 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: x30
+  m_text: 
   m_isRightToLeft: 0
-  m_fontAsset: {fileID: 11400000, guid: 2ab96c5017cfd794cba23f621ab3a5fe, type: 2}
-  m_sharedMaterial: {fileID: -8303675138586539969, guid: 2ab96c5017cfd794cba23f621ab3a5fe, type: 2}
+  m_fontAsset: {fileID: 11400000, guid: 5d42b6420626b1a44839d8b205e274f7, type: 2}
+  m_sharedMaterial: {fileID: -6926319217153242524, guid: 5d42b6420626b1a44839d8b205e274f7, type: 2}
   m_fontSharedMaterials: []
   m_fontMaterial: {fileID: 0}
   m_fontMaterials: []

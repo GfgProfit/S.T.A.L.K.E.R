@@ -6,6 +6,7 @@ public class ItemData : ScriptableObject
 {
     [SerializeField] private string itemName;
     [SerializeField] private string shortName;
+    [SerializeField] [TextArea(3, 8)] private string description;
     [SerializeField] private ItemRarity rarity = ItemRarity.Common;
     [SerializeField] [Min(0f)] private float weight;
     [SerializeField] private bool stackable;
@@ -42,6 +43,7 @@ public class ItemData : ScriptableObject
 
     public string ItemName => string.IsNullOrWhiteSpace(itemName) ? name : itemName;
     public string ShortName => string.IsNullOrWhiteSpace(shortName) ? string.Empty : shortName;
+    public string Description => description ?? string.Empty;
     public ItemRarity Rarity => rarity;
     public Color ShortNameColor => RarityVisualSettings.GetShortNameColor(rarity);
     public float Weight => Mathf.Max(0f, weight);

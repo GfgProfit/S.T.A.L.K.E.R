@@ -25,6 +25,7 @@ public class InventoryController : MonoBehaviour
     [SerializeField] private InventoryGrid defaultItemGrid;
     [SerializeField] private PlayerController playerController;
     [SerializeField] private TMP_Text weightText;
+    [SerializeField] private ItemInfoPanel itemInfoPanel;
     [SerializeField] [Min(0f)] private float maxCarryWeight = 50f;
     [SerializeField] [Min(0f)] private float movementBlockExtraWeight = 10f;
     [SerializeField] private Color normalWeightColor = Color.white;
@@ -121,12 +122,14 @@ public class InventoryController : MonoBehaviour
         if (IsOpen == false)
         {
             inventoryHighlight.Show(false);
+            HideItemInfoPanel();
             return;
         }
 
         if (iconsReady == false)
         {
             inventoryHighlight.Show(false);
+            HideItemInfoPanel();
             return;
         }
 
@@ -145,6 +148,7 @@ public class InventoryController : MonoBehaviour
         if (selectedItemGrid == null) 
         {
             inventoryHighlight.Show(false);
+            HideItemInfoPanel();
 
             return; 
         }
@@ -241,14 +245,17 @@ public class InventoryController : MonoBehaviour
                 inventoryHighlight.Show(true);
                 inventoryHighlight.SetSize(selectedItemGrid, itemToHighlight);
                 inventoryHighlight.SetPosition(selectedItemGrid, itemToHighlight);
+                ShowItemInfoPanel(itemToHighlight);
             }
             else
             {
                 inventoryHighlight.Show(false);
+                HideItemInfoPanel();
             }
         }
         else
         {
+            HideItemInfoPanel();
             inventoryHighlight.Show(selectedItemGrid.CanPlaceItem(selectedItem, positionOnGrid.x, positionOnGrid.y));
             inventoryHighlight.SetSize(selectedItemGrid, selectedItem, positionOnGrid.x, positionOnGrid.y);
             inventoryHighlight.SetPosition(selectedItemGrid, selectedItem, positionOnGrid.x, positionOnGrid.y);
@@ -361,7 +368,7 @@ public class InventoryController : MonoBehaviour
         weightText.raycastTarget = false;
         weightText.richText = true;
         weightText.color = normalWeightColor;
-        weightText.text = $"Вес: <color=#{ColorUtility.ToHtmlStringRGBA(GetWeightTextColor())}>{FormatWeight(currentCarryWeight)}</color> / {FormatWeight(MaxCarryWeight)} КГ";
+        weightText.text = $"Вес: <color=#{ColorUtility.ToHtmlStringRGBA(GetWeightTextColor())}>{FormatWeight(currentCarryWeight)}</color> / {FormatWeight(MaxCarryWeight)}";
     }
 
     private void ApplyWeightMovementState()
@@ -376,7 +383,14 @@ public class InventoryController : MonoBehaviour
 
     private string FormatWeight(float weight)
     {
-        return Mathf.Max(0f, weight).ToString("0.#");
+        float normalizedWeight = Mathf.Max(0f, weight);
+
+        if (normalizedWeight < 1f)
+        {
+            return $"{Mathf.RoundToInt(normalizedWeight * 1000f)} ГР";
+        }
+
+        return $"{normalizedWeight:0.#} КГ";
     }
 
     private Color GetWeightTextColor()
@@ -392,6 +406,26 @@ public class InventoryController : MonoBehaviour
         }
 
         return normalWeightColor;
+    }
+
+    private void ShowItemInfoPanel(InventoryItem item)
+    {
+        if (itemInfoPanel == null)
+        {
+            return;
+        }
+
+        itemInfoPanel.Show(item);
+    }
+
+    private void HideItemInfoPanel()
+    {
+        if (itemInfoPanel == null)
+        {
+            return;
+        }
+
+        itemInfoPanel.Hide();
     }
 
     private int NormalizeItemAmount(ItemData itemData, int amount)
@@ -510,6 +544,7 @@ public class InventoryController : MonoBehaviour
     private void StartDraggingItem(InventoryItem item)
     {
         selectedItem = item;
+        HideItemInfoPanel();
         selectedItem.SetCellVisualsVisible(false);
         selectedItem.SetOverlayTextsVisible(false);
         rectTransform = selectedItem.GetComponent<RectTransform>();
@@ -541,7 +576,7 @@ public class InventoryController : MonoBehaviour
             return;
         }
 
-        string itemName = itemData == null ? "None" : itemData.name;
+        string itemName = itemData == null ? "None" : itemData.ItemName;
         Debug.Log($"Item icon bootstrap: {completedCount}/{totalCount} ({itemName})", this);
     }
 
@@ -596,6 +631,7 @@ public class InventoryController : MonoBehaviour
         {
             SelectedItemGrid = null;
             inventoryHighlight.Show(false);
+            HideItemInfoPanel();
         }
     }
 
