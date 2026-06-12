@@ -12,13 +12,14 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 737e751cd05516846acf43daad139c9e, type: 3}
   m_Name: 762x54 7H14
   m_EditorClassIdentifier: 
-  itemName: "7,62 \xD7 54 R 7\u041D14"
+  itemName: "7,62x54 R 7\u041D14"
   shortName: 7H14
   description: "\u0421\u043D\u0430\u0439\u043F\u0435\u0440\u0441\u043A\u0438\u0439
     \u043F\u0430\u0442\u0440\u043E\u043D \u043A\u0430\u043B\u0438\u0431\u0440\u0430
     7,62 \u043C\u043C. \u041E\u0431\u043B\u0430\u0434\u0430\u0435\u0442 \u0432\u044B\u0441\u043E\u043A\u043E\u0439
     \u043A\u0443\u0447\u043D\u043E\u0441\u0442\u044C\u044E \u0438 \u043F\u0440\u043E\u0431\u0438\u0432\u0430\u044E\u0449\u0435\u0439
     \u0441\u043F\u043E\u0441\u043E\u0431\u043D\u043E\u0441\u0442\u044C\u044E."
+  itemType: 2
   rarity: 0
   weight: 0.023
   stackable: 1
@@ -42,6 +43,10 @@ MonoBehaviour:
   iconModelEulerAngles: {x: 0, y: 0, z: 0}
   iconModelScale: {x: 1, y: 1, z: 1}
   iconCameraEulerAngles: {x: 25, y: -135, z: 0}
+  slotIconModelEulerAngles: {x: 0, y: 0, z: 0}
+  slotIconModelScale: {x: 1, y: 1, z: 1}
+  slotIconCameraEulerAngles: {x: 25, y: -135, z: 0}
+  slotIconPadding: 1.15
   iconBackgroundColor: {r: 0, g: 0, b: 0, a: 0.27450982}
   iconShowCellGrid: 1
   iconShowCellGridBorder: 1
@@ -50,3 +55,7 @@ MonoBehaviour:
   iconUseDirectionalLight: 1
   iconLightEulerAngles: {x: 50, y: -130, z: 0}
   iconLightIntensity: 100000
+  slotIconUseDirectionalLight: 1
+  slotIconLightEulerAngles: {x: 50, y: -130, z: 0}
+  slotIconLightIntensity: 100000
+  slotIconSettingsInitialized: 1

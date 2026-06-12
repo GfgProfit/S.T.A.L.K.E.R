@@ -44,6 +44,39 @@ public static class ItemIconCache
         return generatedSprite;
     }
 
+    public static Sprite GetOrCreateSlotIcon(ItemData itemData, int slotWidth, int slotHeight, IReadOnlyList<ItemIconPart> runtimeIconParts = null)
+    {
+        if (itemData == null)
+        {
+            return null;
+        }
+
+        if (itemData.HasRuntimeIconSource(runtimeIconParts) == false)
+        {
+            return itemData.FallbackIcon;
+        }
+
+        ItemIconGeneratorSettings settings = ItemIconGeneratorSettings.LoadDefault();
+        IconRenderProfile renderProfile = IconRenderProfile.CreateSlot(itemData, slotWidth, slotHeight);
+        IconCacheKey key = BuildCacheKey(itemData, runtimeIconParts, settings, renderProfile);
+
+        if (TryGetCachedSprite(key, out Sprite cachedSprite))
+        {
+            return cachedSprite;
+        }
+
+        Sprite generatedSprite = RenderIcon(itemData, runtimeIconParts, settings, renderProfile, out Texture2D generatedTexture);
+        if (generatedSprite == null)
+        {
+            DestroyObject(generatedTexture);
+            CacheFallbackSprite(key, itemData);
+            return itemData.FallbackIcon;
+        }
+
+        cache[key] = new IconCacheEntry(generatedSprite, generatedTexture);
+        return generatedSprite;
+    }
+
     public static IEnumerator PrewarmCoroutine(IReadOnlyList<ItemData> itemDataList, Action<int, int, ItemData> progressCallback = null)
     {
         if (itemDataList == null)
@@ -106,7 +139,7 @@ public static class ItemIconCache
             yield break;
         }
 
-        RawIconRenderResult rawResult = RenderRawIcon(itemData, runtimeIconParts, settings);
+        RawIconRenderResult rawResult = RenderRawIcon(itemData, runtimeIconParts, settings, IconRenderProfile.CreateDefault(itemData));
         if (rawResult == null)
         {
             CacheFallbackSprite(key, itemData);
@@ -175,12 +208,12 @@ public static class ItemIconCache
             return null;
         }
 
-        return RenderIconTexture(itemData, null, settings ?? ItemIconGeneratorSettings.LoadDefault());
+        return RenderIconTexture(itemData, null, settings ?? ItemIconGeneratorSettings.LoadDefault(), IconRenderProfile.CreateDefault(itemData));
     }
 
     private static Sprite RenderIcon(ItemData itemData, IReadOnlyList<ItemIconPart> runtimeIconParts, ItemIconGeneratorSettings settings, out Texture2D texture)
     {
-        texture = RenderIconTexture(itemData, runtimeIconParts, settings);
+        texture = RenderIconTexture(itemData, runtimeIconParts, settings, IconRenderProfile.CreateDefault(itemData));
         if (texture == null)
         {
             return null;
@@ -189,9 +222,20 @@ public static class ItemIconCache
         return CreateSprite(itemData, texture);
     }
 
-    private static Texture2D RenderIconTexture(ItemData itemData, IReadOnlyList<ItemIconPart> runtimeIconParts, ItemIconGeneratorSettings settings)
+    private static Sprite RenderIcon(ItemData itemData, IReadOnlyList<ItemIconPart> runtimeIconParts, ItemIconGeneratorSettings settings, IconRenderProfile renderProfile, out Texture2D texture)
     {
-        RawIconRenderResult rawResult = RenderRawIcon(itemData, runtimeIconParts, settings);
+        texture = RenderIconTexture(itemData, runtimeIconParts, settings, renderProfile);
+        if (texture == null)
+        {
+            return null;
+        }
+
+        return CreateSprite(itemData, texture);
+    }
+
+    private static Texture2D RenderIconTexture(ItemData itemData, IReadOnlyList<ItemIconPart> runtimeIconParts, ItemIconGeneratorSettings settings, IconRenderProfile renderProfile)
+    {
+        RawIconRenderResult rawResult = RenderRawIcon(itemData, runtimeIconParts, settings, renderProfile);
         if (rawResult == null)
         {
             return null;
@@ -217,7 +261,7 @@ public static class ItemIconCache
         }
     }
 
-    private static RawIconRenderResult RenderRawIcon(ItemData itemData, IReadOnlyList<ItemIconPart> runtimeIconParts, ItemIconGeneratorSettings settings)
+    private static RawIconRenderResult RenderRawIcon(ItemData itemData, IReadOnlyList<ItemIconPart> runtimeIconParts, ItemIconGeneratorSettings settings, IconRenderProfile renderProfile)
     {
         GameObject rootObject = null;
         GameObject cameraObject = null;
@@ -240,8 +284,8 @@ public static class ItemIconCache
             rootObject = new GameObject($"Runtime Icon Root - {itemData.name}");
             rootObject.hideFlags = HideFlags.HideAndDontSave;
             rootObject.transform.position = settings.RenderOrigin;
-            rootObject.transform.rotation = Quaternion.Euler(itemData.IconModelEulerAngles);
-            rootObject.transform.localScale = itemData.IconModelScale;
+            rootObject.transform.rotation = Quaternion.Euler(renderProfile.ModelEulerAngles);
+            rootObject.transform.localScale = renderProfile.ModelScale;
 
             bool hasRenderablePart = InstantiateSource(itemData.IconPrefab, rootObject.transform, null);
             hasRenderablePart |= InstantiateParts(itemData.IconParts, rootObject.transform);
@@ -255,8 +299,8 @@ public static class ItemIconCache
             SetLayerRecursively(rootObject, settings.RenderLayer);
             SetRendererIsolation(rootObject, settings);
 
-            int textureWidth = itemData.IconTextureWidth;
-            int textureHeight = itemData.IconTextureHeight;
+            int textureWidth = renderProfile.TextureWidth;
+            int textureHeight = renderProfile.TextureHeight;
 
             renderTexture = RenderTexture.GetTemporary(
                 textureWidth,
@@ -277,7 +321,7 @@ public static class ItemIconCache
             HDAdditionalCameraData hdCameraData = renderCamera.gameObject.AddComponent<HDAdditionalCameraData>();
             ConfigureIsolatedCamera(hdCameraData, settings);
 
-            Quaternion cameraRotation = Quaternion.Euler(itemData.IconCameraEulerAngles);
+            Quaternion cameraRotation = Quaternion.Euler(renderProfile.CameraEulerAngles);
 
             float boundsRadius = Mathf.Max(0.1f, bounds.extents.magnitude);
 
@@ -286,7 +330,7 @@ public static class ItemIconCache
             renderCamera.backgroundColor = Color.clear;
             renderCamera.cullingMask = settings.RenderLayerMask;
             renderCamera.orthographic = true;
-            renderCamera.orthographicSize = CalculateOrthographicSize(bounds, cameraRotation, (float)textureWidth / textureHeight, itemData.IconPadding);
+            renderCamera.orthographicSize = CalculateOrthographicSize(bounds, cameraRotation, (float)textureWidth / textureHeight, renderProfile.Padding);
             renderCamera.nearClipPlane = settings.NearClipPlane;
             renderCamera.farClipPlane = boundsRadius * settings.FarClipBoundsMultiplier + settings.FarClipOffset;
             renderCamera.targetTexture = renderTexture;
@@ -295,9 +339,9 @@ public static class ItemIconCache
             renderCamera.allowHDR = settings.AllowHdr;
             renderCamera.allowMSAA = settings.UseCameraMsaa && itemData.IconAntiAliasing > 1;
 
-            if (itemData.IconUseDirectionalLight)
+            if (renderProfile.UseDirectionalLight)
             {
-                lightObjects = CreateIconLights(itemData, renderCamera.transform, settings);
+                lightObjects = CreateIconLights(itemData, renderCamera.transform, settings, renderProfile);
             }
 
             renderCamera.Render();
@@ -388,6 +432,15 @@ public static class ItemIconCache
     private static IconCacheKey BuildCacheKey(ItemData itemData, IReadOnlyList<ItemIconPart> runtimeIconParts, ItemIconGeneratorSettings settings)
     {
         return new IconCacheKey(itemData.GetInstanceID(), itemData.BuildIconHash(runtimeIconParts), settings.BuildHash());
+    }
+
+    private static IconCacheKey BuildCacheKey(ItemData itemData, IReadOnlyList<ItemIconPart> runtimeIconParts, ItemIconGeneratorSettings settings, IconRenderProfile renderProfile)
+    {
+        int iconHash = renderProfile.UseSlotSettings
+            ? itemData.BuildSlotIconHash(renderProfile.CellWidth, renderProfile.CellHeight, runtimeIconParts)
+            : itemData.BuildIconHash(runtimeIconParts);
+
+        return new IconCacheKey(itemData.GetInstanceID(), iconHash, settings.BuildHash());
     }
 
     private static bool TryGetCachedSprite(IconCacheKey key, out Sprite sprite)
@@ -830,17 +883,17 @@ public static class ItemIconCache
         hdCameraData.renderingPathCustomFrameSettings.SetEnabled(field, enabled);
     }
 
-    private static List<GameObject> CreateIconLights(ItemData itemData, Transform cameraTransform, ItemIconGeneratorSettings settings)
+    private static List<GameObject> CreateIconLights(ItemData itemData, Transform cameraTransform, ItemIconGeneratorSettings settings, IconRenderProfile renderProfile)
     {
         List<GameObject> lightObjects = new List<GameObject>(4);
-        float baseIntensity = itemData.IconLightIntensity;
+        float baseIntensity = renderProfile.LightIntensity;
 
         AddIconDirectionalLight(
             settings,
             lightObjects,
             $"Runtime Icon Key Light - {itemData.name}",
             baseIntensity,
-            Quaternion.Euler(itemData.IconLightEulerAngles));
+            Quaternion.Euler(renderProfile.LightEulerAngles));
 
         if (settings.UseFrontFillLight)
         {
@@ -1040,6 +1093,87 @@ public static class ItemIconCache
         else
         {
             UnityEngine.Object.DestroyImmediate(target);
+        }
+    }
+
+    private readonly struct IconRenderProfile
+    {
+        public readonly bool UseSlotSettings;
+        public readonly int CellWidth;
+        public readonly int CellHeight;
+        public readonly int TextureWidth;
+        public readonly int TextureHeight;
+        public readonly Vector3 ModelEulerAngles;
+        public readonly Vector3 ModelScale;
+        public readonly Vector3 CameraEulerAngles;
+        public readonly float Padding;
+        public readonly bool UseDirectionalLight;
+        public readonly Vector3 LightEulerAngles;
+        public readonly float LightIntensity;
+
+        private IconRenderProfile(
+            bool useSlotSettings,
+            int cellWidth,
+            int cellHeight,
+            int textureWidth,
+            int textureHeight,
+            Vector3 modelEulerAngles,
+            Vector3 modelScale,
+            Vector3 cameraEulerAngles,
+            float padding,
+            bool useDirectionalLight,
+            Vector3 lightEulerAngles,
+            float lightIntensity)
+        {
+            UseSlotSettings = useSlotSettings;
+            CellWidth = Mathf.Max(1, cellWidth);
+            CellHeight = Mathf.Max(1, cellHeight);
+            TextureWidth = Mathf.Max(1, textureWidth);
+            TextureHeight = Mathf.Max(1, textureHeight);
+            ModelEulerAngles = modelEulerAngles;
+            ModelScale = modelScale == Vector3.zero ? Vector3.one : modelScale;
+            CameraEulerAngles = cameraEulerAngles;
+            Padding = Mathf.Max(1f, padding);
+            UseDirectionalLight = useDirectionalLight;
+            LightEulerAngles = lightEulerAngles;
+            LightIntensity = Mathf.Max(0f, lightIntensity);
+        }
+
+        public static IconRenderProfile CreateDefault(ItemData itemData)
+        {
+            return new IconRenderProfile(
+                false,
+                Mathf.Max(1, itemData.width),
+                Mathf.Max(1, itemData.height),
+                itemData.IconTextureWidth,
+                itemData.IconTextureHeight,
+                itemData.IconModelEulerAngles,
+                itemData.IconModelScale,
+                itemData.IconCameraEulerAngles,
+                itemData.IconPadding,
+                itemData.IconUseDirectionalLight,
+                itemData.IconLightEulerAngles,
+                itemData.IconLightIntensity);
+        }
+
+        public static IconRenderProfile CreateSlot(ItemData itemData, int slotWidth, int slotHeight)
+        {
+            int cellWidth = Mathf.Max(1, slotWidth);
+            int cellHeight = Mathf.Max(1, slotHeight);
+
+            return new IconRenderProfile(
+                true,
+                cellWidth,
+                cellHeight,
+                cellWidth * itemData.IconPixelsPerCell * itemData.IconRenderScale,
+                cellHeight * itemData.IconPixelsPerCell * itemData.IconRenderScale,
+                itemData.SlotIconModelEulerAngles,
+                itemData.SlotIconModelScale,
+                itemData.SlotIconCameraEulerAngles,
+                itemData.SlotIconPadding,
+                itemData.SlotIconUseDirectionalLight,
+                itemData.SlotIconLightEulerAngles,
+                itemData.SlotIconLightIntensity);
         }
     }
 

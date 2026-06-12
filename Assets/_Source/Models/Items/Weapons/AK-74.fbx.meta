@@ -1,0 +1,245 @@
+fileFormatVersion: 2
+guid: 622dc5063c1447c43ab0d5d4185c5426
+ModelImporter:
+  serializedVersion: 24200
+  internalIDToNameTable: []
+  externalObjects:
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: wpn_ammo_5x45
+    second: {fileID: 2100000, guid: 6aea23b8d0e25634e9aa2b5e84e9b45b, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: wpn_mount_dovetail_sag_ak_sidemount_lod0_diff
+    second: {fileID: 2100000, guid: d1fb85140b730ab408e6250e019db712, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: wpn_sights
+    second: {fileID: 2100000, guid: 5393a4561a03ad146ac9011703e9297a, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: wpn_silencer_tgpa
+    second: {fileID: 2100000, guid: d53854c79fc72194f83a4aac4a2f7b15, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: wpn_wpn_ak74m
+    second: {fileID: 2100000, guid: e72dc4d2080a17f4da8fe43a52ea2b90, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: wpn_wpn_eft_ak74_ammo_545x39_diff
+    second: {fileID: 2100000, guid: 8d290631a4acae24ba0720cdef176989, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: wpn_wpn_eft_ak74_body_diff
+    second: {fileID: 2100000, guid: 5d710af1135a6fa43a4a397e57ac8b38, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: wpn_wpn_eft_ak74_bolt_diff
+    second: {fileID: 2100000, guid: ab2f97d4e5493b8409e274a85bdf6562, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: wpn_wpn_eft_ak74_handguard_diff
+    second: {fileID: 2100000, guid: 4f771a09c32520b4c805314098b037b3, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: wpn_wpn_eft_ak74_kolodka_diff
+    second: {fileID: 2100000, guid: b082202a5326ad348acd297c75bb021b, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: wpn_wpn_eft_ak74_mag_30rnd_diff
+    second: {fileID: 2100000, guid: 8add0f86a62f138479a69986ff38a773, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: wpn_wpn_eft_ak74_mount_dovetail_diff
+    second: {fileID: 2100000, guid: 2f82bdba47d4a7d46a33c24b9a89f2ad, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: wpn_wpn_eft_ak74_muzzle_diff
+    second: {fileID: 2100000, guid: 5b42f67565f79bb4f86bd452ed4cb70e, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: wpn_wpn_eft_ak74_pistolgrip_bakelite_diff
+    second: {fileID: 2100000, guid: 0844b7a9c9008ec42b0e175ef87eec33, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: wpn_wpn_eft_ak74_reciever_diff
+    second: {fileID: 2100000, guid: e3c5027bf50f75944a30ef823b517454, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: wpn_wpn_eft_ak74_sight_rear_diff
+    second: {fileID: 2100000, guid: 75be123c6d849bd4bba95a03a1c33fbc, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: wpn_wpn_eft_ak74_stock_diff
+    second: {fileID: 2100000, guid: d0757859e966ab94ca201eae2146c768, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: wpn_wpn_flashassault
+    second: {fileID: 2100000, guid: 0ccd402b715575f4396f69e4336c7ac1, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: wpn_wpn_foregrip_zenit_rk_1_diff
+    second: {fileID: 2100000, guid: 416478126e6ff724d9e3350a36d84ba9, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: wpn_wpn_gp25
+    second: {fileID: 2100000, guid: c64d8e509a58c4449b13d9544ded1cc4, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: wpn_wpn_handguard_ak_caa_quad_rail_polymer_diff
+    second: {fileID: 2100000, guid: 9296712918a14cf4495e2c81bf957e53, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: wpn_wpn_knife_nsak
+    second: {fileID: 2100000, guid: 8c6a3791e0880a74b90d5cbe68157bbd, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: wpn_wpn_laserassault
+    second: {fileID: 2100000, guid: 550321c193a21aa47a9e2809d71edfe2, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: wpn_wpn_mag_5x45_45rnd_backelite
+    second: {fileID: 2100000, guid: 1138962072f1a5440b3080c51d64e8bb, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: wpn_wpn_mag_5x45_45rnd_black
+    second: {fileID: 2100000, guid: f0948496719590545b009b4d74599a2f, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: wpn_wpn_mag_5x45_60rnd
+    second: {fileID: 2100000, guid: 76887dde86836464bb7517e57ec0f696, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: wpn_wpn_vog
+    second: {fileID: 2100000, guid: bace646036b7d044d9688aca66f11f6a, type: 2}
+  materials:
+    materialImportMode: 2
+    materialName: 0
+    materialSearch: 1
+    materialLocation: 1
+  animations:
+    legacyGenerateAnimations: 4
+    bakeSimulation: 0
+    resampleCurves: 1
+    optimizeGameObjects: 0
+    removeConstantScaleCurves: 0
+    motionNodeName: 
+    animationImportErrors: 
+    animationImportWarnings: 
+    animationRetargetingWarnings: 
+    animationDoRetargetingWarnings: 0
+    importAnimatedCustomProperties: 0
+    importConstraints: 0
+    animationCompression: 1
+    animationRotationError: 0.5
+    animationPositionError: 0.5
+    animationScaleError: 0.5
+    animationWrapMode: 0
+    extraExposedTransformPaths: []
+    extraUserProperties: []
+    clipAnimations: []
+    isReadable: 0
+  meshes:
+    lODScreenPercentages: []
+    globalScale: 1
+    meshCompression: 0
+    addColliders: 0
+    useSRGBMaterialColor: 1
+    sortHierarchyByName: 1
+    importPhysicalCameras: 1
+    importVisibility: 0
+    importBlendShapes: 0
+    importCameras: 0
+    importLights: 0
+    nodeNameCollisionStrategy: 1
+    fileIdsGeneration: 2
+    swapUVChannels: 0
+    generateSecondaryUV: 0
+    useFileUnits: 1
+    keepQuads: 0
+    weldVertices: 1
+    bakeAxisConversion: 0
+    preserveHierarchy: 0
+    skinWeightsMode: 0
+    maxBonesPerVertex: 4
+    minBoneWeight: 0.001
+    optimizeBones: 1
+    generateMeshLods: 0
+    meshLodGenerationFlags: 0
+    maximumMeshLod: -1
+    meshOptimizationFlags: -1
+    indexFormat: 0
+    secondaryUVAngleDistortion: 8
+    secondaryUVAreaDistortion: 15.000001
+    secondaryUVHardAngle: 88
+    secondaryUVMarginMethod: 1
+    secondaryUVMinLightmapResolution: 40
+    secondaryUVMinObjectScale: 1
+    secondaryUVPackMargin: 4
+    useFileScale: 1
+    strictVertexDataChecks: 0
+  tangentSpace:
+    normalSmoothAngle: 60
+    normalImportMode: 0
+    tangentImportMode: 3
+    normalCalculationMode: 4
+    legacyComputeAllNormalsFromSmoothingGroupsWhenMeshHasBlendShapes: 0
+    blendShapeNormalImportMode: 1
+    normalSmoothingSource: 0
+  referencedClips: []
+  importAnimation: 0
+  humanDescription:
+    serializedVersion: 3
+    human: []
+    skeleton: []
+    armTwist: 0.5
+    foreArmTwist: 0.5
+    upperLegTwist: 0.5
+    legTwist: 0.5
+    armStretch: 0.05
+    legStretch: 0.05
+    feetSpacing: 0
+    globalScale: 1
+    rootMotionBoneName: 
+    hasTranslationDoF: 0
+    hasExtraRoot: 0
+    skeletonHasParents: 1
+  lastHumanDescriptionAvatarSource: {instanceID: 0}
+  autoGenerateAvatarMappingIfUnspecified: 1
+  animationType: 2
+  humanoidOversampling: 1
+  avatarSetup: 0
+  addHumanoidExtraRootOnlyWhenUsingAvatar: 1
+  importBlendShapeDeformPercent: 0
+  remapMaterialsIfMaterialImportModeIsNone: 0
+  additionalBone: 0
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 

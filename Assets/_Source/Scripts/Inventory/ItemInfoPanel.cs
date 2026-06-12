@@ -57,12 +57,14 @@ public class ItemInfoPanel : MonoBehaviour
     private void SetIcon(InventoryItem item)
     {
         Vector2 iconSize = new Vector2(
-            item.Width * ItemGrid.tileSizeWidth,
-            item.Height * ItemGrid.tileSizeHeight);
+            item.BaseWidth * ItemGrid.tileSizeWidth,
+            item.BaseHeight * ItemGrid.tileSizeHeight);
 
         if (iconRectTransform != null)
         {
             iconRectTransform.sizeDelta = iconSize;
+            iconRectTransform.localRotation = Quaternion.identity;
+            iconRectTransform.localScale = Vector3.one;
         }
 
         if (iconLayoutElement != null)
@@ -83,6 +85,8 @@ public class ItemInfoPanel : MonoBehaviour
         Sprite icon = item.itemData.GetIcon();
         iconImage.sprite = icon;
         iconImage.enabled = icon != null;
+        iconImage.rectTransform.localRotation = Quaternion.identity;
+        iconImage.rectTransform.localScale = Vector3.one;
     }
 
     private void SetItemName(ItemData itemData)

@@ -183,7 +183,8 @@ public class InventoryController : MonoBehaviour
 
         InventoryItem itemToInsert = CreateItem(itemData, normalizedAmount);
 
-        if (InsertItem(itemToInsert, insertionGrid))
+        if (InsertItem(itemToInsert, insertionGrid) ||
+            (insertionGrid != defaultItemGrid && InsertItem(itemToInsert, defaultItemGrid)))
         {
             RegisterInventoryItem(itemToInsert);
             RefreshWeightState();
@@ -203,7 +204,7 @@ public class InventoryController : MonoBehaviour
             return true;
         }
 
-        if (itemToInsert.Width == itemToInsert.Height)
+        if (itemToInsert.CanRotate == false)
         {
             return false;
         }
@@ -256,16 +257,32 @@ public class InventoryController : MonoBehaviour
         else
         {
             HideItemInfoPanel();
-            inventoryHighlight.Show(selectedItemGrid.CanPlaceItem(selectedItem, positionOnGrid.x, positionOnGrid.y));
-            inventoryHighlight.SetSize(selectedItemGrid, selectedItem, positionOnGrid.x, positionOnGrid.y);
-            inventoryHighlight.SetPosition(selectedItemGrid, selectedItem, positionOnGrid.x, positionOnGrid.y);
+            bool canMergeStack = TryGetStackMergeTarget(selectedItemGrid, positionOnGrid, out InventoryItem stackMergeTarget);
+            bool canPlaceItem = selectedItemGrid.CanPlaceItem(selectedItem, positionOnGrid.x, positionOnGrid.y);
+
+            inventoryHighlight.Show(canPlaceItem || canMergeStack);
+            if (canMergeStack)
+            {
+                inventoryHighlight.SetSize(selectedItemGrid, stackMergeTarget);
+                inventoryHighlight.SetPosition(selectedItemGrid, stackMergeTarget);
+            }
+            else
+            {
+                inventoryHighlight.SetSize(selectedItemGrid, selectedItem, positionOnGrid.x, positionOnGrid.y);
+                inventoryHighlight.SetPosition(selectedItemGrid, selectedItem, positionOnGrid.x, positionOnGrid.y);
+            }
         }
     }
 
     private InventoryItem CreateItem(ItemData itemData, int amount)
     {
+        return CreateItem(itemData, amount, null);
+    }
+
+    private InventoryItem CreateItem(ItemData itemData, int amount, IReadOnlyList<ItemIconPart> runtimeIconParts)
+    {
         InventoryItem inventoryItem = Instantiate(itemPrefab).GetComponent<InventoryItem>();
-        inventoryItem.Set(itemData, amount);
+        inventoryItem.Set(itemData, amount, runtimeIconParts);
 
         return inventoryItem;
     }
@@ -499,6 +516,18 @@ public class InventoryController : MonoBehaviour
             return false;
         }
 
+        SlottedItemGrid slottedGrid = targetGrid as SlottedItemGrid;
+        if (TryMergeDraggedItemIntoStack(targetGrid, tileGridPosition))
+        {
+            return true;
+        }
+
+        if (slottedGrid != null &&
+            slottedGrid.ShouldSplitStackOnPlace(selectedItem, tileGridPosition.x, tileGridPosition.y))
+        {
+            return TryPlaceSingleItemFromStack(slottedGrid, tileGridPosition);
+        }
+
         if (targetGrid.CanPlaceItem(selectedItem, tileGridPosition.x, tileGridPosition.y) == false)
         {
             return false;
@@ -507,6 +536,101 @@ public class InventoryController : MonoBehaviour
         targetGrid.PlaceItem(selectedItem, tileGridPosition.x, tileGridPosition.y);
         FinishDraggingItem();
         return true;
+    }
+
+    private bool TryMergeDraggedItemIntoStack(InventoryGrid targetGrid, Vector2Int tileGridPosition)
+    {
+        if (TryGetStackMergeTarget(targetGrid, tileGridPosition, out InventoryItem targetStack) == false)
+        {
+            return false;
+        }
+
+        InventoryItem mergedItem = selectedItem;
+        targetStack.AddAmount(mergedItem.CurrentAmount);
+        DestroyInventoryItem(mergedItem);
+        RefreshWeightState();
+        FinishDraggingItem();
+        return true;
+    }
+
+    private bool TryGetStackMergeTarget(InventoryGrid targetGrid, Vector2Int tileGridPosition, out InventoryItem targetStack)
+    {
+        targetStack = null;
+
+        if (targetGrid == null ||
+            selectedItem == null ||
+            selectedItem.IsStackable == false ||
+            targetGrid.CanMergeStackAt(tileGridPosition.x, tileGridPosition.y) == false)
+        {
+            return false;
+        }
+
+        targetStack = targetGrid.GetItem(tileGridPosition.x, tileGridPosition.y);
+        return targetStack != null &&
+               targetStack != selectedItem &&
+               targetStack.CanStackWith(selectedItem.itemData);
+    }
+
+    private bool TryPlaceSingleItemFromStack(SlottedItemGrid slottedGrid, Vector2Int tileGridPosition)
+    {
+        if (slottedGrid == null ||
+            selectedItem == null ||
+            dragOriginGrid == null)
+        {
+            return false;
+        }
+
+        if (slottedGrid == dragOriginGrid && tileGridPosition == dragOriginPosition)
+        {
+            return false;
+        }
+
+        if (slottedGrid.CanPlaceItem(selectedItem, tileGridPosition.x, tileGridPosition.y) == false)
+        {
+            return false;
+        }
+
+        int originalAmount = selectedItem.CurrentAmount;
+        bool originalRotated = selectedItem.rotated;
+
+        selectedItem.SetAmount(originalAmount - 1);
+        selectedItem.SetRotated(dragOriginRotated);
+
+        if (dragOriginGrid.CanPlaceItem(selectedItem, dragOriginPosition.x, dragOriginPosition.y) == false)
+        {
+            selectedItem.SetAmount(originalAmount);
+            selectedItem.SetRotated(originalRotated);
+            return false;
+        }
+
+        InventoryItem singleItem = CreateItem(selectedItem.itemData, 1, selectedItem.RuntimeIconParts);
+
+        if (slottedGrid.CanPlaceItem(singleItem, tileGridPosition.x, tileGridPosition.y) == false)
+        {
+            Destroy(singleItem.gameObject);
+            selectedItem.SetAmount(originalAmount);
+            selectedItem.SetRotated(originalRotated);
+            return false;
+        }
+
+        slottedGrid.PlaceItem(singleItem, tileGridPosition.x, tileGridPosition.y);
+        dragOriginGrid.PlaceItem(selectedItem, dragOriginPosition.x, dragOriginPosition.y);
+
+        RegisterInventoryItem(singleItem);
+        RefreshWeightState();
+        FinishDraggingItem();
+        return true;
+    }
+
+    private void DestroyInventoryItem(InventoryItem item)
+    {
+        if (item == null)
+        {
+            return;
+        }
+
+        inventoryItems.Remove(item);
+        Destroy(item.gameObject);
     }
 
     private bool ReturnDraggedItemToOrigin()
@@ -521,10 +645,7 @@ public class InventoryController : MonoBehaviour
             return false;
         }
 
-        if (selectedItem.rotated != dragOriginRotated)
-        {
-            selectedItem.Rotate();
-        }
+        selectedItem.SetRotated(dragOriginRotated);
 
         dragOriginGrid.PlaceItem(selectedItem, dragOriginPosition.x, dragOriginPosition.y);
         FinishDraggingItem();

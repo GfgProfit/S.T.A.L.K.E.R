@@ -20,6 +20,11 @@ public abstract class InventoryGrid : MonoBehaviour
         return CalculatePositionOnGrid(inventoryItem, posX, posY);
     }
 
+    public virtual bool CanMergeStackAt(int posX, int posY)
+    {
+        return true;
+    }
+
     public abstract InventoryItem PickUpItem(int x, int y);
     public abstract InventoryItem GetItem(int x, int y);
     public abstract Vector2Int GetTileGridPosition(Vector2 mousePosition, InventoryItem selectedItem = null);

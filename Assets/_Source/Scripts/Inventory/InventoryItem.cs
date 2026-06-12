@@ -30,6 +30,11 @@ public class InventoryItem : MonoBehaviour
     private RectTransform shortNameTextRectTransform;
     private RectTransform rectTransform;
     private bool overlayTextsVisible = true;
+    private bool hasVisualSizeOverride;
+    private int visualWidthOverride = 1;
+    private int visualHeightOverride = 1;
+    private Sprite iconOverride;
+    private IReadOnlyList<ItemIconPart> runtimeIconParts;
 
     public int Width => itemData == null ? 0 : Mathf.Max(1, rotated ? itemData.height : itemData.width);
     public int Height => itemData == null ? 0 : Mathf.Max(1, rotated ? itemData.width : itemData.height);
@@ -37,6 +42,10 @@ public class InventoryItem : MonoBehaviour
     public bool IsStackable => itemData != null && itemData.IsStackable;
     public float UnitWeight => itemData == null ? 0f : itemData.Weight;
     public float TotalWeight => UnitWeight * CurrentAmount;
+    public int BaseWidth => itemData == null ? 0 : Mathf.Max(1, itemData.width);
+    public int BaseHeight => itemData == null ? 0 : Mathf.Max(1, itemData.height);
+    public bool CanRotate => BaseWidth != BaseHeight;
+    internal IReadOnlyList<ItemIconPart> RuntimeIconParts => runtimeIconParts;
 
     internal void Set(ItemData itemData)
     {
@@ -58,11 +67,13 @@ public class InventoryItem : MonoBehaviour
         EnsureVisuals();
 
         this.itemData = itemData;
+        this.runtimeIconParts = runtimeIconParts;
         rotated = false;
+        ClearVisualOverride();
         SetAmountInternal(amount);
         RefreshShortNameText();
 
-        RefreshIcon(runtimeIconParts);
+        RefreshIcon();
         RebuildCellVisuals();
 
         if (itemData == null)
@@ -70,12 +81,7 @@ public class InventoryItem : MonoBehaviour
             return;
         }
 
-        Vector2 size = new Vector2();
-
-        size.x = Mathf.Max(1, itemData.width) * ItemGrid.tileSizeWidth;
-        size.y = Mathf.Max(1, itemData.height) * ItemGrid.tileSizeHeight;
-
-        rectTransform.sizeDelta = size;
+        ApplyVisualSize();
         ApplyRotation();
         SetCellVisualsVisible(true);
     }
@@ -105,10 +111,46 @@ public class InventoryItem : MonoBehaviour
     {
         EnsureVisuals();
 
+        if (runtimeIconParts != null)
+        {
+            this.runtimeIconParts = runtimeIconParts;
+        }
+
         if (itemImage != null)
         {
-            itemImage.sprite = itemData == null ? null : itemData.GetIcon(runtimeIconParts);
+            itemImage.sprite = iconOverride != null ? iconOverride : itemData == null ? null : itemData.GetIcon(this.runtimeIconParts);
         }
+    }
+
+    internal void ApplySlotVisual(int slotWidth, int slotHeight, bool useGeneratedSlotIcon)
+    {
+        EnsureVisuals();
+
+        hasVisualSizeOverride = true;
+        visualWidthOverride = Mathf.Max(1, slotWidth);
+        visualHeightOverride = Mathf.Max(1, slotHeight);
+        iconOverride = itemData == null
+            ? null
+            : useGeneratedSlotIcon
+                ? itemData.GetSlotIcon(visualWidthOverride, visualHeightOverride, runtimeIconParts)
+                : itemData.GetIcon(runtimeIconParts);
+
+        ApplyVisualSize();
+        RefreshIcon();
+        RebuildCellVisuals();
+        ApplyRotation();
+        SetCellVisualsVisible(true);
+    }
+
+    internal void RestoreDefaultVisual()
+    {
+        EnsureVisuals();
+        ClearVisualOverride();
+        ApplyVisualSize();
+        RefreshIcon();
+        RebuildCellVisuals();
+        ApplyRotation();
+        SetCellVisualsVisible(true);
     }
 
     internal void SetCellVisualsVisible(bool visible)
@@ -135,7 +177,25 @@ public class InventoryItem : MonoBehaviour
 
     public void Rotate()
     {
-        rotated = !rotated;
+        if (CanRotate == false)
+        {
+            SetRotated(false);
+            return;
+        }
+
+        SetRotated(rotated == false);
+    }
+
+    internal void SetRotated(bool value)
+    {
+        bool normalizedValue = value && CanRotate;
+        if (rotated == normalizedValue)
+        {
+            ApplyRotation();
+            return;
+        }
+
+        rotated = normalizedValue;
         ApplyRotation();
     }
 
@@ -147,9 +207,25 @@ public class InventoryItem : MonoBehaviour
     private void ApplyRotation()
     {
         EnsureVisuals();
-        rectTransform.localRotation = Quaternion.Euler(0f, 0f, rotated ? -90f : 0f);
+        rectTransform.localRotation = Quaternion.Euler(0f, 0f, IsVisuallyRotated ? -90f : 0f);
         ApplyCountTextLayout();
         ApplyShortNameTextLayout();
+    }
+
+    private void ApplyVisualSize()
+    {
+        EnsureVisuals();
+        rectTransform.sizeDelta = new Vector2(
+            VisualWidth * ItemGrid.tileSizeWidth,
+            VisualHeight * ItemGrid.tileSizeHeight);
+    }
+
+    private void ClearVisualOverride()
+    {
+        hasVisualSizeOverride = false;
+        visualWidthOverride = 1;
+        visualHeightOverride = 1;
+        iconOverride = null;
     }
 
     private void SetAmountInternal(int amount)
@@ -271,8 +347,8 @@ public class InventoryItem : MonoBehaviour
         }
 
         Vector2 size = new Vector2(
-            Mathf.Max(1, itemData.width) * ItemGrid.tileSizeWidth,
-            Mathf.Max(1, itemData.height) * ItemGrid.tileSizeHeight);
+            VisualWidth * ItemGrid.tileSizeWidth,
+            VisualHeight * ItemGrid.tileSizeHeight);
 
         GameObject gridObject = new GameObject("Cell Grid", typeof(RectTransform));
         gridObject.transform.SetParent(transform, false);
@@ -285,8 +361,8 @@ public class InventoryItem : MonoBehaviour
         cellGridRoot.sizeDelta = size;
         cellGridRoot.SetAsFirstSibling();
 
-        int itemWidth = Mathf.Max(1, itemData.width);
-        int itemHeight = Mathf.Max(1, itemData.height);
+        int itemWidth = VisualWidth;
+        int itemHeight = VisualHeight;
         Color borderColor = itemData.IconCellGridBorderColor;
         float borderThickness = itemData.IconCellGridBorderLineThickness;
 
@@ -392,14 +468,14 @@ public class InventoryItem : MonoBehaviour
             return;
         }
 
-        countTextRectTransform.anchorMin = rotated ? new Vector2(1f, 1f) : new Vector2(1f, 0f);
+        countTextRectTransform.anchorMin = IsVisuallyRotated ? new Vector2(1f, 1f) : new Vector2(1f, 0f);
         countTextRectTransform.anchorMax = countTextRectTransform.anchorMin;
         countTextRectTransform.pivot = new Vector2(1f, 0f);
         countTextRectTransform.sizeDelta = CountTextSize;
-        countTextRectTransform.anchoredPosition = rotated
+        countTextRectTransform.anchoredPosition = IsVisuallyRotated
             ? new Vector2(-CountTextMargin.y, -CountTextMargin.x)
             : new Vector2(-CountTextMargin.x, CountTextMargin.y);
-        countTextRectTransform.localRotation = Quaternion.Euler(0f, 0f, rotated ? 90f : 0f);
+        countTextRectTransform.localRotation = Quaternion.Euler(0f, 0f, IsVisuallyRotated ? 90f : 0f);
         countTextRectTransform.localScale = Vector3.one;
         BringOverlayTextsToFront();
     }
@@ -413,23 +489,27 @@ public class InventoryItem : MonoBehaviour
             return;
         }
 
-        shortNameTextRectTransform.anchorMin = rotated ? Vector2.zero : new Vector2(0f, 1f);
+        shortNameTextRectTransform.anchorMin = IsVisuallyRotated ? Vector2.zero : new Vector2(0f, 1f);
         shortNameTextRectTransform.anchorMax = shortNameTextRectTransform.anchorMin;
         shortNameTextRectTransform.pivot = new Vector2(0f, 1f);
         shortNameTextRectTransform.sizeDelta = new Vector2(GetShortNameTextWidth(), ShortNameTextHeight);
-        shortNameTextRectTransform.anchoredPosition = rotated
+        shortNameTextRectTransform.anchoredPosition = IsVisuallyRotated
             ? new Vector2(ShortNameTextMargin.y, ShortNameTextMargin.x)
             : new Vector2(ShortNameTextMargin.x, -ShortNameTextMargin.y);
-        shortNameTextRectTransform.localRotation = Quaternion.Euler(0f, 0f, rotated ? 90f : 0f);
+        shortNameTextRectTransform.localRotation = Quaternion.Euler(0f, 0f, IsVisuallyRotated ? 90f : 0f);
         shortNameTextRectTransform.localScale = Vector3.one;
         BringOverlayTextsToFront();
     }
 
     private float GetShortNameTextWidth()
     {
-        float visualWidth = Mathf.Max(1, Width) * ItemGrid.tileSizeWidth;
+        float visualWidth = VisualWidth * ItemGrid.tileSizeWidth;
         return Mathf.Max(ShortNameMinWidth, visualWidth - ShortNameTextMargin.x * 2f);
     }
+
+    private int VisualWidth => hasVisualSizeOverride ? visualWidthOverride : BaseWidth;
+    private int VisualHeight => hasVisualSizeOverride ? visualHeightOverride : BaseHeight;
+    private bool IsVisuallyRotated => hasVisualSizeOverride == false && rotated;
 
     private void CreateGridLine(RectTransform parent, string name, Vector2 anchoredPosition, Vector2 size, Vector2 pivot, Color color)
     {

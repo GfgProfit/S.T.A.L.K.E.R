@@ -7,6 +7,7 @@ public class ItemData : ScriptableObject
     [SerializeField] private string itemName;
     [SerializeField] private string shortName;
     [SerializeField] [TextArea(3, 8)] private string description;
+    [SerializeField] private ItemType itemType = ItemType.Misc;
     [SerializeField] private ItemRarity rarity = ItemRarity.Common;
     [SerializeField] [Min(0f)] private float weight;
     [SerializeField] private bool stackable;
@@ -32,6 +33,10 @@ public class ItemData : ScriptableObject
     [SerializeField] private Vector3 iconModelEulerAngles = Vector3.zero;
     [SerializeField] private Vector3 iconModelScale = Vector3.one;
     [SerializeField] private Vector3 iconCameraEulerAngles = new Vector3(25f, -35f, 0f);
+    [SerializeField] private Vector3 slotIconModelEulerAngles = Vector3.zero;
+    [SerializeField] private Vector3 slotIconModelScale = Vector3.one;
+    [SerializeField] private Vector3 slotIconCameraEulerAngles = new Vector3(25f, -35f, 0f);
+    [SerializeField] [Range(1f, 2f)] private float slotIconPadding = 1.15f;
     [SerializeField] private Color iconBackgroundColor = new Color(0f, 0f, 0f, 0f);
     [SerializeField] private bool iconShowCellGrid = true;
     [SerializeField] private bool iconShowCellGridBorder = true;
@@ -40,10 +45,15 @@ public class ItemData : ScriptableObject
     [SerializeField] private bool iconUseDirectionalLight = true;
     [SerializeField] private Vector3 iconLightEulerAngles = new Vector3(50f, -30f, 0f);
     [SerializeField] private float iconLightIntensity = 1.5f;
+    [SerializeField] private bool slotIconUseDirectionalLight = true;
+    [SerializeField] private Vector3 slotIconLightEulerAngles = new Vector3(50f, -30f, 0f);
+    [SerializeField] private float slotIconLightIntensity = 1.5f;
+    [SerializeField, HideInInspector] private bool slotIconSettingsInitialized;
 
     public string ItemName => string.IsNullOrWhiteSpace(itemName) ? name : itemName;
     public string ShortName => string.IsNullOrWhiteSpace(shortName) ? string.Empty : shortName;
     public string Description => description ?? string.Empty;
+    public ItemType ItemType => itemType;
     public ItemRarity Rarity => rarity;
     public Color ShortNameColor => RarityVisualSettings.GetShortNameColor(rarity);
     public float Weight => Mathf.Max(0f, weight);
@@ -66,6 +76,41 @@ public class ItemData : ScriptableObject
     public Vector3 IconModelEulerAngles => iconModelEulerAngles;
     public Vector3 IconModelScale => iconModelScale == Vector3.zero ? Vector3.one : iconModelScale;
     public Vector3 IconCameraEulerAngles => iconCameraEulerAngles;
+    public float SlotIconPadding
+    {
+        get
+        {
+            EnsureSlotIconSettingsInitialized();
+            return Mathf.Max(1f, slotIconPadding);
+        }
+    }
+
+    public Vector3 SlotIconModelEulerAngles
+    {
+        get
+        {
+            EnsureSlotIconSettingsInitialized();
+            return slotIconModelEulerAngles;
+        }
+    }
+
+    public Vector3 SlotIconModelScale
+    {
+        get
+        {
+            EnsureSlotIconSettingsInitialized();
+            return slotIconModelScale == Vector3.zero ? Vector3.one : slotIconModelScale;
+        }
+    }
+
+    public Vector3 SlotIconCameraEulerAngles
+    {
+        get
+        {
+            EnsureSlotIconSettingsInitialized();
+            return slotIconCameraEulerAngles;
+        }
+    }
     public Color IconBackgroundColor => RarityVisualSettings.GetIconBackgroundColor(rarity);
     public bool IconShowCellGrid => iconShowCellGrid;
     public bool IconShowCellGridBorder => iconShowCellGridBorder;
@@ -74,6 +119,32 @@ public class ItemData : ScriptableObject
     public bool IconUseDirectionalLight => iconUseDirectionalLight;
     public Vector3 IconLightEulerAngles => iconLightEulerAngles;
     public float IconLightIntensity => iconLightIntensity;
+    public bool SlotIconUseDirectionalLight
+    {
+        get
+        {
+            EnsureSlotIconSettingsInitialized();
+            return slotIconUseDirectionalLight;
+        }
+    }
+
+    public Vector3 SlotIconLightEulerAngles
+    {
+        get
+        {
+            EnsureSlotIconSettingsInitialized();
+            return slotIconLightEulerAngles;
+        }
+    }
+
+    public float SlotIconLightIntensity
+    {
+        get
+        {
+            EnsureSlotIconSettingsInitialized();
+            return slotIconLightIntensity;
+        }
+    }
 
     public int IconTextureWidth => Mathf.Max(1, width) * IconPixelsPerCell * IconRenderScale;
     public int IconTextureHeight => Mathf.Max(1, height) * IconPixelsPerCell * IconRenderScale;
@@ -81,11 +152,33 @@ public class ItemData : ScriptableObject
 
     private ItemRarityVisualSettings RarityVisualSettings => ItemRarityVisualSettings.LoadDefault();
 
+    private void OnEnable()
+    {
+        EnsureSlotIconSettingsInitialized();
+    }
+
+    private void OnValidate()
+    {
+        EnsureSlotIconSettingsInitialized();
+    }
+
     public Sprite GetIcon(IReadOnlyList<ItemIconPart> runtimeIconParts = null)
     {
         if (HasRuntimeIconSource(runtimeIconParts))
         {
             return ItemIconCache.GetOrCreate(this, runtimeIconParts);
+        }
+
+        return itemIcon;
+    }
+
+    public Sprite GetSlotIcon(int slotWidth, int slotHeight, IReadOnlyList<ItemIconPart> runtimeIconParts = null)
+    {
+        EnsureSlotIconSettingsInitialized();
+
+        if (HasRuntimeIconSource(runtimeIconParts))
+        {
+            return ItemIconCache.GetOrCreateSlotIcon(this, slotWidth, slotHeight, runtimeIconParts);
         }
 
         return itemIcon;
@@ -103,14 +196,29 @@ public class ItemData : ScriptableObject
 
     internal int BuildIconHash(IReadOnlyList<ItemIconPart> runtimeIconParts = null)
     {
+        return BuildIconHash(runtimeIconParts, Mathf.Max(1, width), Mathf.Max(1, height), false);
+    }
+
+    internal int BuildSlotIconHash(int slotWidth, int slotHeight, IReadOnlyList<ItemIconPart> runtimeIconParts = null)
+    {
+        return BuildIconHash(runtimeIconParts, Mathf.Max(1, slotWidth), Mathf.Max(1, slotHeight), true);
+    }
+
+    private int BuildIconHash(IReadOnlyList<ItemIconPart> runtimeIconParts, int targetWidth, int targetHeight, bool useSlotIconSettings)
+    {
+        if (useSlotIconSettings)
+        {
+            EnsureSlotIconSettingsInitialized();
+        }
+
         unchecked
         {
             int hash = 17;
             hash = hash * 31 + GetInstanceID();
             hash = hash * 31 + (int)rarity;
             hash = hash * 31 + RarityVisualSettings.BuildHash();
-            hash = hash * 31 + Mathf.Max(1, width);
-            hash = hash * 31 + Mathf.Max(1, height);
+            hash = hash * 31 + targetWidth;
+            hash = hash * 31 + targetHeight;
             hash = hash * 31 + IconPixelsPerCell;
             hash = hash * 31 + IconRenderScale;
             hash = hash * 31 + IconAntiAliasing;
@@ -121,13 +229,14 @@ public class ItemData : ScriptableObject
             hash = hash * 31 + HashColor(IconShadowColor);
             hash = hash * 31 + HashVector(iconShadowOffset);
             hash = hash * 31 + Mathf.Max(0, iconShadowBlur);
-            hash = hash * 31 + Quantize(iconPadding);
-            hash = hash * 31 + HashVector(iconModelEulerAngles);
-            hash = hash * 31 + HashVector(IconModelScale);
-            hash = hash * 31 + HashVector(iconCameraEulerAngles);
-            hash = hash * 31 + (iconUseDirectionalLight ? 1 : 0);
-            hash = hash * 31 + HashVector(iconLightEulerAngles);
-            hash = hash * 31 + Quantize(iconLightIntensity);
+            hash = hash * 31 + Quantize(useSlotIconSettings ? SlotIconPadding : IconPadding);
+            hash = hash * 31 + HashVector(useSlotIconSettings ? slotIconModelEulerAngles : iconModelEulerAngles);
+            hash = hash * 31 + HashVector(useSlotIconSettings ? SlotIconModelScale : IconModelScale);
+            hash = hash * 31 + HashVector(useSlotIconSettings ? slotIconCameraEulerAngles : iconCameraEulerAngles);
+            bool useDirectionalLight = useSlotIconSettings ? SlotIconUseDirectionalLight : IconUseDirectionalLight;
+            hash = hash * 31 + (useDirectionalLight ? 1 : 0);
+            hash = hash * 31 + HashVector(useSlotIconSettings ? slotIconLightEulerAngles : iconLightEulerAngles);
+            hash = hash * 31 + Quantize(useSlotIconSettings ? slotIconLightIntensity : iconLightIntensity);
             hash = hash * 31 + (iconPrefab == null ? 0 : iconPrefab.GetInstanceID());
             hash = hash * 31 + HashParts(iconParts);
             hash = hash * 31 + HashParts(runtimeIconParts);
@@ -212,6 +321,23 @@ public class ItemData : ScriptableObject
     private static int Quantize(float value)
     {
         return Mathf.RoundToInt(value * 1000f);
+    }
+
+    private void EnsureSlotIconSettingsInitialized()
+    {
+        if (slotIconSettingsInitialized)
+        {
+            return;
+        }
+
+        slotIconModelEulerAngles = iconModelEulerAngles;
+        slotIconModelScale = iconModelScale;
+        slotIconCameraEulerAngles = iconCameraEulerAngles;
+        slotIconPadding = iconPadding;
+        slotIconUseDirectionalLight = iconUseDirectionalLight;
+        slotIconLightEulerAngles = iconLightEulerAngles;
+        slotIconLightIntensity = iconLightIntensity;
+        slotIconSettingsInitialized = true;
     }
 
     private static int GetSupportedAntiAliasing(int value)

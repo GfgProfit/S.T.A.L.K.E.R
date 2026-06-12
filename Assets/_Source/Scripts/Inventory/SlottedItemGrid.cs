@@ -77,7 +77,9 @@ public class SlottedItemGrid : InventoryGrid
             for (int y = 0; y < gridSizeHeight; y++)
             {
                 InventoryItem item = inventoryItemSlot[x, y];
-                if (item != null && item.CanStackWith(itemData))
+                if (item != null &&
+                    IsArtifactSlot(GetSlotAtCell(x, y)) == false &&
+                    item.CanStackWith(itemData))
                 {
                     stack = item;
                     return true;
@@ -94,11 +96,14 @@ public class SlottedItemGrid : InventoryGrid
 
         positionOnTheGrid.x = localPoint.x + rectTransform.pivot.x * rectTransform.rect.width;
         positionOnTheGrid.y = (1f - rectTransform.pivot.y) * rectTransform.rect.height - localPoint.y;
+        SlotState hoverSlot = GetSlotAtVisualPosition(positionOnTheGrid);
 
         if (selectedItem != null)
         {
-            positionOnTheGrid.x -= (selectedItem.Width - 1) * ItemGrid.tileSizeWidth / 2f;
-            positionOnTheGrid.y -= (selectedItem.Height - 1) * ItemGrid.tileSizeHeight / 2f;
+            int selectedWidth = GetPlacementWidth(selectedItem, hoverSlot);
+            int selectedHeight = GetPlacementHeight(selectedItem, hoverSlot);
+            positionOnTheGrid.x -= (selectedWidth - 1) * ItemGrid.tileSizeWidth / 2f;
+            positionOnTheGrid.y -= (selectedHeight - 1) * ItemGrid.tileSizeHeight / 2f;
         }
 
         SlotState slot = GetSlotAtVisualPosition(positionOnTheGrid);
@@ -114,14 +119,21 @@ public class SlottedItemGrid : InventoryGrid
     {
         foreach (SlotState slot in slots)
         {
-            int maxX = slot.Definition.x + slot.Definition.width - itemToInsert.Width;
-            int maxY = slot.Definition.y + slot.Definition.height - itemToInsert.Height;
+            if (slot.Definition.AcceptsItem(itemToInsert) == false)
+            {
+                continue;
+            }
+
+            int placementWidth = GetPlacementWidth(itemToInsert, slot);
+            int placementHeight = GetPlacementHeight(itemToInsert, slot);
+            int maxX = slot.Definition.x + slot.Definition.width - placementWidth;
+            int maxY = slot.Definition.y + slot.Definition.height - placementHeight;
 
             for (int y = slot.Definition.y; y <= maxY; y++)
             {
                 for (int x = slot.Definition.x; x <= maxX; x++)
                 {
-                    if (CheckAvailableSpace(x, y, itemToInsert.Width, itemToInsert.Height))
+                    if (CheckAvailableSpace(itemToInsert, x, y))
                     {
                         return new Vector2Int(x, y);
                     }
@@ -134,12 +146,20 @@ public class SlottedItemGrid : InventoryGrid
 
     public override bool PlaceItem(InventoryItem inventoryItem, int posX, int posY, ref InventoryItem overlapItem)
     {
-        if (BoundryCheck(posX, posY, inventoryItem.Width, inventoryItem.Height) == false)
+        if (TryGetPlacementSlot(inventoryItem, posX, posY, out SlotState slot) == false)
         {
             return false;
         }
 
-        if (OverlapCheck(posX, posY, inventoryItem.Width, inventoryItem.Height, ref overlapItem) == false)
+        int placementWidth = GetPlacementWidth(inventoryItem, slot);
+        int placementHeight = GetPlacementHeight(inventoryItem, slot);
+
+        if (BoundryCheck(posX, posY, placementWidth, placementHeight) == false)
+        {
+            return false;
+        }
+
+        if (OverlapCheck(posX, posY, placementWidth, placementHeight, ref overlapItem) == false)
         {
             overlapItem = null;
             return false;
@@ -162,20 +182,30 @@ public class SlottedItemGrid : InventoryGrid
             return false;
         }
 
-        return CheckAvailableSpace(posX, posY, inventoryItem.Width, inventoryItem.Height);
+        return CheckAvailableSpace(inventoryItem, posX, posY);
     }
 
     public override void PlaceItem(InventoryItem inventoryItem, int posX, int posY)
     {
-        if (BoundryCheck(posX, posY, inventoryItem.Width, inventoryItem.Height) == false) { return; }
+        if (TryGetPlacementSlot(inventoryItem, posX, posY, out SlotState slot) == false) { return; }
+
+        if (ShouldResetRotationForSlot(slot))
+        {
+            inventoryItem.SetRotated(false);
+        }
+
+        int placementWidth = GetPlacementWidth(inventoryItem, slot);
+        int placementHeight = GetPlacementHeight(inventoryItem, slot);
+
+        if (BoundryCheck(posX, posY, placementWidth, placementHeight) == false) { return; }
 
         RectTransform itemRectTransform = inventoryItem.GetComponent<RectTransform>();
         itemRectTransform.SetParent(rectTransform, false);
         itemRectTransform.localScale = Vector3.one;
 
-        for (int x = 0; x < inventoryItem.Width; x++)
+        for (int x = 0; x < placementWidth; x++)
         {
-            for (int y = 0; y < inventoryItem.Height; y++)
+            for (int y = 0; y < placementHeight; y++)
             {
                 inventoryItemSlot[posX + x, posY + y] = inventoryItem;
             }
@@ -185,7 +215,7 @@ public class SlottedItemGrid : InventoryGrid
         inventoryItem.onGridPositionY = posY;
         itemRectTransform.localPosition = CalculatePositionOnGrid(inventoryItem, posX, posY);
         inventoryItem.SetCellVisualsVisible(true);
-        inventoryItem.SetOverlayTextsVisible(true);
+        inventoryItem.SetOverlayTextsVisible(ShouldHideOverlayTexts(slot) == false);
     }
 
     public override Vector2 CalculatePositionOnGrid(InventoryItem inventoryItem, int posX, int posY)
@@ -193,9 +223,12 @@ public class SlottedItemGrid : InventoryGrid
         SlotState slot = GetSlotAtCell(posX, posY);
         if (slot != null)
         {
+            int placementWidth = GetPlacementWidth(inventoryItem, slot);
+            int placementHeight = GetPlacementHeight(inventoryItem, slot);
+
             return new Vector2(
-                slot.VisualPosition.x + (posX - slot.Definition.x) * ItemGrid.tileSizeWidth + ItemGrid.tileSizeWidth * inventoryItem.Width / 2f,
-                -(slot.VisualPosition.y + (posY - slot.Definition.y) * ItemGrid.tileSizeHeight + ItemGrid.tileSizeHeight * inventoryItem.Height / 2f));
+                slot.VisualPosition.x + (posX - slot.Definition.x) * ItemGrid.tileSizeWidth + ItemGrid.tileSizeWidth * placementWidth / 2f,
+                -(slot.VisualPosition.y + (posY - slot.Definition.y) * ItemGrid.tileSizeHeight + ItemGrid.tileSizeHeight * placementHeight / 2f));
         }
 
         Vector2 position = new Vector2();
@@ -203,6 +236,24 @@ public class SlottedItemGrid : InventoryGrid
         position.y = -(posY * ItemGrid.tileSizeHeight + ItemGrid.tileSizeHeight * inventoryItem.Height / 2);
 
         return position;
+    }
+
+    public override Vector2 GetHighlightSize(InventoryItem inventoryItem, int posX, int posY)
+    {
+        SlotState slot = GetSlotAtCell(posX, posY);
+        return new Vector2(
+            GetPlacementWidth(inventoryItem, slot) * ItemGrid.tileSizeWidth,
+            GetPlacementHeight(inventoryItem, slot) * ItemGrid.tileSizeHeight);
+    }
+
+    public override Vector2 GetHighlightPosition(InventoryItem inventoryItem, int posX, int posY)
+    {
+        return CalculatePositionOnGrid(inventoryItem, posX, posY);
+    }
+
+    public override bool CanMergeStackAt(int posX, int posY)
+    {
+        return IsArtifactSlot(GetSlotAtCell(posX, posY)) == false;
     }
 
     public override bool BoundryCheck(int posX, int posY, int width, int height)
@@ -270,22 +321,31 @@ public class SlottedItemGrid : InventoryGrid
 
     private void CleanGridReference(InventoryItem item)
     {
-        for (int x = 0; x < item.Width; x++)
+        SlotState slot = GetSlotAtCell(item.onGridPositionX, item.onGridPositionY);
+        int placementWidth = GetPlacementWidth(item, slot);
+        int placementHeight = GetPlacementHeight(item, slot);
+
+        for (int x = 0; x < placementWidth; x++)
         {
-            for (int y = 0; y < item.Height; y++)
+            for (int y = 0; y < placementHeight; y++)
             {
                 inventoryItemSlot[item.onGridPositionX + x, item.onGridPositionY + y] = null;
             }
         }
     }
 
-    private bool CheckAvailableSpace(int posX, int posY, int width, int height)
+    private bool CheckAvailableSpace(InventoryItem inventoryItem, int posX, int posY)
     {
-        if (BoundryCheck(posX, posY, width, height) == false) { return false; }
+        if (TryGetPlacementSlot(inventoryItem, posX, posY, out SlotState slot) == false) { return false; }
 
-        for (int x = 0; x < width; x++)
+        int placementWidth = GetPlacementWidth(inventoryItem, slot);
+        int placementHeight = GetPlacementHeight(inventoryItem, slot);
+
+        if (BoundryCheck(posX, posY, placementWidth, placementHeight) == false) { return false; }
+
+        for (int x = 0; x < placementWidth; x++)
         {
-            for (int y = 0; y < height; y++)
+            for (int y = 0; y < placementHeight; y++)
             {
                 if (inventoryItemSlot[posX + x, posY + y] != null)
                 {
@@ -295,6 +355,58 @@ public class SlottedItemGrid : InventoryGrid
         }
 
         return true;
+    }
+
+    public bool ShouldSplitStackOnPlace(InventoryItem inventoryItem, int posX, int posY)
+    {
+        return inventoryItem != null &&
+               inventoryItem.IsStackable &&
+               inventoryItem.CurrentAmount > 1 &&
+               TryGetPlacementSlot(inventoryItem, posX, posY, out SlotState slot) &&
+               IsArtifactSlot(slot);
+    }
+
+    private bool TryGetPlacementSlot(InventoryItem inventoryItem, int posX, int posY, out SlotState slot)
+    {
+        slot = GetSlotAtCell(posX, posY);
+        return slot != null && slot.Definition.AcceptsItem(inventoryItem);
+    }
+
+    private int GetPlacementWidth(InventoryItem inventoryItem, SlotState slot)
+    {
+        if (inventoryItem == null)
+        {
+            return 0;
+        }
+
+        return ShouldResetRotationForSlot(slot) ? inventoryItem.BaseWidth : inventoryItem.Width;
+    }
+
+    private int GetPlacementHeight(InventoryItem inventoryItem, SlotState slot)
+    {
+        if (inventoryItem == null)
+        {
+            return 0;
+        }
+
+        return ShouldResetRotationForSlot(slot) ? inventoryItem.BaseHeight : inventoryItem.Height;
+    }
+
+    private static bool ShouldResetRotationForSlot(SlotState slot)
+    {
+        return IsArtifactSlot(slot);
+    }
+
+    private static bool ShouldHideOverlayTexts(SlotState slot)
+    {
+        return IsArtifactSlot(slot);
+    }
+
+    private static bool IsArtifactSlot(SlotState slot)
+    {
+        return slot != null &&
+               slot.Definition.restrictItemType &&
+               slot.Definition.acceptedItemType == ItemType.Artifact;
     }
 
     private bool OverlapCheck(int posX, int posY, int width, int height, ref InventoryItem overlapItem)

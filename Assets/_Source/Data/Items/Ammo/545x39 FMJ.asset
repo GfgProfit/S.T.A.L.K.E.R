@@ -12,10 +12,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 737e751cd05516846acf43daad139c9e, type: 3}
   m_Name: 545x39 FMJ
   m_EditorClassIdentifier: 
-  itemName: "5,45 \xD7 39 \u043C\u043C"
+  itemName: "5,45x39 \u043C\u043C"
   shortName: FMJ
   description: "\u041F\u0430\u0442\u0440\u043E\u043D \u043A\u0430\u043B\u0438\u0431\u0440\u0430
-    5,45 x 39 \u043C\u043C 7\u041D10 \u0441 \u043F\u0443\u043B\u0435\u0439 \u043F\u043E\u0432\u044B\u0448\u0435\u043D\u043D\u043E\u0439
+    5,45x39 \u043C\u043C 7\u041D10 \u0441 \u043F\u0443\u043B\u0435\u0439 \u043F\u043E\u0432\u044B\u0448\u0435\u043D\u043D\u043E\u0439
     \u043F\u0440\u043E\u0431\u0438\u0432\u0430\u0435\u043C\u043E\u0441\u0442\u0438
     \u0438\u0441\u043F\u043E\u043B\u044C\u0437\u0443\u0435\u0442\u0441\u044F \u0432
     \u0430\u0432\u0442\u043E\u043C\u0430\u0442\u0438\u0447\u0435\u0441\u043A\u0438\u0445
@@ -30,6 +30,7 @@ MonoBehaviour:
     \u0431\u043E\u044F \u0432 \u0441\u0440\u0430\u0432\u043D\u0435\u043D\u0438\u0438
     \u0441\u043E \u0441\u0442\u0430\u0440\u044B\u043C \u043F\u0430\u0442\u0440\u043E\u043D\u043E\u043C
     \u043A\u0430\u043B\u0438\u0431\u0440\u0430 7,62 \u043C\u043C."
+  itemType: 2
   rarity: 0
   weight: 0.032
   stackable: 1
@@ -53,6 +54,10 @@ MonoBehaviour:
   iconModelEulerAngles: {x: 0, y: 0, z: 0}
   iconModelScale: {x: 1, y: 1, z: 1}
   iconCameraEulerAngles: {x: 25, y: -135, z: 0}
+  slotIconModelEulerAngles: {x: 0, y: 0, z: 0}
+  slotIconModelScale: {x: 1, y: 1, z: 1}
+  slotIconCameraEulerAngles: {x: 25, y: -135, z: 0}
+  slotIconPadding: 1.15
   iconBackgroundColor: {r: 0, g: 0, b: 0, a: 0.27450982}
   iconShowCellGrid: 1
   iconShowCellGridBorder: 1
@@ -61,3 +66,7 @@ MonoBehaviour:
   iconUseDirectionalLight: 1
   iconLightEulerAngles: {x: 50, y: -130, z: 0}
   iconLightIntensity: 100000
+  slotIconUseDirectionalLight: 1
+  slotIconLightEulerAngles: {x: 50, y: -130, z: 0}
+  slotIconLightIntensity: 100000
+  slotIconSettingsInitialized: 1
