@@ -1,7 +1,7 @@
 ﻿using System.Collections.Generic;
+using TMPro;
 using UnityEngine;
 using System.Collections;
-using Random = UnityEngine.Random;
 
 public class InventoryController : MonoBehaviour
 {
@@ -24,6 +24,12 @@ public class InventoryController : MonoBehaviour
     [SerializeField] private CanvasGroup inventoryCanvasGroup;
     [SerializeField] private InventoryGrid defaultItemGrid;
     [SerializeField] private PlayerController playerController;
+    [SerializeField] private TMP_Text weightText;
+    [SerializeField] [Min(0f)] private float maxCarryWeight = 50f;
+    [SerializeField] [Min(0f)] private float movementBlockExtraWeight = 10f;
+    [SerializeField] private Color normalWeightColor = Color.white;
+    [SerializeField] private Color overweightColor = new Color(1f, 0.55f, 0f, 1f);
+    [SerializeField] private Color movementBlockedWeightColor = Color.red;
     [SerializeField] private bool openOnStart;
     [SerializeField] private bool unlockCursorWhileOpen = true;
     [SerializeField] private bool disablePlayerControlsWhileOpen = true;
@@ -41,8 +47,14 @@ public class InventoryController : MonoBehaviour
     private bool dragOriginRotated;
     private bool iconsReady;
     private IPlayerInput fallbackPlayerInput;
+    private readonly List<InventoryItem> inventoryItems = new List<InventoryItem>();
+    private float currentCarryWeight;
 
     public bool IsOpen { get; private set; }
+    public float CurrentCarryWeight => currentCarryWeight;
+    public float MaxCarryWeight => Mathf.Max(0f, maxCarryWeight);
+    public float MovementBlockWeight => MaxCarryWeight + Mathf.Max(0f, movementBlockExtraWeight);
+    public bool IsMovementBlockedByWeight => currentCarryWeight >= MovementBlockWeight;
 
     private IPlayerInput PlayerInput
     {
@@ -83,7 +95,9 @@ public class InventoryController : MonoBehaviour
             playerController = FindFirstObjectByType<PlayerController>();
         }
 
+        RegisterExistingInventoryItems();
         SetInventoryOpen(openOnStart, true);
+        RefreshWeightState();
     }
 
     private IEnumerator Start()
@@ -145,16 +159,30 @@ public class InventoryController : MonoBehaviour
 
     public bool TryInsertItem(ItemData itemData)
     {
+        return TryInsertItem(itemData, 1);
+    }
+
+    public bool TryInsertItem(ItemData itemData, int amount)
+    {
         if (iconsReady == false) { return false; }
         if (itemData == null) { return false; }
 
         InventoryGrid insertionGrid = GetInsertionGrid();
         if (insertionGrid == null) { return false; }
 
-        InventoryItem itemToInsert = CreateItem(itemData);
+        int normalizedAmount = NormalizeItemAmount(itemData, amount);
+        if (TryAddToExistingStack(itemData, normalizedAmount, insertionGrid))
+        {
+            RefreshWeightState();
+            return true;
+        }
+
+        InventoryItem itemToInsert = CreateItem(itemData, normalizedAmount);
 
         if (InsertItem(itemToInsert, insertionGrid))
         {
+            RegisterInventoryItem(itemToInsert);
+            RefreshWeightState();
             return true;
         }
 
@@ -227,12 +255,148 @@ public class InventoryController : MonoBehaviour
         }
     }
 
-    private InventoryItem CreateItem(ItemData itemData)
+    private InventoryItem CreateItem(ItemData itemData, int amount)
     {
         InventoryItem inventoryItem = Instantiate(itemPrefab).GetComponent<InventoryItem>();
-        inventoryItem.Set(itemData);
+        inventoryItem.Set(itemData, amount);
 
         return inventoryItem;
+    }
+
+    private bool TryAddToExistingStack(ItemData itemData, int amount, InventoryGrid preferredGrid)
+    {
+        if (itemData == null || itemData.IsStackable == false)
+        {
+            return false;
+        }
+
+        if (TryAddToExistingStackInGrid(preferredGrid, itemData, amount))
+        {
+            return true;
+        }
+
+        return preferredGrid != defaultItemGrid &&
+               TryAddToExistingStackInGrid(defaultItemGrid, itemData, amount);
+    }
+
+    private bool TryAddToExistingStackInGrid(InventoryGrid grid, ItemData itemData, int amount)
+    {
+        if (grid == null)
+        {
+            return false;
+        }
+
+        if (grid.TryFindStack(itemData, out InventoryItem stack) == false)
+        {
+            return false;
+        }
+
+        stack.AddAmount(amount);
+        return true;
+    }
+
+    private void RegisterInventoryItem(InventoryItem item)
+    {
+        if (item == null || inventoryItems.Contains(item))
+        {
+            return;
+        }
+
+        inventoryItems.Add(item);
+    }
+
+    private void RegisterExistingInventoryItems()
+    {
+        RegisterInventoryItemsIn(inventoryRoot == null ? null : inventoryRoot.transform);
+        RegisterInventoryItemsIn(canvasTransform);
+    }
+
+    private void RegisterInventoryItemsIn(Transform root)
+    {
+        if (root == null)
+        {
+            return;
+        }
+
+        InventoryItem[] existingItems = root.GetComponentsInChildren<InventoryItem>(true);
+        for (int i = 0; i < existingItems.Length; i++)
+        {
+            RegisterInventoryItem(existingItems[i]);
+        }
+    }
+
+    private void RefreshWeightState()
+    {
+        currentCarryWeight = CalculateCurrentCarryWeight();
+        RefreshWeightText();
+        ApplyWeightMovementState();
+    }
+
+    private float CalculateCurrentCarryWeight()
+    {
+        float totalWeight = 0f;
+
+        for (int i = inventoryItems.Count - 1; i >= 0; i--)
+        {
+            InventoryItem item = inventoryItems[i];
+            if (item == null)
+            {
+                inventoryItems.RemoveAt(i);
+                continue;
+            }
+
+            totalWeight += item.TotalWeight;
+        }
+
+        return totalWeight;
+    }
+
+    private void RefreshWeightText()
+    {
+        if (weightText == null)
+        {
+            return;
+        }
+
+        weightText.raycastTarget = false;
+        weightText.richText = true;
+        weightText.color = normalWeightColor;
+        weightText.text = $"Вес: <color=#{ColorUtility.ToHtmlStringRGBA(GetWeightTextColor())}>{FormatWeight(currentCarryWeight)}</color> / {FormatWeight(MaxCarryWeight)} КГ";
+    }
+
+    private void ApplyWeightMovementState()
+    {
+        if (playerController == null)
+        {
+            return;
+        }
+
+        playerController.SetMovementEnabled(IsMovementBlockedByWeight == false);
+    }
+
+    private string FormatWeight(float weight)
+    {
+        return Mathf.Max(0f, weight).ToString("0.#");
+    }
+
+    private Color GetWeightTextColor()
+    {
+        if (currentCarryWeight >= MovementBlockWeight)
+        {
+            return movementBlockedWeightColor;
+        }
+
+        if (currentCarryWeight >= MaxCarryWeight)
+        {
+            return overweightColor;
+        }
+
+        return normalWeightColor;
+    }
+
+    private int NormalizeItemAmount(ItemData itemData, int amount)
+    {
+        return itemData != null && itemData.IsStackable ? Mathf.Max(1, amount) : 1;
     }
 
     private InventoryGrid GetInsertionGrid()
@@ -347,6 +511,7 @@ public class InventoryController : MonoBehaviour
     {
         selectedItem = item;
         selectedItem.SetCellVisualsVisible(false);
+        selectedItem.SetOverlayTextsVisible(false);
         rectTransform = selectedItem.GetComponent<RectTransform>();
         rectTransform.SetParent(canvasTransform, false);
         rectTransform.localScale = Vector3.one;
@@ -424,6 +589,7 @@ public class InventoryController : MonoBehaviour
         if (disablePlayerControlsWhileOpen && playerController != null)
         {
             playerController.SetControlsEnabled(IsOpen == false);
+            ApplyWeightMovementState();
         }
 
         if (IsOpen == false)

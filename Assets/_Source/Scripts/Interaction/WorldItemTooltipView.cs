@@ -21,7 +21,7 @@ public class WorldItemTooltipView : MonoBehaviour
             return;
         }
 
-        Show(worldItem.ItemName, interactKey);
+        Show(worldItem.DisplayName, interactKey);
     }
 
     public void Show(string itemName, string interactKey)

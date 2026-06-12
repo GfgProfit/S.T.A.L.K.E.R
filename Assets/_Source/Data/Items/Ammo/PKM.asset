@@ -13,6 +13,10 @@ MonoBehaviour:
   m_Name: PKM
   m_EditorClassIdentifier: 
   itemName: "7,62 \xD7 54 \u043C\u043C \u041F\u041F"
+  shortName: "\u041F\u041A\u041C"
+  rarity: 0
+  weight: 0.0218
+  stackable: 1
   width: 2
   height: 1
   itemIcon: {fileID: 0}

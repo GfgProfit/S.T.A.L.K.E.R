@@ -13,6 +13,10 @@ MonoBehaviour:
   m_Name: 9x19 PBP
   m_EditorClassIdentifier: 
   itemName: "9 \xD7 19 \u043C\u043C \u0411\u041F"
+  shortName: "\u0411\u041F"
+  rarity: 0
+  weight: 0.02
+  stackable: 1
   width: 1
   height: 1
   itemIcon: {fileID: 0}

@@ -13,6 +13,10 @@ MonoBehaviour:
   m_Name: 12x70 BUCK
   m_EditorClassIdentifier: 
   itemName: "12 \xD7 70 \u0434\u0440\u043E\u0431\u044C"
+  shortName: "\u0414\u0440\u043E\u0431\u044C"
+  rarity: 0
+  weight: 0.045
+  stackable: 1
   width: 2
   height: 1
   itemIcon: {fileID: 0}

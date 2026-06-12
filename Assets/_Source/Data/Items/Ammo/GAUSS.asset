@@ -13,6 +13,10 @@ MonoBehaviour:
   m_Name: GAUSS
   m_EditorClassIdentifier: 
   itemName: "\u0410\u043A\u043A\u0443\u043C\u0443\u043B\u044F\u0442\u043E\u0440"
+  shortName: "\u0413\u0430\u0443\u0441\u0441"
+  rarity: 0
+  weight: 0.05
+  stackable: 1
   width: 1
   height: 1
   itemIcon: {fileID: 0}

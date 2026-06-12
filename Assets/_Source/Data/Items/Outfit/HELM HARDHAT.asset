@@ -13,6 +13,10 @@ MonoBehaviour:
   m_Name: HELM HARDHAT
   m_EditorClassIdentifier: 
   itemName: "\u0421\u0442\u0430\u043B\u044C\u043D\u043E\u0439 \u0448\u043B\u0435\u043C"
+  shortName: "\u0421\u0442\u0430\u043B\u044C"
+  rarity: 2
+  weight: 4
+  stackable: 0
   width: 2
   height: 2
   itemIcon: {fileID: 0}

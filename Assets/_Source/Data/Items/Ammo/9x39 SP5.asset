@@ -13,6 +13,10 @@ MonoBehaviour:
   m_Name: 9x39 SP5
   m_EditorClassIdentifier: 
   itemName: "9 \xD7 39 \u043C\u043C \u0421\u041F-5"
+  shortName: "\u0421\u041F-5"
+  rarity: 0
+  weight: 0.07
+  stackable: 1
   width: 2
   height: 1
   itemIcon: {fileID: 0}

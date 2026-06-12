@@ -12,6 +12,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 737e751cd05516846acf43daad139c9e, type: 3}
   m_Name: Bottle
   m_EditorClassIdentifier: 
+  shortName: 
+  rarity: 0
+  weight: 0
+  stackable: 0
   width: 1
   height: 2
   itemIcon: {fileID: 0}

@@ -13,6 +13,10 @@ MonoBehaviour:
   m_Name: 545x39 FMJ
   m_EditorClassIdentifier: 
   itemName: "5,45 \xD7 39 \u043C\u043C"
+  shortName: FMJ
+  rarity: 0
+  weight: 0.032
+  stackable: 1
   width: 2
   height: 1
   itemIcon: {fileID: 0}

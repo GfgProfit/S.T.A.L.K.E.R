@@ -13,6 +13,10 @@ MonoBehaviour:
   m_Name: EXO
   m_EditorClassIdentifier: 
   itemName: "\u042D\u043A\u0437\u043E\u0441\u043A\u0435\u043B\u0435\u0442"
+  shortName: "\u042D\u043A\u0437\u043E"
+  rarity: 5
+  weight: 25
+  stackable: 0
   width: 2
   height: 3
   itemIcon: {fileID: 0}

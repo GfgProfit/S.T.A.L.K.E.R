@@ -12,6 +12,16 @@ public partial class PlayerController
         }
     }
 
+    public void SetMovementEnabled(bool movementEnabled)
+    {
+        _movementEnabled = movementEnabled;
+
+        if (movementEnabled == false)
+        {
+            ClearMotionInput();
+        }
+    }
+
     public void SetCanCrouching(bool canCrouching)
     {
         CanCrouching = canCrouching;

@@ -25,9 +25,17 @@ public partial class PlayerController
         if (_controlsEnabled)
         {
             Look();
-            SetRawInput();
-            UpdateMotionState();
-            HandleCrouch();
+
+            if (_movementEnabled)
+            {
+                SetRawInput();
+                UpdateMotionState();
+                HandleCrouch();
+            }
+            else
+            {
+                ClearMotionInput();
+            }
         }
         else
         {

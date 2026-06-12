@@ -13,6 +13,10 @@ MonoBehaviour:
   m_Name: 1143x23 FMJ
   m_EditorClassIdentifier: 
   itemName: .45 ACP
+  shortName: FMJ
+  rarity: 0
+  weight: 0.02
+  stackable: 1
   width: 1
   height: 1
   itemIcon: {fileID: 0}

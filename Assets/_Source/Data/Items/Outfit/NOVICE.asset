@@ -13,6 +13,10 @@ MonoBehaviour:
   m_Name: NOVICE
   m_EditorClassIdentifier: 
   itemName: "\u041A\u043E\u0436\u0430\u043D\u044B\u0439 \u043F\u043B\u0430\u0449"
+  shortName: "\u041F\u043B\u0430\u0449"
+  rarity: 1
+  weight: 4
+  stackable: 0
   width: 2
   height: 3
   itemIcon: {fileID: 0}

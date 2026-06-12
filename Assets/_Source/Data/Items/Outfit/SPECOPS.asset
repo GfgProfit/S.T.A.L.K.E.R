@@ -13,6 +13,10 @@ MonoBehaviour:
   m_Name: SPECOPS
   m_EditorClassIdentifier: 
   itemName: "\u0411\u0440\u043E\u043D\u0435\u043A\u043E\u0441\u0442\u044E\u043C \xAB\u0411\u0435\u0440\u0438\u043B\u043B-5\u041C\xBB"
+  shortName: "\u0411-5\u041C"
+  rarity: 2
+  weight: 9
+  stackable: 0
   width: 2
   height: 3
   itemIcon: {fileID: 0}

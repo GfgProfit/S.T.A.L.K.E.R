@@ -13,6 +13,10 @@ MonoBehaviour:
   m_Name: 57x28 AP
   m_EditorClassIdentifier: 
   itemName: "5,7 \xD7 28 \u043C\u043C \u0411\u041F"
+  shortName: "\u0411\u041F"
+  rarity: 0
+  weight: 0.03
+  stackable: 1
   width: 2
   height: 1
   itemIcon: {fileID: 0}

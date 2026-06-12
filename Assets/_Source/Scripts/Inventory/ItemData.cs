@@ -5,6 +5,10 @@ using UnityEngine;
 public class ItemData : ScriptableObject
 {
     [SerializeField] private string itemName;
+    [SerializeField] private string shortName;
+    [SerializeField] private ItemRarity rarity = ItemRarity.Common;
+    [SerializeField] [Min(0f)] private float weight;
+    [SerializeField] private bool stackable;
 
     [Min(1)] public int width = 1;
     [Min(1)] public int height = 1;
@@ -37,6 +41,11 @@ public class ItemData : ScriptableObject
     [SerializeField] private float iconLightIntensity = 1.5f;
 
     public string ItemName => string.IsNullOrWhiteSpace(itemName) ? name : itemName;
+    public string ShortName => string.IsNullOrWhiteSpace(shortName) ? string.Empty : shortName;
+    public ItemRarity Rarity => rarity;
+    public Color ShortNameColor => RarityVisualSettings.GetShortNameColor(rarity);
+    public float Weight => Mathf.Max(0f, weight);
+    public bool IsStackable => stackable;
 
     public Sprite FallbackIcon => itemIcon;
     public GameObject IconPrefab => iconPrefab;
@@ -44,21 +53,21 @@ public class ItemData : ScriptableObject
     public int IconPixelsPerCell => Mathf.Max(16, iconPixelsPerCell);
     public int IconRenderScale => Mathf.Clamp(iconRenderScale, 1, 4);
     public int IconAntiAliasing => GetSupportedAntiAliasing(iconAntiAliasing);
-    public bool IconUseOutline => iconUseOutline && IconOutlineTextureWidth > 0 && iconOutlineColor.a > 0f;
-    public Color IconOutlineColor => iconOutlineColor;
+    public bool IconUseOutline => iconUseOutline && IconOutlineTextureWidth > 0 && IconOutlineColor.a > 0f;
+    public Color IconOutlineColor => RarityVisualSettings.IconOutlineColor;
     public int IconOutlineTextureWidth => Mathf.Max(0, iconOutlineWidth) * IconRenderScale;
-    public bool IconUseShadow => iconUseShadow && iconShadowColor.a > 0f && (IconShadowTextureOffset != Vector2Int.zero || IconShadowTextureBlur > 0);
-    public Color IconShadowColor => iconShadowColor;
+    public bool IconUseShadow => iconUseShadow && IconShadowColor.a > 0f && (IconShadowTextureOffset != Vector2Int.zero || IconShadowTextureBlur > 0);
+    public Color IconShadowColor => RarityVisualSettings.IconShadowColor;
     public Vector2Int IconShadowTextureOffset => Vector2Int.RoundToInt(iconShadowOffset * IconRenderScale);
     public int IconShadowTextureBlur => Mathf.Max(0, iconShadowBlur) * IconRenderScale;
     public float IconPadding => Mathf.Max(1f, iconPadding);
     public Vector3 IconModelEulerAngles => iconModelEulerAngles;
     public Vector3 IconModelScale => iconModelScale == Vector3.zero ? Vector3.one : iconModelScale;
     public Vector3 IconCameraEulerAngles => iconCameraEulerAngles;
-    public Color IconBackgroundColor => iconBackgroundColor;
+    public Color IconBackgroundColor => RarityVisualSettings.GetIconBackgroundColor(rarity);
     public bool IconShowCellGrid => iconShowCellGrid;
     public bool IconShowCellGridBorder => iconShowCellGridBorder;
-    public Color IconCellGridBorderColor => iconCellGridBorderColor;
+    public Color IconCellGridBorderColor => RarityVisualSettings.GetIconCellGridBorderColor(rarity);
     public float IconCellGridBorderLineThickness => Mathf.Max(1f, iconCellGridBorderLineThickness);
     public bool IconUseDirectionalLight => iconUseDirectionalLight;
     public Vector3 IconLightEulerAngles => iconLightEulerAngles;
@@ -67,6 +76,8 @@ public class ItemData : ScriptableObject
     public int IconTextureWidth => Mathf.Max(1, width) * IconPixelsPerCell * IconRenderScale;
     public int IconTextureHeight => Mathf.Max(1, height) * IconPixelsPerCell * IconRenderScale;
     public float IconSpritePixelsPerUnit => IconPixelsPerCell * IconRenderScale;
+
+    private ItemRarityVisualSettings RarityVisualSettings => ItemRarityVisualSettings.LoadDefault();
 
     public Sprite GetIcon(IReadOnlyList<ItemIconPart> runtimeIconParts = null)
     {
@@ -94,16 +105,18 @@ public class ItemData : ScriptableObject
         {
             int hash = 17;
             hash = hash * 31 + GetInstanceID();
+            hash = hash * 31 + (int)rarity;
+            hash = hash * 31 + RarityVisualSettings.BuildHash();
             hash = hash * 31 + Mathf.Max(1, width);
             hash = hash * 31 + Mathf.Max(1, height);
             hash = hash * 31 + IconPixelsPerCell;
             hash = hash * 31 + IconRenderScale;
             hash = hash * 31 + IconAntiAliasing;
             hash = hash * 31 + (iconUseOutline ? 1 : 0);
-            hash = hash * 31 + HashColor(iconOutlineColor);
+            hash = hash * 31 + HashColor(IconOutlineColor);
             hash = hash * 31 + Mathf.Max(0, iconOutlineWidth);
             hash = hash * 31 + (iconUseShadow ? 1 : 0);
-            hash = hash * 31 + HashColor(iconShadowColor);
+            hash = hash * 31 + HashColor(IconShadowColor);
             hash = hash * 31 + HashVector(iconShadowOffset);
             hash = hash * 31 + Mathf.Max(0, iconShadowBlur);
             hash = hash * 31 + Quantize(iconPadding);

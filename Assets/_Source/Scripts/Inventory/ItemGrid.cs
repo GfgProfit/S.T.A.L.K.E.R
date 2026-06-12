@@ -74,6 +74,31 @@ public class ItemGrid : InventoryGrid
         return inventoryItemSlot[x, y];
     }
 
+    public override bool TryFindStack(ItemData itemData, out InventoryItem stack)
+    {
+        stack = null;
+
+        if (itemData == null || itemData.IsStackable == false || inventoryItemSlot == null)
+        {
+            return false;
+        }
+
+        for (int x = 0; x < gridSizeWidth; x++)
+        {
+            for (int y = 0; y < gridSizeHeight; y++)
+            {
+                InventoryItem item = inventoryItemSlot[x, y];
+                if (item != null && item.CanStackWith(itemData))
+                {
+                    stack = item;
+                    return true;
+                }
+            }
+        }
+
+        return false;
+    }
+
     public override Vector2Int GetTileGridPosition(Vector2 mousePosition, InventoryItem selectedItem = null)
     {
         RectTransformUtility.ScreenPointToLocalPointInRectangle(rectTransform, mousePosition, uiCamera, out Vector2 localPoint);
@@ -167,6 +192,7 @@ public class ItemGrid : InventoryGrid
 
         rectTransform.localPosition = position;
         inventoryItem.SetCellVisualsVisible(true);
+        inventoryItem.SetOverlayTextsVisible(true);
     }
 
     public override Vector2 CalculatePositionOnGrid(InventoryItem inventoryItem, int posX, int posY)

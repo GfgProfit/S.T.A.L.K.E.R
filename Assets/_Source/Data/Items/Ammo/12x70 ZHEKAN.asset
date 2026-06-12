@@ -13,6 +13,10 @@ MonoBehaviour:
   m_Name: 12x70 ZHEKAN
   m_EditorClassIdentifier: 
   itemName: "12 \xD7 76 \u0436\u0435\u043A\u0430\u043D"
+  shortName: "\u0416\u0435\u043A\u0430\u043D"
+  rarity: 0
+  weight: 0.05
+  stackable: 1
   width: 2
   height: 1
   itemIcon: {fileID: 0}
