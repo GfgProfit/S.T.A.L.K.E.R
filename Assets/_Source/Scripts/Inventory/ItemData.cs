@@ -11,6 +11,9 @@ public class ItemData : ScriptableObject
     [SerializeField] private ItemRarity rarity = ItemRarity.Common;
     [SerializeField] [Min(0f)] private float weight;
     [SerializeField] private bool stackable;
+    [SerializeField] private bool useDurability;
+    [SerializeField] [Range(0f, 100f)] private float defaultDurabilityPercent = 100f;
+    [SerializeField] private WorldItem worldItemPrefab;
 
     [Min(1)] public int width = 1;
     [Min(1)] public int height = 1;
@@ -24,10 +27,8 @@ public class ItemData : ScriptableObject
     [SerializeField] [Range(1f, 2f)] private float iconPadding = 1.15f;
     [SerializeField] [Range(1, 8)] private int iconAntiAliasing = 4;
     [SerializeField] private bool iconUseOutline = true;
-    [SerializeField] private Color iconOutlineColor = new Color(0f, 0f, 0f, 0.85f);
     [SerializeField] [Range(0, 8)] private int iconOutlineWidth = 1;
     [SerializeField] private bool iconUseShadow = true;
-    [SerializeField] private Color iconShadowColor = new Color(0f, 0f, 0f, 0.35f);
     [SerializeField] private Vector2 iconShadowOffset = new Vector2(2f, -2f);
     [SerializeField] [Range(0, 8)] private int iconShadowBlur = 2;
     [SerializeField] private Vector3 iconModelEulerAngles = Vector3.zero;
@@ -37,10 +38,8 @@ public class ItemData : ScriptableObject
     [SerializeField] private Vector3 slotIconModelScale = Vector3.one;
     [SerializeField] private Vector3 slotIconCameraEulerAngles = new Vector3(25f, -35f, 0f);
     [SerializeField] [Range(1f, 2f)] private float slotIconPadding = 1.15f;
-    [SerializeField] private Color iconBackgroundColor = new Color(0f, 0f, 0f, 0f);
     [SerializeField] private bool iconShowCellGrid = true;
     [SerializeField] private bool iconShowCellGridBorder = true;
-    [SerializeField] private Color iconCellGridBorderColor = new Color(0.745283f, 0.745283f, 0.745283f, 0.11764706f);
     [SerializeField] [Range(1, 8)] private int iconCellGridBorderLineThickness = 2;
     [SerializeField] private bool iconUseDirectionalLight = true;
     [SerializeField] private Vector3 iconLightEulerAngles = new Vector3(50f, -30f, 0f);
@@ -57,7 +56,10 @@ public class ItemData : ScriptableObject
     public ItemRarity Rarity => rarity;
     public Color ShortNameColor => RarityVisualSettings.GetShortNameColor(rarity);
     public float Weight => Mathf.Max(0f, weight);
-    public bool IsStackable => stackable;
+    public bool IsStackable => stackable && HasDurability == false;
+    public bool HasDurability => useDurability;
+    public float DefaultDurabilityPercent => NormalizeDurability(defaultDurabilityPercent);
+    public WorldItem WorldItemPrefab => worldItemPrefab;
 
     public Sprite FallbackIcon => itemIcon;
     public GameObject IconPrefab => iconPrefab;
@@ -160,6 +162,7 @@ public class ItemData : ScriptableObject
     private void OnValidate()
     {
         EnsureSlotIconSettingsInitialized();
+        defaultDurabilityPercent = NormalizeDurability(defaultDurabilityPercent);
     }
 
     public Sprite GetIcon(IReadOnlyList<ItemIconPart> runtimeIconParts = null)
@@ -202,6 +205,13 @@ public class ItemData : ScriptableObject
     internal int BuildSlotIconHash(int slotWidth, int slotHeight, IReadOnlyList<ItemIconPart> runtimeIconParts = null)
     {
         return BuildIconHash(runtimeIconParts, Mathf.Max(1, slotWidth), Mathf.Max(1, slotHeight), true);
+    }
+
+    public void SetWorldPrefab(WorldItem worldItem) => worldItemPrefab = worldItem;
+
+    public static float NormalizeDurability(float durabilityPercent)
+    {
+        return Mathf.Clamp(durabilityPercent, 0f, 100f);
     }
 
     private int BuildIconHash(IReadOnlyList<ItemIconPart> runtimeIconParts, int targetWidth, int targetHeight, bool useSlotIconSettings)

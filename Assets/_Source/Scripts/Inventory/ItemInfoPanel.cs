@@ -15,7 +15,9 @@ public class ItemInfoPanel : MonoBehaviour
     [SerializeField] private RectTransform iconRectTransform;
     [SerializeField] private LayoutElement iconLayoutElement;
     [SerializeField] private TMP_Text itemNameText;
+    [SerializeField] private TMP_Text typeText;
     [SerializeField] private TMP_Text weightText;
+    [SerializeField] private TMP_Text durabilityText;
     [SerializeField] private TMP_Text descriptionText;
     [SerializeField] [Min(1)] private int descriptionWordsPerLine;
 
@@ -43,7 +45,9 @@ public class ItemInfoPanel : MonoBehaviour
 
         SetIcon(item);
         SetItemName(item.itemData);
+        SetType(item.itemData);
         SetWeight(item);
+        SetDurability(item);
         SetDescription(item.itemData);
         RebuildLayout();
         UpdatePosition();
@@ -99,6 +103,17 @@ public class ItemInfoPanel : MonoBehaviour
         itemNameText.text = itemData.ItemName;
     }
 
+    private void SetType(ItemData itemData)
+    {
+        if (typeText == null)
+        {
+            return;
+        }
+
+        typeText.text = $"Тип: {ItemTypeFormatter.ToRussianText(itemData.ItemType)}";
+        typeText.gameObject.SetActive(true);
+    }
+
     private void SetWeight(InventoryItem item)
     {
         if (weightText == null)
@@ -109,6 +124,27 @@ public class ItemInfoPanel : MonoBehaviour
         weightText.text = item.CurrentAmount > 1
             ? $"Вес: {FormatWeight(item.TotalWeight)} ({FormatWeight(item.UnitWeight)})"
             : $"Вес: {FormatWeight(item.TotalWeight)}";
+    }
+
+    private void SetDurability(InventoryItem item)
+    {
+        if (durabilityText == null)
+        {
+            return;
+        }
+
+        bool showDurability = item != null && item.HasDurability;
+        durabilityText.gameObject.SetActive(showDurability);
+
+        if (showDurability == false)
+        {
+            return;
+        }
+
+        float durabilityPercent = item.CurrentDurabilityPercent;
+        string percentColor = ColorUtility.ToHtmlStringRGBA(ItemDurabilityVisualSettings.LoadDefault().GetColor(durabilityPercent));
+        durabilityText.richText = true;
+        durabilityText.text = $"Прочность: <color=#{percentColor}>{durabilityPercent:00.0}%</color>";
     }
 
     private void SetDescription(ItemData itemData)
@@ -165,6 +201,20 @@ public class ItemInfoPanel : MonoBehaviour
         }
 
         return $"<color=orange>{normalizedWeight:0.#}</color> КГ";
+    }
+
+    private TMP_Text FindText(string objectName)
+    {
+        TMP_Text[] texts = GetComponentsInChildren<TMP_Text>(true);
+        for (int i = 0; i < texts.Length; i++)
+        {
+            if (texts[i].name == objectName)
+            {
+                return texts[i];
+            }
+        }
+
+        return null;
     }
 
     private void RebuildLayout()

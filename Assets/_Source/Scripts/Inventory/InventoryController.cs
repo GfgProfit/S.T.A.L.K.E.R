@@ -3,6 +3,10 @@ using TMPro;
 using UnityEngine;
 using System.Collections;
 
+#if UNITY_EDITOR
+using UnityEditor;
+#endif
+
 public class InventoryController : MonoBehaviour
 {
     private InventoryGrid selectedItemGrid;
@@ -24,8 +28,20 @@ public class InventoryController : MonoBehaviour
     [SerializeField] private CanvasGroup inventoryCanvasGroup;
     [SerializeField] private InventoryGrid defaultItemGrid;
     [SerializeField] private PlayerController playerController;
+    [SerializeField] private Transform dropOrigin;
+    [SerializeField] private Camera dropCamera;
+    [SerializeField] [Min(0f)] private float dropForwardDistance = 1.2f;
+    [SerializeField] [Min(0f)] private float dropUpOffset = 0.45f;
+    [SerializeField] [Min(0f)] private float dropGroundProbeHeight = 1.5f;
+    [SerializeField] [Min(0f)] private float dropGroundProbeDistance = 3f;
+    [SerializeField] [Min(0f)] private float dropGroundOffset = 0.08f;
+    [SerializeField] [Min(0f)] private float dropObstacleClearance = 0.2f;
+    [SerializeField] [Min(0f)] private float dropImpulse = 1.2f;
+    [SerializeField] private LayerMask dropGroundLayers = ~0;
+    [SerializeField] private LayerMask dropObstacleLayers = ~0;
     [SerializeField] private TMP_Text weightText;
     [SerializeField] private ItemInfoPanel itemInfoPanel;
+    [SerializeField] private InventoryItemContextMenu itemContextMenu;
     [SerializeField] [Min(0f)] private float maxCarryWeight = 50f;
     [SerializeField] [Min(0f)] private float movementBlockExtraWeight = 10f;
     [SerializeField] private Color normalWeightColor = Color.white;
@@ -44,11 +60,14 @@ public class InventoryController : MonoBehaviour
     private InventoryItem itemToHighlight;
     private InventoryHighlight inventoryHighlight;
     private InventoryGrid dragOriginGrid;
+    private InventoryGrid contextMenuGrid;
+    private InventoryItem contextMenuItem;
     private Vector2Int dragOriginPosition;
     private bool dragOriginRotated;
     private bool iconsReady;
     private IPlayerInput fallbackPlayerInput;
     private readonly List<InventoryItem> inventoryItems = new List<InventoryItem>();
+    private readonly List<InventoryGrid> quickActionGrids = new List<InventoryGrid>();
     private float currentCarryWeight;
 
     public bool IsOpen { get; private set; }
@@ -96,6 +115,12 @@ public class InventoryController : MonoBehaviour
             playerController = FindFirstObjectByType<PlayerController>();
         }
 
+        if (dropCamera == null)
+        {
+            dropCamera = Camera.main;
+        }
+
+        itemContextMenu.Initialize(DropSingleContextMenuItem, DropContextMenuItemStack);
         RegisterExistingInventoryItems();
         SetInventoryOpen(openOnStart, true);
         RefreshWeightState();
@@ -123,6 +148,7 @@ public class InventoryController : MonoBehaviour
         {
             inventoryHighlight.Show(false);
             HideItemInfoPanel();
+            HideContextMenu();
             return;
         }
 
@@ -130,10 +156,18 @@ public class InventoryController : MonoBehaviour
         {
             inventoryHighlight.Show(false);
             HideItemInfoPanel();
+            HideContextMenu();
             return;
         }
 
         ItemIconDrag();
+
+        CloseContextMenuIfPointerIsOutsideRadius();
+
+        if (HandleContextMenuInput())
+        {
+            return;
+        }
 
         if (Input.GetKeyUp(KeyCode.Mouse0))
         {
@@ -153,10 +187,20 @@ public class InventoryController : MonoBehaviour
             return; 
         }
 
+        if (TryHandleHoveredItemDropInput())
+        {
+            return;
+        }
+
         HandleHighlight();
 
         if (Input.GetKeyDown(KeyCode.Mouse0))
         {
+            if (TryHandleQuickItemAction())
+            {
+                return;
+            }
+
             BeginDrag();
         }
     }
@@ -167,6 +211,11 @@ public class InventoryController : MonoBehaviour
     }
 
     public bool TryInsertItem(ItemData itemData, int amount)
+    {
+        return TryInsertItem(itemData, amount, null);
+    }
+
+    public bool TryInsertItem(ItemData itemData, int amount, float? durabilityPercent)
     {
         if (iconsReady == false) { return false; }
         if (itemData == null) { return false; }
@@ -181,7 +230,7 @@ public class InventoryController : MonoBehaviour
             return true;
         }
 
-        InventoryItem itemToInsert = CreateItem(itemData, normalizedAmount);
+        InventoryItem itemToInsert = CreateItem(itemData, normalizedAmount, null, durabilityPercent);
 
         if (InsertItem(itemToInsert, insertionGrid) ||
             (insertionGrid != defaultItemGrid && InsertItem(itemToInsert, defaultItemGrid)))
@@ -233,6 +282,228 @@ public class InventoryController : MonoBehaviour
         return false;
     }
 
+    private bool TryHandleQuickItemAction()
+    {
+        bool quickMoveToInventory = PlayerInput.IsInventoryQuickMoveModifierHeld();
+        bool quickEquip = PlayerInput.IsInventoryQuickEquipModifierHeld();
+
+        if (quickMoveToInventory == false && quickEquip == false)
+        {
+            return false;
+        }
+
+        if (selectedItem != null || selectedItemGrid == null)
+        {
+            return true;
+        }
+
+        HideContextMenu();
+
+        Vector2Int tileGridPosition = GetTileGridPosition();
+        InventoryItem item = selectedItemGrid.GetItem(tileGridPosition.x, tileGridPosition.y);
+
+        if (item == null)
+        {
+            return true;
+        }
+
+        if (quickEquip)
+        {
+            TryQuickEquipItem(selectedItemGrid, item);
+        }
+        else
+        {
+            TryQuickMoveItemToInventory(selectedItemGrid, item);
+        }
+
+        inventoryHighlight.Show(false);
+        HideItemInfoPanel();
+        return true;
+    }
+
+    private bool TryHandleHoveredItemDropInput()
+    {
+        if (PlayerInput.IsInventoryDropPressed() == false)
+        {
+            return false;
+        }
+
+        if (selectedItem != null || selectedItemGrid == null || IsContextMenuOpen())
+        {
+            return true;
+        }
+
+        Vector2Int tileGridPosition = GetTileGridPosition();
+        InventoryItem item = selectedItemGrid.GetItem(tileGridPosition.x, tileGridPosition.y);
+
+        if (item == null)
+        {
+            return true;
+        }
+
+        bool dropWholeStack = PlayerInput.IsInventoryDropStackModifierHeld() && item.IsStackable;
+        TryDropItem(selectedItemGrid, item, dropWholeStack);
+        inventoryHighlight.Show(false);
+        HideItemInfoPanel();
+        return true;
+    }
+
+    private bool TryQuickMoveItemToInventory(InventoryGrid sourceGrid, InventoryItem item)
+    {
+        if (sourceGrid == null || item == null || defaultItemGrid == null || sourceGrid == defaultItemGrid)
+        {
+            return false;
+        }
+
+        return TryMoveItemToGrid(sourceGrid, item, defaultItemGrid, true);
+    }
+
+    private bool TryQuickEquipItem(InventoryGrid sourceGrid, InventoryItem item)
+    {
+        if (sourceGrid == null || item == null)
+        {
+            return false;
+        }
+
+        CollectQuickActionGrids();
+
+        for (int i = 0; i < quickActionGrids.Count; i++)
+        {
+            InventoryGrid targetGrid = quickActionGrids[i];
+            if (IsQuickEquipTargetGrid(sourceGrid, targetGrid) == false)
+            {
+                continue;
+            }
+
+            if (targetGrid is SlottedItemGrid slottedGrid &&
+                TryQuickEquipSingleItemFromStack(sourceGrid, item, slottedGrid))
+            {
+                return true;
+            }
+
+            if (TryMoveItemToGrid(sourceGrid, item, targetGrid, false))
+            {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    private bool TryQuickEquipSingleItemFromStack(
+        InventoryGrid sourceGrid,
+        InventoryItem item,
+        SlottedItemGrid targetGrid)
+    {
+        if (sourceGrid == null || item == null || targetGrid == null)
+        {
+            return false;
+        }
+
+        Vector2Int? targetPosition = targetGrid.FindSpaceForObject(item);
+        if (targetPosition == null ||
+            targetGrid.ShouldSplitStackOnPlace(item, targetPosition.Value.x, targetPosition.Value.y) == false ||
+            targetGrid.CanPlaceItem(item, targetPosition.Value.x, targetPosition.Value.y) == false)
+        {
+            return false;
+        }
+
+        InventoryItem singleItem = CreateItem(item.itemData, 1, item.RuntimeIconParts);
+
+        if (targetGrid.CanPlaceItem(singleItem, targetPosition.Value.x, targetPosition.Value.y) == false)
+        {
+            Destroy(singleItem.gameObject);
+            return false;
+        }
+
+        item.SetAmount(item.CurrentAmount - 1);
+        targetGrid.PlaceItem(singleItem, targetPosition.Value.x, targetPosition.Value.y);
+
+        RegisterInventoryItem(singleItem);
+        RefreshWeightState();
+        return true;
+    }
+
+    private bool TryMoveItemToGrid(
+        InventoryGrid sourceGrid,
+        InventoryItem item,
+        InventoryGrid targetGrid,
+        bool allowStackMerge)
+    {
+        if (sourceGrid == null ||
+            item == null ||
+            targetGrid == null ||
+            sourceGrid == targetGrid)
+        {
+            return false;
+        }
+
+        Vector2Int restorePosition = new Vector2Int(item.onGridPositionX, item.onGridPositionY);
+        bool restoreRotated = item.rotated;
+
+        if (TryDetachItemFromGrid(sourceGrid, item) == false)
+        {
+            return false;
+        }
+
+        if (allowStackMerge &&
+            item.IsStackable &&
+            TryAddToExistingStackInGrid(targetGrid, item.itemData, item.CurrentAmount))
+        {
+            DestroyInventoryItem(item);
+            RefreshWeightState();
+            return true;
+        }
+
+        if (InsertItem(item, targetGrid))
+        {
+            RegisterInventoryItem(item);
+            RefreshWeightState();
+            return true;
+        }
+
+        item.SetRotated(restoreRotated);
+        sourceGrid.PlaceItem(item, restorePosition.x, restorePosition.y);
+        return false;
+    }
+
+    private void CollectQuickActionGrids()
+    {
+        quickActionGrids.Clear();
+        AddQuickActionGridsIn(inventoryRoot == null ? null : inventoryRoot.transform);
+        AddQuickActionGridsIn(canvasTransform);
+    }
+
+    private void AddQuickActionGridsIn(Transform root)
+    {
+        if (root == null)
+        {
+            return;
+        }
+
+        InventoryGrid[] grids = root.GetComponentsInChildren<InventoryGrid>(true);
+        for (int i = 0; i < grids.Length; i++)
+        {
+            InventoryGrid grid = grids[i];
+            if (grid != null && quickActionGrids.Contains(grid) == false)
+            {
+                quickActionGrids.Add(grid);
+            }
+        }
+    }
+
+    private bool IsQuickEquipTargetGrid(InventoryGrid sourceGrid, InventoryGrid targetGrid)
+    {
+        if (targetGrid == null ||
+            targetGrid == sourceGrid ||
+            targetGrid.gameObject.activeInHierarchy == false)
+        {
+            return false;
+        }
+
+        return targetGrid is EquipmentSlotGrid || targetGrid is SlottedItemGrid;
+    }
+
     private void HandleHighlight()
     {
         Vector2Int positionOnGrid = GetTileGridPosition();
@@ -276,13 +547,22 @@ public class InventoryController : MonoBehaviour
 
     private InventoryItem CreateItem(ItemData itemData, int amount)
     {
-        return CreateItem(itemData, amount, null);
+        return CreateItem(itemData, amount, null, null);
     }
 
     private InventoryItem CreateItem(ItemData itemData, int amount, IReadOnlyList<ItemIconPart> runtimeIconParts)
     {
+        return CreateItem(itemData, amount, runtimeIconParts, null);
+    }
+
+    private InventoryItem CreateItem(
+        ItemData itemData,
+        int amount,
+        IReadOnlyList<ItemIconPart> runtimeIconParts,
+        float? durabilityPercent)
+    {
         InventoryItem inventoryItem = Instantiate(itemPrefab).GetComponent<InventoryItem>();
-        inventoryItem.Set(itemData, amount, runtimeIconParts);
+        inventoryItem.Set(itemData, amount, runtimeIconParts, durabilityPercent);
 
         return inventoryItem;
     }
@@ -432,6 +712,12 @@ public class InventoryController : MonoBehaviour
             return;
         }
 
+        if (IsContextMenuOpen())
+        {
+            HideItemInfoPanel();
+            return;
+        }
+
         itemInfoPanel.Show(item);
     }
 
@@ -443,6 +729,11 @@ public class InventoryController : MonoBehaviour
         }
 
         itemInfoPanel.Hide();
+    }
+
+    private bool IsContextMenuOpen()
+    {
+        return itemContextMenu != null && itemContextMenu.IsOpen;
     }
 
     private int NormalizeItemAmount(ItemData itemData, int amount)
@@ -461,6 +752,8 @@ public class InventoryController : MonoBehaviour
         {
             return;
         }
+
+        HideContextMenu();
 
         Vector2Int tileGridPosition = GetTileGridPosition();
         InventoryItem item = selectedItemGrid.GetItem(tileGridPosition.x, tileGridPosition.y);
@@ -690,6 +983,401 @@ public class InventoryController : MonoBehaviour
         dragOriginGrid = null;
     }
 
+    private bool HandleContextMenuInput()
+    {
+        if (itemContextMenu != null && itemContextMenu.IsOpen)
+        {
+            if (Input.GetKeyDown(KeyCode.Mouse0))
+            {
+                if (itemContextMenu.ContainsScreenPoint(Input.mousePosition))
+                {
+                    return true;
+                }
+
+                HideContextMenu();
+                return true;
+            }
+
+            if (Input.GetKeyDown(KeyCode.Mouse1) &&
+                itemContextMenu.ContainsScreenPoint(Input.mousePosition))
+            {
+                return true;
+            }
+        }
+
+        if (Input.GetKeyDown(KeyCode.Mouse1))
+        {
+            OpenContextMenuAtCursor();
+            return true;
+        }
+
+        return false;
+    }
+
+    private void CloseContextMenuIfPointerIsOutsideRadius()
+    {
+        if (itemContextMenu == null ||
+            itemContextMenu.ShouldCloseForPointer(Input.mousePosition) == false)
+        {
+            return;
+        }
+
+        HideContextMenu();
+    }
+
+    private void OpenContextMenuAtCursor()
+    {
+        HideContextMenu();
+
+        if (selectedItem != null || selectedItemGrid == null || itemContextMenu == null)
+        {
+            return;
+        }
+
+        Vector2Int tileGridPosition = GetTileGridPosition();
+        InventoryItem item = selectedItemGrid.GetItem(tileGridPosition.x, tileGridPosition.y);
+
+        if (item == null)
+        {
+            return;
+        }
+
+        contextMenuGrid = selectedItemGrid;
+        contextMenuItem = item;
+
+        HideItemInfoPanel();
+        itemContextMenu.Show(item, Input.mousePosition);
+    }
+
+    private void DropSingleContextMenuItem()
+    {
+        DropContextMenuItem(false);
+    }
+
+    private void DropContextMenuItemStack()
+    {
+        DropContextMenuItem(true);
+    }
+
+    private void DropContextMenuItem(bool wholeStack)
+    {
+        InventoryItem item = contextMenuItem;
+        InventoryGrid grid = contextMenuGrid;
+        HideContextMenu();
+
+        TryDropItem(grid, item, wholeStack);
+    }
+
+    private bool TryDropItem(InventoryGrid grid, InventoryItem item, bool wholeStack)
+    {
+        if (item == null || item.itemData == null)
+        {
+            return false;
+        }
+
+        ItemData itemData = item.itemData;
+        int amountToDrop = wholeStack ? item.CurrentAmount : 1;
+        float durabilityPercent = item.CurrentDurabilityPercent;
+        bool removeWholeItem = wholeStack || item.IsStackable == false || item.CurrentAmount <= amountToDrop;
+
+        if (removeWholeItem == false)
+        {
+            if (TrySpawnDroppedWorldItem(itemData, amountToDrop, durabilityPercent) == false)
+            {
+                return false;
+            }
+
+            item.SetAmount(item.CurrentAmount - amountToDrop);
+            RefreshWeightState();
+            return true;
+        }
+
+        Vector2Int restorePosition = new Vector2Int(item.onGridPositionX, item.onGridPositionY);
+
+        if (TryDetachItemFromGrid(grid, item) == false)
+        {
+            return false;
+        }
+
+        if (TrySpawnDroppedWorldItem(itemData, amountToDrop, durabilityPercent) == false)
+        {
+            grid.PlaceItem(item, restorePosition.x, restorePosition.y);
+            return false;
+        }
+
+        DestroyInventoryItem(item);
+        RefreshWeightState();
+        return true;
+    }
+
+    private bool TrySpawnDroppedWorldItem(ItemData itemData, int amount, float durabilityPercent)
+    {
+        if (itemData == null)
+        {
+            return false;
+        }
+
+        Vector3 dropPosition = CalculateDropPosition();
+        Vector3 dropForward = GetDropForwardDirection();
+        Quaternion dropRotation = Quaternion.Euler(0f, Random.Range(0f, 360f), 0f);
+        WorldItem worldItemPrefab = ResolveWorldItemPrefab(itemData);
+
+        WorldItem worldItem = worldItemPrefab != null
+            ? Instantiate(worldItemPrefab, dropPosition, dropRotation)
+            : CreateFallbackWorldItem(itemData, dropPosition, dropRotation);
+
+        if (worldItem == null)
+        {
+            return false;
+        }
+
+        worldItem.Initialize(itemData, amount, durabilityPercent);
+        EnsureDroppedWorldItemPhysics(worldItem.gameObject);
+        ApplyDropImpulse(worldItem.gameObject, dropForward);
+        return true;
+    }
+
+    private WorldItem ResolveWorldItemPrefab(ItemData itemData)
+    {
+        if (itemData == null)
+        {
+            return null;
+        }
+
+        if (itemData.WorldItemPrefab != null)
+        {
+            return itemData.WorldItemPrefab;
+        }
+
+#if UNITY_EDITOR
+        return FindEditorWorldItemPrefab(itemData);
+#else
+        return null;
+#endif
+    }
+
+#if UNITY_EDITOR
+    private WorldItem FindEditorWorldItemPrefab(ItemData itemData)
+    {
+        string[] prefabGuids = AssetDatabase.FindAssets("t:Prefab", new[] { "Assets/_Source/Prefabs/Items/World Items" });
+
+        for (int i = 0; i < prefabGuids.Length; i++)
+        {
+            string prefabPath = AssetDatabase.GUIDToAssetPath(prefabGuids[i]);
+            GameObject prefab = AssetDatabase.LoadAssetAtPath<GameObject>(prefabPath);
+            if (prefab == null)
+            {
+                continue;
+            }
+
+            WorldItem worldItem = prefab.GetComponentInChildren<WorldItem>(true);
+            if (worldItem != null && worldItem.ItemData == itemData)
+            {
+                return worldItem;
+            }
+        }
+
+        return null;
+    }
+#endif
+
+    private WorldItem CreateFallbackWorldItem(ItemData itemData, Vector3 position, Quaternion rotation)
+    {
+        GameObject rootObject = new GameObject($"Dropped {itemData.ItemName}");
+        rootObject.transform.SetPositionAndRotation(position, rotation);
+
+        if (itemData.IconPrefab != null)
+        {
+            GameObject visualObject = Instantiate(itemData.IconPrefab, rootObject.transform);
+            visualObject.transform.localPosition = Vector3.zero;
+            visualObject.transform.localRotation = Quaternion.identity;
+            visualObject.transform.localScale = Vector3.one;
+        }
+        else
+        {
+            GameObject visualObject = GameObject.CreatePrimitive(PrimitiveType.Cube);
+            visualObject.name = "Fallback Visual";
+            visualObject.transform.SetParent(rootObject.transform, false);
+            visualObject.transform.localScale = Vector3.one * 0.2f;
+        }
+
+        return rootObject.AddComponent<WorldItem>();
+    }
+
+    private Vector3 CalculateDropPosition()
+    {
+        Transform origin = GetDropOrigin();
+        Vector3 dropForward = GetDropForwardDirection();
+        Vector3 rayStart = origin.position + Vector3.up * dropUpOffset;
+        Vector3 position = rayStart + dropForward * dropForwardDistance;
+
+        if (Physics.Raycast(
+                rayStart,
+                dropForward,
+                out RaycastHit obstacleHit,
+                dropForwardDistance,
+                dropObstacleLayers,
+                QueryTriggerInteraction.Ignore))
+        {
+            position = obstacleHit.point - dropForward * dropObstacleClearance;
+        }
+
+        rayStart = position + Vector3.up * dropGroundProbeHeight;
+        float rayDistance = dropGroundProbeHeight + dropGroundProbeDistance;
+
+        if (Physics.Raycast(
+                rayStart,
+                Vector3.down,
+                out RaycastHit hit,
+                rayDistance,
+                dropGroundLayers,
+                QueryTriggerInteraction.Ignore))
+        {
+            position = hit.point + Vector3.up * dropGroundOffset;
+        }
+
+        return position;
+    }
+
+    private Transform GetDropOrigin()
+    {
+        if (dropOrigin != null)
+        {
+            return dropOrigin;
+        }
+
+        if (playerController != null)
+        {
+            return playerController.transform;
+        }
+
+        return transform;
+    }
+
+    private Vector3 GetDropForwardDirection()
+    {
+        Transform forwardSource = dropCamera != null
+            ? dropCamera.transform
+            : dropOrigin != null
+                ? dropOrigin
+                : playerController != null ? playerController.transform : transform;
+
+        Vector3 forward = forwardSource.forward;
+        forward.y = 0f;
+
+        if (forward.sqrMagnitude < 0.001f)
+        {
+            forward = forwardSource.forward;
+        }
+
+        return forward.normalized;
+    }
+
+    private void EnsureDroppedWorldItemPhysics(GameObject worldItemObject)
+    {
+        if (worldItemObject == null)
+        {
+            return;
+        }
+
+        if (worldItemObject.GetComponentInChildren<Collider>() == null)
+        {
+            AddFallbackCollider(worldItemObject);
+        }
+
+        if (worldItemObject.GetComponent<Rigidbody>() == null)
+        {
+            worldItemObject.AddComponent<Rigidbody>();
+        }
+    }
+
+    private void AddFallbackCollider(GameObject worldItemObject)
+    {
+        BoxCollider boxCollider = worldItemObject.AddComponent<BoxCollider>();
+
+        if (TryGetRendererBounds(worldItemObject, out Bounds bounds) == false)
+        {
+            boxCollider.size = Vector3.one * 0.25f;
+            return;
+        }
+
+        boxCollider.center = worldItemObject.transform.InverseTransformPoint(bounds.center);
+
+        Vector3 localSize = worldItemObject.transform.InverseTransformVector(bounds.size);
+        boxCollider.size = new Vector3(
+            Mathf.Abs(localSize.x),
+            Mathf.Abs(localSize.y),
+            Mathf.Abs(localSize.z));
+    }
+
+    private bool TryGetRendererBounds(GameObject rootObject, out Bounds bounds)
+    {
+        Renderer[] renderers = rootObject.GetComponentsInChildren<Renderer>(true);
+        bounds = default;
+
+        if (renderers.Length == 0)
+        {
+            return false;
+        }
+
+        bounds = renderers[0].bounds;
+
+        for (int i = 1; i < renderers.Length; i++)
+        {
+            bounds.Encapsulate(renderers[i].bounds);
+        }
+
+        return true;
+    }
+
+    private void ApplyDropImpulse(GameObject worldItemObject, Vector3 dropForward)
+    {
+        if (dropImpulse <= 0f ||
+            worldItemObject == null ||
+            worldItemObject.TryGetComponent(out Rigidbody rigidbody) == false)
+        {
+            return;
+        }
+
+        Vector3 impulseDirection = (dropForward + Vector3.up * 0.25f).normalized;
+        rigidbody.AddForce(impulseDirection * dropImpulse, ForceMode.VelocityChange);
+    }
+
+    private bool TryDetachItemFromGrid(InventoryGrid grid, InventoryItem item)
+    {
+        if (grid == null || item == null)
+        {
+            return false;
+        }
+
+        Vector2Int position = new Vector2Int(item.onGridPositionX, item.onGridPositionY);
+        InventoryItem pickedItem = grid.PickUpItem(position.x, position.y);
+
+        if (pickedItem == null)
+        {
+            return false;
+        }
+
+        if (pickedItem == item)
+        {
+            return true;
+        }
+
+        grid.PlaceItem(pickedItem, position.x, position.y);
+        return false;
+    }
+
+    private void HideContextMenu()
+    {
+        if (itemContextMenu != null)
+        {
+            itemContextMenu.Hide();
+        }
+
+        contextMenuGrid = null;
+        contextMenuItem = null;
+    }
+
     private void HandleIconPrewarmProgress(int completedCount, int totalCount, ItemData itemData)
     {
         if (logIconPrewarmProgress == false)
@@ -753,6 +1441,7 @@ public class InventoryController : MonoBehaviour
             SelectedItemGrid = null;
             inventoryHighlight.Show(false);
             HideItemInfoPanel();
+            HideContextMenu();
         }
     }
 

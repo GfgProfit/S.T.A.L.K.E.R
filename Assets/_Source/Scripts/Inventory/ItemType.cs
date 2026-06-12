@@ -11,3 +11,35 @@ public enum ItemType
     Knife = 8,
     Pistol = 9
 }
+
+public static class ItemTypeFormatter
+{
+    public static string ToRussianText(ItemType itemType)
+    {
+        switch (itemType)
+        {
+            case ItemType.Weapon:
+                return "Оружие";
+            case ItemType.Ammo:
+                return "Боеприпасы";
+            case ItemType.Armor:
+                return "Броня";
+            case ItemType.Helmet:
+                return "Шлем";
+            case ItemType.Detector:
+                return "Детектор";
+            case ItemType.Artifact:
+                return "Артефакт";
+            case ItemType.Consumable:
+                return "Расходник";
+            case ItemType.Knife:
+                return "Нож";
+            case ItemType.Pistol:
+                return "Пистолет";
+            case ItemType.Misc:
+                return "Разное";
+            default:
+                return itemType.ToString();
+        }
+    }
+}

@@ -41,6 +41,9 @@ MonoBehaviour:
   rarity: 0
   weight: 3.5
   stackable: 0
+  useDurability: 1
+  defaultDurabilityPercent: 100
+  worldItemPrefab: {fileID: 0}
   width: 5
   height: 2
   itemIcon: {fileID: 0}
@@ -52,10 +55,8 @@ MonoBehaviour:
   iconPadding: 1.15
   iconAntiAliasing: 8
   iconUseOutline: 1
-  iconOutlineColor: {r: 0, g: 0, b: 0, a: 0.85}
   iconOutlineWidth: 2
   iconUseShadow: 1
-  iconShadowColor: {r: 0, g: 0, b: 0, a: 0.35}
   iconShadowOffset: {x: 2, y: -2}
   iconShadowBlur: 2
   iconModelEulerAngles: {x: 0, y: 0, z: 0}
@@ -65,10 +66,8 @@ MonoBehaviour:
   slotIconModelScale: {x: 1, y: 1, z: 1}
   slotIconCameraEulerAngles: {x: 0, y: -90, z: 90}
   slotIconPadding: 1.15
-  iconBackgroundColor: {r: 0, g: 0, b: 0, a: 0.27450982}
   iconShowCellGrid: 1
   iconShowCellGridBorder: 1
-  iconCellGridBorderColor: {r: 0.6039216, g: 0.6039216, b: 0.6039216, a: 0.24705882}
   iconCellGridBorderLineThickness: 2
   iconUseDirectionalLight: 1
   iconLightEulerAngles: {x: 50, y: -30, z: 0}

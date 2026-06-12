@@ -28,7 +28,7 @@ public partial class PlayerController
             _verticalVelocity = _groundedGravity;
         }
 
-        if (CanJumping && IsGrounded && !IsCrouching && _playerInput.IsJumpPressed())
+        if (_controlsEnabled && _movementEnabled && CanJumping && IsGrounded && !IsCrouching && _playerInput.IsJumpPressed())
         {
             _verticalVelocity = Mathf.Sqrt(_jumpHeight * -2.0f * _gravity);
         }

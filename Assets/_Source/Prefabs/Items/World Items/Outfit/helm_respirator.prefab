@@ -11,7 +11,7 @@ GameObject:
   - component: {fileID: 4543926965554424735}
   - component: {fileID: 1757842921010939166}
   - component: {fileID: 8659494520399758507}
-  - component: {fileID: 6227800084577540808}
+  - component: {fileID: -3782501644110283644}
   - component: {fileID: 2375216292482209227}
   - component: {fileID: 608373259508701597}
   m_Layer: 0
@@ -93,7 +93,7 @@ MeshRenderer:
   m_SortingOrder: 0
   m_MaskInteraction: 0
   m_AdditionalVertexStreams: {fileID: 0}
---- !u!65 &6227800084577540808
+--- !u!65 &-3782501644110283644
 BoxCollider:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -112,8 +112,8 @@ BoxCollider:
   m_ProvidesContacts: 0
   m_Enabled: 1
   serializedVersion: 3
-  m_Size: {x: 0.22711831, y: 0.13193342, z: 0.34423804}
-  m_Center: {x: 0.00086651393, y: 0.06450498, z: 0.011305544}
+  m_Size: {x: 0.22711825, y: 0.13193342, z: 0.34423795}
+  m_Center: {x: 0.0008665137, y: 0.06450498, z: 0.011305541}
 --- !u!54 &2375216292482209227
 Rigidbody:
   m_ObjectHideFlags: 0
@@ -155,4 +155,5 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::WorldItem
   itemData: {fileID: 11400000, guid: ee2d0d462cb46484d9890047e22b55c5, type: 2}
   amount: 1
+  durabilityPercent: 100
   destroyOnPickup: 1

@@ -104,6 +104,7 @@ GameObject:
   m_Component:
   - component: {fileID: 2305084429871596548}
   - component: {fileID: 799722297439423455}
+  - component: {fileID: 7208345377891025538}
   m_Layer: 0
   m_Name: wpn_ak74_hud.ogf 02
   m_TagString: Untagged
@@ -248,6 +249,27 @@ SkinnedMeshRenderer:
     m_Center: {x: -0.00023976204, y: 0.00006468862, z: 0.0017377876}
     m_Extent: {x: 0.00044728335, y: 0.00031028525, z: 0.00093476864}
   m_DirtyAABB: 0
+--- !u!65 &7208345377891025538
+BoxCollider:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 233749606885017645}
+  m_Material: {fileID: 0}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_LayerOverridePriority: 0
+  m_IsTrigger: 0
+  m_ProvidesContacts: 0
+  m_Enabled: 1
+  serializedVersion: 3
+  m_Size: {x: 0.08945668, y: 0.06205704, z: 0.1869537}
+  m_Center: {x: -0.11644536, y: -0.079928316, z: -0.5308981}
 --- !u!1 &266907406288522727
 GameObject:
   m_ObjectHideFlags: 0
@@ -640,6 +662,7 @@ GameObject:
   m_Component:
   - component: {fileID: 4276064577922699573}
   - component: {fileID: 5597854077153795098}
+  - component: {fileID: 386933059963840877}
   m_Layer: 0
   m_Name: wpn_ak74_hud.ogf 24
   m_TagString: Untagged
@@ -784,6 +807,27 @@ SkinnedMeshRenderer:
     m_Center: {x: 0.0005814308, y: -0.00004428476, z: -0.0005548239}
     m_Extent: {x: 0.00022253417, y: 0.00020448814, z: 0.00079320685}
   m_DirtyAABB: 0
+--- !u!65 &386933059963840877
+BoxCollider:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1221825080188291569}
+  m_Material: {fileID: 0}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_LayerOverridePriority: 0
+  m_IsTrigger: 0
+  m_ProvidesContacts: 0
+  m_Enabled: 1
+  serializedVersion: 3
+  m_Size: {x: 0.044506844, y: 0.040897623, z: 0.15864135}
+  m_Center: {x: -0.034326065, y: -0.09082565, z: -0.76015925}
 --- !u!1 &1290341654940708484
 GameObject:
   m_ObjectHideFlags: 0
@@ -922,6 +966,7 @@ GameObject:
   m_Component:
   - component: {fileID: 5360941040434347173}
   - component: {fileID: 4004279806468617864}
+  - component: {fileID: 2815714261082121980}
   m_Layer: 0
   m_Name: wpn_ak74_hud.ogf 13
   m_TagString: Untagged
@@ -1066,6 +1111,27 @@ SkinnedMeshRenderer:
     m_Center: {x: 0.00000090936373, y: -0.00159648, z: 0.0016221476}
     m_Extent: {x: 0.00020392254, y: 0.0014747378, z: 0.00091977353}
   m_DirtyAABB: 0
+--- !u!65 &2815714261082121980
+BoxCollider:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1658760370620728213}
+  m_Material: {fileID: 0}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_LayerOverridePriority: 0
+  m_IsTrigger: 0
+  m_ProvidesContacts: 0
+  m_Enabled: 1
+  serializedVersion: 3
+  m_Size: {x: 0.04078452, y: 0.2949475, z: 0.18395469}
+  m_Center: {x: -0.09237822, y: -0.24604514, z: -0.5424621}
 --- !u!1 &1674363116098489839
 GameObject:
   m_ObjectHideFlags: 0
@@ -1076,6 +1142,7 @@ GameObject:
   m_Component:
   - component: {fileID: 5053902394573389818}
   - component: {fileID: 938463692431302139}
+  - component: {fileID: 8187510526120461120}
   m_Layer: 0
   m_Name: wpn_ak74_hud.ogf 28
   m_TagString: Untagged
@@ -1220,6 +1287,27 @@ SkinnedMeshRenderer:
     m_Center: {x: 0.0000009082578, y: -0.0016119246, z: 0.0016457993}
     m_Extent: {x: 0.0002270102, y: 0.0014724383, z: 0.00096137176}
   m_DirtyAABB: 0
+--- !u!65 &8187510526120461120
+BoxCollider:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1674363116098489839}
+  m_Material: {fileID: 0}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_LayerOverridePriority: 0
+  m_IsTrigger: 0
+  m_ProvidesContacts: 0
+  m_Enabled: 1
+  serializedVersion: 3
+  m_Size: {x: 0.04540205, y: 0.29448763, z: 0.19227432}
+  m_Center: {x: -0.09237833, y: -0.24758962, z: -0.540097}
 --- !u!1 &1777949135555460006
 GameObject:
   m_ObjectHideFlags: 0
@@ -1230,6 +1318,7 @@ GameObject:
   m_Component:
   - component: {fileID: 2050910705578430327}
   - component: {fileID: 6054719319253700041}
+  - component: {fileID: 4280692917418916604}
   m_Layer: 0
   m_Name: wpn_ak74_hud.ogf 22
   m_TagString: Untagged
@@ -1374,6 +1463,27 @@ SkinnedMeshRenderer:
     m_Center: {x: -0.0000132024, y: -0.0002546131, z: 0.00020081177}
     m_Extent: {x: 0.00030382004, y: 0.00091532664, z: 0.0048437226}
   m_DirtyAABB: 0
+--- !u!65 &4280692917418916604
+BoxCollider:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1777949135555460006}
+  m_Material: {fileID: 0}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_LayerOverridePriority: 0
+  m_IsTrigger: 0
+  m_ProvidesContacts: 0
+  m_Enabled: 1
+  serializedVersion: 3
+  m_Size: {x: 0.060764063, y: 0.1830653, z: 0.96874434}
+  m_Center: {x: -0.09378939, y: -0.11185849, z: -0.6845957}
 --- !u!1 &1779332007420380135
 GameObject:
   m_ObjectHideFlags: 0
@@ -1509,6 +1619,7 @@ GameObject:
   m_Component:
   - component: {fileID: 2156682130836751446}
   - component: {fileID: 4586869834657578700}
+  - component: {fileID: 7416189422759324373}
   m_Layer: 0
   m_Name: wpn_ak74_hud.ogf 21
   m_TagString: Untagged
@@ -1653,6 +1764,27 @@ SkinnedMeshRenderer:
     m_Center: {x: -0.0000006608607, y: -0.000024974986, z: -0.00022190087}
     m_Extent: {x: 0.00030634354, y: 0.0005468457, z: 0.0012055149}
   m_DirtyAABB: 0
+--- !u!65 &7416189422759324373
+BoxCollider:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1882817056145623502}
+  m_Material: {fileID: 0}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_LayerOverridePriority: 0
+  m_IsTrigger: 0
+  m_ProvidesContacts: 0
+  m_Enabled: 1
+  serializedVersion: 3
+  m_Size: {x: 0.061268725, y: 0.10936913, z: 0.24110293}
+  m_Center: {x: -0.092535235, y: -0.08889467, z: -0.72686696}
 --- !u!1 &1933515222331337865
 GameObject:
   m_ObjectHideFlags: 0
@@ -1693,7 +1825,6 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 4770080469376916634}
-  - component: {fileID: 7492483008828654833}
   - component: {fileID: 6184501900970794010}
   - component: {fileID: 8859476487254420239}
   m_Layer: 0
@@ -1746,27 +1877,6 @@ Transform:
   - {fileID: 5140671570356576090}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!65 &7492483008828654833
-BoxCollider:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 2040571348268524436}
-  m_Material: {fileID: 0}
-  m_IncludeLayers:
-    serializedVersion: 2
-    m_Bits: 0
-  m_ExcludeLayers:
-    serializedVersion: 2
-    m_Bits: 0
-  m_LayerOverridePriority: 0
-  m_IsTrigger: 0
-  m_ProvidesContacts: 0
-  m_Enabled: 1
-  serializedVersion: 3
-  m_Size: {x: 0.06, y: 0.39, z: 1.3377097}
-  m_Center: {x: 0, y: -0.110000014, z: -0.09174016}
 --- !u!54 &6184501900970794010
 Rigidbody:
   m_ObjectHideFlags: 0
@@ -1883,6 +1993,7 @@ GameObject:
   m_Component:
   - component: {fileID: 2382396565326802930}
   - component: {fileID: 8971726155038535487}
+  - component: {fileID: 6384006404935610425}
   m_Layer: 0
   m_Name: wpn_ak74_hud.ogf 01
   m_TagString: Untagged
@@ -2027,6 +2138,27 @@ SkinnedMeshRenderer:
     m_Center: {x: 0.00005881212, y: 0.000043140855, z: -0.00096097525}
     m_Extent: {x: 0.00031277994, y: 0.00048466644, z: 0.0013039645}
   m_DirtyAABB: 0
+--- !u!65 &6384006404935610425
+BoxCollider:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2408415009063562902}
+  m_Material: {fileID: 0}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_LayerOverridePriority: 0
+  m_IsTrigger: 0
+  m_ProvidesContacts: 0
+  m_Enabled: 1
+  serializedVersion: 3
+  m_Size: {x: 0.062556006, y: 0.096933275, z: 0.26079285}
+  m_Center: {x: -0.08658793, y: -0.08208309, z: -0.8007744}
 --- !u!1 &2467187709757466044
 GameObject:
   m_ObjectHideFlags: 0
@@ -2226,6 +2358,7 @@ GameObject:
   m_Component:
   - component: {fileID: 1887262682909511774}
   - component: {fileID: 6201324993130359345}
+  - component: {fileID: 6877852241732229563}
   m_Layer: 0
   m_Name: wpn_ak74_hud.ogf 16
   m_TagString: Untagged
@@ -2370,6 +2503,27 @@ SkinnedMeshRenderer:
     m_Center: {x: 0.00003169934, y: -0.000718988, z: 0.0059421835}
     m_Extent: {x: 0.00028237878, y: 0.00071560696, z: 0.0019177897}
   m_DirtyAABB: 0
+--- !u!65 &6877852241732229563
+BoxCollider:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2880253368733304841}
+  m_Material: {fileID: 0}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_LayerOverridePriority: 0
+  m_IsTrigger: 0
+  m_ProvidesContacts: 0
+  m_Enabled: 1
+  serializedVersion: 3
+  m_Size: {x: 0.056475777, y: 0.14312138, z: 0.3835579}
+  m_Center: {x: -0.08929925, y: -0.15829596, z: -0.11045861}
 --- !u!1 &2991306570460482133
 GameObject:
   m_ObjectHideFlags: 0
@@ -2631,6 +2785,7 @@ GameObject:
   m_Component:
   - component: {fileID: 5601179210470838013}
   - component: {fileID: 5453129894190120503}
+  - component: {fileID: 9176611303417642125}
   m_Layer: 0
   m_Name: wpn_ak74_hud.ogf 15
   m_TagString: Untagged
@@ -2775,6 +2930,27 @@ SkinnedMeshRenderer:
     m_Center: {x: -0.0007339351, y: -0.000060268503, z: -0.0013135227}
     m_Extent: {x: 0.0004214411, y: 0.00032737598, z: 0.0009467403}
   m_DirtyAABB: 0
+--- !u!65 &9176611303417642125
+BoxCollider:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3370311378321517414}
+  m_Material: {fileID: 0}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_LayerOverridePriority: 0
+  m_IsTrigger: 0
+  m_ProvidesContacts: 0
+  m_Enabled: 1
+  serializedVersion: 3
+  m_Size: {x: 0.08428823, y: 0.06547519, z: 0.18934804}
+  m_Center: {x: -0.16586265, y: -0.09242403, z: -0.8360291}
 --- !u!1 &3415969475445000343
 GameObject:
   m_ObjectHideFlags: 0
@@ -2849,6 +3025,7 @@ GameObject:
   m_Component:
   - component: {fileID: 3724077643534428603}
   - component: {fileID: 323914586192037286}
+  - component: {fileID: 2297529046909803779}
   m_Layer: 0
   m_Name: wpn_ak74_hud.ogf 03
   m_TagString: Untagged
@@ -2993,6 +3170,27 @@ SkinnedMeshRenderer:
     m_Center: {x: 0.00027261188, y: -0.0008203841, z: 0.0024795244}
     m_Extent: {x: 0.00066384906, y: 0.0009886035, z: 0.0059302906}
   m_DirtyAABB: 0
+--- !u!65 &2297529046909803779
+BoxCollider:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3796068434426219861}
+  m_Material: {fileID: 0}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_LayerOverridePriority: 0
+  m_IsTrigger: 0
+  m_ProvidesContacts: 0
+  m_Enabled: 1
+  serializedVersion: 3
+  m_Size: {x: 0.13276988, y: 0.19772066, z: 1.1860579}
+  m_Center: {x: -0.06520797, y: -0.16843557, z: -0.45672446}
 --- !u!1 &3797186969467929035
 GameObject:
   m_ObjectHideFlags: 0
@@ -3067,6 +3265,7 @@ GameObject:
   m_Component:
   - component: {fileID: 5422634900395848205}
   - component: {fileID: 7165751266591781265}
+  - component: {fileID: 6305119855786801651}
   m_Layer: 0
   m_Name: wpn_ak74_hud.ogf 17
   m_TagString: Untagged
@@ -3211,6 +3410,27 @@ SkinnedMeshRenderer:
     m_Center: {x: -0.00000071987415, y: 0.0006285397, z: -0.0014323364}
     m_Extent: {x: 0.000026390266, y: 0.000025581918, z: 0.0027334779}
   m_DirtyAABB: 0
+--- !u!65 &6305119855786801651
+BoxCollider:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3882063289423041531}
+  m_Material: {fileID: 0}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_LayerOverridePriority: 0
+  m_IsTrigger: 0
+  m_ProvidesContacts: 0
+  m_Enabled: 1
+  serializedVersion: 3
+  m_Size: {x: 0.005278086, y: 0.0051163826, z: 0.5466955}
+  m_Center: {x: -0.09254113, y: -0.023543216, z: -0.84791046}
 --- !u!1 &3907097875412392916
 GameObject:
   m_ObjectHideFlags: 0
@@ -3221,6 +3441,7 @@ GameObject:
   m_Component:
   - component: {fileID: 1714953832247646745}
   - component: {fileID: 7601745934509770854}
+  - component: {fileID: 1505691520163248564}
   m_Layer: 0
   m_Name: wpn_ak74_hud.ogf 00
   m_TagString: Untagged
@@ -3365,6 +3586,27 @@ SkinnedMeshRenderer:
     m_Center: {x: 0.0000059923623, y: 0.0005804334, z: 0.0008921143}
     m_Extent: {x: 0.00021821016, y: 0.00007437472, z: 0.0004054709}
   m_DirtyAABB: 0
+--- !u!65 &1505691520163248564
+BoxCollider:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3907097875412392916}
+  m_Material: {fileID: 0}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_LayerOverridePriority: 0
+  m_IsTrigger: 0
+  m_ProvidesContacts: 0
+  m_Enabled: 1
+  serializedVersion: 3
+  m_Size: {x: 0.043642037, y: 0.014874943, z: 0.08109417}
+  m_Center: {x: -0.09186992, y: -0.028353844, z: -0.61546546}
 --- !u!1 &4108758289260720124
 GameObject:
   m_ObjectHideFlags: 0
@@ -3407,6 +3649,7 @@ GameObject:
   m_Component:
   - component: {fileID: 8794331577681020263}
   - component: {fileID: 179126431489498225}
+  - component: {fileID: 2934348073761152929}
   m_Layer: 0
   m_Name: wpn_ak74_hud.ogf 08
   m_TagString: Untagged
@@ -3551,6 +3794,27 @@ SkinnedMeshRenderer:
     m_Center: {x: 0.0000043397013, y: -0.00028393656, z: 0.0020466857}
     m_Extent: {x: 0.00012411512, y: 0.00013004936, z: 0.00040762132}
   m_DirtyAABB: 0
+--- !u!65 &2934348073761152929
+BoxCollider:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4274100657898493618}
+  m_Material: {fileID: 0}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_LayerOverridePriority: 0
+  m_IsTrigger: 0
+  m_ProvidesContacts: 0
+  m_Enabled: 1
+  serializedVersion: 3
+  m_Size: {x: 0.024823029, y: 0.026009869, z: 0.08152425}
+  m_Center: {x: -0.09203519, y: -0.11479083, z: -0.50000834}
 --- !u!1 &4312487302996195226
 GameObject:
   m_ObjectHideFlags: 0
@@ -3750,6 +4014,7 @@ GameObject:
   m_Component:
   - component: {fileID: 559267314289181771}
   - component: {fileID: 6089737408009823726}
+  - component: {fileID: 6720765984863403723}
   m_Layer: 0
   m_Name: wpn_ak74_hud.ogf 11
   m_TagString: Untagged
@@ -3894,6 +4159,27 @@ SkinnedMeshRenderer:
     m_Center: {x: 0.00000059456215, y: -0.0019084841, z: 0.0014379668}
     m_Extent: {x: 0.00019793888, y: 0.0017719364, z: 0.0010903158}
   m_DirtyAABB: 0
+--- !u!65 &6720765984863403723
+BoxCollider:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4709357673687900559}
+  m_Material: {fileID: 0}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_LayerOverridePriority: 0
+  m_IsTrigger: 0
+  m_ProvidesContacts: 0
+  m_Enabled: 1
+  serializedVersion: 3
+  m_Size: {x: 0.039587785, y: 0.35438722, z: 0.21806312}
+  m_Center: {x: -0.0924097, y: -0.27724555, z: -0.5608802}
 --- !u!1 &4902142919656392063
 GameObject:
   m_ObjectHideFlags: 0
@@ -3968,6 +4254,7 @@ GameObject:
   m_Component:
   - component: {fileID: 2074543727511625039}
   - component: {fileID: 5959276053933074362}
+  - component: {fileID: 1181296915938649119}
   m_Layer: 0
   m_Name: wpn_ak74_hud.ogf 27
   m_TagString: Untagged
@@ -4112,6 +4399,27 @@ SkinnedMeshRenderer:
     m_Center: {x: 0.00000087951776, y: -0.0017920075, z: 0.0015465276}
     m_Extent: {x: 0.00036126046, y: 0.0016800171, z: 0.0009765652}
   m_DirtyAABB: 0
+--- !u!65 &1181296915938649119
+BoxCollider:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5060123691347716259}
+  m_Material: {fileID: 0}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_LayerOverridePriority: 0
+  m_IsTrigger: 0
+  m_ProvidesContacts: 0
+  m_Enabled: 1
+  serializedVersion: 3
+  m_Size: {x: 0.07225211, y: 0.33600336, z: 0.195313}
+  m_Center: {x: -0.09238121, y: -0.2655979, z: -0.55002415}
 --- !u!1 &5225449543126947236
 GameObject:
   m_ObjectHideFlags: 0
@@ -4216,6 +4524,7 @@ GameObject:
   m_Component:
   - component: {fileID: 6924244161108581239}
   - component: {fileID: 6060089202398932750}
+  - component: {fileID: 1546286444079260694}
   m_Layer: 0
   m_Name: wpn_ak74_hud.ogf 26
   m_TagString: Untagged
@@ -4360,6 +4669,27 @@ SkinnedMeshRenderer:
     m_Center: {x: -0.00003721437, y: -0.0012475502, z: -0.00043001678}
     m_Extent: {x: 0.0002553834, y: 0.0008204632, z: 0.00035294064}
   m_DirtyAABB: 0
+--- !u!65 &1546286444079260694
+BoxCollider:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5406832800608983184}
+  m_Material: {fileID: 0}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_LayerOverridePriority: 0
+  m_IsTrigger: 0
+  m_ProvidesContacts: 0
+  m_Enabled: 1
+  serializedVersion: 3
+  m_Size: {x: 0.051076684, y: 0.16409262, z: 0.07058812}
+  m_Center: {x: -0.09619058, y: -0.21115218, z: -0.7476785}
 --- !u!1 &5486314756179434271
 GameObject:
   m_ObjectHideFlags: 0
@@ -4566,6 +4896,7 @@ GameObject:
   m_Component:
   - component: {fileID: 2427580388903529666}
   - component: {fileID: 7734374215649120339}
+  - component: {fileID: 8109955763091329003}
   m_Layer: 0
   m_Name: wpn_ak74_hud.ogf 10
   m_TagString: Untagged
@@ -4710,6 +5041,27 @@ SkinnedMeshRenderer:
     m_Center: {x: 0.00000028990326, y: -0.0019010982, z: 0.0014149699}
     m_Extent: {x: 0.00019793877, y: 0.0017681591, z: 0.0011154352}
   m_DirtyAABB: 0
+--- !u!65 &8109955763091329003
+BoxCollider:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5816528915211228116}
+  m_Material: {fileID: 0}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_LayerOverridePriority: 0
+  m_IsTrigger: 0
+  m_ProvidesContacts: 0
+  m_Enabled: 1
+  serializedVersion: 3
+  m_Size: {x: 0.03958777, y: 0.35363176, z: 0.223087}
+  m_Center: {x: -0.092440166, y: -0.27650696, z: -0.5631799}
 --- !u!1 &5820298000339200931
 GameObject:
   m_ObjectHideFlags: 0
@@ -4720,6 +5072,7 @@ GameObject:
   m_Component:
   - component: {fileID: 6888882972631622320}
   - component: {fileID: 7790020700711598046}
+  - component: {fileID: 7199124350682390937}
   m_Layer: 0
   m_Name: wpn_ak74_hud.ogf 05
   m_TagString: Untagged
@@ -4864,6 +5217,27 @@ SkinnedMeshRenderer:
     m_Center: {x: -0.00000081042526, y: -0.0013263132, z: 0.004031894}
     m_Extent: {x: 0.00018860685, y: 0.0007340007, z: 0.00048729952}
   m_DirtyAABB: 0
+--- !u!65 &7199124350682390937
+BoxCollider:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5820298000339200931}
+  m_Material: {fileID: 0}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_LayerOverridePriority: 0
+  m_IsTrigger: 0
+  m_ProvidesContacts: 0
+  m_Enabled: 1
+  serializedVersion: 3
+  m_Size: {x: 0.037721377, y: 0.14680012, z: 0.09745989}
+  m_Center: {x: -0.09255022, y: -0.21902847, z: -0.30148754}
 --- !u!1 &5823072271160539144
 GameObject:
   m_ObjectHideFlags: 0
@@ -4874,6 +5248,7 @@ GameObject:
   m_Component:
   - component: {fileID: 5205214068189588900}
   - component: {fileID: 8613036671392326392}
+  - component: {fileID: 3897844504142498041}
   m_Layer: 0
   m_Name: wpn_ak74_hud.ogf 14
   m_TagString: Untagged
@@ -5018,6 +5393,27 @@ SkinnedMeshRenderer:
     m_Center: {x: -0.0000083517225, y: 0.00018349523, z: 0.0028374952}
     m_Extent: {x: 0.0002937769, y: 0.00026174943, z: 0.0016704255}
   m_DirtyAABB: 0
+--- !u!65 &3897844504142498041
+BoxCollider:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5823072271160539144}
+  m_Material: {fileID: 0}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_LayerOverridePriority: 0
+  m_IsTrigger: 0
+  m_ProvidesContacts: 0
+  m_Enabled: 1
+  serializedVersion: 3
+  m_Size: {x: 0.058755398, y: 0.052349877, z: 0.33408505}
+  m_Center: {x: -0.093304336, y: -0.06804766, z: -0.4209274}
 --- !u!1 &5984771253097131274
 GameObject:
   m_ObjectHideFlags: 0
@@ -5028,6 +5424,7 @@ GameObject:
   m_Component:
   - component: {fileID: 5140671570356576090}
   - component: {fileID: 2939777949879710422}
+  - component: {fileID: 1046538854253377816}
   m_Layer: 0
   m_Name: wpn_ak74_hud.ogf 29
   m_TagString: Untagged
@@ -5172,6 +5569,27 @@ SkinnedMeshRenderer:
     m_Center: {x: -0.00002306659, y: -0.00019218249, z: 0.0018549488}
     m_Extent: {x: 0.00016142605, y: 0.00021377945, z: 0.0005399379}
   m_DirtyAABB: 0
+--- !u!65 &1046538854253377816
+BoxCollider:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5984771253097131274}
+  m_Material: {fileID: 0}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_LayerOverridePriority: 0
+  m_IsTrigger: 0
+  m_ProvidesContacts: 0
+  m_Enabled: 1
+  serializedVersion: 3
+  m_Size: {x: 0.032285217, y: 0.042755883, z: 0.10798756}
+  m_Center: {x: -0.09477582, y: -0.10561542, z: -0.519182}
 --- !u!1 &6106443472364578054
 GameObject:
   m_ObjectHideFlags: 0
@@ -5404,6 +5822,7 @@ GameObject:
   m_Component:
   - component: {fileID: 2666804446159971765}
   - component: {fileID: 2916650179003725957}
+  - component: {fileID: 2121259326719376470}
   m_Layer: 0
   m_Name: wpn_ak74_hud.ogf 25
   m_TagString: Untagged
@@ -5548,6 +5967,27 @@ SkinnedMeshRenderer:
     m_Center: {x: -0.00000010523945, y: 0.000051716575, z: -0.00023009349}
     m_Extent: {x: 0.00042342534, y: 0.00057393336, z: 0.0011690476}
   m_DirtyAABB: 0
+--- !u!65 &2121259326719376470
+BoxCollider:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6591082464469854199}
+  m_Material: {fileID: 0}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_LayerOverridePriority: 0
+  m_IsTrigger: 0
+  m_ProvidesContacts: 0
+  m_Enabled: 1
+  serializedVersion: 3
+  m_Size: {x: 0.08468509, y: 0.114786655, z: 0.23380947}
+  m_Center: {x: -0.09247967, y: -0.08122552, z: -0.7276862}
 --- !u!1 &6636715610143446270
 GameObject:
   m_ObjectHideFlags: 0
@@ -5558,6 +5998,7 @@ GameObject:
   m_Component:
   - component: {fileID: 8141854543791951895}
   - component: {fileID: 8775114796268525448}
+  - component: {fileID: 6671023367700330940}
   m_Layer: 0
   m_Name: wpn_ak74_hud.ogf 06
   m_TagString: Untagged
@@ -5702,6 +6143,27 @@ SkinnedMeshRenderer:
     m_Center: {x: 0.0000000013969839, y: -0.0007475484, z: -0.002290759}
     m_Extent: {x: 0.0002877321, y: 0.00028774547, z: 0.00083513674}
   m_DirtyAABB: 0
+--- !u!65 &6671023367700330940
+BoxCollider:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6636715610143446270}
+  m_Material: {fileID: 0}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_LayerOverridePriority: 0
+  m_IsTrigger: 0
+  m_ProvidesContacts: 0
+  m_Enabled: 1
+  serializedVersion: 3
+  m_Size: {x: 0.057546433, y: 0.057549085, z: 0.16702732}
+  m_Center: {x: -0.09246899, y: -0.161152, z: -0.9337527}
 --- !u!1 &6730858079083121175
 GameObject:
   m_ObjectHideFlags: 0
@@ -6283,6 +6745,7 @@ GameObject:
   m_Component:
   - component: {fileID: 8872889237559049612}
   - component: {fileID: 4852574933185579103}
+  - component: {fileID: 1263958402395387891}
   m_Layer: 0
   m_Name: wpn_ak74_hud.ogf 18
   m_TagString: Untagged
@@ -6427,6 +6890,27 @@ SkinnedMeshRenderer:
     m_Center: {x: 0.00018519998, y: 0.000049034425, z: 0.0027395217}
     m_Extent: {x: 0.0002957922, y: 0.00056958577, z: 0.0012670755}
   m_DirtyAABB: 0
+--- !u!65 &1263958402395387891
+BoxCollider:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7569787665962824816}
+  m_Material: {fileID: 0}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_LayerOverridePriority: 0
+  m_IsTrigger: 0
+  m_ProvidesContacts: 0
+  m_Enabled: 1
+  serializedVersion: 3
+  m_Size: {x: 0.059158456, y: 0.113917135, z: 0.25341508}
+  m_Center: {x: -0.073949166, y: -0.081493735, z: -0.43072474}
 --- !u!1 &7695091527382049212
 GameObject:
   m_ObjectHideFlags: 0
@@ -6658,6 +7142,7 @@ GameObject:
   m_Component:
   - component: {fileID: 4669243594873066291}
   - component: {fileID: 8930167946634150406}
+  - component: {fileID: 5397707406122358001}
   m_Layer: 0
   m_Name: wpn_ak74_hud.ogf 09
   m_TagString: Untagged
@@ -6802,6 +7287,27 @@ SkinnedMeshRenderer:
     m_Center: {x: 0.0000010397052, y: -0.00037609308, z: -0.0058274856}
     m_Extent: {x: 0.00017689691, y: 0.00046514522, z: 0.0022209752}
   m_DirtyAABB: 0
+--- !u!65 &5397707406122358001
+BoxCollider:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8147864017634144991}
+  m_Material: {fileID: 0}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_LayerOverridePriority: 0
+  m_IsTrigger: 0
+  m_ProvidesContacts: 0
+  m_Enabled: 1
+  serializedVersion: 3
+  m_Size: {x: 0.035379406, y: 0.09302903, z: 0.44419497}
+  m_Center: {x: -0.092365146, y: -0.12400648, z: -1.2874253}
 --- !u!1 &8148091676712808531
 GameObject:
   m_ObjectHideFlags: 0
@@ -7004,6 +7510,7 @@ GameObject:
   m_Component:
   - component: {fileID: 8178388923988150449}
   - component: {fileID: 6366433916747509575}
+  - component: {fileID: 621433489564438296}
   m_Layer: 0
   m_Name: wpn_ak74_hud.ogf 12
   m_TagString: Untagged
@@ -7148,6 +7655,27 @@ SkinnedMeshRenderer:
     m_Center: {x: 0.00029042448, y: -0.0003431006, z: 0.0031218952}
     m_Extent: {x: 0.000060441147, y: 0.00017782408, z: 0.00084211817}
   m_DirtyAABB: 0
+--- !u!65 &621433489564438296
+BoxCollider:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8345826065864656251}
+  m_Material: {fileID: 0}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_LayerOverridePriority: 0
+  m_IsTrigger: 0
+  m_ProvidesContacts: 0
+  m_Enabled: 1
+  serializedVersion: 3
+  m_Size: {x: 0.01208824, y: 0.03556481, z: 0.16842361}
+  m_Center: {x: -0.06342672, y: -0.12070723, z: -0.39248738}
 --- !u!1 &8429196835872227868
 GameObject:
   m_ObjectHideFlags: 0
@@ -7345,6 +7873,7 @@ GameObject:
   m_Component:
   - component: {fileID: 2227101951039278815}
   - component: {fileID: 968275037752579757}
+  - component: {fileID: 6423263523709790940}
   m_Layer: 0
   m_Name: wpn_ak74_hud.ogf 20
   m_TagString: Untagged
@@ -7489,6 +8018,27 @@ SkinnedMeshRenderer:
     m_Center: {x: -0.0000006998889, y: -0.00009504867, z: -0.0048528984}
     m_Extent: {x: 0.0001867495, y: 0.00018674268, z: 0.00054033985}
   m_DirtyAABB: 0
+--- !u!65 &6423263523709790940
+BoxCollider:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8964957728367592292}
+  m_Material: {fileID: 0}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_LayerOverridePriority: 0
+  m_IsTrigger: 0
+  m_ProvidesContacts: 0
+  m_Enabled: 1
+  serializedVersion: 3
+  m_Size: {x: 0.03734991, y: 0.03734853, z: 0.10806795}
+  m_Center: {x: -0.09253911, y: -0.09590204, z: -1.1899667}
 --- !u!1 &9159357391850498807
 GameObject:
   m_ObjectHideFlags: 0
@@ -7499,6 +8049,7 @@ GameObject:
   m_Component:
   - component: {fileID: 9064483269399581524}
   - component: {fileID: 1916190158057615932}
+  - component: {fileID: 3763015066911763857}
   m_Layer: 0
   m_Name: wpn_ak74_hud.ogf 19
   m_TagString: Untagged
@@ -7643,6 +8194,27 @@ SkinnedMeshRenderer:
     m_Center: {x: -0.000016794686, y: -0.00008807945, z: -0.0058285464}
     m_Extent: {x: 0.0003133862, y: 0.0003151001, z: 0.0015153759}
   m_DirtyAABB: 0
+--- !u!65 &3763015066911763857
+BoxCollider:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 9159357391850498807}
+  m_Material: {fileID: 0}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_LayerOverridePriority: 0
+  m_IsTrigger: 0
+  m_ProvidesContacts: 0
+  m_Enabled: 1
+  serializedVersion: 3
+  m_Size: {x: 0.06267726, y: 0.06302001, z: 0.30307513}
+  m_Center: {x: -0.09414858, y: -0.09520512, z: -1.2875314}
 --- !u!1 &9199025891090804759
 GameObject:
   m_ObjectHideFlags: 0

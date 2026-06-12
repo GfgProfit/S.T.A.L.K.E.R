@@ -13,7 +13,7 @@ MonoBehaviour:
   m_Name: EXO
   m_EditorClassIdentifier: 
   itemName: "\u042D\u043A\u0437\u043E\u0441\u043A\u0435\u043B\u0435\u0442"
-  shortName: "\u042D\u043A\u0437\u043E"
+  shortName: "\u042D\u043A\u0437\u043E\u0441\u043A\u0435\u043B\u0435\u0442"
   description: "\u042D\u043A\u0441\u043F\u0435\u0440\u0438\u043C\u0435\u043D\u0442\u0430\u043B\u044C\u043D\u044B\u0439
     \u043E\u0431\u0440\u0430\u0437\u0435\u0446 \u0432\u043E\u0435\u043D\u043D\u043E\u0433\u043E
     \u044D\u043A\u0437\u043E\u0441\u043A\u0435\u043B\u0435\u0442\u0430. \u0412 \u0441\u0435\u0440\u0438\u0439\u043D\u043E\u0435
@@ -37,6 +37,9 @@ MonoBehaviour:
   rarity: 5
   weight: 25
   stackable: 0
+  useDurability: 1
+  defaultDurabilityPercent: 100
+  worldItemPrefab: {fileID: 3269962884562995573, guid: 733bec57064b0494d832fd34a6e82bd3, type: 3}
   width: 2
   height: 3
   itemIcon: {fileID: 0}
@@ -48,20 +51,24 @@ MonoBehaviour:
   iconPadding: 1.2
   iconAntiAliasing: 8
   iconUseOutline: 1
-  iconOutlineColor: {r: 0, g: 0, b: 0, a: 0.85}
   iconOutlineWidth: 2
   iconUseShadow: 1
-  iconShadowColor: {r: 0, g: 0, b: 0, a: 0.35}
   iconShadowOffset: {x: 2, y: -2}
   iconShadowBlur: 2
   iconModelEulerAngles: {x: 0, y: 0, z: 0}
   iconModelScale: {x: 1, y: 1, z: 1}
   iconCameraEulerAngles: {x: 90, y: 0, z: 0}
-  iconBackgroundColor: {r: 0.59607846, g: 0.039215688, b: 0.15686275, a: 0.09803922}
+  slotIconModelEulerAngles: {x: 0, y: 0, z: 0}
+  slotIconModelScale: {x: 1, y: 1, z: 1}
+  slotIconCameraEulerAngles: {x: 90, y: 0, z: 0}
+  slotIconPadding: 1.2
   iconShowCellGrid: 1
   iconShowCellGridBorder: 1
-  iconCellGridBorderColor: {r: 0.5943396, g: 0.036445368, b: 0.15353428, a: 0.24705882}
   iconCellGridBorderLineThickness: 2
   iconUseDirectionalLight: 1
   iconLightEulerAngles: {x: 50, y: -130, z: 0}
   iconLightIntensity: 100000
+  slotIconUseDirectionalLight: 1
+  slotIconLightEulerAngles: {x: 50, y: -130, z: 0}
+  slotIconLightIntensity: 100000
+  slotIconSettingsInitialized: 1

@@ -18,4 +18,8 @@ public interface IPlayerInput
 
     bool IsEscapePressed();
     bool IsInventoryPressed();
+    bool IsInventoryDropPressed();
+    bool IsInventoryDropStackModifierHeld();
+    bool IsInventoryQuickEquipModifierHeld();
+    bool IsInventoryQuickMoveModifierHeld();
 }

@@ -7,8 +7,13 @@ public class InventoryItem : MonoBehaviour
 {
     private const string CountTextObjectName = "Item Count Text";
     private const string ShortNameTextObjectName = "Short Name Text";
+    private const string DurabilityBackgroundObjectName = "Durability Background";
+    private const string DurabilityFillObjectName = "Durability Fill";
     private const float ShortNameTextHeight = 20f;
     private const float ShortNameMinWidth = 48f;
+    private const float DurabilityBarInset = 5f;
+    private const float DurabilityBarThickness = 3.5f;
+    private const float DurabilityBarOffset = 3f;
 
     private static readonly Vector2 CountTextSize = new Vector2(48f, 20f);
     private static readonly Vector2 CountTextMargin = new Vector2(4f, 4f);
@@ -16,6 +21,7 @@ public class InventoryItem : MonoBehaviour
 
     public ItemData itemData;
     [SerializeField] [Min(1)] private int currentAmount = 1;
+    [SerializeField] [Range(0f, 100f)] private float currentDurabilityPercent = 100f;
 
     public int onGridPositionX;
     public int onGridPositionY;
@@ -28,6 +34,9 @@ public class InventoryItem : MonoBehaviour
     private RectTransform cellGridRoot;
     private RectTransform countTextRectTransform;
     private RectTransform shortNameTextRectTransform;
+    private RectTransform durabilityBackgroundRectTransform;
+    private RectTransform durabilityFillRectTransform;
+    private Graphic durabilityFillGraphic;
     private RectTransform rectTransform;
     private bool overlayTextsVisible = true;
     private bool hasVisualSizeOverride;
@@ -40,6 +49,8 @@ public class InventoryItem : MonoBehaviour
     public int Height => itemData == null ? 0 : Mathf.Max(1, rotated ? itemData.width : itemData.height);
     public int CurrentAmount => Mathf.Max(1, currentAmount);
     public bool IsStackable => itemData != null && itemData.IsStackable;
+    public bool HasDurability => itemData != null && itemData.HasDurability;
+    public float CurrentDurabilityPercent => HasDurability ? ItemData.NormalizeDurability(currentDurabilityPercent) : 0f;
     public float UnitWeight => itemData == null ? 0f : itemData.Weight;
     public float TotalWeight => UnitWeight * CurrentAmount;
     public int BaseWidth => itemData == null ? 0 : Mathf.Max(1, itemData.width);
@@ -47,22 +58,37 @@ public class InventoryItem : MonoBehaviour
     public bool CanRotate => BaseWidth != BaseHeight;
     internal IReadOnlyList<ItemIconPart> RuntimeIconParts => runtimeIconParts;
 
+    private void Awake()
+    {
+        EnsureVisuals();
+        RefreshDurabilityVisual(true);
+    }
+
     internal void Set(ItemData itemData)
     {
-        Set(itemData, 1, null);
+        Set(itemData, 1, null, null);
     }
 
     internal void Set(ItemData itemData, int amount)
     {
-        Set(itemData, amount, null);
+        Set(itemData, amount, null, null);
     }
 
     internal void Set(ItemData itemData, IReadOnlyList<ItemIconPart> runtimeIconParts)
     {
-        Set(itemData, 1, runtimeIconParts);
+        Set(itemData, 1, runtimeIconParts, null);
     }
 
     internal void Set(ItemData itemData, int amount, IReadOnlyList<ItemIconPart> runtimeIconParts)
+    {
+        Set(itemData, amount, runtimeIconParts, null);
+    }
+
+    internal void Set(
+        ItemData itemData,
+        int amount,
+        IReadOnlyList<ItemIconPart> runtimeIconParts,
+        float? durabilityPercent)
     {
         EnsureVisuals();
 
@@ -71,6 +97,7 @@ public class InventoryItem : MonoBehaviour
         rotated = false;
         ClearVisualOverride();
         SetAmountInternal(amount);
+        SetDurabilityInternal(durabilityPercent ?? GetDefaultDurabilityPercent());
         RefreshShortNameText();
 
         RefreshIcon();
@@ -105,6 +132,11 @@ public class InventoryItem : MonoBehaviour
     public bool CanStackWith(ItemData targetItemData)
     {
         return targetItemData != null && itemData == targetItemData && IsStackable;
+    }
+
+    public void SetDurability(float durabilityPercent)
+    {
+        SetDurabilityInternal(durabilityPercent);
     }
 
     internal void RefreshIcon(IReadOnlyList<ItemIconPart> runtimeIconParts = null)
@@ -166,6 +198,8 @@ public class InventoryItem : MonoBehaviour
         {
             cellGridRoot.gameObject.SetActive(visible);
         }
+
+        RefreshDurabilityVisual(visible);
     }
 
     internal void SetOverlayTextsVisible(bool visible)
@@ -202,12 +236,14 @@ public class InventoryItem : MonoBehaviour
     private void OnValidate()
     {
         currentAmount = Mathf.Max(1, currentAmount);
+        currentDurabilityPercent = ItemData.NormalizeDurability(currentDurabilityPercent);
     }
 
     private void ApplyRotation()
     {
         EnsureVisuals();
         rectTransform.localRotation = Quaternion.Euler(0f, 0f, IsVisuallyRotated ? -90f : 0f);
+        ApplyDurabilityLayout();
         ApplyCountTextLayout();
         ApplyShortNameTextLayout();
     }
@@ -218,6 +254,7 @@ public class InventoryItem : MonoBehaviour
         rectTransform.sizeDelta = new Vector2(
             VisualWidth * ItemGrid.tileSizeWidth,
             VisualHeight * ItemGrid.tileSizeHeight);
+        ApplyDurabilityLayout();
     }
 
     private void ClearVisualOverride()
@@ -232,6 +269,17 @@ public class InventoryItem : MonoBehaviour
     {
         currentAmount = NormalizeAmount(amount);
         RefreshCountText();
+    }
+
+    private void SetDurabilityInternal(float durabilityPercent)
+    {
+        currentDurabilityPercent = ItemData.NormalizeDurability(durabilityPercent);
+        RefreshDurabilityVisual(true);
+    }
+
+    private float GetDefaultDurabilityPercent()
+    {
+        return itemData == null ? 100f : itemData.DefaultDurabilityPercent;
     }
 
     private int NormalizeAmount(int amount)
@@ -284,6 +332,93 @@ public class InventoryItem : MonoBehaviour
         }
     }
 
+    private void RefreshDurabilityVisual(bool cellVisualsVisible)
+    {
+        EnsureDurabilityVisuals();
+
+        if (durabilityBackgroundRectTransform == null)
+        {
+            return;
+        }
+
+        bool showDurability = cellVisualsVisible && HasDurability;
+        durabilityBackgroundRectTransform.gameObject.SetActive(showDurability);
+
+        if (showDurability == false)
+        {
+            return;
+        }
+
+        ApplyDurabilityLayout();
+        ApplyDurabilityFill();
+        durabilityBackgroundRectTransform.SetAsLastSibling();
+        BringOverlayTextsToFront();
+    }
+
+    private void ApplyDurabilityLayout()
+    {
+        EnsureDurabilityVisuals();
+
+        if (durabilityBackgroundRectTransform == null)
+        {
+            return;
+        }
+
+        if (IsVisuallyRotated)
+        {
+            durabilityBackgroundRectTransform.anchorMin = new Vector2(1f, 0f);
+            durabilityBackgroundRectTransform.anchorMax = new Vector2(1f, 1f);
+            durabilityBackgroundRectTransform.pivot = new Vector2(1f, 0.5f);
+            durabilityBackgroundRectTransform.anchoredPosition = new Vector2(-DurabilityBarOffset, 0f);
+            durabilityBackgroundRectTransform.sizeDelta = new Vector2(DurabilityBarThickness, -DurabilityBarInset * 2f);
+        }
+        else
+        {
+            durabilityBackgroundRectTransform.anchorMin = new Vector2(0f, 0f);
+            durabilityBackgroundRectTransform.anchorMax = new Vector2(1f, 0f);
+            durabilityBackgroundRectTransform.pivot = new Vector2(0.5f, 0f);
+            durabilityBackgroundRectTransform.anchoredPosition = new Vector2(0f, DurabilityBarOffset);
+            durabilityBackgroundRectTransform.sizeDelta = new Vector2(-DurabilityBarInset * 2f, DurabilityBarThickness);
+        }
+
+        durabilityBackgroundRectTransform.localRotation = Quaternion.identity;
+        durabilityBackgroundRectTransform.localScale = Vector3.one;
+        ApplyDurabilityFill();
+    }
+
+    private void ApplyDurabilityFill()
+    {
+        EnsureDurabilityVisuals();
+
+        if (durabilityFillRectTransform == null)
+        {
+            return;
+        }
+
+        float normalizedDurability = CurrentDurabilityPercent / 100f;
+        bool showFill = normalizedDurability > 0f;
+        durabilityFillRectTransform.gameObject.SetActive(showFill);
+
+        if (showFill == false)
+        {
+            return;
+        }
+
+        if (durabilityFillGraphic != null)
+        {
+            durabilityFillGraphic.color = ItemDurabilityVisualSettings.LoadDefault().GetColor(CurrentDurabilityPercent);
+        }
+
+        durabilityFillRectTransform.anchorMin = Vector2.zero;
+        durabilityFillRectTransform.anchorMax = IsVisuallyRotated
+            ? new Vector2(1f, normalizedDurability)
+            : new Vector2(normalizedDurability, 1f);
+        durabilityFillRectTransform.offsetMin = Vector2.one;
+        durabilityFillRectTransform.offsetMax = -Vector2.one;
+        durabilityFillRectTransform.localRotation = Quaternion.identity;
+        durabilityFillRectTransform.localScale = Vector3.one;
+    }
+
     private void EnsureVisuals()
     {
         if (rectTransform == null)
@@ -301,6 +436,7 @@ public class InventoryItem : MonoBehaviour
         }
 
         EnsureOverlayTexts();
+        EnsureDurabilityVisuals();
 
         if (itemImage != null)
         {
@@ -342,6 +478,7 @@ public class InventoryItem : MonoBehaviour
         if (itemData == null || itemData.IconShowCellGrid == false || itemData.IconShowCellGridBorder == false)
         {
             itemImage.transform.SetAsLastSibling();
+            RefreshDurabilityVisual(true);
             BringOverlayTextsToFront();
             return;
         }
@@ -399,6 +536,7 @@ public class InventoryItem : MonoBehaviour
             borderColor);
 
         itemImage.transform.SetAsLastSibling();
+        RefreshDurabilityVisual(true);
         BringOverlayTextsToFront();
     }
 
@@ -418,6 +556,36 @@ public class InventoryItem : MonoBehaviour
             shortNameText.raycastTarget = false;
             shortNameText.alignment = TextAlignmentOptions.TopLeft;
         }
+    }
+
+    private void EnsureDurabilityVisuals()
+    {
+        if (durabilityBackgroundRectTransform == null)
+        {
+            durabilityBackgroundRectTransform = FindChildRectTransform(DurabilityBackgroundObjectName);
+        }
+
+        if (durabilityFillRectTransform == null && durabilityBackgroundRectTransform != null)
+        {
+            RectTransform[] childRectTransforms = durabilityBackgroundRectTransform.GetComponentsInChildren<RectTransform>(true);
+            for (int i = 0; i < childRectTransforms.Length; i++)
+            {
+                if (childRectTransforms[i].name == DurabilityFillObjectName)
+                {
+                    durabilityFillRectTransform = childRectTransforms[i];
+                    durabilityFillRectTransform.TryGetComponent(out durabilityFillGraphic);
+                    break;
+                }
+            }
+        }
+
+        if (durabilityFillGraphic == null && durabilityFillRectTransform != null)
+        {
+            durabilityFillRectTransform.TryGetComponent(out durabilityFillGraphic);
+        }
+
+        DisableRaycastTarget(durabilityBackgroundRectTransform);
+        DisableRaycastTarget(durabilityFillRectTransform);
     }
 
     private void EnsureOverlayText(string objectName, ref TMP_Text text, ref RectTransform textRectTransform)
@@ -442,6 +610,30 @@ public class InventoryItem : MonoBehaviour
 
         text = null;
         textRectTransform = null;
+    }
+
+    private RectTransform FindChildRectTransform(string objectName)
+    {
+        RectTransform[] childRectTransforms = GetComponentsInChildren<RectTransform>(true);
+        for (int i = 0; i < childRectTransforms.Length; i++)
+        {
+            if (childRectTransforms[i].name == objectName)
+            {
+                return childRectTransforms[i];
+            }
+        }
+
+        return null;
+    }
+
+    private static void DisableRaycastTarget(RectTransform target)
+    {
+        if (target == null || target.TryGetComponent(out Graphic graphic) == false)
+        {
+            return;
+        }
+
+        graphic.raycastTarget = false;
     }
 
     private void BringOverlayTextsToFront()
