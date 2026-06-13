@@ -154,6 +154,9 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::WorldItem
   itemData: {fileID: 11400000, guid: 45a00d5ba90f1724e9620ffd4f0624c4, type: 2}
+  itemRigidbody: {fileID: -7207184814001675683}
+  itemColliders:
+  - {fileID: -4711213236448741279}
   amount: 1
   durabilityPercent: 100
   destroyOnPickup: 1

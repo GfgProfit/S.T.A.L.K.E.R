@@ -6,10 +6,6 @@ using UnityEngine.UI;
 
 public class InventoryItem : MonoBehaviour
 {
-    private const string CountTextObjectName = "Item Count Text";
-    private const string ShortNameTextObjectName = "Short Name Text";
-    private const string DurabilityBackgroundObjectName = "Durability Background";
-    private const string DurabilityFillObjectName = "Durability Fill";
     private const float ShortNameTextHeight = 20f;
     private const float ShortNameMinWidth = 48f;
     private const float DurabilityBarInset = 5f;
@@ -25,25 +21,26 @@ public class InventoryItem : MonoBehaviour
     public ItemData itemData;
     [SerializeField] [Min(1)] private int currentAmount = 1;
     [SerializeField] [Range(0f, 100f)] private float currentDurabilityPercent = 100f;
+    [SerializeField] private RectTransform rectTransform;
+    [SerializeField] private Image itemImage;
+    [SerializeField] private Image cellBackgroundImage;
+    [SerializeField] private TMP_Text countText;
+    [SerializeField] private RectTransform countTextRectTransform;
+    [SerializeField] private TMP_Text shortNameText;
+    [SerializeField] private RectTransform shortNameTextRectTransform;
+    [SerializeField] private RectTransform durabilityBackgroundRectTransform;
+    [SerializeField] private Graphic durabilityBackgroundGraphic;
+    [SerializeField] private RectTransform durabilityFillRectTransform;
+    [SerializeField] private Graphic durabilityFillGraphic;
     [SerializeField] private Sprite questStatusIcon;
     [SerializeField] private Image statusIconImage;
+    [SerializeField] private RectTransform statusIconRectTransform;
 
     public int onGridPositionX;
     public int onGridPositionY;
     public bool rotated;
 
-    private Image itemImage;
-    private Image cellBackgroundImage;
-    private TMP_Text countText;
-    private TMP_Text shortNameText;
     private RectTransform cellGridRoot;
-    private RectTransform countTextRectTransform;
-    private RectTransform shortNameTextRectTransform;
-    private RectTransform statusIconRectTransform;
-    private RectTransform durabilityBackgroundRectTransform;
-    private RectTransform durabilityFillRectTransform;
-    private Graphic durabilityFillGraphic;
-    private RectTransform rectTransform;
     private bool overlayTextsVisible = true;
     private bool cellVisualsVisible = true;
     private bool hasVisualSizeOverride;
@@ -65,11 +62,12 @@ public class InventoryItem : MonoBehaviour
     public int BaseWidth => itemData == null ? 0 : Mathf.Max(1, itemData.width);
     public int BaseHeight => itemData == null ? 0 : Mathf.Max(1, itemData.height);
     public bool CanRotate => BaseWidth != BaseHeight;
+    public RectTransform RectTransform => rectTransform;
     internal IReadOnlyList<ItemIconPart> RuntimeIconParts => runtimeIconParts;
 
     private void Awake()
     {
-        EnsureVisuals();
+        ApplySerializedVisualSettings();
         RefreshDurabilityVisual(true);
         RefreshStatusIcon();
     }
@@ -100,7 +98,7 @@ public class InventoryItem : MonoBehaviour
         IReadOnlyList<ItemIconPart> runtimeIconParts,
         float? durabilityPercent)
     {
-        EnsureVisuals();
+        ApplySerializedVisualSettings();
 
         this.itemData = itemData;
         this.runtimeIconParts = runtimeIconParts;
@@ -153,7 +151,7 @@ public class InventoryItem : MonoBehaviour
 
     internal void RefreshIcon(IReadOnlyList<ItemIconPart> runtimeIconParts = null)
     {
-        EnsureVisuals();
+        ApplySerializedVisualSettings();
 
         if (runtimeIconParts != null)
         {
@@ -168,7 +166,7 @@ public class InventoryItem : MonoBehaviour
 
     internal void ApplySlotVisual(int slotWidth, int slotHeight, bool useGeneratedSlotIcon)
     {
-        EnsureVisuals();
+        ApplySerializedVisualSettings();
 
         hasVisualSizeOverride = true;
         visualWidthOverride = Mathf.Max(1, slotWidth);
@@ -188,7 +186,7 @@ public class InventoryItem : MonoBehaviour
 
     internal void RestoreDefaultVisual()
     {
-        EnsureVisuals();
+        ApplySerializedVisualSettings();
         ClearVisualOverride();
         ApplyVisualSize();
         RefreshIcon();
@@ -199,7 +197,7 @@ public class InventoryItem : MonoBehaviour
 
     internal void SetCellVisualsVisible(bool visible)
     {
-        EnsureVisuals();
+        ApplySerializedVisualSettings();
         cellVisualsVisible = visible;
 
         if (cellBackgroundImage != null)
@@ -255,7 +253,7 @@ public class InventoryItem : MonoBehaviour
 
     private void ApplyRotation()
     {
-        EnsureVisuals();
+        ApplySerializedVisualSettings();
         rectTransform.localRotation = Quaternion.Euler(0f, 0f, IsVisuallyRotated ? -90f : 0f);
         ApplyDurabilityLayout();
         ApplyCountTextLayout();
@@ -265,7 +263,7 @@ public class InventoryItem : MonoBehaviour
 
     private void ApplyVisualSize()
     {
-        EnsureVisuals();
+        ApplySerializedVisualSettings();
         rectTransform.sizeDelta = new Vector2(
             VisualWidth * ItemGrid.tileSizeWidth,
             VisualHeight * ItemGrid.tileSizeHeight);
@@ -318,7 +316,7 @@ public class InventoryItem : MonoBehaviour
 
     private void RefreshCountText()
     {
-        EnsureOverlayTexts();
+        ApplyOverlayTextSettings();
 
         if (countText == null)
         {
@@ -337,7 +335,7 @@ public class InventoryItem : MonoBehaviour
 
     private void RefreshShortNameText()
     {
-        EnsureOverlayTexts();
+        ApplyOverlayTextSettings();
 
         if (shortNameText == null)
         {
@@ -358,7 +356,7 @@ public class InventoryItem : MonoBehaviour
 
     private void RefreshDurabilityVisual(bool cellVisualsVisible)
     {
-        EnsureDurabilityVisuals();
+        ApplyDurabilityVisualSettings();
 
         if (durabilityBackgroundRectTransform == null)
         {
@@ -381,7 +379,7 @@ public class InventoryItem : MonoBehaviour
 
     private void ApplyDurabilityLayout()
     {
-        EnsureDurabilityVisuals();
+        ApplyDurabilityVisualSettings();
 
         if (durabilityBackgroundRectTransform == null)
         {
@@ -412,7 +410,7 @@ public class InventoryItem : MonoBehaviour
 
     private void ApplyDurabilityFill()
     {
-        EnsureDurabilityVisuals();
+        ApplyDurabilityVisualSettings();
 
         if (durabilityFillRectTransform == null)
         {
@@ -445,7 +443,7 @@ public class InventoryItem : MonoBehaviour
 
     private void RefreshStatusIcon()
     {
-        EnsureStatusIconVisual();
+        ApplyStatusIconSettings();
 
         if (statusIconRectTransform == null || statusIconImage == null)
         {
@@ -466,7 +464,7 @@ public class InventoryItem : MonoBehaviour
 
     private void ApplyStatusIconLayout()
     {
-        EnsureStatusIconVisual();
+        ApplyStatusIconSettings();
 
         if (statusIconRectTransform == null)
         {
@@ -484,53 +482,29 @@ public class InventoryItem : MonoBehaviour
         statusIconRectTransform.localScale = Vector3.one;
     }
 
-    private void EnsureVisuals()
+    private void ApplySerializedVisualSettings()
     {
-        if (rectTransform == null)
-        {
-            rectTransform = GetComponent<RectTransform>();
-        }
+        ApplyOverlayTextSettings();
+        ApplyDurabilityVisualSettings();
+        ApplyStatusIconSettings();
 
-        if (cellBackgroundImage == null)
+        if (cellBackgroundImage != null)
         {
-            cellBackgroundImage = GetComponent<Image>();
-            if (cellBackgroundImage != null)
-            {
-                cellBackgroundImage.raycastTarget = false;
-            }
+            cellBackgroundImage.raycastTarget = false;
         }
-
-        EnsureOverlayTexts();
-        EnsureDurabilityVisuals();
-        EnsureStatusIconVisual();
 
         if (itemImage != null)
         {
+            itemImage.color = Color.white;
+            itemImage.raycastTarget = false;
+            itemImage.preserveAspect = false;
             BringOverlayTextsToFront();
-            return;
         }
-
-        GameObject iconObject = new GameObject("Item Icon", typeof(RectTransform), typeof(CanvasRenderer), typeof(Image));
-        iconObject.transform.SetParent(transform, false);
-
-        RectTransform iconRectTransform = iconObject.GetComponent<RectTransform>();
-        iconRectTransform.anchorMin = Vector2.zero;
-        iconRectTransform.anchorMax = Vector2.one;
-        iconRectTransform.offsetMin = Vector2.zero;
-        iconRectTransform.offsetMax = Vector2.zero;
-        iconRectTransform.pivot = new Vector2(0.5f, 0.5f);
-
-        itemImage = iconObject.GetComponent<Image>();
-        itemImage.color = Color.white;
-        itemImage.raycastTarget = false;
-        itemImage.preserveAspect = false;
-
-        BringOverlayTextsToFront();
     }
 
     private void RebuildCellVisuals()
     {
-        EnsureVisuals();
+        ApplySerializedVisualSettings();
         DestroyCellGrid();
 
         if (cellBackgroundImage != null)
@@ -543,7 +517,11 @@ public class InventoryItem : MonoBehaviour
 
         if (itemData == null || itemData.IconShowCellGrid == false || itemData.IconShowCellGridBorder == false)
         {
-            itemImage.transform.SetAsLastSibling();
+            if (itemImage != null)
+            {
+                itemImage.transform.SetAsLastSibling();
+            }
+
             RefreshDurabilityVisual(true);
             BringOverlayTextsToFront();
             return;
@@ -553,10 +531,10 @@ public class InventoryItem : MonoBehaviour
             VisualWidth * ItemGrid.tileSizeWidth,
             VisualHeight * ItemGrid.tileSizeHeight);
 
-        GameObject gridObject = new GameObject("Cell Grid", typeof(RectTransform));
+        GameObject gridObject = new GameObject("Cell Grid");
         gridObject.transform.SetParent(transform, false);
 
-        cellGridRoot = gridObject.GetComponent<RectTransform>();
+        cellGridRoot = gridObject.AddComponent<RectTransform>();
         cellGridRoot.anchorMin = new Vector2(0f, 1f);
         cellGridRoot.anchorMax = new Vector2(0f, 1f);
         cellGridRoot.pivot = new Vector2(0f, 1f);
@@ -601,17 +579,18 @@ public class InventoryItem : MonoBehaviour
             new Vector2(0f, 0.5f),
             borderColor);
 
-        itemImage.transform.SetAsLastSibling();
+        if (itemImage != null)
+        {
+            itemImage.transform.SetAsLastSibling();
+        }
+
         RefreshDurabilityVisual(true);
         BringOverlayTextsToFront();
         RefreshStatusIcon();
     }
 
-    private void EnsureOverlayTexts()
+    private void ApplyOverlayTextSettings()
     {
-        EnsureOverlayText(CountTextObjectName, ref countText, ref countTextRectTransform);
-        EnsureOverlayText(ShortNameTextObjectName, ref shortNameText, ref shortNameTextRectTransform);
-
         if (countText != null)
         {
             countText.raycastTarget = false;
@@ -625,104 +604,33 @@ public class InventoryItem : MonoBehaviour
         }
     }
 
-    private void EnsureDurabilityVisuals()
+    private void ApplyDurabilityVisualSettings()
     {
-        if (durabilityBackgroundRectTransform == null)
+        if (durabilityBackgroundGraphic != null)
         {
-            durabilityBackgroundRectTransform = FindChildRectTransform(DurabilityBackgroundObjectName);
+            durabilityBackgroundGraphic.raycastTarget = false;
         }
 
-        if (durabilityFillRectTransform == null && durabilityBackgroundRectTransform != null)
+        if (durabilityFillGraphic != null)
         {
-            RectTransform[] childRectTransforms = durabilityBackgroundRectTransform.GetComponentsInChildren<RectTransform>(true);
-            for (int i = 0; i < childRectTransforms.Length; i++)
-            {
-                if (childRectTransforms[i].name == DurabilityFillObjectName)
-                {
-                    durabilityFillRectTransform = childRectTransforms[i];
-                    durabilityFillRectTransform.TryGetComponent(out durabilityFillGraphic);
-                    break;
-                }
-            }
+            durabilityFillGraphic.raycastTarget = false;
         }
-
-        if (durabilityFillGraphic == null && durabilityFillRectTransform != null)
-        {
-            durabilityFillRectTransform.TryGetComponent(out durabilityFillGraphic);
-        }
-
-        DisableRaycastTarget(durabilityBackgroundRectTransform);
-        DisableRaycastTarget(durabilityFillRectTransform);
     }
 
-    private void EnsureStatusIconVisual()
+    private void ApplyStatusIconSettings()
     {
         if (statusIconImage == null)
         {
-            statusIconRectTransform = null;
             return;
-        }
-
-        if (statusIconRectTransform == null)
-        {
-            statusIconRectTransform = statusIconImage.rectTransform;
         }
 
         statusIconImage.raycastTarget = false;
         statusIconImage.preserveAspect = true;
     }
 
-    private void EnsureOverlayText(string objectName, ref TMP_Text text, ref RectTransform textRectTransform)
-    {
-        if (text != null && textRectTransform != null)
-        {
-            return;
-        }
-
-        TMP_Text[] texts = GetComponentsInChildren<TMP_Text>(true);
-        for (int i = 0; i < texts.Length; i++)
-        {
-            if (texts[i].name != objectName)
-            {
-                continue;
-            }
-
-            text = texts[i];
-            textRectTransform = text.GetComponent<RectTransform>();
-            return;
-        }
-
-        text = null;
-        textRectTransform = null;
-    }
-
-    private RectTransform FindChildRectTransform(string objectName)
-    {
-        RectTransform[] childRectTransforms = GetComponentsInChildren<RectTransform>(true);
-        for (int i = 0; i < childRectTransforms.Length; i++)
-        {
-            if (childRectTransforms[i].name == objectName)
-            {
-                return childRectTransforms[i];
-            }
-        }
-
-        return null;
-    }
-
-    private static void DisableRaycastTarget(RectTransform target)
-    {
-        if (target == null || target.TryGetComponent(out Graphic graphic) == false)
-        {
-            return;
-        }
-
-        graphic.raycastTarget = false;
-    }
-
     private void BringOverlayTextsToFront()
     {
-        EnsureOverlayTexts();
+        ApplyOverlayTextSettings();
 
         if (shortNameTextRectTransform != null)
         {
@@ -742,7 +650,7 @@ public class InventoryItem : MonoBehaviour
 
     private void ApplyCountTextLayout()
     {
-        EnsureOverlayTexts();
+        ApplyOverlayTextSettings();
 
         if (countTextRectTransform == null)
         {
@@ -763,7 +671,7 @@ public class InventoryItem : MonoBehaviour
 
     private void ApplyShortNameTextLayout()
     {
-        EnsureOverlayTexts();
+        ApplyOverlayTextSettings();
 
         if (shortNameTextRectTransform == null)
         {
@@ -794,17 +702,18 @@ public class InventoryItem : MonoBehaviour
 
     private void CreateGridLine(RectTransform parent, string name, Vector2 anchoredPosition, Vector2 size, Vector2 pivot, Color color)
     {
-        GameObject lineObject = new GameObject(name, typeof(RectTransform), typeof(CanvasRenderer), typeof(Image));
+        GameObject lineObject = new GameObject(name);
         lineObject.transform.SetParent(parent, false);
 
-        RectTransform lineRectTransform = lineObject.GetComponent<RectTransform>();
+        RectTransform lineRectTransform = lineObject.AddComponent<RectTransform>();
+        lineObject.AddComponent<CanvasRenderer>();
         lineRectTransform.anchorMin = new Vector2(0f, 1f);
         lineRectTransform.anchorMax = new Vector2(0f, 1f);
         lineRectTransform.pivot = pivot;
         lineRectTransform.anchoredPosition = anchoredPosition;
         lineRectTransform.sizeDelta = size;
 
-        Image lineImage = lineObject.GetComponent<Image>();
+        Image lineImage = lineObject.AddComponent<Image>();
         lineImage.color = color;
         lineImage.raycastTarget = false;
     }

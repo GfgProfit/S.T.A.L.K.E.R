@@ -43,7 +43,7 @@ MonoBehaviour:
   stackable: 0
   useDurability: 1
   defaultDurabilityPercent: 100
-  worldItemPrefab: {fileID: 0}
+  worldItemPrefab: {fileID: 8859476487254420239, guid: 0a1f3ef63a219b747819b80d3742996b, type: 3}
   width: 5
   height: 2
   itemIcon: {fileID: 0}

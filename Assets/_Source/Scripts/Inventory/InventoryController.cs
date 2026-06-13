@@ -3,14 +3,8 @@ using TMPro;
 using UnityEngine;
 using System.Collections;
 
-#if UNITY_EDITOR
-using UnityEditor;
-#endif
-
 public class InventoryController : MonoBehaviour
 {
-    private const string EditorClosedSlotPrefabPath = "Assets/_Source/Prefabs/UI/Closed Slot.prefab";
-
     private InventoryGrid selectedItemGrid;
 
     public InventoryGrid SelectedItemGrid
@@ -24,11 +18,12 @@ public class InventoryController : MonoBehaviour
     }
 
     [SerializeField] private List<ItemData> items;
-    [SerializeField] private GameObject itemPrefab;
+    [SerializeField] private InventoryItem itemPrefab;
     [SerializeField] private Transform canvasTransform;
     [SerializeField] private GameObject inventoryRoot;
     [SerializeField] private CanvasGroup inventoryCanvasGroup;
     [SerializeField] private InventoryGrid defaultItemGrid;
+    [SerializeField] private InventoryHighlight inventoryHighlight;
     [SerializeField] private PlayerController playerController;
     [SerializeField] private PlayerCharacterStats playerStats;
     [SerializeField] private Transform dropOrigin;
@@ -46,6 +41,10 @@ public class InventoryController : MonoBehaviour
     [SerializeField] private ItemInfoPanel itemInfoPanel;
     [SerializeField] private InventoryItemContextMenu itemContextMenu;
     [SerializeField] private GameObject closedSlotPrefab;
+    [SerializeField] private List<InventoryItem> initialInventoryItems = new List<InventoryItem>();
+    [SerializeField] private List<InventoryGrid> quickActionGridReferences = new List<InventoryGrid>();
+    [SerializeField] private List<EquipmentSlotGrid> equipmentSlotGrids = new List<EquipmentSlotGrid>();
+    [SerializeField] private List<SlottedItemGrid> slottedItemGrids = new List<SlottedItemGrid>();
     [Header("Stats Info")]
     [SerializeField] private CharacterStatsInfoPanel playerStatsInfoPanel;
     [SerializeField] private bool hidePlayerStatsInfoWhenEmpty = true;
@@ -62,7 +61,6 @@ public class InventoryController : MonoBehaviour
     private InventoryItem selectedItem;
     private RectTransform rectTransform;
     private InventoryItem itemToHighlight;
-    private InventoryHighlight inventoryHighlight;
     private InventoryGrid dragOriginGrid;
     private InventoryGrid contextMenuGrid;
     private InventoryItem contextMenuItem;
@@ -72,9 +70,6 @@ public class InventoryController : MonoBehaviour
     private IPlayerInput fallbackPlayerInput;
     private readonly List<InventoryItem> inventoryItems = new List<InventoryItem>();
     private readonly List<InventoryGrid> quickActionGrids = new List<InventoryGrid>();
-    private readonly HashSet<EquipmentSlotGrid> equippedStatGrids = new HashSet<EquipmentSlotGrid>();
-    private readonly HashSet<EquipmentSlotGrid> restrictedEquipmentGrids = new HashSet<EquipmentSlotGrid>();
-    private readonly HashSet<SlottedItemGrid> restrictedSlottedGrids = new HashSet<SlottedItemGrid>();
     private readonly CharacterStatBlock equippedStats = new CharacterStatBlock();
     private float currentCarryWeight;
 
@@ -101,33 +96,7 @@ public class InventoryController : MonoBehaviour
 
     private void Awake()
     {
-        inventoryHighlight = GetComponent<InventoryHighlight>();
         iconsReady = prewarmItemIconsOnStart == false;
-
-        if (inventoryRoot == null && inventoryCanvasGroup != null)
-        {
-            inventoryRoot = inventoryCanvasGroup.gameObject;
-        }
-
-        if (inventoryCanvasGroup == null && inventoryRoot != null)
-        {
-            inventoryCanvasGroup = inventoryRoot.GetComponent<CanvasGroup>();
-        }
-
-        if (defaultItemGrid == null)
-        {
-            defaultItemGrid = FindFirstObjectByType<InventoryGrid>();
-        }
-
-        if (playerController == null)
-        {
-            playerController = FindFirstObjectByType<PlayerController>();
-        }
-
-        if (dropCamera == null)
-        {
-            dropCamera = Camera.main;
-        }
 
         itemContextMenu.Initialize(DropSingleContextMenuItem, DropContextMenuItemStack);
         RegisterExistingInventoryItems();
@@ -493,21 +462,10 @@ public class InventoryController : MonoBehaviour
     private void CollectQuickActionGrids()
     {
         quickActionGrids.Clear();
-        AddQuickActionGridsIn(inventoryRoot == null ? null : inventoryRoot.transform);
-        AddQuickActionGridsIn(canvasTransform);
-    }
 
-    private void AddQuickActionGridsIn(Transform root)
-    {
-        if (root == null)
+        for (int i = 0; i < quickActionGridReferences.Count; i++)
         {
-            return;
-        }
-
-        InventoryGrid[] grids = root.GetComponentsInChildren<InventoryGrid>(true);
-        for (int i = 0; i < grids.Length; i++)
-        {
-            InventoryGrid grid = grids[i];
+            InventoryGrid grid = quickActionGridReferences[i];
             if (grid != null && quickActionGrids.Contains(grid) == false)
             {
                 quickActionGrids.Add(grid);
@@ -584,7 +542,7 @@ public class InventoryController : MonoBehaviour
         IReadOnlyList<ItemIconPart> runtimeIconParts,
         float? durabilityPercent)
     {
-        InventoryItem inventoryItem = Instantiate(itemPrefab).GetComponent<InventoryItem>();
+        InventoryItem inventoryItem = Instantiate(itemPrefab);
         inventoryItem.Set(itemData, amount, runtimeIconParts, durabilityPercent);
 
         return inventoryItem;
@@ -635,21 +593,9 @@ public class InventoryController : MonoBehaviour
 
     private void RegisterExistingInventoryItems()
     {
-        RegisterInventoryItemsIn(inventoryRoot == null ? null : inventoryRoot.transform);
-        RegisterInventoryItemsIn(canvasTransform);
-    }
-
-    private void RegisterInventoryItemsIn(Transform root)
-    {
-        if (root == null)
+        for (int i = 0; i < initialInventoryItems.Count; i++)
         {
-            return;
-        }
-
-        InventoryItem[] existingItems = root.GetComponentsInChildren<InventoryItem>(true);
-        for (int i = 0; i < existingItems.Length; i++)
-        {
-            RegisterInventoryItem(existingItems[i]);
+            RegisterInventoryItem(initialInventoryItems[i]);
         }
     }
 
@@ -674,10 +620,16 @@ public class InventoryController : MonoBehaviour
     private void RefreshEquippedStats()
     {
         equippedStats.Clear();
-        equippedStatGrids.Clear();
 
-        AddEquippedStatsIn(inventoryRoot == null ? null : inventoryRoot.transform);
-        AddEquippedStatsIn(canvasTransform);
+        for (int i = 0; i < equipmentSlotGrids.Count; i++)
+        {
+            EquipmentSlotGrid grid = equipmentSlotGrids[i];
+            InventoryItem item = grid == null ? null : grid.EquippedItem;
+            if (ShouldApplyEquippedStats(item))
+            {
+                CharacterStatUtility.AddItemStats(equippedStats, item);
+            }
+        }
 
         if (playerStats != null)
         {
@@ -693,32 +645,6 @@ public class InventoryController : MonoBehaviour
                 GameProjectSettings.LoadDefault().StatCurrentValueColor,
                 hidePlayerStatsInfoWhenEmpty,
                 true);
-        }
-    }
-
-    private void AddEquippedStatsIn(Transform root)
-    {
-        if (root == null)
-        {
-            return;
-        }
-
-        EquipmentSlotGrid[] grids = root.GetComponentsInChildren<EquipmentSlotGrid>(true);
-        for (int i = 0; i < grids.Length; i++)
-        {
-            EquipmentSlotGrid grid = grids[i];
-            if (grid == null || equippedStatGrids.Add(grid) == false)
-            {
-                continue;
-            }
-
-            InventoryItem item = grid.EquippedItem;
-            if (ShouldApplyEquippedStats(item) == false)
-            {
-                continue;
-            }
-
-            CharacterStatUtility.AddItemStats(equippedStats, item);
         }
     }
 
@@ -799,32 +725,12 @@ public class InventoryController : MonoBehaviour
 
     private bool TryGetFirstEquipmentSlot(ItemType itemType, out EquipmentSlotGrid slot)
     {
-        restrictedEquipmentGrids.Clear();
-
-        if (TryGetFirstEquipmentSlotIn(inventoryRoot == null ? null : inventoryRoot.transform, itemType, out slot))
-        {
-            return true;
-        }
-
-        return TryGetFirstEquipmentSlotIn(canvasTransform, itemType, out slot);
-    }
-
-    private bool TryGetFirstEquipmentSlotIn(Transform root, ItemType itemType, out EquipmentSlotGrid slot)
-    {
         slot = null;
 
-        if (root == null)
+        for (int i = 0; i < equipmentSlotGrids.Count; i++)
         {
-            return false;
-        }
-
-        EquipmentSlotGrid[] grids = root.GetComponentsInChildren<EquipmentSlotGrid>(true);
-        for (int i = 0; i < grids.Length; i++)
-        {
-            EquipmentSlotGrid grid = grids[i];
-            if (grid == null ||
-                restrictedEquipmentGrids.Add(grid) == false ||
-                grid.AcceptedItemType != itemType)
+            EquipmentSlotGrid grid = equipmentSlotGrids[i];
+            if (grid == null || grid.AcceptedItemType != itemType)
             {
                 continue;
             }
@@ -880,25 +786,10 @@ public class InventoryController : MonoBehaviour
 
     private void SetEquipmentSlotsClosed(ItemType itemType, bool closed, GameObject resolvedClosedSlotPrefab)
     {
-        restrictedEquipmentGrids.Clear();
-        SetEquipmentSlotsClosedIn(inventoryRoot == null ? null : inventoryRoot.transform, itemType, closed, resolvedClosedSlotPrefab);
-        SetEquipmentSlotsClosedIn(canvasTransform, itemType, closed, resolvedClosedSlotPrefab);
-    }
-
-    private void SetEquipmentSlotsClosedIn(Transform root, ItemType itemType, bool closed, GameObject resolvedClosedSlotPrefab)
-    {
-        if (root == null)
+        for (int i = 0; i < equipmentSlotGrids.Count; i++)
         {
-            return;
-        }
-
-        EquipmentSlotGrid[] grids = root.GetComponentsInChildren<EquipmentSlotGrid>(true);
-        for (int i = 0; i < grids.Length; i++)
-        {
-            EquipmentSlotGrid grid = grids[i];
-            if (grid == null ||
-                restrictedEquipmentGrids.Add(grid) == false ||
-                grid.AcceptedItemType != itemType)
+            EquipmentSlotGrid grid = equipmentSlotGrids[i];
+            if (grid == null || grid.AcceptedItemType != itemType)
             {
                 continue;
             }
@@ -909,31 +800,12 @@ public class InventoryController : MonoBehaviour
 
     private bool CanSetOpenArtifactSlotCount(int openSlotCount)
     {
-        restrictedSlottedGrids.Clear();
         int remainingOpenSlots = Mathf.Max(0, openSlotCount);
 
-        if (CanSetOpenArtifactSlotCountIn(inventoryRoot == null ? null : inventoryRoot.transform, ref remainingOpenSlots) == false)
+        for (int i = 0; i < slottedItemGrids.Count; i++)
         {
-            return false;
-        }
-
-        return CanSetOpenArtifactSlotCountIn(canvasTransform, ref remainingOpenSlots);
-    }
-
-    private bool CanSetOpenArtifactSlotCountIn(Transform root, ref int remainingOpenSlots)
-    {
-        if (root == null)
-        {
-            return true;
-        }
-
-        SlottedItemGrid[] grids = root.GetComponentsInChildren<SlottedItemGrid>(true);
-        for (int i = 0; i < grids.Length; i++)
-        {
-            SlottedItemGrid grid = grids[i];
-            if (grid == null ||
-                grid.HasArtifactSlots == false ||
-                restrictedSlottedGrids.Add(grid) == false)
+            SlottedItemGrid grid = slottedItemGrids[i];
+            if (grid == null || grid.HasArtifactSlots == false)
             {
                 continue;
             }
@@ -951,26 +823,12 @@ public class InventoryController : MonoBehaviour
 
     private void SetOpenArtifactSlotCount(int openSlotCount, GameObject resolvedClosedSlotPrefab)
     {
-        restrictedSlottedGrids.Clear();
         int remainingOpenSlots = Mathf.Max(0, openSlotCount);
-        SetOpenArtifactSlotCountIn(inventoryRoot == null ? null : inventoryRoot.transform, ref remainingOpenSlots, resolvedClosedSlotPrefab);
-        SetOpenArtifactSlotCountIn(canvasTransform, ref remainingOpenSlots, resolvedClosedSlotPrefab);
-    }
 
-    private void SetOpenArtifactSlotCountIn(Transform root, ref int remainingOpenSlots, GameObject resolvedClosedSlotPrefab)
-    {
-        if (root == null)
+        for (int i = 0; i < slottedItemGrids.Count; i++)
         {
-            return;
-        }
-
-        SlottedItemGrid[] grids = root.GetComponentsInChildren<SlottedItemGrid>(true);
-        for (int i = 0; i < grids.Length; i++)
-        {
-            SlottedItemGrid grid = grids[i];
-            if (grid == null ||
-                grid.HasArtifactSlots == false ||
-                restrictedSlottedGrids.Add(grid) == false)
+            SlottedItemGrid grid = slottedItemGrids[i];
+            if (grid == null || grid.HasArtifactSlots == false)
             {
                 continue;
             }
@@ -1012,15 +870,6 @@ public class InventoryController : MonoBehaviour
 
     private GameObject GetClosedSlotPrefab()
     {
-        if (closedSlotPrefab != null)
-        {
-            return closedSlotPrefab;
-        }
-
-#if UNITY_EDITOR
-        closedSlotPrefab = AssetDatabase.LoadAssetAtPath<GameObject>(EditorClosedSlotPrefabPath);
-#endif
-
         return closedSlotPrefab;
     }
 
@@ -1365,7 +1214,7 @@ public class InventoryController : MonoBehaviour
         HideItemInfoPanel();
         selectedItem.SetCellVisualsVisible(false);
         selectedItem.SetOverlayTextsVisible(false);
-        rectTransform = selectedItem.GetComponent<RectTransform>();
+        rectTransform = selectedItem.RectTransform;
         rectTransform.SetParent(canvasTransform, false);
         rectTransform.localScale = Vector3.one;
         rectTransform.SetAsLastSibling();
@@ -1526,18 +1375,14 @@ public class InventoryController : MonoBehaviour
         Quaternion dropRotation = Quaternion.Euler(0f, Random.Range(0f, 360f), 0f);
         WorldItem worldItemPrefab = ResolveWorldItemPrefab(itemData);
 
-        WorldItem worldItem = worldItemPrefab != null
-            ? Instantiate(worldItemPrefab, dropPosition, dropRotation)
-            : CreateFallbackWorldItem(itemData, dropPosition, dropRotation);
-
-        if (worldItem == null)
+        if (worldItemPrefab == null)
         {
             return false;
         }
 
+        WorldItem worldItem = Instantiate(worldItemPrefab, dropPosition, dropRotation);
         worldItem.Initialize(itemData, amount, durabilityPercent);
-        EnsureDroppedWorldItemPhysics(worldItem.gameObject);
-        ApplyDropImpulse(worldItem.gameObject, dropForward);
+        ApplyDropImpulse(worldItem.ItemRigidbody, dropForward);
         return true;
     }
 
@@ -1548,64 +1393,7 @@ public class InventoryController : MonoBehaviour
             return null;
         }
 
-        if (itemData.WorldItemPrefab != null)
-        {
-            return itemData.WorldItemPrefab;
-        }
-
-#if UNITY_EDITOR
-        return FindEditorWorldItemPrefab(itemData);
-#else
-        return null;
-#endif
-    }
-
-#if UNITY_EDITOR
-    private WorldItem FindEditorWorldItemPrefab(ItemData itemData)
-    {
-        string[] prefabGuids = AssetDatabase.FindAssets("t:Prefab", new[] { "Assets/_Source/Prefabs/Items/World Items" });
-
-        for (int i = 0; i < prefabGuids.Length; i++)
-        {
-            string prefabPath = AssetDatabase.GUIDToAssetPath(prefabGuids[i]);
-            GameObject prefab = AssetDatabase.LoadAssetAtPath<GameObject>(prefabPath);
-            if (prefab == null)
-            {
-                continue;
-            }
-
-            WorldItem worldItem = prefab.GetComponentInChildren<WorldItem>(true);
-            if (worldItem != null && worldItem.ItemData == itemData)
-            {
-                return worldItem;
-            }
-        }
-
-        return null;
-    }
-#endif
-
-    private WorldItem CreateFallbackWorldItem(ItemData itemData, Vector3 position, Quaternion rotation)
-    {
-        GameObject rootObject = new GameObject($"Dropped {itemData.ItemName}");
-        rootObject.transform.SetPositionAndRotation(position, rotation);
-
-        if (itemData.IconPrefab != null)
-        {
-            GameObject visualObject = Instantiate(itemData.IconPrefab, rootObject.transform);
-            visualObject.transform.localPosition = Vector3.zero;
-            visualObject.transform.localRotation = Quaternion.identity;
-            visualObject.transform.localScale = Vector3.one;
-        }
-        else
-        {
-            GameObject visualObject = GameObject.CreatePrimitive(PrimitiveType.Cube);
-            visualObject.name = "Fallback Visual";
-            visualObject.transform.SetParent(rootObject.transform, false);
-            visualObject.transform.localScale = Vector3.one * 0.2f;
-        }
-
-        return rootObject.AddComponent<WorldItem>();
+        return itemData.WorldItemPrefab;
     }
 
     private Vector3 CalculateDropPosition()
@@ -1677,68 +1465,9 @@ public class InventoryController : MonoBehaviour
         return forward.normalized;
     }
 
-    private void EnsureDroppedWorldItemPhysics(GameObject worldItemObject)
+    private void ApplyDropImpulse(Rigidbody rigidbody, Vector3 dropForward)
     {
-        if (worldItemObject == null)
-        {
-            return;
-        }
-
-        if (worldItemObject.GetComponentInChildren<Collider>() == null)
-        {
-            AddFallbackCollider(worldItemObject);
-        }
-
-        if (worldItemObject.GetComponent<Rigidbody>() == null)
-        {
-            worldItemObject.AddComponent<Rigidbody>();
-        }
-    }
-
-    private void AddFallbackCollider(GameObject worldItemObject)
-    {
-        BoxCollider boxCollider = worldItemObject.AddComponent<BoxCollider>();
-
-        if (TryGetRendererBounds(worldItemObject, out Bounds bounds) == false)
-        {
-            boxCollider.size = Vector3.one * 0.25f;
-            return;
-        }
-
-        boxCollider.center = worldItemObject.transform.InverseTransformPoint(bounds.center);
-
-        Vector3 localSize = worldItemObject.transform.InverseTransformVector(bounds.size);
-        boxCollider.size = new Vector3(
-            Mathf.Abs(localSize.x),
-            Mathf.Abs(localSize.y),
-            Mathf.Abs(localSize.z));
-    }
-
-    private bool TryGetRendererBounds(GameObject rootObject, out Bounds bounds)
-    {
-        Renderer[] renderers = rootObject.GetComponentsInChildren<Renderer>(true);
-        bounds = default;
-
-        if (renderers.Length == 0)
-        {
-            return false;
-        }
-
-        bounds = renderers[0].bounds;
-
-        for (int i = 1; i < renderers.Length; i++)
-        {
-            bounds.Encapsulate(renderers[i].bounds);
-        }
-
-        return true;
-    }
-
-    private void ApplyDropImpulse(GameObject worldItemObject, Vector3 dropForward)
-    {
-        if (dropImpulse <= 0f ||
-            worldItemObject == null ||
-            worldItemObject.TryGetComponent(out Rigidbody rigidbody) == false)
+        if (dropImpulse <= 0f || rigidbody == null)
         {
             return;
         }

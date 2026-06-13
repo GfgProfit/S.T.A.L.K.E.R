@@ -13,13 +13,6 @@ public partial class PlayerController
         _cameraTargetLocalPos = _cameraDefaultLocalPos;
     }
 
-    private void OnValidate()
-    {
-        _characterController = GetComponent<CharacterController>();
-        _mainCamera = Camera.main;
-        _cameraTransform = _mainCamera.transform;
-    }
-
     private void Update()
     {
         if (_controlsEnabled)

@@ -1,18 +1,40 @@
+using System.Collections.Generic;
 using UnityEngine;
 
 public class WorldItem : MonoBehaviour
 {
+    private static readonly Dictionary<Collider, WorldItem> WorldItemsByCollider = new Dictionary<Collider, WorldItem>();
+
     [SerializeField] private ItemData itemData;
+    [SerializeField] private Rigidbody itemRigidbody;
+    [SerializeField] private List<Collider> itemColliders = new List<Collider>();
     [SerializeField] [Min(1)] private int amount = 1;
     [SerializeField] [Range(0f, 100f)] private float durabilityPercent = 100f;
     [SerializeField] private bool destroyOnPickup = true;
 
     public ItemData ItemData => itemData;
+    public Rigidbody ItemRigidbody => itemRigidbody;
     public string ItemName => itemData == null ? string.Empty : itemData.ItemName;
     public int Amount => NormalizeAmount(itemData, amount);
     public float DurabilityPercent => NormalizeDurability(itemData, durabilityPercent);
     public float TotalWeight => itemData == null ? 0f : itemData.Weight * Amount;
     public string DisplayName => Amount > 1 ? $"{ItemName} x{Amount}" : ItemName;
+
+    public static bool TryGetByCollider(Collider itemCollider, out WorldItem worldItem)
+    {
+        worldItem = null;
+        return itemCollider != null && WorldItemsByCollider.TryGetValue(itemCollider, out worldItem);
+    }
+
+    private void OnEnable()
+    {
+        RegisterColliders();
+    }
+
+    private void OnDisable()
+    {
+        UnregisterColliders();
+    }
 
     public void Initialize(ItemData itemData, int amount)
     {
@@ -60,6 +82,32 @@ public class WorldItem : MonoBehaviour
     {
         amount = NormalizeAmount(itemData, amount);
         durabilityPercent = NormalizeDurability(itemData, durabilityPercent);
+    }
+
+    private void RegisterColliders()
+    {
+        for (int i = 0; i < itemColliders.Count; i++)
+        {
+            Collider itemCollider = itemColliders[i];
+            if (itemCollider != null)
+            {
+                WorldItemsByCollider[itemCollider] = this;
+            }
+        }
+    }
+
+    private void UnregisterColliders()
+    {
+        for (int i = 0; i < itemColliders.Count; i++)
+        {
+            Collider itemCollider = itemColliders[i];
+            if (itemCollider != null &&
+                WorldItemsByCollider.TryGetValue(itemCollider, out WorldItem registeredWorldItem) &&
+                registeredWorldItem == this)
+            {
+                WorldItemsByCollider.Remove(itemCollider);
+            }
+        }
     }
 
     private static int NormalizeAmount(ItemData itemData, int amount)

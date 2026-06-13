@@ -222,20 +222,6 @@ public class ItemInfoPanel : MonoBehaviour
         return $"<color=orange>{normalizedWeight:0.#}</color> КГ";
     }
 
-    private TMP_Text FindText(string objectName)
-    {
-        TMP_Text[] texts = GetComponentsInChildren<TMP_Text>(true);
-        for (int i = 0; i < texts.Length; i++)
-        {
-            if (texts[i].name == objectName)
-            {
-                return texts[i];
-            }
-        }
-
-        return null;
-    }
-
     private void RebuildLayout()
     {
         if (panelRectTransform == null)

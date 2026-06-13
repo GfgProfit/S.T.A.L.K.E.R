@@ -7,23 +7,22 @@ public class EquipmentSlotGrid : InventoryGrid
     [SerializeField] private bool useRectTransformSize = true;
     [SerializeField] [Min(1)] private int gridSizeWidth = 1;
     [SerializeField] [Min(1)] private int gridSizeHeight = 1;
+    [SerializeField] private RectTransform rectTransform;
+    [SerializeField] private Canvas canvas;
 
     private Vector2 positionOnTheGrid = new Vector2();
     private Vector2Int tileGridPosition = new Vector2Int();
-    private RectTransform rectTransform;
     private Camera uiCamera;
     private InventoryItem equippedItem;
-    private GameObject closedSlotInstance;
+    private RectTransform closedSlotInstanceRectTransform;
 
     public InventoryItem EquippedItem => equippedItem;
     public ItemType AcceptedItemType => acceptedItemType;
     public bool IsClosed { get; private set; }
+    public override RectTransform RectTransform => rectTransform;
 
     private void Awake()
     {
-        rectTransform = GetComponent<RectTransform>();
-
-        Canvas canvas = GetComponentInParent<Canvas>();
         if (canvas != null && canvas.renderMode != RenderMode.ScreenSpaceOverlay)
         {
             uiCamera = canvas.worldCamera;
@@ -105,7 +104,7 @@ public class EquipmentSlotGrid : InventoryGrid
     {
         if (CanPlaceItem(inventoryItem, posX, posY) == false) { return; }
 
-        RectTransform itemRectTransform = inventoryItem.GetComponent<RectTransform>();
+        RectTransform itemRectTransform = inventoryItem.RectTransform;
         itemRectTransform.SetParent(rectTransform, false);
         itemRectTransform.localScale = Vector3.one;
         itemRectTransform.SetAsLastSibling();
@@ -164,7 +163,7 @@ public class EquipmentSlotGrid : InventoryGrid
 
         if (IsClosed)
         {
-            EnsureClosedSlotVisual(closedSlotPrefab);
+            ShowClosedSlotVisual(closedSlotPrefab);
         }
         else
         {
@@ -201,20 +200,21 @@ public class EquipmentSlotGrid : InventoryGrid
         return item.itemData != null && item.itemData.ItemType == acceptedItemType;
     }
 
-    private void EnsureClosedSlotVisual(GameObject closedSlotPrefab)
+    private void ShowClosedSlotVisual(GameObject closedSlotPrefab)
     {
         if (closedSlotPrefab == null || rectTransform == null)
         {
             return;
         }
 
-        if (closedSlotInstance == null)
+        if (closedSlotInstanceRectTransform == null)
         {
-            closedSlotInstance = Instantiate(closedSlotPrefab, rectTransform, false);
+            GameObject closedSlotInstance = Instantiate(closedSlotPrefab, rectTransform, false);
             closedSlotInstance.name = closedSlotPrefab.name;
+            closedSlotInstanceRectTransform = closedSlotInstance.transform as RectTransform;
         }
 
-        RectTransform closedRectTransform = closedSlotInstance.GetComponent<RectTransform>();
+        RectTransform closedRectTransform = closedSlotInstanceRectTransform;
         if (closedRectTransform != null)
         {
             closedRectTransform.anchorMin = new Vector2(0f, 1f);
@@ -228,27 +228,27 @@ public class EquipmentSlotGrid : InventoryGrid
             closedRectTransform.localScale = Vector3.one;
         }
 
-        closedSlotInstance.transform.SetAsFirstSibling();
-        closedSlotInstance.SetActive(true);
+        closedSlotInstanceRectTransform.SetAsFirstSibling();
+        closedSlotInstanceRectTransform.gameObject.SetActive(true);
     }
 
     private void DestroyClosedSlotVisual()
     {
-        if (closedSlotInstance == null)
+        if (closedSlotInstanceRectTransform == null)
         {
             return;
         }
 
         if (Application.isPlaying)
         {
-            Destroy(closedSlotInstance);
+            Destroy(closedSlotInstanceRectTransform.gameObject);
         }
         else
         {
-            DestroyImmediate(closedSlotInstance);
+            DestroyImmediate(closedSlotInstanceRectTransform.gameObject);
         }
 
-        closedSlotInstance = null;
+        closedSlotInstanceRectTransform = null;
     }
 
     private void ApplyEquippedVisual(InventoryItem item)

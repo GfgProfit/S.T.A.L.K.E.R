@@ -15,6 +15,7 @@ public class InventoryItemContextMenu : MonoBehaviour
     private static readonly Color DisabledTextColor = new Color(0.48f, 0.47f, 0.42f, 1f);
 
     [SerializeField] private RectTransform panelRectTransform;
+    [SerializeField] private Canvas canvas;
     [SerializeField] private Button dropOneButton;
     [SerializeField] private Button dropStackButton;
     [SerializeField] private TMP_Text dropStackButtonText;
@@ -30,13 +31,11 @@ public class InventoryItemContextMenu : MonoBehaviour
 
     private void Awake()
     {
-        CacheReferences();
         Hide();
     }
 
     public void Initialize(Action dropOneAction, Action dropStackAction)
     {
-        CacheReferences();
         onDropOne = dropOneAction;
         onDropStack = dropStackAction;
 
@@ -55,8 +54,6 @@ public class InventoryItemContextMenu : MonoBehaviour
 
     public void Show(InventoryItem item, Vector2 screenPosition)
     {
-        CacheReferences();
-
         if (item == null)
         {
             Hide();
@@ -79,8 +76,6 @@ public class InventoryItemContextMenu : MonoBehaviour
 
     public bool ContainsScreenPoint(Vector2 screenPoint)
     {
-        CacheReferences();
-
         return IsOpen &&
                panelRectTransform != null &&
                RectTransformUtility.RectangleContainsScreenPoint(panelRectTransform, screenPoint);
@@ -177,35 +172,6 @@ public class InventoryItemContextMenu : MonoBehaviour
         LayoutRebuilder.ForceRebuildLayoutImmediate(panelRectTransform);
     }
 
-    private void CacheReferences()
-    {
-        if (panelRectTransform == null)
-        {
-            panelRectTransform = GetComponent<RectTransform>();
-        }
-
-        if (dropOneButton == null)
-        {
-            dropOneButton = FindButton("Drop One Button");
-        }
-
-        if (dropStackButton == null)
-        {
-            dropStackButton = FindButton("Drop Stack Button");
-        }
-
-        if (dropStackButtonText == null && dropStackButton != null)
-        {
-            dropStackButtonText = dropStackButton.GetComponentInChildren<TMP_Text>(true);
-        }
-    }
-
-    private Button FindButton(string buttonName)
-    {
-        Transform buttonTransform = transform.Find(buttonName);
-        return buttonTransform == null ? null : buttonTransform.GetComponent<Button>();
-    }
-
     private Vector2 GetPanelCenterScreenPoint()
     {
         if (panelRectTransform == null)
@@ -229,10 +195,6 @@ public class InventoryItemContextMenu : MonoBehaviour
 
     private Camera GetCanvasCamera()
     {
-        Canvas canvas = panelRectTransform == null
-            ? GetComponentInParent<Canvas>()
-            : panelRectTransform.GetComponentInParent<Canvas>();
-
         if (canvas == null || canvas.renderMode == RenderMode.ScreenSpaceOverlay)
         {
             return null;
@@ -248,8 +210,6 @@ public class InventoryItemContextMenu : MonoBehaviour
         {
             return;
         }
-
-        CacheReferences();
 
         Vector3 center = GetPanelCenterWorldPoint();
 

@@ -56,7 +56,7 @@ MonoBehaviour:
     valueAtFullDurability: 15
   - statType: 8
     valueAtFullDurability: 2
-  worldItemPrefab: {fileID: 0}
+  worldItemPrefab: {fileID: 217209326969153803, guid: 9edb50e878579dd49806da33f6d581c5, type: 3}
   width: 2
   height: 3
   itemIcon: {fileID: 0}

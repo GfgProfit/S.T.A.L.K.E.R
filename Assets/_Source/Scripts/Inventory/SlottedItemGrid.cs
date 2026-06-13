@@ -9,13 +9,15 @@ public class SlottedItemGrid : InventoryGrid
     [SerializeField] private Image slotImageTemplate;
     [SerializeField] private bool hideSourceImage = true;
     [SerializeField] private bool centerRows = true;
+    [SerializeField] private RectTransform rectTransform;
+    [SerializeField] private Canvas canvas;
+    [SerializeField] private InventoryController inventoryController;
 
     private readonly List<SlotState> slots = new List<SlotState>();
     private SlotState[,] slotByCell;
     private InventoryItem[,] inventoryItemSlot;
     private Vector2 positionOnTheGrid = new Vector2();
     private Vector2Int tileGridPosition = new Vector2Int();
-    private RectTransform rectTransform;
     private Camera uiCamera;
     private int gridSizeWidth;
     private int gridSizeHeight;
@@ -27,19 +29,18 @@ public class SlottedItemGrid : InventoryGrid
     private GameProjectSettings visualSettings;
 
     public override int HighlightSiblingIndex => slotVisualRoot == null ? 0 : 1;
+    public override RectTransform RectTransform => rectTransform;
 
     private void Awake()
     {
-        rectTransform = GetComponent<RectTransform>();
         visualSettings = GameProjectSettings.LoadDefault();
 
-        Canvas canvas = GetComponentInParent<Canvas>();
         if (canvas != null && canvas.renderMode != RenderMode.ScreenSpaceOverlay)
         {
             uiCamera = canvas.worldCamera;
         }
 
-        sourceImage = slotImageTemplate != null ? slotImageTemplate : GetComponent<Image>();
+        sourceImage = slotImageTemplate;
 
         InitFromLayout();
     }
@@ -204,7 +205,7 @@ public class SlottedItemGrid : InventoryGrid
 
         if (BoundryCheck(posX, posY, placementWidth, placementHeight) == false) { return; }
 
-        RectTransform itemRectTransform = inventoryItem.GetComponent<RectTransform>();
+        RectTransform itemRectTransform = inventoryItem.RectTransform;
         itemRectTransform.SetParent(rectTransform, false);
         itemRectTransform.localScale = Vector3.one;
 
@@ -558,7 +559,7 @@ public class SlottedItemGrid : InventoryGrid
         public readonly InventorySlotDefinition Definition;
         public Vector2 VisualPosition;
         public RectTransform VisualRoot;
-        public GameObject ClosedSlotInstance;
+        public RectTransform ClosedSlotInstance;
         public bool IsClosed;
 
         public SlotState(InventorySlotDefinition definition)
@@ -569,10 +570,10 @@ public class SlottedItemGrid : InventoryGrid
 
     private void CreateSlotVisuals()
     {
-        GameObject rootObject = new GameObject("Slot Visuals", typeof(RectTransform));
+        GameObject rootObject = new GameObject("Slot Visuals");
         rootObject.transform.SetParent(rectTransform, false);
 
-        slotVisualRoot = rootObject.GetComponent<RectTransform>();
+        slotVisualRoot = rootObject.AddComponent<RectTransform>();
         slotVisualRoot.anchorMin = new Vector2(0f, 1f);
         slotVisualRoot.anchorMax = new Vector2(0f, 1f);
         slotVisualRoot.pivot = new Vector2(0f, 1f);
@@ -582,10 +583,11 @@ public class SlottedItemGrid : InventoryGrid
 
         foreach (SlotState slot in slots)
         {
-            GameObject slotObject = new GameObject($"Slot {slot.Definition.id}", typeof(RectTransform), typeof(CanvasRenderer), typeof(Image));
+            GameObject slotObject = new GameObject($"Slot {slot.Definition.id}");
             slotObject.transform.SetParent(slotVisualRoot, false);
 
-            RectTransform slotRectTransform = slotObject.GetComponent<RectTransform>();
+            RectTransform slotRectTransform = slotObject.AddComponent<RectTransform>();
+            slotObject.AddComponent<CanvasRenderer>();
             slot.VisualRoot = slotRectTransform;
             slotRectTransform.anchorMin = new Vector2(0f, 1f);
             slotRectTransform.anchorMax = new Vector2(0f, 1f);
@@ -593,13 +595,14 @@ public class SlottedItemGrid : InventoryGrid
             slotRectTransform.anchoredPosition = new Vector2(slot.VisualPosition.x, -slot.VisualPosition.y);
             slotRectTransform.sizeDelta = GetSlotVisualSize(slot.Definition);
 
-            Image slotImage = slotObject.GetComponent<Image>();
+            Image slotImage = slotObject.AddComponent<Image>();
             CopyImageSettings(slotImage, sourceImage);
             slotImage.raycastTarget = true;
 
             CreateCellGridLines(slotRectTransform, slot.Definition);
 
-            slotObject.AddComponent<GridInteract>();
+            GridInteract gridInteract = slotObject.AddComponent<GridInteract>();
+            gridInteract.Initialize(inventoryController, this);
         }
 
         if (hideSourceImage && sourceImage != null && sourceImage.transform == transform)
@@ -669,17 +672,18 @@ public class SlottedItemGrid : InventoryGrid
 
     private void CreateGridLine(RectTransform parent, string name, Vector2 anchoredPosition, Vector2 size, Vector2 pivot, Color color)
     {
-        GameObject lineObject = new GameObject(name, typeof(RectTransform), typeof(CanvasRenderer), typeof(Image));
+        GameObject lineObject = new GameObject(name);
         lineObject.transform.SetParent(parent, false);
 
-        RectTransform lineRectTransform = lineObject.GetComponent<RectTransform>();
+        RectTransform lineRectTransform = lineObject.AddComponent<RectTransform>();
+        lineObject.AddComponent<CanvasRenderer>();
         lineRectTransform.anchorMin = new Vector2(0f, 1f);
         lineRectTransform.anchorMax = new Vector2(0f, 1f);
         lineRectTransform.pivot = pivot;
         lineRectTransform.anchoredPosition = anchoredPosition;
         lineRectTransform.sizeDelta = size;
 
-        Image lineImage = lineObject.GetComponent<Image>();
+        Image lineImage = lineObject.AddComponent<Image>();
         lineImage.color = color;
         lineImage.raycastTarget = false;
     }
@@ -700,7 +704,7 @@ public class SlottedItemGrid : InventoryGrid
 
         if (slot.IsClosed)
         {
-            EnsureClosedSlotVisual(slot, closedSlotPrefab);
+            ShowClosedSlotVisual(slot, closedSlotPrefab);
         }
         else
         {
@@ -730,7 +734,7 @@ public class SlottedItemGrid : InventoryGrid
         return null;
     }
 
-    private void EnsureClosedSlotVisual(SlotState slot, GameObject closedSlotPrefab)
+    private void ShowClosedSlotVisual(SlotState slot, GameObject closedSlotPrefab)
     {
         if (slot == null || slot.VisualRoot == null || closedSlotPrefab == null)
         {
@@ -739,11 +743,12 @@ public class SlottedItemGrid : InventoryGrid
 
         if (slot.ClosedSlotInstance == null)
         {
-            slot.ClosedSlotInstance = Instantiate(closedSlotPrefab, slot.VisualRoot, false);
-            slot.ClosedSlotInstance.name = closedSlotPrefab.name;
+            GameObject closedSlotInstance = Instantiate(closedSlotPrefab, slot.VisualRoot, false);
+            closedSlotInstance.name = closedSlotPrefab.name;
+            slot.ClosedSlotInstance = closedSlotInstance.transform as RectTransform;
         }
 
-        RectTransform closedRectTransform = slot.ClosedSlotInstance.GetComponent<RectTransform>();
+        RectTransform closedRectTransform = slot.ClosedSlotInstance;
         if (closedRectTransform != null)
         {
             closedRectTransform.anchorMin = new Vector2(0f, 1f);
@@ -755,8 +760,8 @@ public class SlottedItemGrid : InventoryGrid
             closedRectTransform.localScale = Vector3.one;
         }
 
-        slot.ClosedSlotInstance.transform.SetAsFirstSibling();
-        slot.ClosedSlotInstance.SetActive(true);
+        slot.ClosedSlotInstance.SetAsFirstSibling();
+        slot.ClosedSlotInstance.gameObject.SetActive(true);
     }
 
     private void DestroyClosedSlotVisual(SlotState slot)
@@ -768,11 +773,11 @@ public class SlottedItemGrid : InventoryGrid
 
         if (Application.isPlaying)
         {
-            Destroy(slot.ClosedSlotInstance);
+            Destroy(slot.ClosedSlotInstance.gameObject);
         }
         else
         {
-            DestroyImmediate(slot.ClosedSlotInstance);
+            DestroyImmediate(slot.ClosedSlotInstance.gameObject);
         }
 
         slot.ClosedSlotInstance = null;

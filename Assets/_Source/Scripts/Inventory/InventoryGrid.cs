@@ -3,6 +3,7 @@ using UnityEngine;
 public abstract class InventoryGrid : MonoBehaviour
 {
     public virtual int HighlightSiblingIndex => 0;
+    public abstract RectTransform RectTransform { get; }
 
     public virtual bool TryFindStack(ItemData itemData, out InventoryItem stack)
     {

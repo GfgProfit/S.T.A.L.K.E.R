@@ -3,29 +3,44 @@ using UnityEngine.EventSystems;
 
 public class GridInteract : MonoBehaviour, IPointerEnterHandler, IPointerExitHandler
 {
-    private InventoryController inventoryController;
-    private InventoryGrid inventoryGrid;
+    [SerializeField] private InventoryController inventoryController;
+    [SerializeField] private InventoryGrid inventoryGrid;
+    [SerializeField] private RectTransform interactRectTransform;
 
-    private void Awake()
+    internal void Initialize(InventoryController inventoryController, InventoryGrid inventoryGrid)
     {
-        inventoryController = FindFirstObjectByType(typeof(InventoryController)) as InventoryController;
-        inventoryGrid = GetComponentInParent<InventoryGrid>();
+        this.inventoryController = inventoryController;
+        this.inventoryGrid = inventoryGrid;
+        interactRectTransform = transform as RectTransform;
     }
 
     public void OnPointerEnter(PointerEventData eventData)
     {
-        if (inventoryGrid == null) { return; }
+        if (inventoryController == null || inventoryGrid == null) { return; }
 
         inventoryController.SelectedItemGrid = inventoryGrid;
     }
 
     public void OnPointerExit(PointerEventData eventData)
     {
-        InventoryGrid currentGrid = eventData.pointerCurrentRaycast.gameObject == null
-            ? null
-            : eventData.pointerCurrentRaycast.gameObject.GetComponentInParent<InventoryGrid>();
+        if (inventoryController == null || inventoryGrid == null)
+        {
+            return;
+        }
 
-        if (currentGrid == inventoryGrid) { return; }
+        if (interactRectTransform != null &&
+            RectTransformUtility.RectangleContainsScreenPoint(
+                interactRectTransform,
+                eventData.position,
+                eventData.enterEventCamera))
+        {
+            return;
+        }
+
+        if (inventoryController.SelectedItemGrid != inventoryGrid)
+        {
+            return;
+        }
 
         inventoryController.SelectedItemGrid = null;
     }

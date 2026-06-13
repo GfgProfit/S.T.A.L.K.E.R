@@ -28,24 +28,6 @@ public class PlayerWorldItemInteractor : MonoBehaviour
         }
     }
 
-    private void Awake()
-    {
-        if (raycastCamera == null)
-        {
-            raycastCamera = Camera.main;
-        }
-
-        if (inventoryController == null)
-        {
-            inventoryController = FindFirstObjectByType<InventoryController>();
-        }
-
-        if (tooltipView == null)
-        {
-            tooltipView = FindFirstObjectByType<WorldItemTooltipView>(FindObjectsInactive.Include);
-        }
-    }
-
     private void Update()
     {
         if (inventoryController != null && inventoryController.IsOpen)
@@ -92,7 +74,7 @@ public class PlayerWorldItemInteractor : MonoBehaviour
             return null;
         }
 
-        return hit.collider.GetComponentInParent<WorldItem>();
+        return WorldItem.TryGetByCollider(hit.collider, out WorldItem worldItem) ? worldItem : null;
     }
 
     private void SetHoveredWorldItem(WorldItem worldItem)

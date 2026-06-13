@@ -5,13 +5,14 @@ public class ItemGrid : InventoryGrid
 {
     [SerializeField] [Range(1, 20)] private int gridSizeWidth = 7;
     [SerializeField] [Range(1, 20)] private int gridSizeHeight = 9;
+    [SerializeField] private RectTransform rectTransform;
+    [SerializeField] private Canvas canvas;
 
     public const float tileSizeWidth = 64;
     public const float tileSizeHeight = 64;
 
     private Vector2 positionOnTheGrid = new Vector2();
     private Vector2Int tileGridPosition = new Vector2Int();
-    private RectTransform rectTransform;
     private Camera uiCamera;
     private RectTransform cellGridRoot;
     private GameProjectSettings visualSettings;
@@ -19,13 +20,12 @@ public class ItemGrid : InventoryGrid
     private InventoryItem[,] inventoryItemSlot;
 
     public override int HighlightSiblingIndex => cellGridRoot == null ? 0 : 1;
+    public override RectTransform RectTransform => rectTransform;
 
     private void Awake()
     {
-        rectTransform = GetComponent<RectTransform>();
         visualSettings = GameProjectSettings.LoadDefault();
 
-        Canvas canvas = GetComponentInParent<Canvas>();
         if (canvas != null && canvas.renderMode != RenderMode.ScreenSpaceOverlay)
         {
             uiCamera = canvas.worldCamera;
@@ -173,9 +173,9 @@ public class ItemGrid : InventoryGrid
 
     public override void PlaceItem(InventoryItem inventoryItem, int posX, int posY)
     {
-        RectTransform rectTransform = inventoryItem.GetComponent<RectTransform>();
-        rectTransform.SetParent(this.rectTransform, false);
-        rectTransform.localScale = Vector3.one;
+        RectTransform itemRectTransform = inventoryItem.RectTransform;
+        itemRectTransform.SetParent(rectTransform, false);
+        itemRectTransform.localScale = Vector3.one;
 
         for (int x = 0; x < inventoryItem.Width; x++)
         {
@@ -190,7 +190,7 @@ public class ItemGrid : InventoryGrid
 
         Vector2 position = CalculatePositionOnGrid(inventoryItem, posX, posY);
 
-        rectTransform.localPosition = position;
+        itemRectTransform.localPosition = position;
         inventoryItem.SetCellVisualsVisible(true);
         inventoryItem.SetOverlayTextsVisible(true);
     }
@@ -283,10 +283,10 @@ public class ItemGrid : InventoryGrid
 
         if (visualSettings.ShowCellGrid == false) { return; }
 
-        GameObject rootObject = new GameObject("Cell Grid", typeof(RectTransform));
+        GameObject rootObject = new GameObject("Cell Grid");
         rootObject.transform.SetParent(rectTransform, false);
 
-        cellGridRoot = rootObject.GetComponent<RectTransform>();
+        cellGridRoot = rootObject.AddComponent<RectTransform>();
         cellGridRoot.anchorMin = new Vector2(0f, 1f);
         cellGridRoot.anchorMax = new Vector2(0f, 1f);
         cellGridRoot.pivot = new Vector2(0f, 1f);
@@ -328,17 +328,18 @@ public class ItemGrid : InventoryGrid
 
     private void CreateGridLine(RectTransform parent, string name, Vector2 anchoredPosition, Vector2 size, Vector2 pivot, Color color)
     {
-        GameObject lineObject = new GameObject(name, typeof(RectTransform), typeof(CanvasRenderer), typeof(UnityEngine.UI.Image));
+        GameObject lineObject = new GameObject(name);
         lineObject.transform.SetParent(parent, false);
 
-        RectTransform lineRectTransform = lineObject.GetComponent<RectTransform>();
+        RectTransform lineRectTransform = lineObject.AddComponent<RectTransform>();
+        lineObject.AddComponent<CanvasRenderer>();
         lineRectTransform.anchorMin = new Vector2(0f, 1f);
         lineRectTransform.anchorMax = new Vector2(0f, 1f);
         lineRectTransform.pivot = pivot;
         lineRectTransform.anchoredPosition = anchoredPosition;
         lineRectTransform.sizeDelta = size;
 
-        UnityEngine.UI.Image lineImage = lineObject.GetComponent<UnityEngine.UI.Image>();
+        UnityEngine.UI.Image lineImage = lineObject.AddComponent<UnityEngine.UI.Image>();
         lineImage.color = color;
         lineImage.raycastTarget = false;
     }

@@ -30,6 +30,7 @@ MonoBehaviour:
   rarity: 0
   weight: 0.023
   stackable: 1
+  worldItemPrefab: {fileID: 289471682219326118, guid: 136cbed246198e649b3ff0beacfbe476, type: 3}
   width: 2
   height: 1
   itemIcon: {fileID: 0}

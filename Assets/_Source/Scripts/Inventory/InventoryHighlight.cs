@@ -40,7 +40,7 @@ public class InventoryHighlight : MonoBehaviour
     {
         if (targetGrid == null) { return; }
 
-        highlighter.SetParent(targetGrid.GetComponent<RectTransform>(), false);
+        highlighter.SetParent(targetGrid.RectTransform, false);
         int siblingIndex = Mathf.Min(targetGrid.HighlightSiblingIndex, highlighter.parent.childCount - 1);
         highlighter.SetSiblingIndex(siblingIndex);
     }

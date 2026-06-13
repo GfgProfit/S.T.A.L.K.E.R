@@ -1288,6 +1288,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 6ed123bfcf0d6f04b84f7ad69d286ccf, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::GridInteract
+  inventoryController: {fileID: 602623720}
+  inventoryGrid: {fileID: 131765860}
+  interactRectTransform: {fileID: 131765858}
 --- !u!114 &131765860
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1305,6 +1308,8 @@ MonoBehaviour:
   useRectTransformSize: 1
   gridSizeWidth: 2
   gridSizeHeight: 1
+  rectTransform: {fileID: 131765858}
+  canvas: {fileID: 853287344}
 --- !u!114 &131765861
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -2371,6 +2376,8 @@ MonoBehaviour:
   useRectTransformSize: 1
   gridSizeWidth: 2
   gridSizeHeight: 5
+  rectTransform: {fileID: 323776689}
+  canvas: {fileID: 853287344}
 --- !u!114 &210100002
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -2383,6 +2390,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 6ed123bfcf0d6f04b84f7ad69d286ccf, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::GridInteract
+  inventoryController: {fileID: 602623720}
+  inventoryGrid: {fileID: 210100001}
+  interactRectTransform: {fileID: 323776689}
 --- !u!114 &210100003
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -2400,6 +2410,8 @@ MonoBehaviour:
   useRectTransformSize: 1
   gridSizeWidth: 2
   gridSizeHeight: 5
+  rectTransform: {fileID: 605924271}
+  canvas: {fileID: 853287344}
 --- !u!114 &210100004
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -2412,6 +2424,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 6ed123bfcf0d6f04b84f7ad69d286ccf, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::GridInteract
+  inventoryController: {fileID: 602623720}
+  inventoryGrid: {fileID: 210100003}
+  interactRectTransform: {fileID: 605924271}
 --- !u!114 &210100005
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -2429,6 +2444,8 @@ MonoBehaviour:
   useRectTransformSize: 1
   gridSizeWidth: 2
   gridSizeHeight: 2
+  rectTransform: {fileID: 1081696661}
+  canvas: {fileID: 853287344}
 --- !u!114 &210100006
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -2441,6 +2458,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 6ed123bfcf0d6f04b84f7ad69d286ccf, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::GridInteract
+  inventoryController: {fileID: 602623720}
+  inventoryGrid: {fileID: 210100005}
+  interactRectTransform: {fileID: 1081696661}
 --- !u!114 &210100007
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -2458,6 +2478,8 @@ MonoBehaviour:
   useRectTransformSize: 1
   gridSizeWidth: 2
   gridSizeHeight: 2
+  rectTransform: {fileID: 1139423573}
+  canvas: {fileID: 853287344}
 --- !u!114 &210100008
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -2470,6 +2492,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 6ed123bfcf0d6f04b84f7ad69d286ccf, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::GridInteract
+  inventoryController: {fileID: 602623720}
+  inventoryGrid: {fileID: 210100007}
+  interactRectTransform: {fileID: 1139423573}
 --- !u!114 &210100009
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -2487,6 +2512,8 @@ MonoBehaviour:
   useRectTransformSize: 1
   gridSizeWidth: 2
   gridSizeHeight: 2
+  rectTransform: {fileID: 1395268740}
+  canvas: {fileID: 853287344}
 --- !u!114 &210100010
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -2499,6 +2526,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 6ed123bfcf0d6f04b84f7ad69d286ccf, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::GridInteract
+  inventoryController: {fileID: 602623720}
+  inventoryGrid: {fileID: 210100009}
+  interactRectTransform: {fileID: 1395268740}
 --- !u!114 &210100011
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -2516,6 +2546,8 @@ MonoBehaviour:
   useRectTransformSize: 1
   gridSizeWidth: 2
   gridSizeHeight: 1
+  rectTransform: {fileID: 1451469336}
+  canvas: {fileID: 853287344}
 --- !u!114 &210100012
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -2528,6 +2560,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 6ed123bfcf0d6f04b84f7ad69d286ccf, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::GridInteract
+  inventoryController: {fileID: 602623720}
+  inventoryGrid: {fileID: 210100011}
+  interactRectTransform: {fileID: 1451469336}
 --- !u!114 &210100013
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -2545,6 +2580,8 @@ MonoBehaviour:
   useRectTransformSize: 1
   gridSizeWidth: 2
   gridSizeHeight: 3
+  rectTransform: {fileID: 1481941981}
+  canvas: {fileID: 853287344}
 --- !u!114 &210100014
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -2557,6 +2594,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 6ed123bfcf0d6f04b84f7ad69d286ccf, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::GridInteract
+  inventoryController: {fileID: 602623720}
+  inventoryGrid: {fileID: 210100013}
+  interactRectTransform: {fileID: 1481941981}
 --- !u!1 &211645402
 GameObject:
   m_ObjectHideFlags: 0
@@ -2689,6 +2729,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 6ed123bfcf0d6f04b84f7ad69d286ccf, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::GridInteract
+  inventoryController: {fileID: 602623720}
+  inventoryGrid: {fileID: 226771813}
+  interactRectTransform: {fileID: 226771811}
 --- !u!114 &226771813
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -2706,6 +2749,8 @@ MonoBehaviour:
   useRectTransformSize: 1
   gridSizeWidth: 2
   gridSizeHeight: 1
+  rectTransform: {fileID: 226771811}
+  canvas: {fileID: 853287344}
 --- !u!114 &226771814
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -4550,6 +4595,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 6ed123bfcf0d6f04b84f7ad69d286ccf, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::GridInteract
+  inventoryController: {fileID: 602623720}
+  inventoryGrid: {fileID: 423999478}
+  interactRectTransform: {fileID: 423999476}
 --- !u!114 &423999478
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -4567,6 +4615,8 @@ MonoBehaviour:
   useRectTransformSize: 1
   gridSizeWidth: 2
   gridSizeHeight: 1
+  rectTransform: {fileID: 423999476}
+  canvas: {fileID: 853287344}
 --- !u!114 &423999479
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -5956,6 +6006,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::InventoryItemContextMenu
   panelRectTransform: {fileID: 564352808}
+  canvas: {fileID: 853287344}
   dropOneButton: {fileID: 417679117}
   dropStackButton: {fileID: 1375092425}
   dropStackButtonText: {fileID: 1555326203}
@@ -6785,11 +6836,12 @@ MonoBehaviour:
   - {fileID: 11400000, guid: fade3f1bcd1ae764c831c16e5a9f0633, type: 2}
   - {fileID: 11400000, guid: bdd5f93d789e74f4c86085a220bec05f, type: 2}
   - {fileID: 11400000, guid: 8788bb606b48b7d4185309a17a1097a7, type: 2}
-  itemPrefab: {fileID: 7244211069171183451, guid: 2e6a23eb37479154592a10b021b0a7b0, type: 3}
+  itemPrefab: {fileID: 7244211069171183449, guid: 2e6a23eb37479154592a10b021b0a7b0, type: 3}
   canvasTransform: {fileID: 853287341}
   inventoryRoot: {fileID: 452837760}
   inventoryCanvasGroup: {fileID: 452837764}
   defaultItemGrid: {fileID: 8528455188214440164}
+  inventoryHighlight: {fileID: 602623719}
   playerController: {fileID: 602623714}
   playerStats: {fileID: 602623721}
   dropOrigin: {fileID: 1178330743}
@@ -6811,6 +6863,34 @@ MonoBehaviour:
   itemInfoPanel: {fileID: 2010338236}
   itemContextMenu: {fileID: 564352809}
   closedSlotPrefab: {fileID: 7039134793815377571, guid: aa9dbe456d8ccf8499b6d334af9b97de, type: 3}
+  initialInventoryItems: []
+  quickActionGridReferences:
+  - {fileID: 131765860}
+  - {fileID: 210100001}
+  - {fileID: 210100003}
+  - {fileID: 210100005}
+  - {fileID: 210100007}
+  - {fileID: 210100009}
+  - {fileID: 210100011}
+  - {fileID: 210100013}
+  - {fileID: 226771813}
+  - {fileID: 423999478}
+  - {fileID: 750053519}
+  - {fileID: 741226605}
+  equipmentSlotGrids:
+  - {fileID: 131765860}
+  - {fileID: 210100001}
+  - {fileID: 210100003}
+  - {fileID: 210100005}
+  - {fileID: 210100007}
+  - {fileID: 210100009}
+  - {fileID: 210100011}
+  - {fileID: 210100013}
+  - {fileID: 226771813}
+  - {fileID: 423999478}
+  - {fileID: 750053519}
+  slottedItemGrids:
+  - {fileID: 741226605}
   playerStatsInfoPanel: {fileID: 1135701639071284298}
   hidePlayerStatsInfoWhenEmpty: 0
   maxCarryWeight: 999
@@ -8295,6 +8375,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 6ed123bfcf0d6f04b84f7ad69d286ccf, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::GridInteract
+  inventoryController: {fileID: 602623720}
+  inventoryGrid: {fileID: 741226605}
+  interactRectTransform: {fileID: 741226601}
 --- !u!114 &741226605
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -8309,9 +8392,12 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::SlottedItemGrid
   slotLayout: {fileID: 11400000, guid: de4afb5c5b81e1d4c9aedfce3e3d8601, type: 2}
   slotSpacing: 10
-  slotImageTemplate: {fileID: 0}
+  slotImageTemplate: {fileID: 741226602}
   hideSourceImage: 1
   centerRows: 1
+  rectTransform: {fileID: 741226601}
+  canvas: {fileID: 853287344}
+  inventoryController: {fileID: 602623720}
 --- !u!1 &750053516
 GameObject:
   m_ObjectHideFlags: 0
@@ -8369,6 +8455,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 6ed123bfcf0d6f04b84f7ad69d286ccf, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::GridInteract
+  inventoryController: {fileID: 602623720}
+  inventoryGrid: {fileID: 750053519}
+  interactRectTransform: {fileID: 750053517}
 --- !u!114 &750053519
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -8386,6 +8475,8 @@ MonoBehaviour:
   useRectTransformSize: 1
   gridSizeWidth: 2
   gridSizeHeight: 1
+  rectTransform: {fileID: 750053517}
+  canvas: {fileID: 853287344}
 --- !u!114 &750053520
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -29103,6 +29194,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   gridSizeWidth: 10
   gridSizeHeight: 14
+  rectTransform: {fileID: 5818979331892679846}
+  canvas: {fileID: 853287344}
 --- !u!1001 &8536564287983286959
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -29210,6 +29303,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 6ed123bfcf0d6f04b84f7ad69d286ccf, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  inventoryController: {fileID: 602623720}
+  inventoryGrid: {fileID: 8528455188214440164}
+  interactRectTransform: {fileID: 5818979331892679846}
 --- !u!114 &8655396423833347937
 MonoBehaviour:
   m_ObjectHideFlags: 0
