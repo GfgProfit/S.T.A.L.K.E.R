@@ -1,0 +1,66 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 737e751cd05516846acf43daad139c9e, type: 3}
+  m_Name: memory_module
+  m_EditorClassIdentifier: 
+  itemName: "\u041C\u043E\u0434\u0443\u043B\u044C \u043F\u0430\u043C\u044F\u0442\u0438
+    (\u0437\u0430\u0431\u043B\u043E\u043A\u0438\u0440\u043E\u0432\u0430\u043D)"
+  shortName: 
+  description: "\u041C\u043E\u0434\u0443\u043B\u044C \u043F\u0430\u043C\u044F\u0442\u0438
+    \u0438\u0437 \u0431\u0435\u0441\u043F\u0438\u043B\u043E\u0442\u043D\u043E\u0433\u043E
+    \u0440\u0430\u0437\u0432\u0435\u0434\u0447\u0438\u043A\u0430. \u0421\u043D\u0430\u0447\u0430\u043B\u0430
+    \u0437\u0430\u0431\u043B\u043E\u043A\u0438\u0440\u043E\u0432\u0430\u043D, \u043F\u043E\u0441\u043B\u0435
+    \u0440\u0430\u0437\u0431\u043B\u043E\u043A\u0438\u0440\u043E\u0432\u043A\u0438
+    \u0441\u043E\u0434\u0435\u0440\u0436\u0438\u0442 \u0434\u0430\u043D\u043D\u044B\u0435,
+    \u0432\u043A\u043B\u044E\u0447\u0430\u044F \u043F\u0435\u043B\u0435\u043D\u0433\u0438
+    \u0440\u0430\u0434\u0438\u043E\u043C\u0430\u044F\u043A\u043E\u0432."
+  itemType: 10
+  rarity: 0
+  weight: 1
+  stackable: 0
+  useDurability: 0
+  defaultDurabilityPercent: 100
+  canEquipHelmet: 1
+  statModifiers: []
+  worldItemPrefab: {fileID: -3263285567527824524, guid: 76a9d9f4c973e2046a6d5f315c870dfa, type: 3}
+  width: 2
+  height: 1
+  itemIcon: {fileID: 0}
+  generateIconAtRuntime: 1
+  iconPrefab: {fileID: 37576750626716324, guid: a2d9d86fd1beaae4dbd9876101a50a02, type: 3}
+  iconParts: []
+  iconPixelsPerCell: 64
+  iconRenderScale: 2
+  iconPadding: 1.1
+  iconAntiAliasing: 8
+  iconUseOutline: 1
+  iconOutlineWidth: 2
+  iconUseShadow: 1
+  iconShadowOffset: {x: 2, y: -2}
+  iconShadowBlur: 2
+  iconModelEulerAngles: {x: 0, y: 0, z: 0}
+  iconModelScale: {x: 1, y: 1, z: 1}
+  iconCameraEulerAngles: {x: 35, y: -100, z: 0}
+  slotIconModelEulerAngles: {x: 0, y: 0, z: 0}
+  slotIconModelScale: {x: 1, y: 1, z: 1}
+  slotIconCameraEulerAngles: {x: 25, y: -135, z: 0}
+  slotIconPadding: 1.15
+  iconShowCellGrid: 1
+  iconShowCellGridBorder: 1
+  iconCellGridBorderLineThickness: 2
+  iconUseDirectionalLight: 1
+  iconLightEulerAngles: {x: 50, y: -130, z: 0}
+  iconLightIntensity: 100000
+  slotIconUseDirectionalLight: 1
+  slotIconLightEulerAngles: {x: 50, y: -130, z: 0}
+  slotIconLightIntensity: 100000
+  slotIconSettingsInitialized: 1

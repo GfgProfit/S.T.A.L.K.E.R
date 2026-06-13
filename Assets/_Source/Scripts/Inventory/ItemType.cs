@@ -9,7 +9,8 @@ public enum ItemType
     Artifact = 6,
     Consumable = 7,
     Knife = 8,
-    Pistol = 9
+    Pistol = 9,
+    Quest = 10
 }
 
 public static class ItemTypeFormatter
@@ -36,6 +37,8 @@ public static class ItemTypeFormatter
                 return "Нож";
             case ItemType.Pistol:
                 return "Пистолет";
+            case ItemType.Quest:
+                return "Квестовый предмет";
             case ItemType.Misc:
                 return "Разное";
             default:

@@ -1,0 +1,62 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 737e751cd05516846acf43daad139c9e, type: 3}
+  m_Name: box_transistors
+  m_EditorClassIdentifier: 
+  itemName: "\u041A\u043E\u0440\u043E\u0431\u043A\u0430 \u0442\u0440\u0430\u043D\u0437\u0438\u0441\u0442\u043E\u0440\u043E\u0432"
+  shortName: 
+  description: "\u041A\u0430\u0447\u0435\u0441\u0442\u0432\u0435\u043D\u043D\u044B\u0435
+    \u0442\u0440\u0430\u043D\u0437\u0438\u0441\u0442\u043E\u0440\u044B \u2014 \u0434\u0435\u0442\u0430\u043B\u0438
+    \u0434\u043B\u044F \u0433\u0435\u043D\u0435\u0440\u0430\u0446\u0438\u0438, \u043F\u0440\u0435\u043E\u0431\u0440\u0430\u0437\u043E\u0432\u0430\u043D\u0438\u044F
+    \u0438 \u0443\u0441\u0438\u043B\u0435\u043D\u0438\u044F \u044D\u043B\u0435\u043A\u0442\u0440\u0438\u0447\u0435\u0441\u043A\u0438\u0445
+    \u043A\u043E\u043B\u0435\u0431\u0430\u043D\u0438\u0439."
+  itemType: 10
+  rarity: 0
+  weight: 0.3
+  stackable: 0
+  useDurability: 0
+  defaultDurabilityPercent: 100
+  canEquipHelmet: 1
+  statModifiers: []
+  worldItemPrefab: {fileID: 1309182909780688202, guid: e44a72ad67fd2aa4fa417f1d1252dd7e, type: 3}
+  width: 2
+  height: 1
+  itemIcon: {fileID: 0}
+  generateIconAtRuntime: 1
+  iconPrefab: {fileID: 2635170603995071613, guid: 71f325d137d3ffa47ba780f91fa8493f, type: 3}
+  iconParts: []
+  iconPixelsPerCell: 64
+  iconRenderScale: 2
+  iconPadding: 1.1
+  iconAntiAliasing: 8
+  iconUseOutline: 1
+  iconOutlineWidth: 2
+  iconUseShadow: 1
+  iconShadowOffset: {x: 2, y: -2}
+  iconShadowBlur: 2
+  iconModelEulerAngles: {x: 0, y: 0, z: 0}
+  iconModelScale: {x: 1, y: 1, z: 1}
+  iconCameraEulerAngles: {x: 25, y: -135, z: 0}
+  slotIconModelEulerAngles: {x: 0, y: 0, z: 0}
+  slotIconModelScale: {x: 1, y: 1, z: 1}
+  slotIconCameraEulerAngles: {x: 25, y: -135, z: 0}
+  slotIconPadding: 1.15
+  iconShowCellGrid: 1
+  iconShowCellGridBorder: 1
+  iconCellGridBorderLineThickness: 2
+  iconUseDirectionalLight: 1
+  iconLightEulerAngles: {x: 50, y: -130, z: 0}
+  iconLightIntensity: 100000
+  slotIconUseDirectionalLight: 1
+  slotIconLightEulerAngles: {x: 50, y: -130, z: 0}
+  slotIconLightIntensity: 100000
+  slotIconSettingsInitialized: 1

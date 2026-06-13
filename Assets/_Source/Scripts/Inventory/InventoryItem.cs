@@ -17,12 +17,16 @@ public class InventoryItem : MonoBehaviour
     private const float DurabilityBarOffset = 3f;
 
     private static readonly Vector2 CountTextSize = new Vector2(48f, 20f);
+    private static readonly Vector2 StatusIconSize = new Vector2(18f, 18f);
     private static readonly Vector2 CountTextMargin = new Vector2(4f, 4f);
+    private static readonly Vector2 StatusIconMargin = new Vector2(5f, 5f);
     private static readonly Vector2 ShortNameTextMargin = new Vector2(4f, 4f);
 
     public ItemData itemData;
     [SerializeField] [Min(1)] private int currentAmount = 1;
     [SerializeField] [Range(0f, 100f)] private float currentDurabilityPercent = 100f;
+    [SerializeField] private Sprite questStatusIcon;
+    [SerializeField] private Image statusIconImage;
 
     public int onGridPositionX;
     public int onGridPositionY;
@@ -35,11 +39,13 @@ public class InventoryItem : MonoBehaviour
     private RectTransform cellGridRoot;
     private RectTransform countTextRectTransform;
     private RectTransform shortNameTextRectTransform;
+    private RectTransform statusIconRectTransform;
     private RectTransform durabilityBackgroundRectTransform;
     private RectTransform durabilityFillRectTransform;
     private Graphic durabilityFillGraphic;
     private RectTransform rectTransform;
     private bool overlayTextsVisible = true;
+    private bool cellVisualsVisible = true;
     private bool hasVisualSizeOverride;
     private int visualWidthOverride = 1;
     private int visualHeightOverride = 1;
@@ -65,6 +71,7 @@ public class InventoryItem : MonoBehaviour
     {
         EnsureVisuals();
         RefreshDurabilityVisual(true);
+        RefreshStatusIcon();
     }
 
     internal void Set(ItemData itemData)
@@ -105,6 +112,7 @@ public class InventoryItem : MonoBehaviour
 
         RefreshIcon();
         RebuildCellVisuals();
+        RefreshStatusIcon();
 
         if (itemData == null)
         {
@@ -114,6 +122,7 @@ public class InventoryItem : MonoBehaviour
         ApplyVisualSize();
         ApplyRotation();
         SetCellVisualsVisible(true);
+        RefreshStatusIcon();
     }
 
     public void SetAmount(int amount)
@@ -191,6 +200,7 @@ public class InventoryItem : MonoBehaviour
     internal void SetCellVisualsVisible(bool visible)
     {
         EnsureVisuals();
+        cellVisualsVisible = visible;
 
         if (cellBackgroundImage != null)
         {
@@ -203,6 +213,7 @@ public class InventoryItem : MonoBehaviour
         }
 
         RefreshDurabilityVisual(visible);
+        RefreshStatusIcon();
     }
 
     internal void SetOverlayTextsVisible(bool visible)
@@ -249,6 +260,7 @@ public class InventoryItem : MonoBehaviour
         ApplyDurabilityLayout();
         ApplyCountTextLayout();
         ApplyShortNameTextLayout();
+        ApplyStatusIconLayout();
     }
 
     private void ApplyVisualSize()
@@ -258,6 +270,7 @@ public class InventoryItem : MonoBehaviour
             VisualWidth * ItemGrid.tileSizeWidth,
             VisualHeight * ItemGrid.tileSizeHeight);
         ApplyDurabilityLayout();
+        ApplyStatusIconLayout();
     }
 
     private void ClearVisualOverride()
@@ -430,6 +443,47 @@ public class InventoryItem : MonoBehaviour
         durabilityFillRectTransform.localScale = Vector3.one;
     }
 
+    private void RefreshStatusIcon()
+    {
+        EnsureStatusIconVisual();
+
+        if (statusIconRectTransform == null || statusIconImage == null)
+        {
+            return;
+        }
+
+        bool showStatusIcon = cellVisualsVisible && itemData != null && itemData.ItemType == ItemType.Quest && questStatusIcon != null;
+        statusIconImage.sprite = showStatusIcon ? questStatusIcon : null;
+        statusIconImage.enabled = showStatusIcon;
+        statusIconRectTransform.gameObject.SetActive(showStatusIcon);
+
+        if (showStatusIcon)
+        {
+            ApplyStatusIconLayout();
+            statusIconRectTransform.SetAsLastSibling();
+        }
+    }
+
+    private void ApplyStatusIconLayout()
+    {
+        EnsureStatusIconVisual();
+
+        if (statusIconRectTransform == null)
+        {
+            return;
+        }
+
+        statusIconRectTransform.anchorMin = IsVisuallyRotated ? new Vector2(1f, 1f) : new Vector2(1f, 0f);
+        statusIconRectTransform.anchorMax = statusIconRectTransform.anchorMin;
+        statusIconRectTransform.pivot = new Vector2(1f, 0f);
+        statusIconRectTransform.sizeDelta = StatusIconSize;
+        statusIconRectTransform.anchoredPosition = IsVisuallyRotated
+            ? new Vector2(-StatusIconMargin.y, -StatusIconMargin.x)
+            : new Vector2(-StatusIconMargin.x, StatusIconMargin.y);
+        statusIconRectTransform.localRotation = Quaternion.Euler(0f, 0f, IsVisuallyRotated ? 90f : 0f);
+        statusIconRectTransform.localScale = Vector3.one;
+    }
+
     private void EnsureVisuals()
     {
         if (rectTransform == null)
@@ -448,6 +502,7 @@ public class InventoryItem : MonoBehaviour
 
         EnsureOverlayTexts();
         EnsureDurabilityVisuals();
+        EnsureStatusIconVisual();
 
         if (itemImage != null)
         {
@@ -549,6 +604,7 @@ public class InventoryItem : MonoBehaviour
         itemImage.transform.SetAsLastSibling();
         RefreshDurabilityVisual(true);
         BringOverlayTextsToFront();
+        RefreshStatusIcon();
     }
 
     private void EnsureOverlayTexts()
@@ -597,6 +653,23 @@ public class InventoryItem : MonoBehaviour
 
         DisableRaycastTarget(durabilityBackgroundRectTransform);
         DisableRaycastTarget(durabilityFillRectTransform);
+    }
+
+    private void EnsureStatusIconVisual()
+    {
+        if (statusIconImage == null)
+        {
+            statusIconRectTransform = null;
+            return;
+        }
+
+        if (statusIconRectTransform == null)
+        {
+            statusIconRectTransform = statusIconImage.rectTransform;
+        }
+
+        statusIconImage.raycastTarget = false;
+        statusIconImage.preserveAspect = true;
     }
 
     private void EnsureOverlayText(string objectName, ref TMP_Text text, ref RectTransform textRectTransform)
@@ -659,6 +732,11 @@ public class InventoryItem : MonoBehaviour
         if (countTextRectTransform != null)
         {
             countTextRectTransform.SetAsLastSibling();
+        }
+
+        if (statusIconRectTransform != null && statusIconRectTransform.gameObject.activeSelf)
+        {
+            statusIconRectTransform.SetAsLastSibling();
         }
     }
 

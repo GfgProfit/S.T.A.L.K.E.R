@@ -1,0 +1,58 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 737e751cd05516846acf43daad139c9e, type: 3}
+  m_Name: identity_card
+  m_EditorClassIdentifier: 
+  itemName: "\u041F\u0440\u043E\u043F\u0443\u0441\u043A"
+  shortName: 
+  description: "\u041F\u0440\u043E\u043F\u0443\u0441\u043A"
+  itemType: 10
+  rarity: 0
+  weight: 0.01
+  stackable: 0
+  useDurability: 0
+  defaultDurabilityPercent: 100
+  canEquipHelmet: 1
+  statModifiers: []
+  worldItemPrefab: {fileID: 8246156702917426190, guid: dcb0a1c7943c8f248b02f5861da6b1d3, type: 3}
+  width: 1
+  height: 1
+  itemIcon: {fileID: 0}
+  generateIconAtRuntime: 1
+  iconPrefab: {fileID: 1025589010745932017, guid: 190d5db03851e664ba8ff8931eab2a37, type: 3}
+  iconParts: []
+  iconPixelsPerCell: 64
+  iconRenderScale: 2
+  iconPadding: 1.1
+  iconAntiAliasing: 8
+  iconUseOutline: 1
+  iconOutlineWidth: 2
+  iconUseShadow: 1
+  iconShadowOffset: {x: 2, y: -2}
+  iconShadowBlur: 2
+  iconModelEulerAngles: {x: 180, y: 180, z: 0}
+  iconModelScale: {x: 1, y: 1, z: 1}
+  iconCameraEulerAngles: {x: 50, y: -135, z: 0}
+  slotIconModelEulerAngles: {x: 0, y: 0, z: 0}
+  slotIconModelScale: {x: 1, y: 1, z: 1}
+  slotIconCameraEulerAngles: {x: 50, y: -135, z: 0}
+  slotIconPadding: 1.15
+  iconShowCellGrid: 1
+  iconShowCellGridBorder: 1
+  iconCellGridBorderLineThickness: 2
+  iconUseDirectionalLight: 1
+  iconLightEulerAngles: {x: 50, y: -130, z: 0}
+  iconLightIntensity: 100000
+  slotIconUseDirectionalLight: 1
+  slotIconLightEulerAngles: {x: 50, y: -130, z: 0}
+  slotIconLightIntensity: 100000
+  slotIconSettingsInitialized: 1
