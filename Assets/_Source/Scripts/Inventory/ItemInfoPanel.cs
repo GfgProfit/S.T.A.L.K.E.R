@@ -21,9 +21,7 @@ public class ItemInfoPanel : MonoBehaviour
     [SerializeField] private TMP_Text descriptionText;
     [SerializeField] [Min(1)] private int descriptionWordsPerLine;
     [Header("Stats Info")]
-    [SerializeField] private GameObject statsInfoRoot;
-    [SerializeField] private Color statCurrentValueColor = Color.green;
-    [SerializeField] private Color statFullDurabilityValueColor = new Color(1f, 0.55f, 0f, 1f);
+    [SerializeField] private CharacterStatsInfoPanel statsInfoPanel;
     [SerializeField] private bool hideStatsInfoWhenEmpty = true;
 
     private readonly Vector3[] panelWorldCorners = new Vector3[4];
@@ -66,11 +64,16 @@ public class ItemInfoPanel : MonoBehaviour
 
     private void SetStatsInfo(InventoryItem item)
     {
-        CharacterStatsInfoRenderer.RenderItemStats(
-            GetStatsInfoRoot(),
+        if (statsInfoPanel == null)
+        {
+            return;
+        }
+
+        GameProjectSettings settings = GameProjectSettings.LoadDefault();
+        statsInfoPanel.RenderItemStats(
             item,
-            statCurrentValueColor,
-            statFullDurabilityValueColor,
+            settings.StatCurrentValueColor,
+            settings.StatFullDurabilityValueColor,
             hideStatsInfoWhenEmpty);
     }
 
@@ -158,7 +161,7 @@ public class ItemInfoPanel : MonoBehaviour
         }
 
         float durabilityPercent = item.CurrentDurabilityPercent;
-        string percentColor = ColorUtility.ToHtmlStringRGBA(ItemDurabilityVisualSettings.LoadDefault().GetColor(durabilityPercent));
+        string percentColor = ColorUtility.ToHtmlStringRGBA(GameProjectSettings.LoadDefault().GetDurabilityColor(durabilityPercent));
         durabilityText.richText = true;
         durabilityText.text = $"Прочность: <color=#{percentColor}>{durabilityPercent:00.0}%</color>";
     }
@@ -231,17 +234,6 @@ public class ItemInfoPanel : MonoBehaviour
         }
 
         return null;
-    }
-
-    private GameObject GetStatsInfoRoot()
-    {
-        if (statsInfoRoot != null)
-        {
-            return statsInfoRoot;
-        }
-
-        statsInfoRoot = CharacterStatsInfoRenderer.FindStatsInfoRoot(transform, true);
-        return statsInfoRoot;
     }
 
     private void RebuildLayout()

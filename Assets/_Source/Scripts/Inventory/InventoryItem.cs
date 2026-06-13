@@ -417,7 +417,7 @@ public class InventoryItem : MonoBehaviour
 
         if (durabilityFillGraphic != null)
         {
-            durabilityFillGraphic.color = ItemDurabilityVisualSettings.LoadDefault().GetColor(CurrentDurabilityPercent);
+            durabilityFillGraphic.color = GameProjectSettings.LoadDefault().GetDurabilityColor(CurrentDurabilityPercent);
         }
 
         durabilityFillRectTransform.anchorMin = Vector2.zero;

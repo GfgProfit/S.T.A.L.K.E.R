@@ -56,7 +56,7 @@ public class ItemData : ScriptableObject
     public string Description => description ?? string.Empty;
     public ItemType ItemType => itemType;
     public ItemRarity Rarity => rarity;
-    public Color ShortNameColor => RarityVisualSettings.GetShortNameColor(rarity);
+    public Color ShortNameColor => Settings.GetShortNameColor(rarity);
     public float Weight => Mathf.Max(0f, weight);
     public bool IsStackable => stackable && HasDurability == false;
     public bool HasDurability => useDurability;
@@ -73,10 +73,10 @@ public class ItemData : ScriptableObject
     public int IconRenderScale => Mathf.Clamp(iconRenderScale, 1, 4);
     public int IconAntiAliasing => GetSupportedAntiAliasing(iconAntiAliasing);
     public bool IconUseOutline => iconUseOutline && IconOutlineTextureWidth > 0 && IconOutlineColor.a > 0f;
-    public Color IconOutlineColor => RarityVisualSettings.IconOutlineColor;
+    public Color IconOutlineColor => Settings.IconOutlineColor;
     public int IconOutlineTextureWidth => Mathf.Max(0, iconOutlineWidth) * IconRenderScale;
     public bool IconUseShadow => iconUseShadow && IconShadowColor.a > 0f && (IconShadowTextureOffset != Vector2Int.zero || IconShadowTextureBlur > 0);
-    public Color IconShadowColor => RarityVisualSettings.IconShadowColor;
+    public Color IconShadowColor => Settings.IconShadowColor;
     public Vector2Int IconShadowTextureOffset => Vector2Int.RoundToInt(iconShadowOffset * IconRenderScale);
     public int IconShadowTextureBlur => Mathf.Max(0, iconShadowBlur) * IconRenderScale;
     public float IconPadding => Mathf.Max(1f, iconPadding);
@@ -118,10 +118,10 @@ public class ItemData : ScriptableObject
             return slotIconCameraEulerAngles;
         }
     }
-    public Color IconBackgroundColor => RarityVisualSettings.GetIconBackgroundColor(rarity);
+    public Color IconBackgroundColor => Settings.GetIconBackgroundColor(rarity);
     public bool IconShowCellGrid => iconShowCellGrid;
     public bool IconShowCellGridBorder => iconShowCellGridBorder;
-    public Color IconCellGridBorderColor => RarityVisualSettings.GetIconCellGridBorderColor(rarity);
+    public Color IconCellGridBorderColor => Settings.GetIconCellGridBorderColor(rarity);
     public float IconCellGridBorderLineThickness => Mathf.Max(1f, iconCellGridBorderLineThickness);
     public bool IconUseDirectionalLight => iconUseDirectionalLight;
     public Vector3 IconLightEulerAngles => iconLightEulerAngles;
@@ -157,7 +157,7 @@ public class ItemData : ScriptableObject
     public int IconTextureHeight => Mathf.Max(1, height) * IconPixelsPerCell * IconRenderScale;
     public float IconSpritePixelsPerUnit => IconPixelsPerCell * IconRenderScale;
 
-    private ItemRarityVisualSettings RarityVisualSettings => ItemRarityVisualSettings.LoadDefault();
+    private GameProjectSettings Settings => GameProjectSettings.LoadDefault();
 
     private void OnEnable()
     {
@@ -231,7 +231,7 @@ public class ItemData : ScriptableObject
             int hash = 17;
             hash = hash * 31 + GetInstanceID();
             hash = hash * 31 + (int)rarity;
-            hash = hash * 31 + RarityVisualSettings.BuildHash();
+            hash = hash * 31 + Settings.BuildItemRarityVisualHash();
             hash = hash * 31 + targetWidth;
             hash = hash * 31 + targetHeight;
             hash = hash * 31 + IconPixelsPerCell;

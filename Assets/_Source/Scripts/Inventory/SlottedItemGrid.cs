@@ -24,14 +24,14 @@ public class SlottedItemGrid : InventoryGrid
     private float maxRowLocalWidth;
     private RectTransform slotVisualRoot;
     private Image sourceImage;
-    private InventoryGridVisualSettings visualSettings;
+    private GameProjectSettings visualSettings;
 
     public override int HighlightSiblingIndex => slotVisualRoot == null ? 0 : 1;
 
     private void Awake()
     {
         rectTransform = GetComponent<RectTransform>();
-        visualSettings = InventoryGridVisualSettings.LoadDefault();
+        visualSettings = GameProjectSettings.LoadDefault();
 
         Canvas canvas = GetComponentInParent<Canvas>();
         if (canvas != null && canvas.renderMode != RenderMode.ScreenSpaceOverlay)
@@ -629,7 +629,7 @@ public class SlottedItemGrid : InventoryGrid
     {
         if (visualSettings == null)
         {
-            visualSettings = InventoryGridVisualSettings.LoadDefault();
+            visualSettings = GameProjectSettings.LoadDefault();
         }
 
         if (visualSettings.ShowCellGrid == false) { return; }

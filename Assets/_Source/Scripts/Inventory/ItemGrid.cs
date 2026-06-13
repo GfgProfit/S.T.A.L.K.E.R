@@ -14,7 +14,7 @@ public class ItemGrid : InventoryGrid
     private RectTransform rectTransform;
     private Camera uiCamera;
     private RectTransform cellGridRoot;
-    private InventoryGridVisualSettings visualSettings;
+    private GameProjectSettings visualSettings;
 
     private InventoryItem[,] inventoryItemSlot;
 
@@ -23,7 +23,7 @@ public class ItemGrid : InventoryGrid
     private void Awake()
     {
         rectTransform = GetComponent<RectTransform>();
-        visualSettings = InventoryGridVisualSettings.LoadDefault();
+        visualSettings = GameProjectSettings.LoadDefault();
 
         Canvas canvas = GetComponentInParent<Canvas>();
         if (canvas != null && canvas.renderMode != RenderMode.ScreenSpaceOverlay)
@@ -278,7 +278,7 @@ public class ItemGrid : InventoryGrid
     {
         if (visualSettings == null)
         {
-            visualSettings = InventoryGridVisualSettings.LoadDefault();
+            visualSettings = GameProjectSettings.LoadDefault();
         }
 
         if (visualSettings.ShowCellGrid == false) { return; }

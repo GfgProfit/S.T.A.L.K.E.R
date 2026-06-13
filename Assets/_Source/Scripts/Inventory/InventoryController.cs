@@ -47,14 +47,10 @@ public class InventoryController : MonoBehaviour
     [SerializeField] private InventoryItemContextMenu itemContextMenu;
     [SerializeField] private GameObject closedSlotPrefab;
     [Header("Stats Info")]
-    [SerializeField] private GameObject playerStatsInfoRoot;
-    [SerializeField] private Color statCurrentValueColor = Color.green;
+    [SerializeField] private CharacterStatsInfoPanel playerStatsInfoPanel;
     [SerializeField] private bool hidePlayerStatsInfoWhenEmpty = true;
     [SerializeField] [Min(0f)] private float maxCarryWeight = 50f;
     [SerializeField] [Min(0f)] private float movementBlockExtraWeight = 10f;
-    [SerializeField] private Color normalWeightColor = Color.white;
-    [SerializeField] private Color overweightColor = new Color(1f, 0.55f, 0f, 1f);
-    [SerializeField] private Color movementBlockedWeightColor = Color.red;
     [SerializeField] private bool openOnStart;
     [SerializeField] private bool unlockCursorWhileOpen = true;
     [SerializeField] private bool disablePlayerControlsWhileOpen = true;
@@ -133,7 +129,6 @@ public class InventoryController : MonoBehaviour
             dropCamera = Camera.main;
         }
 
-        ResolvePlayerStats();
         itemContextMenu.Initialize(DropSingleContextMenuItem, DropContextMenuItemStack);
         RegisterExistingInventoryItems();
         SetInventoryOpen(openOnStart, true);
@@ -691,12 +686,14 @@ public class InventoryController : MonoBehaviour
 
         RefreshSlotRestrictions();
 
-        CharacterStatsInfoRenderer.RenderCharacterStats(
-            GetPlayerStatsInfoRoot(),
-            playerStats == null ? equippedStats : playerStats.CurrentStats,
-            statCurrentValueColor,
-            hidePlayerStatsInfoWhenEmpty,
-            true);
+        if (playerStatsInfoPanel != null)
+        {
+            playerStatsInfoPanel.RenderCharacterStats(
+                playerStats == null ? equippedStats : playerStats.CurrentStats,
+                GameProjectSettings.LoadDefault().StatCurrentValueColor,
+                hidePlayerStatsInfoWhenEmpty,
+                true);
+        }
     }
 
     private void AddEquippedStatsIn(Transform root)
@@ -1055,7 +1052,7 @@ public class InventoryController : MonoBehaviour
 
         weightText.raycastTarget = false;
         weightText.richText = true;
-        weightText.color = normalWeightColor;
+        weightText.color = GameProjectSettings.LoadDefault().NormalWeightColor;
         weightText.text = $"Вес: <color=#{ColorUtility.ToHtmlStringRGBA(GetWeightTextColor())}>{FormatWeight(currentCarryWeight)}</color> / {FormatWeight(MaxCarryWeight)}";
     }
 
@@ -1083,17 +1080,19 @@ public class InventoryController : MonoBehaviour
 
     private Color GetWeightTextColor()
     {
+        GameProjectSettings settings = GameProjectSettings.LoadDefault();
+
         if (currentCarryWeight >= MovementBlockWeight)
         {
-            return movementBlockedWeightColor;
+            return settings.MovementBlockedWeightColor;
         }
 
         if (currentCarryWeight >= MaxCarryWeight)
         {
-            return overweightColor;
+            return settings.OverweightColor;
         }
 
-        return normalWeightColor;
+        return settings.NormalWeightColor;
     }
 
     private void ShowItemInfoPanel(InventoryItem item)
@@ -1120,39 +1119,6 @@ public class InventoryController : MonoBehaviour
         }
 
         itemInfoPanel.Hide();
-    }
-
-    private void ResolvePlayerStats()
-    {
-        if (playerStats != null)
-        {
-            return;
-        }
-
-        if (playerController != null)
-        {
-            playerStats = playerController.GetComponent<PlayerCharacterStats>();
-            if (playerStats == null)
-            {
-                playerStats = playerController.gameObject.AddComponent<PlayerCharacterStats>();
-            }
-
-            return;
-        }
-
-        playerStats = FindFirstObjectByType<PlayerCharacterStats>();
-    }
-
-    private GameObject GetPlayerStatsInfoRoot()
-    {
-        if (playerStatsInfoRoot != null)
-        {
-            return playerStatsInfoRoot;
-        }
-
-        Transform searchRoot = inventoryRoot == null ? transform : inventoryRoot.transform;
-        playerStatsInfoRoot = CharacterStatsInfoRenderer.FindStatsInfoRoot(searchRoot, true);
-        return playerStatsInfoRoot;
     }
 
     private bool IsContextMenuOpen()
