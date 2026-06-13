@@ -32,9 +32,10 @@ MonoBehaviour:
   stackable: 0
   useDurability: 1
   defaultDurabilityPercent: 100
+  canEquipHelmet: 1
   statModifiers:
   - statType: 4
-    valueAtFullDurability: 45
+    valueAtFullDurability: 35
   - statType: 5
     valueAtFullDurability: 15
   - statType: 6

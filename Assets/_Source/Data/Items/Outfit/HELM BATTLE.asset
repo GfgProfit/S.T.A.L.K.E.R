@@ -37,6 +37,7 @@ MonoBehaviour:
   stackable: 0
   useDurability: 1
   defaultDurabilityPercent: 100
+  canEquipHelmet: 1
   statModifiers:
   - statType: 2
     valueAtFullDurability: 10
@@ -45,7 +46,7 @@ MonoBehaviour:
   - statType: 4
     valueAtFullDurability: 30
   - statType: 6
-    valueAtFullDurability: 20
+    valueAtFullDurability: 25
   worldItemPrefab: {fileID: 0}
   width: 2
   height: 2
