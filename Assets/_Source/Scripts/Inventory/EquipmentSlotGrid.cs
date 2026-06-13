@@ -13,6 +13,11 @@ public class EquipmentSlotGrid : InventoryGrid
     private RectTransform rectTransform;
     private Camera uiCamera;
     private InventoryItem equippedItem;
+    private GameObject closedSlotInstance;
+
+    public InventoryItem EquippedItem => equippedItem;
+    public ItemType AcceptedItemType => acceptedItemType;
+    public bool IsClosed { get; private set; }
 
     private void Awake()
     {
@@ -61,7 +66,7 @@ public class EquipmentSlotGrid : InventoryGrid
 
     public override Vector2Int? FindSpaceForObject(InventoryItem itemToInsert)
     {
-        if (equippedItem != null || CanAcceptItem(itemToInsert) == false)
+        if (IsClosed || equippedItem != null || CanAcceptItem(itemToInsert) == false)
         {
             return null;
         }
@@ -71,6 +76,11 @@ public class EquipmentSlotGrid : InventoryGrid
 
     public override bool CanPlaceItem(InventoryItem inventoryItem, int posX, int posY)
     {
+        if (IsClosed)
+        {
+            return false;
+        }
+
         if (CanAcceptItem(inventoryItem) == false)
         {
             return false;
@@ -138,6 +148,30 @@ public class EquipmentSlotGrid : InventoryGrid
         return false;
     }
 
+    public bool CanSetClosed(bool closed)
+    {
+        return closed == false || equippedItem == null;
+    }
+
+    public void SetClosed(bool closed, GameObject closedSlotPrefab)
+    {
+        if (closed && equippedItem != null)
+        {
+            closed = false;
+        }
+
+        IsClosed = closed;
+
+        if (IsClosed)
+        {
+            EnsureClosedSlotVisual(closedSlotPrefab);
+        }
+        else
+        {
+            DestroyClosedSlotVisual();
+        }
+    }
+
     private void InitGridSize()
     {
         if (useRectTransformSize == false || rectTransform == null)
@@ -165,6 +199,56 @@ public class EquipmentSlotGrid : InventoryGrid
         }
 
         return item.itemData != null && item.itemData.ItemType == acceptedItemType;
+    }
+
+    private void EnsureClosedSlotVisual(GameObject closedSlotPrefab)
+    {
+        if (closedSlotPrefab == null || rectTransform == null)
+        {
+            return;
+        }
+
+        if (closedSlotInstance == null)
+        {
+            closedSlotInstance = Instantiate(closedSlotPrefab, rectTransform, false);
+            closedSlotInstance.name = closedSlotPrefab.name;
+        }
+
+        RectTransform closedRectTransform = closedSlotInstance.GetComponent<RectTransform>();
+        if (closedRectTransform != null)
+        {
+            closedRectTransform.anchorMin = new Vector2(0f, 1f);
+            closedRectTransform.anchorMax = new Vector2(0f, 1f);
+            closedRectTransform.pivot = new Vector2(0f, 1f);
+            closedRectTransform.anchoredPosition = Vector2.zero;
+            closedRectTransform.sizeDelta = new Vector2(
+                gridSizeWidth * ItemGrid.tileSizeWidth,
+                gridSizeHeight * ItemGrid.tileSizeHeight);
+            closedRectTransform.localRotation = Quaternion.identity;
+            closedRectTransform.localScale = Vector3.one;
+        }
+
+        closedSlotInstance.transform.SetAsFirstSibling();
+        closedSlotInstance.SetActive(true);
+    }
+
+    private void DestroyClosedSlotVisual()
+    {
+        if (closedSlotInstance == null)
+        {
+            return;
+        }
+
+        if (Application.isPlaying)
+        {
+            Destroy(closedSlotInstance);
+        }
+        else
+        {
+            DestroyImmediate(closedSlotInstance);
+        }
+
+        closedSlotInstance = null;
     }
 
     private void ApplyEquippedVisual(InventoryItem item)

@@ -119,6 +119,11 @@ public class SlottedItemGrid : InventoryGrid
     {
         foreach (SlotState slot in slots)
         {
+            if (slot.IsClosed)
+            {
+                continue;
+            }
+
             if (slot.Definition.AcceptsItem(itemToInsert) == false)
             {
                 continue;
@@ -256,6 +261,90 @@ public class SlottedItemGrid : InventoryGrid
         return IsArtifactSlot(GetSlotAtCell(posX, posY)) == false;
     }
 
+    public bool HasArtifactSlots
+    {
+        get
+        {
+            foreach (SlotState slot in slots)
+            {
+                if (IsArtifactSlot(slot))
+                {
+                    return true;
+                }
+            }
+
+            return false;
+        }
+    }
+
+    public int ArtifactSlotCount
+    {
+        get
+        {
+            int count = 0;
+
+            foreach (SlotState slot in slots)
+            {
+                if (IsArtifactSlot(slot))
+                {
+                    count++;
+                }
+            }
+
+            return count;
+        }
+    }
+
+    public bool CanSetOpenArtifactSlotCount(int openSlotBudget)
+    {
+        int remainingOpenSlots = Mathf.Max(0, openSlotBudget);
+
+        foreach (SlotState slot in slots)
+        {
+            if (IsArtifactSlot(slot) == false)
+            {
+                continue;
+            }
+
+            bool shouldOpen = remainingOpenSlots > 0;
+            if (shouldOpen)
+            {
+                remainingOpenSlots--;
+                continue;
+            }
+
+            if (GetSlotOccupant(slot) != null)
+            {
+                return false;
+            }
+        }
+
+        return true;
+    }
+
+    public int SetOpenArtifactSlotCount(int openSlotBudget, GameObject closedSlotPrefab)
+    {
+        int remainingOpenSlots = Mathf.Max(0, openSlotBudget);
+
+        foreach (SlotState slot in slots)
+        {
+            if (IsArtifactSlot(slot) == false)
+            {
+                continue;
+            }
+
+            bool shouldOpen = remainingOpenSlots > 0;
+            if (shouldOpen)
+            {
+                remainingOpenSlots--;
+            }
+
+            SetSlotClosed(slot, shouldOpen == false, closedSlotPrefab);
+        }
+
+        return remainingOpenSlots;
+    }
+
     public override bool BoundryCheck(int posX, int posY, int width, int height)
     {
         SlotState slot = GetSlotAtCell(posX, posY);
@@ -297,6 +386,7 @@ public class SlottedItemGrid : InventoryGrid
         foreach (InventorySlotDefinition definition in definitions)
         {
             SlotState slot = new SlotState(definition);
+            slot.IsClosed = IsArtifactSlot(slot);
             slots.Add(slot);
 
             for (int x = 0; x < definition.width; x++)
@@ -369,7 +459,7 @@ public class SlottedItemGrid : InventoryGrid
     private bool TryGetPlacementSlot(InventoryItem inventoryItem, int posX, int posY, out SlotState slot)
     {
         slot = GetSlotAtCell(posX, posY);
-        return slot != null && slot.Definition.AcceptsItem(inventoryItem);
+        return slot != null && slot.IsClosed == false && slot.Definition.AcceptsItem(inventoryItem);
     }
 
     private int GetPlacementWidth(InventoryItem inventoryItem, SlotState slot)
@@ -467,6 +557,9 @@ public class SlottedItemGrid : InventoryGrid
     {
         public readonly InventorySlotDefinition Definition;
         public Vector2 VisualPosition;
+        public RectTransform VisualRoot;
+        public GameObject ClosedSlotInstance;
+        public bool IsClosed;
 
         public SlotState(InventorySlotDefinition definition)
         {
@@ -493,6 +586,7 @@ public class SlottedItemGrid : InventoryGrid
             slotObject.transform.SetParent(slotVisualRoot, false);
 
             RectTransform slotRectTransform = slotObject.GetComponent<RectTransform>();
+            slot.VisualRoot = slotRectTransform;
             slotRectTransform.anchorMin = new Vector2(0f, 1f);
             slotRectTransform.anchorMax = new Vector2(0f, 1f);
             slotRectTransform.pivot = new Vector2(0f, 1f);
@@ -588,6 +682,100 @@ public class SlottedItemGrid : InventoryGrid
         Image lineImage = lineObject.GetComponent<Image>();
         lineImage.color = color;
         lineImage.raycastTarget = false;
+    }
+
+    private void SetSlotClosed(SlotState slot, bool closed, GameObject closedSlotPrefab)
+    {
+        if (slot == null)
+        {
+            return;
+        }
+
+        if (closed && GetSlotOccupant(slot) != null)
+        {
+            closed = false;
+        }
+
+        slot.IsClosed = closed;
+
+        if (slot.IsClosed)
+        {
+            EnsureClosedSlotVisual(slot, closedSlotPrefab);
+        }
+        else
+        {
+            DestroyClosedSlotVisual(slot);
+        }
+    }
+
+    private InventoryItem GetSlotOccupant(SlotState slot)
+    {
+        if (slot == null || inventoryItemSlot == null)
+        {
+            return null;
+        }
+
+        for (int x = 0; x < slot.Definition.width; x++)
+        {
+            for (int y = 0; y < slot.Definition.height; y++)
+            {
+                InventoryItem item = inventoryItemSlot[slot.Definition.x + x, slot.Definition.y + y];
+                if (item != null)
+                {
+                    return item;
+                }
+            }
+        }
+
+        return null;
+    }
+
+    private void EnsureClosedSlotVisual(SlotState slot, GameObject closedSlotPrefab)
+    {
+        if (slot == null || slot.VisualRoot == null || closedSlotPrefab == null)
+        {
+            return;
+        }
+
+        if (slot.ClosedSlotInstance == null)
+        {
+            slot.ClosedSlotInstance = Instantiate(closedSlotPrefab, slot.VisualRoot, false);
+            slot.ClosedSlotInstance.name = closedSlotPrefab.name;
+        }
+
+        RectTransform closedRectTransform = slot.ClosedSlotInstance.GetComponent<RectTransform>();
+        if (closedRectTransform != null)
+        {
+            closedRectTransform.anchorMin = new Vector2(0f, 1f);
+            closedRectTransform.anchorMax = new Vector2(0f, 1f);
+            closedRectTransform.pivot = new Vector2(0f, 1f);
+            closedRectTransform.anchoredPosition = Vector2.zero;
+            closedRectTransform.sizeDelta = GetSlotVisualSize(slot.Definition);
+            closedRectTransform.localRotation = Quaternion.identity;
+            closedRectTransform.localScale = Vector3.one;
+        }
+
+        slot.ClosedSlotInstance.transform.SetAsFirstSibling();
+        slot.ClosedSlotInstance.SetActive(true);
+    }
+
+    private void DestroyClosedSlotVisual(SlotState slot)
+    {
+        if (slot == null || slot.ClosedSlotInstance == null)
+        {
+            return;
+        }
+
+        if (Application.isPlaying)
+        {
+            Destroy(slot.ClosedSlotInstance);
+        }
+        else
+        {
+            DestroyImmediate(slot.ClosedSlotInstance);
+        }
+
+        slot.ClosedSlotInstance = null;
     }
 
     private Vector2 GetSlotVisualPosition(InventorySlotDefinition definition)

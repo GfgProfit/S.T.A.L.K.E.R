@@ -20,6 +20,11 @@ public class ItemInfoPanel : MonoBehaviour
     [SerializeField] private TMP_Text durabilityText;
     [SerializeField] private TMP_Text descriptionText;
     [SerializeField] [Min(1)] private int descriptionWordsPerLine;
+    [Header("Stats Info")]
+    [SerializeField] private GameObject statsInfoRoot;
+    [SerializeField] private Color statCurrentValueColor = Color.green;
+    [SerializeField] private Color statFullDurabilityValueColor = new Color(1f, 0.55f, 0f, 1f);
+    [SerializeField] private bool hideStatsInfoWhenEmpty = true;
 
     private readonly Vector3[] panelWorldCorners = new Vector3[4];
 
@@ -48,6 +53,7 @@ public class ItemInfoPanel : MonoBehaviour
         SetType(item.itemData);
         SetWeight(item);
         SetDurability(item);
+        SetStatsInfo(item);
         SetDescription(item.itemData);
         RebuildLayout();
         UpdatePosition();
@@ -56,6 +62,16 @@ public class ItemInfoPanel : MonoBehaviour
     public void Hide()
     {
         gameObject.SetActive(false);
+    }
+
+    private void SetStatsInfo(InventoryItem item)
+    {
+        CharacterStatsInfoRenderer.RenderItemStats(
+            GetStatsInfoRoot(),
+            item,
+            statCurrentValueColor,
+            statFullDurabilityValueColor,
+            hideStatsInfoWhenEmpty);
     }
 
     private void SetIcon(InventoryItem item)
@@ -215,6 +231,17 @@ public class ItemInfoPanel : MonoBehaviour
         }
 
         return null;
+    }
+
+    private GameObject GetStatsInfoRoot()
+    {
+        if (statsInfoRoot != null)
+        {
+            return statsInfoRoot;
+        }
+
+        statsInfoRoot = CharacterStatsInfoRenderer.FindStatsInfoRoot(transform, true);
+        return statsInfoRoot;
     }
 
     private void RebuildLayout()

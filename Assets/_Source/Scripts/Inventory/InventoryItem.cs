@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using TMPro;
 using UnityEngine;
@@ -44,6 +45,8 @@ public class InventoryItem : MonoBehaviour
     private int visualHeightOverride = 1;
     private Sprite iconOverride;
     private IReadOnlyList<ItemIconPart> runtimeIconParts;
+
+    public event Action<InventoryItem> DurabilityChanged;
 
     public int Width => itemData == null ? 0 : Mathf.Max(1, rotated ? itemData.height : itemData.width);
     public int Height => itemData == null ? 0 : Mathf.Max(1, rotated ? itemData.width : itemData.height);
@@ -273,8 +276,16 @@ public class InventoryItem : MonoBehaviour
 
     private void SetDurabilityInternal(float durabilityPercent)
     {
-        currentDurabilityPercent = ItemData.NormalizeDurability(durabilityPercent);
+        float normalizedDurabilityPercent = ItemData.NormalizeDurability(durabilityPercent);
+        bool durabilityChanged = Mathf.Approximately(currentDurabilityPercent, normalizedDurabilityPercent) == false;
+
+        currentDurabilityPercent = normalizedDurabilityPercent;
         RefreshDurabilityVisual(true);
+
+        if (durabilityChanged)
+        {
+            DurabilityChanged?.Invoke(this);
+        }
     }
 
     private float GetDefaultDurabilityPercent()

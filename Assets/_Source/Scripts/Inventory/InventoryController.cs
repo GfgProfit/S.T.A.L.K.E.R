@@ -9,6 +9,8 @@ using UnityEditor;
 
 public class InventoryController : MonoBehaviour
 {
+    private const string EditorClosedSlotPrefabPath = "Assets/_Source/Prefabs/UI/Closed Slot.prefab";
+
     private InventoryGrid selectedItemGrid;
 
     public InventoryGrid SelectedItemGrid
@@ -28,6 +30,7 @@ public class InventoryController : MonoBehaviour
     [SerializeField] private CanvasGroup inventoryCanvasGroup;
     [SerializeField] private InventoryGrid defaultItemGrid;
     [SerializeField] private PlayerController playerController;
+    [SerializeField] private PlayerCharacterStats playerStats;
     [SerializeField] private Transform dropOrigin;
     [SerializeField] private Camera dropCamera;
     [SerializeField] [Min(0f)] private float dropForwardDistance = 1.2f;
@@ -42,6 +45,11 @@ public class InventoryController : MonoBehaviour
     [SerializeField] private TMP_Text weightText;
     [SerializeField] private ItemInfoPanel itemInfoPanel;
     [SerializeField] private InventoryItemContextMenu itemContextMenu;
+    [SerializeField] private GameObject closedSlotPrefab;
+    [Header("Stats Info")]
+    [SerializeField] private GameObject playerStatsInfoRoot;
+    [SerializeField] private Color statCurrentValueColor = Color.green;
+    [SerializeField] private bool hidePlayerStatsInfoWhenEmpty = true;
     [SerializeField] [Min(0f)] private float maxCarryWeight = 50f;
     [SerializeField] [Min(0f)] private float movementBlockExtraWeight = 10f;
     [SerializeField] private Color normalWeightColor = Color.white;
@@ -68,11 +76,16 @@ public class InventoryController : MonoBehaviour
     private IPlayerInput fallbackPlayerInput;
     private readonly List<InventoryItem> inventoryItems = new List<InventoryItem>();
     private readonly List<InventoryGrid> quickActionGrids = new List<InventoryGrid>();
+    private readonly HashSet<EquipmentSlotGrid> equippedStatGrids = new HashSet<EquipmentSlotGrid>();
+    private readonly HashSet<EquipmentSlotGrid> restrictedEquipmentGrids = new HashSet<EquipmentSlotGrid>();
+    private readonly HashSet<SlottedItemGrid> restrictedSlottedGrids = new HashSet<SlottedItemGrid>();
+    private readonly CharacterStatBlock equippedStats = new CharacterStatBlock();
     private float currentCarryWeight;
 
     public bool IsOpen { get; private set; }
     public float CurrentCarryWeight => currentCarryWeight;
-    public float MaxCarryWeight => Mathf.Max(0f, maxCarryWeight);
+    public float BaseMaxCarryWeight => Mathf.Max(0f, maxCarryWeight);
+    public float MaxCarryWeight => Mathf.Max(0f, BaseMaxCarryWeight + GetCarryWeightBonusKg());
     public float MovementBlockWeight => MaxCarryWeight + Mathf.Max(0f, movementBlockExtraWeight);
     public bool IsMovementBlockedByWeight => currentCarryWeight >= MovementBlockWeight;
 
@@ -120,6 +133,7 @@ public class InventoryController : MonoBehaviour
             dropCamera = Camera.main;
         }
 
+        ResolvePlayerStats();
         itemContextMenu.Initialize(DropSingleContextMenuItem, DropContextMenuItemStack);
         RegisterExistingInventoryItems();
         SetInventoryOpen(openOnStart, true);
@@ -128,6 +142,8 @@ public class InventoryController : MonoBehaviour
 
     private IEnumerator Start()
     {
+        RefreshWeightState();
+
         if (prewarmItemIconsOnStart == false)
         {
             yield break;
@@ -275,6 +291,11 @@ public class InventoryController : MonoBehaviour
 
         if (posOnGrid != null)
         {
+            if (TryPrepareSlotRestrictionsForPlacement(targetGrid, itemToInsert) == false)
+            {
+                return false;
+            }
+
             targetGrid.PlaceItem(itemToInsert, posOnGrid.Value.x, posOnGrid.Value.y);
             return true;
         }
@@ -446,6 +467,13 @@ public class InventoryController : MonoBehaviour
             return false;
         }
 
+        if (TryPrepareSlotRestrictionsForPlacement(targetGrid, item) == false)
+        {
+            item.SetRotated(restoreRotated);
+            sourceGrid.PlaceItem(item, restorePosition.x, restorePosition.y);
+            return false;
+        }
+
         if (allowStackMerge &&
             item.IsStackable &&
             TryAddToExistingStackInGrid(targetGrid, item.itemData, item.CurrentAmount))
@@ -607,6 +635,7 @@ public class InventoryController : MonoBehaviour
         }
 
         inventoryItems.Add(item);
+        item.DurabilityChanged += HandleInventoryItemDurabilityChanged;
     }
 
     private void RegisterExistingInventoryItems()
@@ -629,11 +658,373 @@ public class InventoryController : MonoBehaviour
         }
     }
 
+    private void HandleInventoryItemDurabilityChanged(InventoryItem item)
+    {
+        RefreshWeightState();
+
+        if (itemInfoPanel != null && itemToHighlight == item)
+        {
+            itemInfoPanel.Show(item);
+        }
+    }
+
     private void RefreshWeightState()
     {
+        RefreshEquippedStats();
         currentCarryWeight = CalculateCurrentCarryWeight();
         RefreshWeightText();
         ApplyWeightMovementState();
+    }
+
+    private void RefreshEquippedStats()
+    {
+        equippedStats.Clear();
+        equippedStatGrids.Clear();
+
+        AddEquippedStatsIn(inventoryRoot == null ? null : inventoryRoot.transform);
+        AddEquippedStatsIn(canvasTransform);
+
+        if (playerStats != null)
+        {
+            playerStats.ApplyEquipmentStats(equippedStats);
+        }
+
+        RefreshSlotRestrictions();
+
+        CharacterStatsInfoRenderer.RenderCharacterStats(
+            GetPlayerStatsInfoRoot(),
+            playerStats == null ? equippedStats : playerStats.CurrentStats,
+            statCurrentValueColor,
+            hidePlayerStatsInfoWhenEmpty,
+            true);
+    }
+
+    private void AddEquippedStatsIn(Transform root)
+    {
+        if (root == null)
+        {
+            return;
+        }
+
+        EquipmentSlotGrid[] grids = root.GetComponentsInChildren<EquipmentSlotGrid>(true);
+        for (int i = 0; i < grids.Length; i++)
+        {
+            EquipmentSlotGrid grid = grids[i];
+            if (grid == null || equippedStatGrids.Add(grid) == false)
+            {
+                continue;
+            }
+
+            InventoryItem item = grid.EquippedItem;
+            if (ShouldApplyEquippedStats(item) == false)
+            {
+                continue;
+            }
+
+            CharacterStatUtility.AddItemStats(equippedStats, item);
+        }
+    }
+
+    private static bool ShouldApplyEquippedStats(InventoryItem item)
+    {
+        if (item == null || item.itemData == null)
+        {
+            return false;
+        }
+
+        return item.itemData.ItemType == ItemType.Armor ||
+               item.itemData.ItemType == ItemType.Helmet;
+    }
+
+    private float GetCarryWeightBonusKg()
+    {
+        return playerStats == null
+            ? equippedStats.Get(CharacterStatType.CarryWeight)
+            : playerStats.GetStat(CharacterStatType.CarryWeight);
+    }
+
+    private void RefreshSlotRestrictions()
+    {
+        GameObject resolvedClosedSlotPrefab = GetClosedSlotPrefab();
+        InventoryItem equippedArmor = GetFirstEquippedItem(ItemType.Armor);
+        bool closeHelmetSlot = equippedArmor != null &&
+                               equippedArmor.itemData != null &&
+                               equippedArmor.itemData.CanEquipHelmet == false;
+
+        SetEquipmentSlotsClosed(ItemType.Helmet, closeHelmetSlot, resolvedClosedSlotPrefab);
+        SetOpenArtifactSlotCount(GetArmorArtifactSlotCount(equippedArmor), resolvedClosedSlotPrefab);
+    }
+
+    private bool TryPrepareSlotRestrictionsForPlacement(InventoryGrid targetGrid, InventoryItem item)
+    {
+        if (item == null || item.itemData == null)
+        {
+            return false;
+        }
+
+        if (item.itemData.ItemType != ItemType.Armor || IsEquipmentSlot(targetGrid, ItemType.Armor) == false)
+        {
+            return true;
+        }
+
+        if (CanSetOpenArtifactSlotCount(GetArmorArtifactSlotCount(item)) == false)
+        {
+            return false;
+        }
+
+        return item.itemData.CanEquipHelmet || TryMoveEquippedItemToInventory(ItemType.Helmet);
+    }
+
+    private bool CanDetachItemWithSlotRestrictions(InventoryGrid sourceGrid, InventoryItem item)
+    {
+        if (item == null || item.itemData == null)
+        {
+            return false;
+        }
+
+        if (item.itemData.ItemType != ItemType.Armor || IsEquipmentSlot(sourceGrid, ItemType.Armor) == false)
+        {
+            return true;
+        }
+
+        return CanSetOpenArtifactSlotCount(0);
+    }
+
+    private InventoryItem GetFirstEquippedItem(ItemType itemType)
+    {
+        if (TryGetFirstEquipmentSlot(itemType, out EquipmentSlotGrid slot))
+        {
+            return slot.EquippedItem;
+        }
+
+        return null;
+    }
+
+    private bool TryGetFirstEquipmentSlot(ItemType itemType, out EquipmentSlotGrid slot)
+    {
+        restrictedEquipmentGrids.Clear();
+
+        if (TryGetFirstEquipmentSlotIn(inventoryRoot == null ? null : inventoryRoot.transform, itemType, out slot))
+        {
+            return true;
+        }
+
+        return TryGetFirstEquipmentSlotIn(canvasTransform, itemType, out slot);
+    }
+
+    private bool TryGetFirstEquipmentSlotIn(Transform root, ItemType itemType, out EquipmentSlotGrid slot)
+    {
+        slot = null;
+
+        if (root == null)
+        {
+            return false;
+        }
+
+        EquipmentSlotGrid[] grids = root.GetComponentsInChildren<EquipmentSlotGrid>(true);
+        for (int i = 0; i < grids.Length; i++)
+        {
+            EquipmentSlotGrid grid = grids[i];
+            if (grid == null ||
+                restrictedEquipmentGrids.Add(grid) == false ||
+                grid.AcceptedItemType != itemType)
+            {
+                continue;
+            }
+
+            if (grid.EquippedItem != null)
+            {
+                slot = grid;
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    private bool TryMoveEquippedItemToInventory(ItemType itemType)
+    {
+        if (defaultItemGrid == null)
+        {
+            return false;
+        }
+
+        if (TryGetFirstEquipmentSlot(itemType, out EquipmentSlotGrid sourceGrid) == false)
+        {
+            return true;
+        }
+
+        InventoryItem item = sourceGrid.EquippedItem;
+        if (item == null)
+        {
+            return true;
+        }
+
+        Vector2Int restorePosition = new Vector2Int(item.onGridPositionX, item.onGridPositionY);
+        bool restoreRotated = item.rotated;
+
+        if (TryDetachItemFromGrid(sourceGrid, item) == false)
+        {
+            return false;
+        }
+
+        if (InsertItem(item, defaultItemGrid))
+        {
+            RegisterInventoryItem(item);
+            RefreshWeightState();
+            return true;
+        }
+
+        item.SetRotated(restoreRotated);
+        sourceGrid.PlaceItem(item, restorePosition.x, restorePosition.y);
+        RefreshWeightState();
+        return false;
+    }
+
+    private void SetEquipmentSlotsClosed(ItemType itemType, bool closed, GameObject resolvedClosedSlotPrefab)
+    {
+        restrictedEquipmentGrids.Clear();
+        SetEquipmentSlotsClosedIn(inventoryRoot == null ? null : inventoryRoot.transform, itemType, closed, resolvedClosedSlotPrefab);
+        SetEquipmentSlotsClosedIn(canvasTransform, itemType, closed, resolvedClosedSlotPrefab);
+    }
+
+    private void SetEquipmentSlotsClosedIn(Transform root, ItemType itemType, bool closed, GameObject resolvedClosedSlotPrefab)
+    {
+        if (root == null)
+        {
+            return;
+        }
+
+        EquipmentSlotGrid[] grids = root.GetComponentsInChildren<EquipmentSlotGrid>(true);
+        for (int i = 0; i < grids.Length; i++)
+        {
+            EquipmentSlotGrid grid = grids[i];
+            if (grid == null ||
+                restrictedEquipmentGrids.Add(grid) == false ||
+                grid.AcceptedItemType != itemType)
+            {
+                continue;
+            }
+
+            grid.SetClosed(closed, resolvedClosedSlotPrefab);
+        }
+    }
+
+    private bool CanSetOpenArtifactSlotCount(int openSlotCount)
+    {
+        restrictedSlottedGrids.Clear();
+        int remainingOpenSlots = Mathf.Max(0, openSlotCount);
+
+        if (CanSetOpenArtifactSlotCountIn(inventoryRoot == null ? null : inventoryRoot.transform, ref remainingOpenSlots) == false)
+        {
+            return false;
+        }
+
+        return CanSetOpenArtifactSlotCountIn(canvasTransform, ref remainingOpenSlots);
+    }
+
+    private bool CanSetOpenArtifactSlotCountIn(Transform root, ref int remainingOpenSlots)
+    {
+        if (root == null)
+        {
+            return true;
+        }
+
+        SlottedItemGrid[] grids = root.GetComponentsInChildren<SlottedItemGrid>(true);
+        for (int i = 0; i < grids.Length; i++)
+        {
+            SlottedItemGrid grid = grids[i];
+            if (grid == null ||
+                grid.HasArtifactSlots == false ||
+                restrictedSlottedGrids.Add(grid) == false)
+            {
+                continue;
+            }
+
+            if (grid.CanSetOpenArtifactSlotCount(remainingOpenSlots) == false)
+            {
+                return false;
+            }
+
+            remainingOpenSlots = Mathf.Max(0, remainingOpenSlots - grid.ArtifactSlotCount);
+        }
+
+        return true;
+    }
+
+    private void SetOpenArtifactSlotCount(int openSlotCount, GameObject resolvedClosedSlotPrefab)
+    {
+        restrictedSlottedGrids.Clear();
+        int remainingOpenSlots = Mathf.Max(0, openSlotCount);
+        SetOpenArtifactSlotCountIn(inventoryRoot == null ? null : inventoryRoot.transform, ref remainingOpenSlots, resolvedClosedSlotPrefab);
+        SetOpenArtifactSlotCountIn(canvasTransform, ref remainingOpenSlots, resolvedClosedSlotPrefab);
+    }
+
+    private void SetOpenArtifactSlotCountIn(Transform root, ref int remainingOpenSlots, GameObject resolvedClosedSlotPrefab)
+    {
+        if (root == null)
+        {
+            return;
+        }
+
+        SlottedItemGrid[] grids = root.GetComponentsInChildren<SlottedItemGrid>(true);
+        for (int i = 0; i < grids.Length; i++)
+        {
+            SlottedItemGrid grid = grids[i];
+            if (grid == null ||
+                grid.HasArtifactSlots == false ||
+                restrictedSlottedGrids.Add(grid) == false)
+            {
+                continue;
+            }
+
+            remainingOpenSlots = grid.SetOpenArtifactSlotCount(remainingOpenSlots, resolvedClosedSlotPrefab);
+        }
+    }
+
+    private int GetArmorArtifactSlotCount(InventoryItem armorItem)
+    {
+        if (armorItem == null ||
+            armorItem.itemData == null ||
+            armorItem.itemData.ItemType != ItemType.Armor ||
+            armorItem.itemData.StatModifiers == null)
+        {
+            return 0;
+        }
+
+        for (int i = 0; i < armorItem.itemData.StatModifiers.Count; i++)
+        {
+            CharacterStatModifier modifier = armorItem.itemData.StatModifiers[i];
+            if (modifier.StatType != CharacterStatType.ArtifactContainers || modifier.HasValue == false)
+            {
+                continue;
+            }
+
+            float durabilityPercent = armorItem.HasDurability ? armorItem.CurrentDurabilityPercent : 100f;
+            float slotCount = CharacterStatUtility.CalculateCurrentValue(modifier, durabilityPercent);
+            return Mathf.Max(0, Mathf.RoundToInt(slotCount));
+        }
+
+        return 0;
+    }
+
+    private static bool IsEquipmentSlot(InventoryGrid grid, ItemType itemType)
+    {
+        return grid is EquipmentSlotGrid equipmentSlot && equipmentSlot.AcceptedItemType == itemType;
+    }
+
+    private GameObject GetClosedSlotPrefab()
+    {
+        if (closedSlotPrefab != null)
+        {
+            return closedSlotPrefab;
+        }
+
+#if UNITY_EDITOR
+        closedSlotPrefab = AssetDatabase.LoadAssetAtPath<GameObject>(EditorClosedSlotPrefabPath);
+#endif
+
+        return closedSlotPrefab;
     }
 
     private float CalculateCurrentCarryWeight()
@@ -731,6 +1122,39 @@ public class InventoryController : MonoBehaviour
         itemInfoPanel.Hide();
     }
 
+    private void ResolvePlayerStats()
+    {
+        if (playerStats != null)
+        {
+            return;
+        }
+
+        if (playerController != null)
+        {
+            playerStats = playerController.GetComponent<PlayerCharacterStats>();
+            if (playerStats == null)
+            {
+                playerStats = playerController.gameObject.AddComponent<PlayerCharacterStats>();
+            }
+
+            return;
+        }
+
+        playerStats = FindFirstObjectByType<PlayerCharacterStats>();
+    }
+
+    private GameObject GetPlayerStatsInfoRoot()
+    {
+        if (playerStatsInfoRoot != null)
+        {
+            return playerStatsInfoRoot;
+        }
+
+        Transform searchRoot = inventoryRoot == null ? transform : inventoryRoot.transform;
+        playerStatsInfoRoot = CharacterStatsInfoRenderer.FindStatsInfoRoot(searchRoot, true);
+        return playerStatsInfoRoot;
+    }
+
     private bool IsContextMenuOpen()
     {
         return itemContextMenu != null && itemContextMenu.IsOpen;
@@ -759,6 +1183,11 @@ public class InventoryController : MonoBehaviour
         InventoryItem item = selectedItemGrid.GetItem(tileGridPosition.x, tileGridPosition.y);
 
         if (item == null)
+        {
+            return;
+        }
+
+        if (CanDetachItemWithSlotRestrictions(selectedItemGrid, item) == false)
         {
             return;
         }
@@ -826,7 +1255,13 @@ public class InventoryController : MonoBehaviour
             return false;
         }
 
+        if (TryPrepareSlotRestrictionsForPlacement(targetGrid, selectedItem) == false)
+        {
+            return false;
+        }
+
         targetGrid.PlaceItem(selectedItem, tileGridPosition.x, tileGridPosition.y);
+        RefreshWeightState();
         FinishDraggingItem();
         return true;
     }
@@ -923,6 +1358,7 @@ public class InventoryController : MonoBehaviour
         }
 
         inventoryItems.Remove(item);
+        item.DurabilityChanged -= HandleInventoryItemDurabilityChanged;
         Destroy(item.gameObject);
     }
 
@@ -941,6 +1377,7 @@ public class InventoryController : MonoBehaviour
         selectedItem.SetRotated(dragOriginRotated);
 
         dragOriginGrid.PlaceItem(selectedItem, dragOriginPosition.x, dragOriginPosition.y);
+        RefreshWeightState();
         FinishDraggingItem();
         return true;
     }
@@ -952,6 +1389,7 @@ public class InventoryController : MonoBehaviour
         if (selectedItem != null)
         {
             StartDraggingItem(selectedItem);
+            RefreshWeightState();
         }
     }
 
@@ -1346,6 +1784,11 @@ public class InventoryController : MonoBehaviour
     private bool TryDetachItemFromGrid(InventoryGrid grid, InventoryItem item)
     {
         if (grid == null || item == null)
+        {
+            return false;
+        }
+
+        if (CanDetachItemWithSlotRestrictions(grid, item) == false)
         {
             return false;
         }

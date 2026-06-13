@@ -13,6 +13,8 @@ public class ItemData : ScriptableObject
     [SerializeField] private bool stackable;
     [SerializeField] private bool useDurability;
     [SerializeField] [Range(0f, 100f)] private float defaultDurabilityPercent = 100f;
+    [SerializeField] private bool canEquipHelmet = true;
+    [SerializeField] private List<CharacterStatModifier> statModifiers = new List<CharacterStatModifier>();
     [SerializeField] private WorldItem worldItemPrefab;
 
     [Min(1)] public int width = 1;
@@ -59,6 +61,9 @@ public class ItemData : ScriptableObject
     public bool IsStackable => stackable && HasDurability == false;
     public bool HasDurability => useDurability;
     public float DefaultDurabilityPercent => NormalizeDurability(defaultDurabilityPercent);
+    public bool CanEquipHelmet => canEquipHelmet;
+    public IReadOnlyList<CharacterStatModifier> StatModifiers => statModifiers;
+    public bool HasStatModifiers => CharacterStatUtility.HasAnyModifier(statModifiers);
     public WorldItem WorldItemPrefab => worldItemPrefab;
 
     public Sprite FallbackIcon => itemIcon;

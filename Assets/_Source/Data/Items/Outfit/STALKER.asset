@@ -38,6 +38,21 @@ MonoBehaviour:
   stackable: 0
   useDurability: 1
   defaultDurabilityPercent: 100
+  statModifiers:
+  - statType: 0
+    valueAtFullDurability: 35
+  - statType: 1
+    valueAtFullDurability: 30
+  - statType: 2
+    valueAtFullDurability: 20
+  - statType: 3
+    valueAtFullDurability: 10
+  - statType: 5
+    valueAtFullDurability: 35
+  - statType: 6
+    valueAtFullDurability: 10
+  - statType: 8
+    valueAtFullDurability: 2
   worldItemPrefab: {fileID: 0}
   width: 2
   height: 3
