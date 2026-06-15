@@ -12,9 +12,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 737e751cd05516846acf43daad139c9e, type: 3}
   m_Name: bandage
   m_EditorClassIdentifier: 
-  itemName: "\u0411\u0438\u043D\u0442"
-  shortName: 
-  description: "\u0410\u0441\u0435\u043F\u0442\u0438\u0447\u0435\u0441\u043A\u0438\u0439
+  _itemName: "\u0411\u0438\u043D\u0442"
+  _shortName: 
+  _description: "\u0410\u0441\u0435\u043F\u0442\u0438\u0447\u0435\u0441\u043A\u0438\u0439
     \u0431\u0438\u043D\u0442 \u0434\u043B\u044F \u043E\u0441\u0442\u0430\u043D\u043E\u0432\u043A\u0438
     \u043A\u0440\u043E\u0432\u043E\u0442\u0435\u0447\u0435\u043D\u0438\u044F \u0438
     \u043F\u0440\u0435\u0434\u043E\u0442\u0432\u0440\u0430\u0449\u0435\u043D\u0438\u044F
@@ -24,44 +24,44 @@ MonoBehaviour:
     \u043F\u0435\u0440\u0435\u0432\u044F\u0437\u0430\u0442\u044C \u0440\u0430\u043D\u0443,
     \u043F\u0440\u0438 \u0430\u0440\u0442\u0435\u0440\u0438\u0430\u043B\u044C\u043D\u043E\u043C
     \u2014 \u043F\u0435\u0440\u0435\u0442\u044F\u043D\u0443\u0442\u044C \u0430\u0440\u0442\u0435\u0440\u0438\u044E."
-  itemType: 7
-  rarity: 0
-  weight: 0.1
-  stackable: 1
-  useDurability: 0
-  defaultDurabilityPercent: 100
-  canEquipHelmet: 1
-  statModifiers: []
-  worldItemPrefab: {fileID: 1991076701997176597, guid: c7c2d4c533dacc9469d1069caec33b13, type: 3}
-  width: 1
-  height: 1
-  itemIcon: {fileID: 0}
-  generateIconAtRuntime: 1
-  iconPrefab: {fileID: 5313496441329673949, guid: 756996b085cf45b4f8c96d13796ce9ea, type: 3}
-  iconParts: []
-  iconPixelsPerCell: 64
-  iconRenderScale: 2
-  iconPadding: 1.15
-  iconAntiAliasing: 8
-  iconUseOutline: 1
-  iconOutlineWidth: 2
-  iconUseShadow: 1
-  iconShadowOffset: {x: 2, y: -2}
-  iconShadowBlur: 2
-  iconModelEulerAngles: {x: 0, y: 0, z: 0}
-  iconModelScale: {x: 1, y: 1, z: 1}
-  iconCameraEulerAngles: {x: 60, y: -135, z: 0}
-  slotIconModelEulerAngles: {x: 0, y: 0, z: 0}
-  slotIconModelScale: {x: 1, y: 1, z: 1}
-  slotIconCameraEulerAngles: {x: 60, y: -135, z: 0}
-  slotIconPadding: 1.15
-  iconShowCellGrid: 1
-  iconShowCellGridBorder: 1
-  iconCellGridBorderLineThickness: 2
-  iconUseDirectionalLight: 1
-  iconLightEulerAngles: {x: 50, y: -130, z: 0}
-  iconLightIntensity: 100000
-  slotIconUseDirectionalLight: 1
-  slotIconLightEulerAngles: {x: 50, y: -130, z: 0}
-  slotIconLightIntensity: 100000
-  slotIconSettingsInitialized: 1
+  _itemType: 7
+  _rarity: 0
+  _weight: 0.1
+  _stackable: 1
+  _useDurability: 0
+  _defaultDurabilityPercent: 100
+  _canEquipHelmet: 1
+  _statModifiers: []
+  _worldItemPrefab: {fileID: 1991076701997176597, guid: c7c2d4c533dacc9469d1069caec33b13, type: 3}
+  _width: 1
+  _height: 1
+  _itemIcon: {fileID: 0}
+  _generateIconAtRuntime: 1
+  _iconPrefab: {fileID: 5313496441329673949, guid: 756996b085cf45b4f8c96d13796ce9ea, type: 3}
+  _iconParts: []
+  _iconPixelsPerCell: 64
+  _iconRenderScale: 2
+  _iconPadding: 1.15
+  _iconAntiAliasing: 8
+  _iconUseOutline: 1
+  _iconOutlineWidth: 2
+  _iconUseShadow: 1
+  _iconShadowOffset: {x: 2, y: -2}
+  _iconShadowBlur: 2
+  _iconModelEulerAngles: {x: 0, y: 0, z: 0}
+  _iconModelScale: {x: 1, y: 1, z: 1}
+  _iconCameraEulerAngles: {x: 60, y: -135, z: 0}
+  _slotIconModelEulerAngles: {x: 0, y: 0, z: 0}
+  _slotIconModelScale: {x: 1, y: 1, z: 1}
+  _slotIconCameraEulerAngles: {x: 60, y: -135, z: 0}
+  _slotIconPadding: 1.15
+  _iconShowCellGrid: 1
+  _iconShowCellGridBorder: 1
+  _iconCellGridBorderLineThickness: 2
+  _iconUseDirectionalLight: 1
+  _iconLightEulerAngles: {x: 50, y: -130, z: 0}
+  _iconLightIntensity: 100000
+  _slotIconUseDirectionalLight: 1
+  _slotIconLightEulerAngles: {x: 50, y: -130, z: 0}
+  _slotIconLightIntensity: 100000
+  _slotIconSettingsInitialized: 1

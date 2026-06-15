@@ -12,44 +12,44 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 6f3d9f5226a647149dcf9874e217c0ee, type: 3}
   m_Name: ProjectSettings
   m_EditorClassIdentifier: Assembly-CSharp::GameProjectSettings
-  showCellGrid: 1
-  showCellGridBorder: 1
-  cellGridColor: {r: 0.2924528, g: 0.2924528, b: 0.2924528, a: 0.78431374}
-  cellGridLineThickness: 1
-  cellGridBorderColor: {r: 0.34509805, g: 0.3647059, b: 0.3764706, a: 1}
-  cellGridBorderLineThickness: 2
-  highDurabilityColor: {r: 0, g: 1, b: 0.5568628, a: 1}
-  mediumDurabilityColor: {r: 1, g: 0.7019608, b: 0, a: 1}
-  lowDurabilityColor: {r: 1, g: 0, b: 0.25882354, a: 1}
-  iconOutlineColor: {r: 0, g: 0, b: 0, a: 0.8509804}
-  iconShadowColor: {r: 0, g: 0, b: 0, a: 0.34901962}
-  rarityColors:
-  - rarity: 0
-    shortNameColor: {r: 1, g: 1, b: 1, a: 1}
-    iconBackgroundColor: {r: 0, g: 0, b: 0, a: 0.27450982}
-    iconCellGridBorderColor: {r: 0.6039216, g: 0.6039216, b: 0.6039216, a: 0.24705882}
-  - rarity: 1
-    shortNameColor: {r: 1, g: 1, b: 1, a: 1}
-    iconBackgroundColor: {r: 0.03921568, g: 0.59607846, b: 0.048625633, a: 0.09803922}
-    iconCellGridBorderColor: {r: 0.039215688, g: 0.59607846, b: 0.050980393, a: 0.24705882}
-  - rarity: 2
-    shortNameColor: {r: 1, g: 1, b: 1, a: 1}
-    iconBackgroundColor: {r: 0.03921568, g: 0.32441244, b: 0.59607846, a: 0.09803922}
-    iconCellGridBorderColor: {r: 0.039215688, g: 0.3254902, b: 0.59607846, a: 0.24705882}
-  - rarity: 3
-    shortNameColor: {r: 1, g: 1, b: 1, a: 1}
-    iconBackgroundColor: {r: 0.6031971, g: 0, b: 1, a: 0.09803922}
-    iconCellGridBorderColor: {r: 0.6039216, g: 0, b: 1, a: 0.24705882}
-  - rarity: 4
-    shortNameColor: {r: 1, g: 1, b: 1, a: 1}
-    iconBackgroundColor: {r: 0.59607846, g: 0.039215688, b: 0.15686275, a: 0.09803922}
-    iconCellGridBorderColor: {r: 0.59607846, g: 0.03529412, b: 0.15294118, a: 0.24705882}
-  - rarity: 5
-    shortNameColor: {r: 1, g: 1, b: 1, a: 1}
-    iconBackgroundColor: {r: 1, g: 0.68602705, b: 0, a: 0.09803922}
-    iconCellGridBorderColor: {r: 1, g: 0.6862745, b: 0, a: 0.24705882}
-  statCurrentValueColor: {r: 0, g: 1, b: 0.5568628, a: 1}
-  statFullDurabilityValueColor: {r: 1, g: 0.7019608, b: 0, a: 1}
-  normalWeightColor: {r: 1, g: 1, b: 1, a: 1}
-  overweightColor: {r: 1, g: 0.7019608, b: 0, a: 1}
-  movementBlockedWeightColor: {r: 1, g: 0, b: 0.25882354, a: 1}
+  _showCellGrid: 1
+  _showCellGridBorder: 1
+  _cellGridColor: {r: 0.2924528, g: 0.2924528, b: 0.2924528, a: 0.78431374}
+  _cellGridLineThickness: 1
+  _cellGridBorderColor: {r: 0.34509805, g: 0.3647059, b: 0.3764706, a: 1}
+  _cellGridBorderLineThickness: 2
+  _highDurabilityColor: {r: 0, g: 1, b: 0.5568628, a: 1}
+  _mediumDurabilityColor: {r: 1, g: 0.7019608, b: 0, a: 1}
+  _lowDurabilityColor: {r: 1, g: 0, b: 0.25882354, a: 1}
+  _iconOutlineColor: {r: 0, g: 0, b: 0, a: 0.8509804}
+  _iconShadowColor: {r: 0, g: 0, b: 0, a: 0.34901962}
+  _rarityColors:
+  - _rarity: 0
+    _shortNameColor: {r: 1, g: 1, b: 1, a: 1}
+    _iconBackgroundColor: {r: 0, g: 0, b: 0, a: 0.27450982}
+    _iconCellGridBorderColor: {r: 0.6039216, g: 0.6039216, b: 0.6039216, a: 0.24705882}
+  - _rarity: 1
+    _shortNameColor: {r: 1, g: 1, b: 1, a: 1}
+    _iconBackgroundColor: {r: 0.03921568, g: 0.59607846, b: 0.048625633, a: 0.09803922}
+    _iconCellGridBorderColor: {r: 0.039215688, g: 0.59607846, b: 0.050980393, a: 0.24705882}
+  - _rarity: 2
+    _shortNameColor: {r: 1, g: 1, b: 1, a: 1}
+    _iconBackgroundColor: {r: 0.03921568, g: 0.32441244, b: 0.59607846, a: 0.09803922}
+    _iconCellGridBorderColor: {r: 0.039215688, g: 0.3254902, b: 0.59607846, a: 0.24705882}
+  - _rarity: 3
+    _shortNameColor: {r: 1, g: 1, b: 1, a: 1}
+    _iconBackgroundColor: {r: 0.6031971, g: 0, b: 1, a: 0.09803922}
+    _iconCellGridBorderColor: {r: 0.6039216, g: 0, b: 1, a: 0.24705882}
+  - _rarity: 4
+    _shortNameColor: {r: 1, g: 1, b: 1, a: 1}
+    _iconBackgroundColor: {r: 0.59607846, g: 0.039215688, b: 0.15686275, a: 0.09803922}
+    _iconCellGridBorderColor: {r: 0.59607846, g: 0.03529412, b: 0.15294118, a: 0.24705882}
+  - _rarity: 5
+    _shortNameColor: {r: 1, g: 1, b: 1, a: 1}
+    _iconBackgroundColor: {r: 1, g: 0.68602705, b: 0, a: 0.09803922}
+    _iconCellGridBorderColor: {r: 1, g: 0.6862745, b: 0, a: 0.24705882}
+  _statCurrentValueColor: {r: 0, g: 1, b: 0.5568628, a: 1}
+  _statFullDurabilityValueColor: {r: 1, g: 0.7019608, b: 0, a: 1}
+  _normalWeightColor: {r: 1, g: 1, b: 1, a: 1}
+  _overweightColor: {r: 1, g: 0.7019608, b: 0, a: 1}
+  _movementBlockedWeightColor: {r: 1, g: 0, b: 0.25882354, a: 1}

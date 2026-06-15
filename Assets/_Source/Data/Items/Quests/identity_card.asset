@@ -12,47 +12,47 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 737e751cd05516846acf43daad139c9e, type: 3}
   m_Name: identity_card
   m_EditorClassIdentifier: 
-  itemName: "\u041F\u0440\u043E\u043F\u0443\u0441\u043A"
-  shortName: 
-  description: "\u041F\u0440\u043E\u043F\u0443\u0441\u043A"
-  itemType: 10
-  rarity: 0
-  weight: 0.01
-  stackable: 0
-  useDurability: 0
-  defaultDurabilityPercent: 100
-  canEquipHelmet: 1
-  statModifiers: []
-  worldItemPrefab: {fileID: 8246156702917426190, guid: dcb0a1c7943c8f248b02f5861da6b1d3, type: 3}
-  width: 1
-  height: 1
-  itemIcon: {fileID: 0}
-  generateIconAtRuntime: 1
-  iconPrefab: {fileID: 1025589010745932017, guid: 190d5db03851e664ba8ff8931eab2a37, type: 3}
-  iconParts: []
-  iconPixelsPerCell: 64
-  iconRenderScale: 2
-  iconPadding: 1.1
-  iconAntiAliasing: 8
-  iconUseOutline: 1
-  iconOutlineWidth: 2
-  iconUseShadow: 1
-  iconShadowOffset: {x: 2, y: -2}
-  iconShadowBlur: 2
-  iconModelEulerAngles: {x: 180, y: 180, z: 0}
-  iconModelScale: {x: 1, y: 1, z: 1}
-  iconCameraEulerAngles: {x: 50, y: -135, z: 0}
-  slotIconModelEulerAngles: {x: 0, y: 0, z: 0}
-  slotIconModelScale: {x: 1, y: 1, z: 1}
-  slotIconCameraEulerAngles: {x: 50, y: -135, z: 0}
-  slotIconPadding: 1.15
-  iconShowCellGrid: 1
-  iconShowCellGridBorder: 1
-  iconCellGridBorderLineThickness: 2
-  iconUseDirectionalLight: 1
-  iconLightEulerAngles: {x: 50, y: -130, z: 0}
-  iconLightIntensity: 100000
-  slotIconUseDirectionalLight: 1
-  slotIconLightEulerAngles: {x: 50, y: -130, z: 0}
-  slotIconLightIntensity: 100000
-  slotIconSettingsInitialized: 1
+  _itemName: "\u041F\u0440\u043E\u043F\u0443\u0441\u043A"
+  _shortName: 
+  _description: "\u041F\u0440\u043E\u043F\u0443\u0441\u043A"
+  _itemType: 10
+  _rarity: 0
+  _weight: 0.01
+  _stackable: 0
+  _useDurability: 0
+  _defaultDurabilityPercent: 100
+  _canEquipHelmet: 1
+  _statModifiers: []
+  _worldItemPrefab: {fileID: 8246156702917426190, guid: dcb0a1c7943c8f248b02f5861da6b1d3, type: 3}
+  _width: 1
+  _height: 1
+  _itemIcon: {fileID: 0}
+  _generateIconAtRuntime: 1
+  _iconPrefab: {fileID: 1025589010745932017, guid: 190d5db03851e664ba8ff8931eab2a37, type: 3}
+  _iconParts: []
+  _iconPixelsPerCell: 64
+  _iconRenderScale: 2
+  _iconPadding: 1.1
+  _iconAntiAliasing: 8
+  _iconUseOutline: 1
+  _iconOutlineWidth: 2
+  _iconUseShadow: 1
+  _iconShadowOffset: {x: 2, y: -2}
+  _iconShadowBlur: 2
+  _iconModelEulerAngles: {x: 180, y: 180, z: 0}
+  _iconModelScale: {x: 1, y: 1, z: 1}
+  _iconCameraEulerAngles: {x: 50, y: -135, z: 0}
+  _slotIconModelEulerAngles: {x: 0, y: 0, z: 0}
+  _slotIconModelScale: {x: 1, y: 1, z: 1}
+  _slotIconCameraEulerAngles: {x: 50, y: -135, z: 0}
+  _slotIconPadding: 1.15
+  _iconShowCellGrid: 1
+  _iconShowCellGridBorder: 1
+  _iconCellGridBorderLineThickness: 2
+  _iconUseDirectionalLight: 1
+  _iconLightEulerAngles: {x: 50, y: -130, z: 0}
+  _iconLightIntensity: 100000
+  _slotIconUseDirectionalLight: 0
+  _slotIconLightEulerAngles: {x: 50, y: -130, z: 0}
+  _slotIconLightIntensity: 100000
+  _slotIconSettingsInitialized: 1

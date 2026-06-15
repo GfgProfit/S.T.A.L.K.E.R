@@ -12,17 +12,17 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c0362de4d456e6d47a0adb2c420862ec, type: 3}
   m_Name: Artefact Grid
   m_EditorClassIdentifier: Assembly-CSharp::InventorySlotLayout
-  slotMask: XYZUIO
-  itemTypeRules:
-  - slotId: X
-    acceptedItemType: 6
-  - slotId: Y
-    acceptedItemType: 6
-  - slotId: Z
-    acceptedItemType: 6
-  - slotId: U
-    acceptedItemType: 6
-  - slotId: I
-    acceptedItemType: 6
-  - slotId: O
-    acceptedItemType: 6
+  _slotMask: XYZUIO
+  _itemTypeRules:
+  - _slotId: X
+    _acceptedItemType: 6
+  - _slotId: Y
+    _acceptedItemType: 6
+  - _slotId: Z
+    _acceptedItemType: 6
+  - _slotId: U
+    _acceptedItemType: 6
+  - _slotId: I
+    _acceptedItemType: 6
+  - _slotId: O
+    _acceptedItemType: 6

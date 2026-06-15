@@ -1,0 +1,327 @@
+using System.Collections;
+using System.Collections.Generic;
+using TMPro;
+using UnityEngine;
+
+public class InventoryController : MonoBehaviour
+{
+    [SerializeField] private List<ItemData> _items;
+    [SerializeField] private InventoryItem _itemPrefab;
+    [SerializeField] private Transform _canvasTransform;
+    [SerializeField] private GameObject _inventoryRoot;
+    [SerializeField] private CanvasGroup _inventoryCanvasGroup;
+    [SerializeField] private InventoryGrid _defaultItemGrid;
+    [SerializeField] private InventoryHighlight _inventoryHighlight;
+    [SerializeField] private PlayerController _playerController;
+    [SerializeField] private PlayerCharacterStats _playerStats;
+
+    [Header("Drop Settings")]
+    [SerializeField] private Transform _dropOrigin;
+    [SerializeField] private Camera _dropCamera;
+    [SerializeField] [Min(0f)] private float _dropForwardDistance = 1.2f;
+    [SerializeField] [Min(0f)] private float _dropUpOffset = 0.45f;
+    [SerializeField] [Min(0f)] private float _dropGroundProbeHeight = 1.5f;
+    [SerializeField] [Min(0f)] private float _dropGroundProbeDistance = 3f;
+    [SerializeField] [Min(0f)] private float _dropGroundOffset = 0.08f;
+    [SerializeField] [Min(0f)] private float _dropObstacleClearance = 0.2f;
+    [SerializeField] [Min(0f)] private float _dropImpulse = 1.2f;
+    [SerializeField] private LayerMask _dropGroundLayers = ~0;
+    [SerializeField] private LayerMask _dropObstacleLayers = ~0;
+    [SerializeField] private TMP_Text _weightText;
+    [SerializeField] private ItemInfoPanel _itemInfoPanel;
+    [SerializeField] private InventoryItemContextMenu _itemContextMenu;
+    [SerializeField] private GameObject _closedSlotPrefab;
+    [SerializeField] private List<InventoryItem> _initialInventoryItems = new();
+    [SerializeField] private List<InventoryGrid> _quickActionGridReferences = new();
+    [SerializeField] private List<EquipmentSlotGrid> _equipmentSlotGrids = new();
+    [SerializeField] private List<SlottedItemGrid> _slottedItemGrids = new();
+
+    [Header("Stats Info")]
+    [SerializeField] private CharacterStatsInfoPanel _playerStatsInfoPanel;
+    [SerializeField] private bool _hidePlayerStatsInfoWhenEmpty = true;
+    [SerializeField] [Min(0f)] private float _maxCarryWeight = 50f;
+    [SerializeField] [Min(0f)] private float _movementBlockExtraWeight = 10f;
+    [SerializeField] private bool _openOnStart;
+    [SerializeField] private bool _unlockCursorWhileOpen = true;
+    [SerializeField] private bool _disablePlayerControlsWhileOpen = true;
+    [SerializeField] private bool _prewarmItemIconsOnStart = true;
+    [SerializeField] private bool _logIconPrewarmProgress;
+
+    [Inject] private IPlayerInput _playerInput = null;
+
+    private IPlayerInput _fallbackPlayerInput;
+    private InventoryItemFactory _itemFactory;
+    private InventoryEquipmentSlotService _equipmentSlotService;
+    private InventoryQuickActionService _quickActionService;
+    private InventoryContextMenuController _contextMenuController;
+    private InventoryItemDropProcessor _dropProcessor;
+    private InventoryWeightStateController _weightStateController;
+    private InventoryHoverInfoController _hoverInfoController;
+    private InventoryDragPlacementService _dragPlacementService;
+    private InventoryDragController _dragController;
+    private InventoryOpenStateController _openStateController;
+    private InventoryItemPlacementService _itemPlacementService;
+    private InventoryHoveredItemActionController _hoveredItemActionController;
+    private InventoryUpdateController _updateController;
+    private InventoryIconPrewarmController _iconPrewarmController;
+    private readonly InventoryDragState _dragState = new();
+    private readonly InventoryDropService _dropService = new();
+    private readonly InventoryItemRegistry _itemRegistry = new();
+    private InventoryGrid _selectedItemGrid;
+
+    public InventoryGrid SelectedItemGrid
+    {
+        get => _selectedItemGrid;
+        set
+        {
+            _selectedItemGrid = value;
+            _inventoryHighlight.SetParent(value);
+        }
+    }
+
+    public bool IsOpen => OpenStateController.IsOpen;
+    public float CurrentCarryWeight => WeightStateController.CurrentCarryWeight;
+    public float BaseMaxCarryWeight => WeightStateController.BaseMaxCarryWeight;
+    public float MaxCarryWeight => WeightStateController.MaxCarryWeight;
+    public float MovementBlockWeight => WeightStateController.MovementBlockWeight;
+    public bool IsMovementBlockedByWeight => WeightStateController.IsMovementBlockedByWeight;
+
+    private IPlayerInput PlayerInput
+    {
+        get
+        {
+            if (_playerInput != null)
+            {
+                return _playerInput;
+            }
+
+            _fallbackPlayerInput ??= new LegacyPlayerInput();
+            return _fallbackPlayerInput;
+        }
+    }
+
+    private InventoryEquipmentSlotService EquipmentSlotService
+    {
+        get
+        {
+            _equipmentSlotService ??= CreateEquipmentSlotService();
+            return _equipmentSlotService;
+        }
+    }
+
+    private InventoryItemFactory ItemFactory
+    {
+        get
+        {
+            _itemFactory ??= new InventoryItemFactory(_itemPrefab);
+            return _itemFactory;
+        }
+    }
+
+    private InventoryQuickActionService QuickActionService
+    {
+        get
+        {
+            _quickActionService ??= CreateQuickActionService();
+            return _quickActionService;
+        }
+    }
+
+    private InventoryContextMenuController ContextMenuController
+    {
+        get
+        {
+            _contextMenuController ??= CreateContextMenuController();
+            return _contextMenuController;
+        }
+    }
+
+    private InventoryItemDropProcessor DropProcessor
+    {
+        get
+        {
+            _dropProcessor ??= CreateDropProcessor();
+            return _dropProcessor;
+        }
+    }
+
+    private InventoryWeightStateController WeightStateController
+    {
+        get
+        {
+            _weightStateController ??= CreateWeightStateController();
+            return _weightStateController;
+        }
+    }
+
+    private InventoryHoverInfoController HoverInfoController
+    {
+        get
+        {
+            _hoverInfoController ??= CreateHoverInfoController();
+            return _hoverInfoController;
+        }
+    }
+
+    private InventoryDragPlacementService DragPlacementService
+    {
+        get
+        {
+            _dragPlacementService ??= CreateDragPlacementService();
+            return _dragPlacementService;
+        }
+    }
+
+    private InventoryDragController DragController
+    {
+        get
+        {
+            _dragController ??= CreateDragController();
+            return _dragController;
+        }
+    }
+
+    private InventoryOpenStateController OpenStateController
+    {
+        get
+        {
+            _openStateController ??= CreateOpenStateController();
+            return _openStateController;
+        }
+    }
+
+    private InventoryItemPlacementService ItemPlacementService
+    {
+        get
+        {
+            _itemPlacementService ??= CreateItemPlacementService();
+            return _itemPlacementService;
+        }
+    }
+
+    private InventoryHoveredItemActionController HoveredItemActionController
+    {
+        get
+        {
+            _hoveredItemActionController ??= CreateHoveredItemActionController();
+            return _hoveredItemActionController;
+        }
+    }
+
+    private InventoryIconPrewarmController IconPrewarmController
+    {
+        get
+        {
+            _iconPrewarmController ??= CreateIconPrewarmController();
+            return _iconPrewarmController;
+        }
+    }
+
+    private InventoryEquipmentSlotService CreateEquipmentSlotService() => new(_equipmentSlotGrids, _slottedItemGrids, _defaultItemGrid, InsertItem, TryDetachItemFromGrid, RegisterInventoryItem, RefreshWeightState, () => _closedSlotPrefab);
+    private InventoryQuickActionService CreateQuickActionService() => new(_quickActionGridReferences, _defaultItemGrid, TryMoveItemToGrid, CreateItem, RegisterInventoryItem, RefreshWeightState);
+    private InventoryContextMenuController CreateContextMenuController() => new(_itemContextMenu, PlayerInput, () => _selectedItemGrid, () => _dragState.SelectedItem, DragController.GetTileGridPosition, HideItemInfoPanel, TryDropItem);
+    private InventoryItemDropProcessor CreateDropProcessor() => new(TrySpawnDroppedWorldItem, TryDetachItemFromGrid, DestroyInventoryItem, RefreshWeightState);
+    private InventoryWeightStateController CreateWeightStateController() => new(_itemRegistry, _equipmentSlotGrids, EquipmentSlotService, _weightText, _playerController, _playerStats, _playerStatsInfoPanel, _hidePlayerStatsInfoWhenEmpty, _maxCarryWeight, _movementBlockExtraWeight);
+    private InventoryHoverInfoController CreateHoverInfoController() => new(_inventoryHighlight, _itemInfoPanel, IsContextMenuOpen);
+    private InventoryDragPlacementService CreateDragPlacementService() => new(_dragState, ItemFactory, _itemRegistry, CanDetachItemWithSlotRestrictions, TryPrepareSlotRestrictionsForPlacement, RefreshWeightState);
+    private InventoryDragController CreateDragController() => new(_dragState, DragPlacementService, PlayerInput, _canvasTransform, () => _selectedItemGrid, CanDetachItemWithSlotRestrictions, HideContextMenu, HideItemInfoPanel, RefreshWeightState);
+    private InventoryOpenStateController CreateOpenStateController() => new(_inventoryRoot, _inventoryCanvasGroup, _playerController, _unlockCursorWhileOpen, _disablePlayerControlsWhileOpen, TryStashSelectedItem, ApplyWeightMovementState, HandleInventoryClosed);
+    private InventoryItemPlacementService CreateItemPlacementService() => new(ItemFactory, _itemRegistry, TryPrepareSlotRestrictionsForPlacement, TryDetachItemFromGrid, DestroyInventoryItem, RefreshWeightState);
+    private InventoryHoveredItemActionController CreateHoveredItemActionController() => new(PlayerInput, _dragState, () => _selectedItemGrid, DragController.GetTileGridPosition, IsContextMenuOpen, QuickActionService, TryDropItem, HoverInfoController, HideItemInfoPanel, HideContextMenu);
+    private InventoryUpdateController CreateUpdateController() => new(PlayerInput, () => IsOpen, () => IconPrewarmController.IconsReady, () => _selectedItemGrid, HoverInfoController, ContextMenuController, ToggleInventory, HideItemInfoPanel, HideContextMenu, DragController.ItemIconDrag, DragController.ReleaseDraggedItem, DragController.RotateSelectedItem, TryHandleHoveredItemDropInput, HandleHighlight, TryHandleQuickItemAction, DragController.BeginDrag);
+    private InventoryIconPrewarmController CreateIconPrewarmController() => new(_items, _prewarmItemIconsOnStart, _logIconPrewarmProgress, this);
+
+    private void Awake()
+    {
+        _itemFactory = new InventoryItemFactory(_itemPrefab);
+        _equipmentSlotService = CreateEquipmentSlotService();
+        _quickActionService = CreateQuickActionService();
+        _contextMenuController = CreateContextMenuController();
+        _dropProcessor = CreateDropProcessor();
+        _weightStateController = CreateWeightStateController();
+        _hoverInfoController = CreateHoverInfoController();
+        _dragPlacementService = CreateDragPlacementService();
+        _dragController = CreateDragController();
+        _openStateController = CreateOpenStateController();
+        _itemPlacementService = CreateItemPlacementService();
+        _hoveredItemActionController = CreateHoveredItemActionController();
+        _iconPrewarmController = CreateIconPrewarmController();
+        _updateController = CreateUpdateController();
+        _itemRegistry.DurabilityChanged += HandleInventoryItemDurabilityChanged;
+
+        _contextMenuController.Initialize();
+        RegisterExistingInventoryItems();
+        SetInventoryOpen(_openOnStart, true);
+        RefreshWeightState();
+    }
+
+    private IEnumerator Start()
+    {
+        RefreshWeightState();
+        yield return IconPrewarmController.Prewarm();
+    }
+
+    private void Update()
+    {
+        _updateController.Tick();
+    }
+
+    public bool TryInsertItem(ItemData itemData) => TryInsertItem(itemData, 1);
+    public bool TryInsertItem(ItemData itemData, int amount) => TryInsertItem(itemData, amount, null);
+    public bool TryInsertItem(ItemData itemData, int amount, float? durabilityPercent) => ItemPlacementService.TryInsertItem(itemData, amount, durabilityPercent, IconPrewarmController.IconsReady, GetInsertionGrid(), _defaultItemGrid);
+    private bool InsertItem(InventoryItem itemToInsert, InventoryGrid targetGrid) => ItemPlacementService.InsertItem(itemToInsert, targetGrid);
+    private bool TryHandleQuickItemAction() => HoveredItemActionController.TryHandleQuickItemAction();
+    private bool TryHandleHoveredItemDropInput() => HoveredItemActionController.TryHandleHoveredItemDropInput();
+    private bool TryMoveItemToGrid(InventoryGrid sourceGrid, InventoryItem item, InventoryGrid targetGrid, bool allowStackMerge) => ItemPlacementService.TryMoveItemToGrid(sourceGrid, item, targetGrid, allowStackMerge);
+
+    private void HandleHighlight() => HoverInfoController.HandleHighlight(_selectedItemGrid, _dragState.SelectedItem, DragController.GetTileGridPosition(), DragController.TryGetStackMergeTarget);
+
+    private InventoryItem CreateItem(ItemData itemData, int amount, IReadOnlyList<ItemIconPart> runtimeIconParts) => CreateItem(itemData, amount, runtimeIconParts, null);
+    private InventoryItem CreateItem(ItemData itemData, int amount, IReadOnlyList<ItemIconPart> runtimeIconParts, float? durabilityPercent) => ItemFactory.Create(itemData, amount, runtimeIconParts, durabilityPercent);
+
+    private void RegisterInventoryItem(InventoryItem item) => _itemRegistry.Register(item);
+
+    private void RegisterExistingInventoryItems()
+    {
+        for (int i = 0; i < _initialInventoryItems.Count; i++)
+        {
+            RegisterInventoryItem(_initialInventoryItems[i]);
+        }
+    }
+
+    private void HandleInventoryItemDurabilityChanged(InventoryItem item)
+    {
+        RefreshWeightState();
+        HoverInfoController.RefreshHighlightedItemInfo(item);
+    }
+
+    private void RefreshWeightState() => WeightStateController.Refresh();
+    private bool TryPrepareSlotRestrictionsForPlacement(InventoryGrid targetGrid, InventoryItem item) => EquipmentSlotService.TryPrepareSlotRestrictionsForPlacement(targetGrid, item);
+    private bool CanDetachItemWithSlotRestrictions(InventoryGrid sourceGrid, InventoryItem item) => EquipmentSlotService.CanDetachItemWithSlotRestrictions(sourceGrid, item);
+    private void ApplyWeightMovementState() => WeightStateController.ApplyMovementState();
+    private void HideItemInfoPanel() => HoverInfoController.HideItemInfoPanel();
+    private bool IsContextMenuOpen() => ContextMenuController.IsOpen;
+    private InventoryGrid GetInsertionGrid() => _selectedItemGrid != null ? _selectedItemGrid : _defaultItemGrid;
+    private void DestroyInventoryItem(InventoryItem item) => DragController.DestroyInventoryItem(item);
+    private bool TryDropItem(InventoryGrid grid, InventoryItem item, bool wholeStack) => DropProcessor.TryDropItem(grid, item, wholeStack);
+    private bool TrySpawnDroppedWorldItem(ItemData itemData, int amount, float durabilityPercent) => _dropService.TrySpawnDroppedWorldItem(itemData, amount, durabilityPercent, CreateDropContext());
+    private InventoryDropContext CreateDropContext() => new(_dropOrigin, _playerController, transform, _dropCamera, _dropForwardDistance, _dropUpOffset, _dropGroundProbeHeight, _dropGroundProbeDistance, _dropGroundOffset, _dropObstacleClearance, _dropImpulse, _dropGroundLayers, _dropObstacleLayers);
+
+    private bool TryDetachItemFromGrid(InventoryGrid grid, InventoryItem item) => DragController.TryDetachItemFromGrid(grid, item);
+
+    private void HideContextMenu() => ContextMenuController.Hide();
+
+    private void ToggleInventory() => OpenStateController.Toggle();
+
+    private void SetInventoryOpen(bool isOpen, bool force) => OpenStateController.SetOpen(isOpen, force);
+
+    private void HandleInventoryClosed()
+    {
+        SelectedItemGrid = null;
+        HoverInfoController.HideHighlight();
+        HideItemInfoPanel();
+        HideContextMenu();
+    }
+
+    private bool TryStashSelectedItem() => DragController.ReturnDraggedItemToOrigin();
+}

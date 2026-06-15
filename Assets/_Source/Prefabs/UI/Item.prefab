@@ -593,26 +593,23 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: eeb4d55b650b6b247975871b2f17b357, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  itemData: {fileID: 0}
-  currentAmount: 1
-  currentDurabilityPercent: 100
-  rectTransform: {fileID: 7244211069171183450}
-  itemImage: {fileID: 188510814560001004}
-  cellBackgroundImage: {fileID: 7244211069171183448}
-  countText: {fileID: 4250159603881515426}
-  countTextRectTransform: {fileID: 2350727213283944633}
-  shortNameText: {fileID: 4440609977588557167}
-  shortNameTextRectTransform: {fileID: 1716061822723402760}
-  durabilityBackgroundRectTransform: {fileID: 3046172824894474639}
-  durabilityBackgroundGraphic: {fileID: 4197266232484777311}
-  durabilityFillRectTransform: {fileID: 5238225536447756363}
-  durabilityFillGraphic: {fileID: 3743127932204334672}
-  questStatusIcon: {fileID: 2080875590, guid: 5d1ce1257ca31224ba441fea8a30b4e4, type: 3}
-  statusIconImage: {fileID: 3862888517923799236}
-  statusIconRectTransform: {fileID: 2267048417686456693}
-  onGridPositionX: 0
-  onGridPositionY: 0
-  rotated: 0
+  _itemData: {fileID: 0}
+  _currentAmount: 1
+  _currentDurabilityPercent: 100
+  _rectTransform: {fileID: 7244211069171183450}
+  _itemImage: {fileID: 188510814560001004}
+  _cellBackgroundImage: {fileID: 7244211069171183448}
+  _countText: {fileID: 4250159603881515426}
+  _countTextRectTransform: {fileID: 2350727213283944633}
+  _shortNameText: {fileID: 4440609977588557167}
+  _shortNameTextRectTransform: {fileID: 1716061822723402760}
+  _durabilityBackgroundRectTransform: {fileID: 3046172824894474639}
+  _durabilityBackgroundGraphic: {fileID: 4197266232484777311}
+  _durabilityFillRectTransform: {fileID: 5238225536447756363}
+  _durabilityFillGraphic: {fileID: 3743127932204334672}
+  _questStatusIcon: {fileID: 2080875590, guid: 5d1ce1257ca31224ba441fea8a30b4e4, type: 3}
+  _statusIconImage: {fileID: 3862888517923799236}
+  _statusIconRectTransform: {fileID: 2267048417686456693}
 --- !u!1 &7510324070010390212
 GameObject:
   m_ObjectHideFlags: 0

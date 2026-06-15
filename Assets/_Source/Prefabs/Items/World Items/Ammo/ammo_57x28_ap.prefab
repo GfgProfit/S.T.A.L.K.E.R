@@ -153,10 +153,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 3465d501e5be4b0dba61b388cf0b3e4a, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::WorldItem
-  itemData: {fileID: 11400000, guid: d1184077d177a5a44b425cfdd883d907, type: 2}
-  itemRigidbody: {fileID: 7387369796750279891}
-  itemColliders:
+  _itemData: {fileID: 11400000, guid: d1184077d177a5a44b425cfdd883d907, type: 2}
+  _itemRigidbody: {fileID: 7387369796750279891}
+  _itemColliders:
   - {fileID: -3879338920311690251}
-  amount: 1
-  durabilityPercent: 100
-  destroyOnPickup: 1
+  _amount: 1
+  _durabilityPercent: 100
+  _destroyOnPickup: 1

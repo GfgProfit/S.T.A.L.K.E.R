@@ -2,21 +2,26 @@ using UnityEngine;
 
 public class LegacyPlayerInput : IPlayerInput
 {
-    private const KeyCode InteractKey = KeyCode.F;
-    private const KeyCode SprintKey = KeyCode.LeftShift;
-    private const KeyCode CrouchKey = KeyCode.LeftControl;
-    private const KeyCode InventoryDropKey = KeyCode.Z;
-    private const KeyCode InventoryDropStackModifierKey = SprintKey;
-    private const KeyCode InventoryQuickEquipModifierKey = KeyCode.LeftAlt;
-    private const KeyCode InventoryQuickMoveModifierKey = CrouchKey;
+    private const KeyCode INTERACT_KEY = KeyCode.F;
+    private const KeyCode SPRINT_KEY = KeyCode.LeftShift;
+    private const KeyCode CROUCH_KEY = KeyCode.LeftControl;
+    private const KeyCode INVENTORY_DROP_KEY = KeyCode.Z;
+    private const KeyCode INVENTORY_DROP_STACK_MODIFIER_KEY = KeyCode.LeftShift;
+    private const KeyCode INVENTORY_QUICK_EQUIP_MODIFIER_KEY = KeyCode.LeftAlt;
+    private const KeyCode INVENTORY_QUICK_MOVE_MODIFIER_KEY = KeyCode.LeftControl;
 
-    public string InteractKeyDisplayName => InteractKey.ToString();
+    public string InteractKeyDisplayName => INTERACT_KEY.ToString();
 
     public Vector2 GetMouseDelta()
     {
         float mouseX = Input.GetAxis("Mouse X");
         float mouseY = Input.GetAxis("Mouse Y");
         return new Vector2(mouseX, mouseY);
+    }
+
+    public Vector2 GetPointerPosition()
+    {
+        return Input.mousePosition;
     }
 
     public Vector2 GetMovementInput()
@@ -28,18 +33,22 @@ public class LegacyPlayerInput : IPlayerInput
 
     public bool IsEscapePressed() => Input.GetKeyDown(KeyCode.Escape);
     public bool IsInventoryPressed() => Input.GetKeyDown(KeyCode.I);
-    public bool IsInventoryDropPressed() => Input.GetKeyDown(InventoryDropKey);
-    public bool IsInventoryDropStackModifierHeld() => Input.GetKey(InventoryDropStackModifierKey);
-    public bool IsInventoryQuickEquipModifierHeld() => Input.GetKey(InventoryQuickEquipModifierKey);
-    public bool IsInventoryQuickMoveModifierHeld() => Input.GetKey(InventoryQuickMoveModifierKey);
+    public bool IsInventoryDropPressed() => Input.GetKeyDown(INVENTORY_DROP_KEY);
+    public bool IsInventoryDropStackModifierHeld() => Input.GetKey(INVENTORY_DROP_STACK_MODIFIER_KEY);
+    public bool IsInventoryQuickEquipModifierHeld() => Input.GetKey(INVENTORY_QUICK_EQUIP_MODIFIER_KEY);
+    public bool IsInventoryQuickMoveModifierHeld() => Input.GetKey(INVENTORY_QUICK_MOVE_MODIFIER_KEY);
+    public bool IsInventoryPrimaryActionPressed() => Input.GetKeyDown(KeyCode.Mouse0);
+    public bool IsInventoryPrimaryActionReleased() => Input.GetKeyUp(KeyCode.Mouse0);
+    public bool IsInventorySecondaryActionPressed() => Input.GetKeyDown(KeyCode.Mouse1);
+    public bool IsInventoryRotatePressed() => Input.GetKeyDown(KeyCode.R);
 
-    public bool IsInteractPressed() => Input.GetKeyDown(InteractKey);
-    public bool IsInteractHold() => Input.GetKey(InteractKey);
-    public bool IsInteractUp() => Input.GetKeyUp(InteractKey);
+    public bool IsInteractPressed() => Input.GetKeyDown(INTERACT_KEY);
+    public bool IsInteractHold() => Input.GetKey(INTERACT_KEY);
+    public bool IsInteractUp() => Input.GetKeyUp(INTERACT_KEY);
     public bool IsInteractDenied() => Input.GetKeyDown(KeyCode.Mouse1);
 
     public bool IsJumpPressed() => Input.GetKeyDown(KeyCode.Space);
-    public bool IsSprintHeld() => Input.GetKey(SprintKey);
+    public bool IsSprintHeld() => Input.GetKey(SPRINT_KEY);
 
-    public bool IsCrouchingHold() => Input.GetKey(CrouchKey);
+    public bool IsCrouchingHold() => Input.GetKey(CROUCH_KEY);
 }

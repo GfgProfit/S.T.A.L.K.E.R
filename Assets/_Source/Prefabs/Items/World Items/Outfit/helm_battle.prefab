@@ -154,13 +154,13 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 3465d501e5be4b0dba61b388cf0b3e4a, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::WorldItem
-  itemData: {fileID: 11400000, guid: 1701b6f701d2fb84db8569e7b0c14cda, type: 2}
-  itemRigidbody: {fileID: 1219521178383121616}
-  itemColliders:
+  _itemData: {fileID: 11400000, guid: 1701b6f701d2fb84db8569e7b0c14cda, type: 2}
+  _itemRigidbody: {fileID: 1219521178383121616}
+  _itemColliders:
   - {fileID: 4275143036492336313}
-  amount: 1
-  durabilityPercent: 100
-  destroyOnPickup: 1
+  _amount: 1
+  _durabilityPercent: 100
+  _destroyOnPickup: 1
 --- !u!1 &4004509422665690052
 GameObject:
   m_ObjectHideFlags: 0

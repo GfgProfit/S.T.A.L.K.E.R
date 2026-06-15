@@ -12,9 +12,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 737e751cd05516846acf43daad139c9e, type: 3}
   m_Name: SPECOPS
   m_EditorClassIdentifier: 
-  itemName: "\u0411\u0440\u043E\u043D\u0435\u043A\u043E\u0441\u0442\u044E\u043C \xAB\u0411\u0435\u0440\u0438\u043B\u043B-5\u041C\xBB"
-  shortName: "\u0411-5\u041C"
-  description: "\u041C\u043E\u0434\u0438\u0444\u0438\u0446\u0438\u0440\u043E\u0432\u0430\u043D\u043D\u044B\u0439
+  _itemName: "\u0411\u0440\u043E\u043D\u0435\u043A\u043E\u0441\u0442\u044E\u043C \xAB\u0411\u0435\u0440\u0438\u043B\u043B-5\u041C\xBB"
+  _shortName: "\u0411-5\u041C"
+  _description: "\u041C\u043E\u0434\u0438\u0444\u0438\u0446\u0438\u0440\u043E\u0432\u0430\u043D\u043D\u044B\u0439
     \u0434\u043B\u044F \u0440\u0430\u0431\u043E\u0442\u044B \u0432 \u0443\u0441\u043B\u043E\u0432\u0438\u044F\u0445
     \u0417\u043E\u043D\u044B \u0430\u0440\u043C\u0435\u0439\u0441\u043A\u0438\u0439
     \u0431\u0440\u043E\u043D\u0435\u0436\u0438\u043B\u0435\u0442 \u0441\u0435\u0440\u0438\u0438
@@ -33,55 +33,55 @@ MonoBehaviour:
     \u0438\u043C\u0443\u0449\u0435\u0441\u0442\u0432\u043E \u043D\u0430 \u0445\u0430\u0431\u0430\u0440.
     \u041D\u0435 \u043E\u0441\u043D\u0430\u0449\u0430\u0435\u0442\u0441\u044F \u043A\u043E\u043D\u0442\u0435\u0439\u043D\u0435\u0440\u0430\u043C\u0438
     \u0434\u043B\u044F \u0430\u0440\u0442\u0435\u0444\u0430\u043A\u0442\u043E\u0432."
-  itemType: 3
-  rarity: 2
-  weight: 9
-  stackable: 0
-  useDurability: 1
-  defaultDurabilityPercent: 100
-  statModifiers:
-  - statType: 0
-    valueAtFullDurability: 30
-  - statType: 1
-    valueAtFullDurability: 15
-  - statType: 2
-    valueAtFullDurability: 15
-  - statType: 3
-    valueAtFullDurability: 5
-  - statType: 5
-    valueAtFullDurability: 70
-  - statType: 6
-    valueAtFullDurability: 25
-  worldItemPrefab: {fileID: 2340778866610453765, guid: c2464a5cdc637394aac37c3bccdcdf90, type: 3}
-  width: 2
-  height: 3
-  itemIcon: {fileID: 0}
-  generateIconAtRuntime: 1
-  iconPrefab: {fileID: 6271439873676582371, guid: 2edb332742654a1449f258cd7aadbe73, type: 3}
-  iconParts: []
-  iconPixelsPerCell: 64
-  iconRenderScale: 2
-  iconPadding: 1.2
-  iconAntiAliasing: 8
-  iconUseOutline: 1
-  iconOutlineWidth: 2
-  iconUseShadow: 1
-  iconShadowOffset: {x: 2, y: -2}
-  iconShadowBlur: 2
-  iconModelEulerAngles: {x: 0, y: 0, z: 0}
-  iconModelScale: {x: 1, y: 1, z: 1}
-  iconCameraEulerAngles: {x: 90, y: 0, z: 0}
-  slotIconModelEulerAngles: {x: 0, y: 0, z: 0}
-  slotIconModelScale: {x: 1, y: 1, z: 1}
-  slotIconCameraEulerAngles: {x: 90, y: 0, z: 0}
-  slotIconPadding: 1.2
-  iconShowCellGrid: 1
-  iconShowCellGridBorder: 1
-  iconCellGridBorderLineThickness: 2
-  iconUseDirectionalLight: 1
-  iconLightEulerAngles: {x: 50, y: -130, z: 0}
-  iconLightIntensity: 100000
-  slotIconUseDirectionalLight: 1
-  slotIconLightEulerAngles: {x: 50, y: -130, z: 0}
-  slotIconLightIntensity: 100000
-  slotIconSettingsInitialized: 1
+  _itemType: 3
+  _rarity: 2
+  _weight: 9
+  _stackable: 0
+  _useDurability: 1
+  _defaultDurabilityPercent: 100
+  _statModifiers:
+  - _statType: 0
+    _valueAtFullDurability: 30
+  - _statType: 1
+    _valueAtFullDurability: 15
+  - _statType: 2
+    _valueAtFullDurability: 15
+  - _statType: 3
+    _valueAtFullDurability: 5
+  - _statType: 5
+    _valueAtFullDurability: 70
+  - _statType: 6
+    _valueAtFullDurability: 25
+  _worldItemPrefab: {fileID: 2340778866610453765, guid: c2464a5cdc637394aac37c3bccdcdf90, type: 3}
+  _width: 2
+  _height: 3
+  _itemIcon: {fileID: 0}
+  _generateIconAtRuntime: 1
+  _iconPrefab: {fileID: 6271439873676582371, guid: 2edb332742654a1449f258cd7aadbe73, type: 3}
+  _iconParts: []
+  _iconPixelsPerCell: 64
+  _iconRenderScale: 2
+  _iconPadding: 1.2
+  _iconAntiAliasing: 8
+  _iconUseOutline: 1
+  _iconOutlineWidth: 2
+  _iconUseShadow: 1
+  _iconShadowOffset: {x: 2, y: -2}
+  _iconShadowBlur: 2
+  _iconModelEulerAngles: {x: 0, y: 0, z: 0}
+  _iconModelScale: {x: 1, y: 1, z: 1}
+  _iconCameraEulerAngles: {x: 90, y: 0, z: 0}
+  _slotIconModelEulerAngles: {x: 0, y: 0, z: 0}
+  _slotIconModelScale: {x: 1, y: 1, z: 1}
+  _slotIconCameraEulerAngles: {x: 90, y: 0, z: 0}
+  _slotIconPadding: 1.2
+  _iconShowCellGrid: 1
+  _iconShowCellGridBorder: 1
+  _iconCellGridBorderLineThickness: 2
+  _iconUseDirectionalLight: 1
+  _iconLightEulerAngles: {x: 50, y: -130, z: 0}
+  _iconLightIntensity: 100000
+  _slotIconUseDirectionalLight: 1
+  _slotIconLightEulerAngles: {x: 50, y: -130, z: 0}
+  _slotIconLightIntensity: 100000
+  _slotIconSettingsInitialized: 1

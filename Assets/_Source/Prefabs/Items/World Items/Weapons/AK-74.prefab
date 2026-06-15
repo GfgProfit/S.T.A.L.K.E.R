@@ -1916,9 +1916,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 3465d501e5be4b0dba61b388cf0b3e4a, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::WorldItem
-  itemData: {fileID: 11400000, guid: 8788bb606b48b7d4185309a17a1097a7, type: 2}
-  itemRigidbody: {fileID: 6184501900970794010}
-  itemColliders:
+  _itemData: {fileID: 11400000, guid: 8788bb606b48b7d4185309a17a1097a7, type: 2}
+  _itemRigidbody: {fileID: 6184501900970794010}
+  _itemColliders:
   - {fileID: 7208345377891025538}
   - {fileID: 386933059963840877}
   - {fileID: 2815714261082121980}
@@ -1946,8 +1946,8 @@ MonoBehaviour:
   - {fileID: 621433489564438296}
   - {fileID: 6423263523709790940}
   - {fileID: 3763015066911763857}
-  amount: 1
-  destroyOnPickup: 1
+  _amount: 1
+  _destroyOnPickup: 1
 --- !u!1 &2149762728162459970
 GameObject:
   m_ObjectHideFlags: 0

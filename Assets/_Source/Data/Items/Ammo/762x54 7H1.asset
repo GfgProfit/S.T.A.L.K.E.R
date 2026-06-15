@@ -12,9 +12,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 737e751cd05516846acf43daad139c9e, type: 3}
   m_Name: 762x54 7H1
   m_EditorClassIdentifier: 
-  itemName: "7,62x54 \u043C\u043C 7\u041D1"
-  shortName: 7H1
-  description: "\u0421\u043F\u0435\u0446\u0438\u0430\u043B\u044C\u043D\u043E \u0440\u0430\u0437\u0440\u0430\u0431\u043E\u0442\u0430\u043D\u043D\u044B\u0439
+  _itemName: "7,62x54 \u043C\u043C 7\u041D1"
+  _shortName: 7H1
+  _description: "\u0421\u043F\u0435\u0446\u0438\u0430\u043B\u044C\u043D\u043E \u0440\u0430\u0437\u0440\u0430\u0431\u043E\u0442\u0430\u043D\u043D\u044B\u0439
     \u0441\u043D\u0430\u0439\u043F\u0435\u0440\u0441\u043A\u0438\u0439 \u043F\u0430\u0442\u0440\u043E\u043D
     \u043A\u0430\u043B\u0438\u0431\u0440\u0430 7,62 \u043C\u043C. \u041F\u0443\u043B\u044F
     \u043E\u0441\u043D\u0430\u0449\u0435\u043D\u0430 \u0441\u0442\u0430\u043B\u044C\u043D\u044B\u043C
@@ -26,44 +26,44 @@ MonoBehaviour:
     \u0445\u0430\u0440\u0430\u043A\u0442\u0435\u0440\u0438\u0441\u0442\u0438\u043A\u0430\u043C\u0438
     \u0438 \u043F\u043E\u0432\u044B\u0448\u0435\u043D\u043D\u043E\u0439 \u043F\u0440\u043E\u0431\u0438\u0432\u0430\u044E\u0449\u0435\u0439
     \u0441\u043F\u043E\u0441\u043E\u0431\u043D\u043E\u0441\u0442\u044C\u044E."
-  itemType: 2
-  rarity: 0
-  weight: 0.023
-  stackable: 1
-  worldItemPrefab: {fileID: 289471682219326118, guid: 136cbed246198e649b3ff0beacfbe476, type: 3}
-  width: 2
-  height: 1
-  itemIcon: {fileID: 0}
-  generateIconAtRuntime: 1
-  iconPrefab: {fileID: 7703001690772129854, guid: 920e51a65f5a5c84280d58ce93271cde, type: 3}
-  iconParts: []
-  iconPixelsPerCell: 64
-  iconRenderScale: 2
-  iconPadding: 1.15
-  iconAntiAliasing: 8
-  iconUseOutline: 1
-  iconOutlineColor: {r: 0, g: 0, b: 0, a: 0.85}
-  iconOutlineWidth: 2
-  iconUseShadow: 1
-  iconShadowColor: {r: 0, g: 0, b: 0, a: 0.35}
-  iconShadowOffset: {x: 2, y: -2}
-  iconShadowBlur: 2
-  iconModelEulerAngles: {x: 0, y: 0, z: 0}
-  iconModelScale: {x: 1, y: 1, z: 1}
-  iconCameraEulerAngles: {x: 25, y: -135, z: 0}
-  slotIconModelEulerAngles: {x: 0, y: 0, z: 0}
-  slotIconModelScale: {x: 1, y: 1, z: 1}
-  slotIconCameraEulerAngles: {x: 25, y: -135, z: 0}
-  slotIconPadding: 1.15
-  iconBackgroundColor: {r: 0, g: 0, b: 0, a: 0.27450982}
-  iconShowCellGrid: 1
-  iconShowCellGridBorder: 1
-  iconCellGridBorderColor: {r: 0.6037736, g: 0.6037736, b: 0.6037736, a: 0.24705882}
-  iconCellGridBorderLineThickness: 2
-  iconUseDirectionalLight: 1
-  iconLightEulerAngles: {x: 50, y: -130, z: 0}
-  iconLightIntensity: 100000
-  slotIconUseDirectionalLight: 1
-  slotIconLightEulerAngles: {x: 50, y: -130, z: 0}
-  slotIconLightIntensity: 100000
-  slotIconSettingsInitialized: 1
+  _itemType: 2
+  _rarity: 0
+  _weight: 0.023
+  _stackable: 1
+  _useDurability: 0
+  _defaultDurabilityPercent: 100
+  _canEquipHelmet: 1
+  _statModifiers: []
+  _worldItemPrefab: {fileID: 289471682219326118, guid: 136cbed246198e649b3ff0beacfbe476, type: 3}
+  _width: 2
+  _height: 1
+  _itemIcon: {fileID: 0}
+  _generateIconAtRuntime: 1
+  _iconPrefab: {fileID: 7703001690772129854, guid: 920e51a65f5a5c84280d58ce93271cde, type: 3}
+  _iconParts: []
+  _iconPixelsPerCell: 64
+  _iconRenderScale: 2
+  _iconPadding: 1.15
+  _iconAntiAliasing: 8
+  _iconUseOutline: 1
+  _iconOutlineWidth: 2
+  _iconUseShadow: 1
+  _iconShadowOffset: {x: 2, y: -2}
+  _iconShadowBlur: 2
+  _iconModelEulerAngles: {x: 0, y: 0, z: 0}
+  _iconModelScale: {x: 1, y: 1, z: 1}
+  _iconCameraEulerAngles: {x: 25, y: -135, z: 0}
+  _slotIconModelEulerAngles: {x: 0, y: 0, z: 0}
+  _slotIconModelScale: {x: 1, y: 1, z: 1}
+  _slotIconCameraEulerAngles: {x: 25, y: -135, z: 0}
+  _slotIconPadding: 1.15
+  _iconShowCellGrid: 1
+  _iconShowCellGridBorder: 1
+  _iconCellGridBorderLineThickness: 2
+  _iconUseDirectionalLight: 1
+  _iconLightEulerAngles: {x: 50, y: -130, z: 0}
+  _iconLightIntensity: 100000
+  _slotIconUseDirectionalLight: 0
+  _slotIconLightEulerAngles: {x: 50, y: -130, z: 0}
+  _slotIconLightIntensity: 100000
+  _slotIconSettingsInitialized: 1

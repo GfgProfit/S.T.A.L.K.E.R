@@ -12,8 +12,8 @@ public class AssignTexturesToMaterialsWindow : EditorWindow
     private SerializedProperty _baseColorTexturesProperty;
     private SerializedProperty _normalTexturesProperty;
 
-    private const string BaseColorMapProperty = "_BaseColorMap";
-    private const string NormalMapProperty = "_NormalMap";
+    private const string BASE_COLOR_MAP_PROPERTY = "_BaseColorMap";
+    private const string NORMAL_MAP_PROPERTY = "_NormalMap";
 
     [MenuItem("Tools/Assign Textures To Materials")]
     private static void OpenWindow()
@@ -116,23 +116,23 @@ public class AssignTexturesToMaterialsWindow : EditorWindow
 
             if (baseColorTexture != null)
             {
-                if (material.HasProperty(BaseColorMapProperty))
+                if (material.HasProperty(BASE_COLOR_MAP_PROPERTY))
                 {
-                    material.SetTexture(BaseColorMapProperty, baseColorTexture);
+                    material.SetTexture(BASE_COLOR_MAP_PROPERTY, baseColorTexture);
                 }
                 else
                 {
                     Debug.LogWarning(
-                        $"{material.name}: shader не содержит property {BaseColorMapProperty}"
+                        $"{material.name}: shader не содержит property {BASE_COLOR_MAP_PROPERTY}"
                     );
                 }
             }
 
             if (normalTexture != null)
             {
-                if (material.HasProperty(NormalMapProperty))
+                if (material.HasProperty(NORMAL_MAP_PROPERTY))
                 {
-                    material.SetTexture(NormalMapProperty, normalTexture);
+                    material.SetTexture(NORMAL_MAP_PROPERTY, normalTexture);
 
                     // Для HDRP/Lit обычно достаточно SetTexture,
                     // но keyword полезен для корректного включения normal map.
@@ -141,7 +141,7 @@ public class AssignTexturesToMaterialsWindow : EditorWindow
                 else
                 {
                     Debug.LogWarning(
-                        $"{material.name}: shader не содержит property {NormalMapProperty}"
+                        $"{material.name}: shader не содержит property {NORMAL_MAP_PROPERTY}"
                     );
                 }
             }
