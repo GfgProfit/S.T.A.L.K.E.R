@@ -79,14 +79,14 @@ public static class CharacterStatUtility
         }
     }
 
-    public static void AddItemStats(CharacterStatBlock target, InventoryItem item)
+    public static void AddItemStats(CharacterStatBlock target, ItemData itemData, float durabilityPercent)
     {
-        if (target == null || item == null || item.ItemData == null)
+        if (target == null || itemData == null)
         {
             return;
         }
 
-        float durabilityPercent = item.HasDurability ? item.CurrentDurabilityPercent : 100f;
-        AddModifiers(target, item.ItemData.StatModifiers, durabilityPercent);
+        float normalizedDurabilityPercent = itemData.HasDurability ? global::ItemData.NormalizeDurability(durabilityPercent) : 100f;
+        AddModifiers(target, itemData.StatModifiers, normalizedDurabilityPercent);
     }
 }

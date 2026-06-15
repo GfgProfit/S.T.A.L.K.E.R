@@ -24,67 +24,6 @@ internal static class InventoryItemOverlayPresenter
         }
     }
 
-    public static void RefreshCountText(TMP_Text countText, RectTransform countTextRectTransform, RectTransform shortNameTextRectTransform, RectTransform statusIconRectTransform, bool overlayTextsVisible, ItemData itemData, int currentAmount)
-    {
-        ApplyOverlayTextSettings(countText, null);
-
-        if (countText == null)
-        {
-            return;
-        }
-
-        bool showCount = overlayTextsVisible && itemData != null && itemData.IsStackable && currentAmount > 1;
-        countText.text = showCount ? $"x{currentAmount}" : string.Empty;
-        countText.gameObject.SetActive(showCount);
-
-        if (showCount)
-        {
-            BringOverlayTextsToFront(shortNameTextRectTransform, countTextRectTransform, statusIconRectTransform);
-        }
-    }
-
-    public static void RefreshShortNameText(TMP_Text shortNameText, RectTransform shortNameTextRectTransform, RectTransform countTextRectTransform, RectTransform statusIconRectTransform, bool overlayTextsVisible, ItemData itemData)
-    {
-        ApplyOverlayTextSettings(null, shortNameText);
-
-        if (shortNameText == null)
-        {
-            return;
-        }
-
-        string text = itemData == null ? string.Empty : itemData.ShortName;
-        bool showShortName = overlayTextsVisible && string.IsNullOrWhiteSpace(text) == false;
-        shortNameText.text = showShortName ? text : string.Empty;
-        shortNameText.color = itemData == null ? Color.white : itemData.ShortNameColor;
-        shortNameText.gameObject.SetActive(showShortName);
-
-        if (showShortName)
-        {
-            BringOverlayTextsToFront(shortNameTextRectTransform, countTextRectTransform, statusIconRectTransform);
-        }
-    }
-
-    public static void RefreshStatusIcon(RectTransform statusIconRectTransform, Image statusIconImage, Sprite questStatusIcon, bool cellVisualsVisible, ItemData itemData, bool isVisuallyRotated)
-    {
-        ApplyStatusIconSettings(statusIconImage);
-
-        if (statusIconRectTransform == null || statusIconImage == null)
-        {
-            return;
-        }
-
-        bool showStatusIcon = cellVisualsVisible && itemData != null && itemData.ItemType == ItemType.Quest && questStatusIcon != null;
-        statusIconImage.sprite = showStatusIcon ? questStatusIcon : null;
-        statusIconImage.enabled = showStatusIcon;
-        statusIconRectTransform.gameObject.SetActive(showStatusIcon);
-
-        if (showStatusIcon)
-        {
-            InventoryItemOverlayLayout.ApplyStatusIconLayout(statusIconRectTransform, isVisuallyRotated);
-            statusIconRectTransform.SetAsLastSibling();
-        }
-    }
-
     public static void ApplyOverlayTextSettings(TMP_Text countText, TMP_Text shortNameText)
     {
         if (countText != null)

@@ -1,48 +1,99 @@
+using System;
+using R3;
 using UnityEngine;
 
-public class InventoryHighlight : MonoBehaviour
+public class InventoryHighlight : MonoBehaviour, IView<InventoryHighlightViewModel>
 {
     [SerializeField] private RectTransform _highlighter;
 
-    public void Show(bool value) => _highlighter.gameObject.SetActive(value);
+    private InventoryHighlightViewModel _viewModel;
+    private IDisposable _visibleSubscription;
+    private IDisposable _sizeSubscription;
+    private IDisposable _positionSubscription;
 
-    public void SetSize(InventoryItem targetItem)
+    public void Show(bool value)
     {
-        Vector2 size = new()
-        {
-            x = targetItem.Width * ItemGrid.TILE_SIZE_WIDTH,
-            y = targetItem.Height * ItemGrid.TILE_SIZE_HEIGHT
-        };
-
-        _highlighter.sizeDelta = size;
+        EnsureViewModel();
+        _viewModel.SetVisible(value);
     }
 
-    public void SetSize(InventoryGrid targetGrid, InventoryItem targetItem) => SetSize(targetGrid, targetItem, targetItem.GridPositionX, targetItem.GridPositionY);
-    public void SetSize(InventoryGrid targetGrid, InventoryItem targetItem, int posX, int posY) => _highlighter.sizeDelta = targetGrid.GetHighlightSize(targetItem, posX, posY);
-
-    public void SetPosition(InventoryGrid targetGrid, InventoryItem targetItem)
+    public void SetSize(Vector2 size)
     {
-        Vector2 pos = targetGrid.GetHighlightPosition(targetItem, targetItem.GridPositionX, targetItem.GridPositionY);
-
-        _highlighter.localPosition = pos;
+        EnsureViewModel();
+        _viewModel.SetSize(size);
     }
 
-    public void SetParent(InventoryGrid targetGrid)
+    public void SetParent(RectTransform parent, int siblingIndex)
     {
-        if (targetGrid == null)
+        if (parent == null)
         {
             return;
         }
 
-        _highlighter.SetParent(targetGrid.RectTransform, false);
-        int siblingIndex = Mathf.Min(targetGrid.HighlightSiblingIndex, _highlighter.parent.childCount - 1);
-        _highlighter.SetSiblingIndex(siblingIndex);
+        _highlighter.SetParent(parent, false);
+        _highlighter.SetSiblingIndex(Mathf.Min(siblingIndex, _highlighter.parent.childCount - 1));
     }
 
-    public void SetPosition(InventoryGrid targetGrid, InventoryItem targetItem, int posX, int posY)
+    public void SetPosition(Vector2 position)
     {
-        Vector2 pos = targetGrid.GetHighlightPosition(targetItem, posX, posY);
+        EnsureViewModel();
+        _viewModel.SetPosition(position);
+    }
 
-        _highlighter.localPosition = pos;
+    public void Bind(InventoryHighlightViewModel viewModel)
+    {
+        Unbind();
+        _viewModel = viewModel;
+
+        if (_viewModel == null)
+        {
+            return;
+        }
+
+        _visibleSubscription = _viewModel.Visible.Subscribe(SetVisible);
+        _sizeSubscription = _viewModel.Size.Subscribe(ApplySize);
+        _positionSubscription = _viewModel.Position.Subscribe(ApplyPosition);
+    }
+
+    public void Unbind()
+    {
+        _visibleSubscription?.Dispose();
+        _sizeSubscription?.Dispose();
+        _positionSubscription?.Dispose();
+        _visibleSubscription = null;
+        _sizeSubscription = null;
+        _positionSubscription = null;
+    }
+
+    private void OnDestroy()
+    {
+        Unbind();
+        _viewModel?.Dispose();
+        _viewModel = null;
+    }
+
+    private void EnsureViewModel()
+    {
+        if (_viewModel != null)
+        {
+            return;
+        }
+
+        Bind(InventoryViewModelFactory.CreateHighlight());
+    }
+
+    private void SetVisible(bool visible)
+    {
+        _highlighter.gameObject.SetActive(visible);
+    }
+
+    private void ApplySize(Vector2 size)
+    {
+        _highlighter.sizeDelta = size;
+    }
+
+    private void ApplyPosition(Vector2 position)
+    {
+        _highlighter.localPosition = position;
     }
 }

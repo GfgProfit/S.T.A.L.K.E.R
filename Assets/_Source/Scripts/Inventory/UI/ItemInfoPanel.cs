@@ -1,8 +1,10 @@
+using System;
 using TMPro;
+using R3;
 using UnityEngine;
 using UnityEngine.UI;
 
-public class ItemInfoPanel : MonoBehaviour
+public class ItemInfoPanel : MonoBehaviour, IView<ItemTooltipViewModel>
 {
     [SerializeField] private RectTransform _panelRectTransform;
     [SerializeField] private Vector2 _cursorOffset;
@@ -25,6 +27,16 @@ public class ItemInfoPanel : MonoBehaviour
 
     private readonly ItemInfoPanelPositioner _positioner = new ItemInfoPanelPositioner();
     private IPlayerInput _fallbackPlayerInput;
+    private ItemTooltipViewModel _viewModel;
+    private IDisposable _isVisibleSubscription;
+    private IDisposable _iconSubscription;
+    private IDisposable _iconSizeSubscription;
+    private IDisposable _itemNameSubscription;
+    private IDisposable _typeSubscription;
+    private IDisposable _weightSubscription;
+    private IDisposable _durabilitySubscription;
+    private IDisposable _showDurabilitySubscription;
+    private IDisposable _descriptionSubscription;
 
     private IPlayerPointerInput PlayerInput
     {
@@ -42,7 +54,13 @@ public class ItemInfoPanel : MonoBehaviour
 
     private void Awake()
     {
-        Hide();
+        bool hasViewModel = _viewModel != null;
+        EnsureViewModel();
+
+        if (hasViewModel == false)
+        {
+            Hide();
+        }
     }
 
     private void LateUpdate()
@@ -50,44 +68,103 @@ public class ItemInfoPanel : MonoBehaviour
         UpdatePosition();
     }
 
-    public void Show(InventoryItem item)
+    public void Show(ItemTooltipData item)
     {
-        if (item == null || item.ItemData == null)
+        EnsureViewModel();
+
+        if (item.IsValid == false)
         {
             Hide();
             return;
         }
 
-        gameObject.SetActive(true);
-
-        SetIcon(item);
-        SetItemName(item.ItemData);
-        SetType(item.ItemData);
-        SetWeight(item);
-        SetDurability(item);
-        SetStatsInfo(item);
-        SetDescription(item.ItemData);
+        GameProjectSettings settings = GameProjectSettings.LoadDefault();
+        _viewModel.Show(item, _descriptionWordsPerLine, settings);
+        SetStatsInfo(item, settings);
         RebuildLayout();
         UpdatePosition();
     }
 
-    public void Hide() => gameObject.SetActive(false);
+    public void Hide()
+    {
+        EnsureViewModel();
+        _viewModel.Hide();
+    }
 
-    private void SetStatsInfo(InventoryItem item)
+    public void Bind(ItemTooltipViewModel viewModel)
+    {
+        Unbind();
+        _viewModel = viewModel;
+
+        if (_viewModel == null)
+        {
+            return;
+        }
+
+        _isVisibleSubscription = _viewModel.IsVisible.Subscribe(SetVisible);
+        _iconSubscription = _viewModel.Icon.Subscribe(SetIcon);
+        _iconSizeSubscription = _viewModel.IconSize.Subscribe(SetIconSize);
+        _itemNameSubscription = _viewModel.ItemNameText.Subscribe(SetItemName);
+        _typeSubscription = _viewModel.TypeText.Subscribe(SetType);
+        _weightSubscription = _viewModel.WeightText.Subscribe(SetWeight);
+        _durabilitySubscription = _viewModel.DurabilityText.Subscribe(SetDurability);
+        _showDurabilitySubscription = _viewModel.ShowDurability.Subscribe(SetDurabilityVisible);
+        _descriptionSubscription = _viewModel.DescriptionText.Subscribe(SetDescription);
+    }
+
+    public void Unbind()
+    {
+        _isVisibleSubscription?.Dispose();
+        _iconSubscription?.Dispose();
+        _iconSizeSubscription?.Dispose();
+        _itemNameSubscription?.Dispose();
+        _typeSubscription?.Dispose();
+        _weightSubscription?.Dispose();
+        _durabilitySubscription?.Dispose();
+        _showDurabilitySubscription?.Dispose();
+        _descriptionSubscription?.Dispose();
+        _isVisibleSubscription = null;
+        _iconSubscription = null;
+        _iconSizeSubscription = null;
+        _itemNameSubscription = null;
+        _typeSubscription = null;
+        _weightSubscription = null;
+        _durabilitySubscription = null;
+        _showDurabilitySubscription = null;
+        _descriptionSubscription = null;
+    }
+
+    private void OnDestroy()
+    {
+        Unbind();
+        _viewModel?.Dispose();
+        _viewModel = null;
+    }
+
+    private void EnsureViewModel()
+    {
+        if (_viewModel != null)
+        {
+            return;
+        }
+
+        Bind(InventoryViewModelFactory.CreateItemTooltip());
+    }
+
+    private void SetStatsInfo(ItemTooltipData item, GameProjectSettings settings)
     {
         if (_statsInfoPanel == null)
         {
             return;
         }
 
-        GameProjectSettings settings = GameProjectSettings.LoadDefault();
         _statsInfoPanel.RenderItemStats(item, settings.StatCurrentValueColor, settings.StatFullDurabilityValueColor, _hideStatsInfoWhenEmpty);
     }
 
-    private void SetIcon(InventoryItem item)
-    {
-        Vector2 iconSize = new(item.BaseWidth * ItemGrid.TILE_SIZE_WIDTH, item.BaseHeight * ItemGrid.TILE_SIZE_HEIGHT);
+    private void SetVisible(bool visible) => gameObject.SetActive(visible);
 
+    private void SetIconSize(Vector2 iconSize)
+    {
         if (_iconRectTransform != null)
         {
             _iconRectTransform.sizeDelta = iconSize;
@@ -104,78 +181,81 @@ public class ItemInfoPanel : MonoBehaviour
             _iconLayoutElement.flexibleWidth = 0f;
             _iconLayoutElement.flexibleHeight = 0f;
         }
+    }
 
+    private void SetIcon(Sprite icon)
+    {
         if (_iconImage == null)
         {
             return;
         }
 
-        Sprite icon = item.ItemData.GetIcon(item.RuntimeIconParts);
         _iconImage.sprite = icon;
         _iconImage.enabled = icon != null;
         _iconImage.rectTransform.localRotation = Quaternion.identity;
         _iconImage.rectTransform.localScale = Vector3.one;
     }
 
-    private void SetItemName(ItemData itemData)
+    private void SetItemName(string itemName)
     {
         if (_itemNameText == null)
         {
             return;
         }
 
-        _itemNameText.text = itemData.ItemName;
+        _itemNameText.text = itemName;
     }
 
-    private void SetType(ItemData itemData)
+    private void SetType(string typeText)
     {
         if (_typeText == null)
         {
             return;
         }
 
-        _typeText.text = ItemInfoPanelTextFormatter.FormatType(itemData);
+        _typeText.text = typeText;
         _typeText.gameObject.SetActive(true);
     }
 
-    private void SetWeight(InventoryItem item)
+    private void SetWeight(string weightText)
     {
         if (_weightText == null)
         {
             return;
         }
 
-        _weightText.text = ItemInfoPanelTextFormatter.FormatWeight(item);
+        _weightText.text = weightText;
     }
 
-    private void SetDurability(InventoryItem item)
+    private void SetDurabilityVisible(bool visible)
     {
         if (_durabilityText == null)
         {
             return;
         }
 
-        bool showDurability = item != null && item.HasDurability;
-        _durabilityText.gameObject.SetActive(showDurability);
+        _durabilityText.gameObject.SetActive(visible);
+    }
 
-        if (showDurability == false)
+    private void SetDurability(string durabilityText)
+    {
+        if (_durabilityText == null)
         {
             return;
         }
 
-        float durabilityPercent = item.CurrentDurabilityPercent;
         _durabilityText.richText = true;
-        _durabilityText.text = ItemInfoPanelTextFormatter.FormatDurability(item, GameProjectSettings.LoadDefault().GetDurabilityColor(durabilityPercent));
+        _durabilityText.text = durabilityText;
     }
 
-    private void SetDescription(ItemData itemData)
+    private void SetDescription(string description)
     {
         if (_descriptionText == null)
         {
             return;
         }
 
-        _descriptionText.text = ItemInfoPanelTextFormatter.WrapDescription(itemData.Description, _descriptionWordsPerLine);
+        _descriptionText.text = description;
     }
 
     private void RebuildLayout()

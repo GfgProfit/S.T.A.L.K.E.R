@@ -1,5 +1,5 @@
+using System;
 using System.Collections.Generic;
-using TMPro;
 using UnityEngine;
 
 internal sealed class InventoryWeightStateController
@@ -7,24 +7,24 @@ internal sealed class InventoryWeightStateController
     private readonly InventoryItemRegistry _itemRegistry;
     private readonly IReadOnlyList<EquipmentSlotGrid> _equipmentSlotGrids;
     private readonly InventoryEquipmentSlotService _equipmentSlotService;
-    private readonly TMP_Text _weightText;
+    private readonly Action<float, float, float, float, bool> _setWeightState;
+    private readonly Action<CharacterStatBlock, bool, bool> _renderCharacterStats;
     private readonly PlayerController _playerController;
     private readonly PlayerCharacterStats _playerStats;
-    private readonly CharacterStatsInfoPanel _playerStatsInfoPanel;
     private readonly bool _hidePlayerStatsInfoWhenEmpty;
     private readonly float _maxCarryWeight;
     private readonly float _movementBlockExtraWeight;
     private readonly CharacterStatBlock _equippedStats = new();
 
-    public InventoryWeightStateController(InventoryItemRegistry itemRegistry, IReadOnlyList<EquipmentSlotGrid> equipmentSlotGrids, InventoryEquipmentSlotService equipmentSlotService, TMP_Text weightText, PlayerController playerController, PlayerCharacterStats playerStats, CharacterStatsInfoPanel playerStatsInfoPanel, bool hidePlayerStatsInfoWhenEmpty, float maxCarryWeight, float movementBlockExtraWeight)
+    public InventoryWeightStateController(InventoryItemRegistry itemRegistry, IReadOnlyList<EquipmentSlotGrid> equipmentSlotGrids, InventoryEquipmentSlotService equipmentSlotService, Action<float, float, float, float, bool> setWeightState, Action<CharacterStatBlock, bool, bool> renderCharacterStats, PlayerController playerController, PlayerCharacterStats playerStats, bool hidePlayerStatsInfoWhenEmpty, float maxCarryWeight, float movementBlockExtraWeight)
     {
         _itemRegistry = itemRegistry;
         _equipmentSlotGrids = equipmentSlotGrids;
         _equipmentSlotService = equipmentSlotService;
-        _weightText = weightText;
+        _setWeightState = setWeightState;
+        _renderCharacterStats = renderCharacterStats;
         _playerController = playerController;
         _playerStats = playerStats;
-        _playerStatsInfoPanel = playerStatsInfoPanel;
         _hidePlayerStatsInfoWhenEmpty = hidePlayerStatsInfoWhenEmpty;
         _maxCarryWeight = maxCarryWeight;
         _movementBlockExtraWeight = movementBlockExtraWeight;
@@ -40,7 +40,7 @@ internal sealed class InventoryWeightStateController
     {
         RefreshEquippedStats();
         CurrentCarryWeight = _itemRegistry.CalculateCarryWeight();
-        RefreshWeightText();
+        PublishWeightState();
         ApplyMovementState();
     }
 
@@ -65,7 +65,7 @@ internal sealed class InventoryWeightStateController
 
             if (ShouldApplyEquippedStats(item))
             {
-                CharacterStatUtility.AddItemStats(_equippedStats, item);
+                CharacterStatUtility.AddItemStats(_equippedStats, item.ItemData, item.CurrentDurabilityPercent);
             }
         }
 
@@ -76,25 +76,12 @@ internal sealed class InventoryWeightStateController
 
         _equipmentSlotService.RefreshSlotRestrictions();
 
-        if (_playerStatsInfoPanel != null)
-        {
-            GameProjectSettings settings = GameProjectSettings.LoadDefault();
-            _playerStatsInfoPanel.RenderCharacterStats(_playerStats == null ? _equippedStats : _playerStats.CurrentStats, settings.StatCurrentValueColor, _hidePlayerStatsInfoWhenEmpty, true);
-        }
+        _renderCharacterStats?.Invoke(_playerStats == null ? _equippedStats : _playerStats.CurrentStats, _hidePlayerStatsInfoWhenEmpty, true);
     }
 
-    private void RefreshWeightText()
+    private void PublishWeightState()
     {
-        if (_weightText == null)
-        {
-            return;
-        }
-
-        _weightText.raycastTarget = false;
-        _weightText.richText = true;
-        GameProjectSettings settings = GameProjectSettings.LoadDefault();
-        _weightText.color = settings.NormalWeightColor;
-        _weightText.text = InventoryWeightTextFormatter.BuildText(CurrentCarryWeight, MaxCarryWeight, MovementBlockWeight, settings);
+        _setWeightState?.Invoke(CurrentCarryWeight, BaseMaxCarryWeight, MaxCarryWeight, MovementBlockWeight, IsMovementBlockedByWeight);
     }
 
     private float GetCarryWeightBonusKg() => _playerStats == null ? _equippedStats.Get(CharacterStatType.CarryWeight) : _playerStats.GetStat(CharacterStatType.CarryWeight);

@@ -1,4 +1,7 @@
 using System;
+using System.Threading;
+using Cysharp.Threading.Tasks;
+using R3;
 using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
@@ -7,7 +10,7 @@ using UnityEngine.UI;
 using UnityEditor;
 #endif
 
-public class InventoryItemContextMenu : MonoBehaviour
+public class InventoryItemContextMenu : MonoBehaviour, IView<InventoryItemContextMenuViewModel>
 {
     private static readonly Vector2 _menuOffset = new(12f, -8f);
     private static readonly Vector2 _screenPadding = new(8f, 8f);
@@ -26,6 +29,9 @@ public class InventoryItemContextMenu : MonoBehaviour
     private Action _onDropOne;
     private Action _onDropStack;
     private InventoryContextMenuPositioner _positioner;
+    private InventoryItemContextMenuViewModel _viewModel;
+    private IDisposable _isVisibleSubscription;
+    private IDisposable _canDropStackSubscription;
 
     public bool IsOpen => gameObject.activeSelf;
 
@@ -40,13 +46,17 @@ public class InventoryItemContextMenu : MonoBehaviour
 
     private void Awake()
     {
-        Hide();
+        if (_viewModel == null)
+        {
+            Hide();
+        }
     }
 
     public void Initialize(Action dropOneAction, Action dropStackAction)
     {
         _onDropOne = dropOneAction;
         _onDropStack = dropStackAction;
+        Bind(InventoryViewModelFactory.CreateContextMenu(_onDropOne, _onDropStack));
 
         if (_dropOneButton != null)
         {
@@ -61,24 +71,32 @@ public class InventoryItemContextMenu : MonoBehaviour
         }
     }
 
-    public void Show(InventoryItem item, Vector2 screenPosition)
+    public void Show(bool canDropStack, Vector2 screenPosition)
     {
-        if (item == null)
+        if (_viewModel == null)
         {
             Hide();
             return;
         }
 
-        gameObject.SetActive(true);
+        _viewModel.Show(canDropStack);
         transform.SetAsLastSibling();
 
-        bool canDropStack = item.IsStackable && item.CurrentAmount > 1;
-        SetDropStackButtonEnabled(canDropStack);
         RebuildLayout();
         Positioner.SetPosition(screenPosition);
     }
 
-    public void Hide() => gameObject.SetActive(false);
+    public void Hide()
+    {
+        if (_viewModel == null)
+        {
+            SetVisible(false);
+            return;
+        }
+
+        _viewModel.Hide();
+    }
+
     public bool ContainsScreenPoint(Vector2 screenPoint) => IsOpen && Positioner.ContainsScreenPoint(screenPoint);
 
     public bool ShouldCloseForPointer(Vector2 screenPoint)
@@ -91,8 +109,64 @@ public class InventoryItemContextMenu : MonoBehaviour
         return Positioner.ShouldCloseForPointer(screenPoint, _closeRadius);
     }
 
-    private void HandleDropOneClicked() => _onDropOne?.Invoke();
-    private void HandleDropStackClicked() => _onDropStack?.Invoke();
+    public void Bind(InventoryItemContextMenuViewModel viewModel)
+    {
+        Unbind();
+        _viewModel?.Dispose();
+        _viewModel = viewModel;
+
+        if (_viewModel == null)
+        {
+            return;
+        }
+
+        _isVisibleSubscription = _viewModel.IsVisible.Subscribe(SetVisible);
+        _canDropStackSubscription = _viewModel.CanDropStack.Subscribe(SetDropStackButtonEnabled);
+    }
+
+    public void Unbind()
+    {
+        _isVisibleSubscription?.Dispose();
+        _canDropStackSubscription?.Dispose();
+        _isVisibleSubscription = null;
+        _canDropStackSubscription = null;
+    }
+
+    private void OnDestroy()
+    {
+        UnsubscribeButtons();
+        Unbind();
+        _viewModel?.Dispose();
+        _viewModel = null;
+    }
+
+    private void HandleDropOneClicked() => ExecuteCommandAsync(_viewModel?.DropOneCommand, destroyCancellationToken).Forget(Debug.LogException);
+    private void HandleDropStackClicked() => ExecuteCommandAsync(_viewModel?.DropStackCommand, destroyCancellationToken).Forget(Debug.LogException);
+
+    private void UnsubscribeButtons()
+    {
+        if (_dropOneButton != null)
+        {
+            _dropOneButton.onClick.RemoveListener(HandleDropOneClicked);
+        }
+
+        if (_dropStackButton != null)
+        {
+            _dropStackButton.onClick.RemoveListener(HandleDropStackClicked);
+        }
+    }
+
+    private static async UniTask ExecuteCommandAsync(AsyncReactiveCommand command, CancellationToken cancellationToken)
+    {
+        if (command == null)
+        {
+            return;
+        }
+
+        await command.ExecuteAsync(cancellationToken);
+    }
+
+    private void SetVisible(bool visible) => gameObject.SetActive(visible);
 
     private void SetDropStackButtonEnabled(bool enabled)
     {

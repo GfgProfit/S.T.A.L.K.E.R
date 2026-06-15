@@ -32,7 +32,7 @@ internal sealed class InventoryEquipmentSlotService
         bool closeHelmetSlot = equippedArmor != null && equippedArmor.ItemData != null && equippedArmor.ItemData.CanEquipHelmet == false;
 
         SetEquipmentSlotsClosed(ItemType.Helmet, closeHelmetSlot, resolvedClosedSlotPrefab);
-        SetOpenArtifactSlotCount(ArmorArtifactSlotResolver.GetSlotCount(equippedArmor), resolvedClosedSlotPrefab);
+        SetOpenArtifactSlotCount(GetArtifactSlotCount(equippedArmor), resolvedClosedSlotPrefab);
     }
 
     public bool TryPrepareSlotRestrictionsForPlacement(InventoryGrid targetGrid, InventoryItem item)
@@ -47,7 +47,7 @@ internal sealed class InventoryEquipmentSlotService
             return true;
         }
 
-        if (CanSetOpenArtifactSlotCount(ArmorArtifactSlotResolver.GetSlotCount(item)) == false)
+        if (CanSetOpenArtifactSlotCount(GetArtifactSlotCount(item)) == false)
         {
             return false;
         }
@@ -101,6 +101,11 @@ internal sealed class InventoryEquipmentSlotService
         }
 
         return false;
+    }
+
+    private static int GetArtifactSlotCount(InventoryItem item)
+    {
+        return item == null ? 0 : ArmorArtifactSlotResolver.GetSlotCount(item.ItemData, item.CurrentDurabilityPercent);
     }
 
     private bool TryMoveEquippedItemToInventory(ItemType itemType)

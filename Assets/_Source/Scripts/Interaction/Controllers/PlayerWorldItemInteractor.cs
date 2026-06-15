@@ -103,7 +103,7 @@ public class PlayerWorldItemInteractor : MonoBehaviour
             return;
         }
 
-        _tooltipView.Show(_hoveredWorldItem, PlayerInput.InteractKeyDisplayName);
+        _tooltipView.Show(_hoveredWorldItem.DisplayName, PlayerInput.InteractKeyDisplayName);
     }
 
     private void OnDisable() => SetHoveredWorldItem(null);

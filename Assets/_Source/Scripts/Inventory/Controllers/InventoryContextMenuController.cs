@@ -100,11 +100,12 @@ internal sealed class InventoryContextMenuController
         _contextMenuItem = item;
 
         _hideItemInfoPanel();
-        _contextMenu.Show(item, _playerInput.GetPointerPosition());
+        _contextMenu.Show(CanDropStack(item), _playerInput.GetPointerPosition());
     }
 
     private void DropSingleItem() => DropContextMenuItem(false);
     private void DropItemStack() => DropContextMenuItem(true);
+    private static bool CanDropStack(InventoryItem item) => item != null && item.IsStackable && item.CurrentAmount > 1;
 
     private void DropContextMenuItem(bool wholeStack)
     {

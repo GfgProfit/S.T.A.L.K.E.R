@@ -4,7 +4,7 @@ using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
 
-public class InventoryItem : MonoBehaviour
+public class InventoryItem : MonoBehaviour, IView<InventoryItemViewModel>
 {
     [SerializeField] private ItemData _itemData;
     [SerializeField] [Min(1)] private int _currentAmount = 1;
@@ -26,33 +26,74 @@ public class InventoryItem : MonoBehaviour
 
     public int GridPositionX { get; internal set; }
     public int GridPositionY { get; internal set; }
-    public bool IsRotated { get; internal set; }
+    public bool IsRotated
+    {
+        get => _state.IsRotated;
+        internal set => SetRotated(value);
+    }
 
-    private RectTransform _cellGridRoot;
+    private readonly InventoryItemState _state = new();
     private readonly InventoryItemVisualState _visualState = new InventoryItemVisualState();
+    private InventoryItemView _itemView;
+    private InventoryItemViewModel _viewModel;
 
     public event Action<InventoryItem> DurabilityChanged;
 
-    public ItemData ItemData => _itemData;
-    public int Width => _itemData == null ? 0 : Mathf.Max(1, IsRotated ? _itemData.Height : _itemData.Width);
-    public int Height => _itemData == null ? 0 : Mathf.Max(1, IsRotated ? _itemData.Width : _itemData.Height);
-    public int CurrentAmount => Mathf.Max(1, _currentAmount);
-    public bool IsStackable => _itemData != null && _itemData.IsStackable;
-    public bool HasDurability => _itemData != null && _itemData.HasDurability;
-    public float CurrentDurabilityPercent => HasDurability ? ItemData.NormalizeDurability(_currentDurabilityPercent) : 0f;
-    public float UnitWeight => _itemData == null ? 0f : _itemData.Weight;
-    public float TotalWeight => UnitWeight * CurrentAmount;
-    public int BaseWidth => _itemData == null ? 0 : Mathf.Max(1, _itemData.Width);
-    public int BaseHeight => _itemData == null ? 0 : Mathf.Max(1, _itemData.Height);
-    public bool CanRotate => BaseWidth != BaseHeight;
+    public ItemData ItemData => _state.ItemData;
+    public int Width => _state.Width;
+    public int Height => _state.Height;
+    public int CurrentAmount => _state.CurrentAmount;
+    public bool IsStackable => _state.IsStackable;
+    public bool HasDurability => _state.HasDurability;
+    public float CurrentDurabilityPercent => _state.CurrentDurabilityPercent;
+    public float UnitWeight => _state.UnitWeight;
+    public float TotalWeight => _state.TotalWeight;
+    public int BaseWidth => _state.BaseWidth;
+    public int BaseHeight => _state.BaseHeight;
+    public bool CanRotate => _state.CanRotate;
     public RectTransform RectTransform => _rectTransform;
     internal IReadOnlyList<ItemIconPart> RuntimeIconParts => _visualState.RuntimeIconParts;
 
     private void Awake()
     {
+        _state.Initialize(_itemData, _currentAmount, _currentDurabilityPercent, false);
+        SyncSerializedStateFromState();
+        EnsureItemView();
+        EnsureViewModel();
         ApplySerializedVisualSettings();
-        RefreshDurabilityVisual(true);
+        RefreshIcon();
+        RefreshCountText();
+        RefreshShortNameText();
+        RefreshCellBackground();
+        RefreshDurabilityVisual(_visualState.CellVisualsVisible);
         RefreshStatusIcon();
+    }
+
+    private void OnDestroy()
+    {
+        Unbind();
+        _itemView?.Dispose();
+        _viewModel?.Dispose();
+        _viewModel = null;
+    }
+
+    public void Bind(InventoryItemViewModel viewModel)
+    {
+        Unbind();
+        _viewModel = viewModel;
+
+        if (_viewModel == null)
+        {
+            return;
+        }
+
+        EnsureItemView();
+        _itemView.Bind(_viewModel);
+    }
+
+    public void Unbind()
+    {
+        _itemView?.Unbind();
     }
 
     internal void Set(ItemData itemData) => Set(itemData, 1, null, null);
@@ -64,19 +105,19 @@ public class InventoryItem : MonoBehaviour
     {
         ApplySerializedVisualSettings();
 
-        _itemData = itemData;
+        _state.SetItem(itemData, amount, durabilityPercent ?? InventoryItemState.GetDefaultDurabilityPercent(itemData));
+        SyncSerializedStateFromState();
         _visualState.SetRuntimeIconParts(runtimeIconParts);
-        IsRotated = false;
         _visualState.RestoreDefaultVisual();
-        SetAmountInternal(amount);
-        SetDurabilityInternal(durabilityPercent ?? GetDefaultDurabilityPercent());
+        RefreshCountText();
+        RefreshDurabilityVisual(true);
         RefreshShortNameText();
 
         RefreshIcon();
         RebuildCellVisuals();
         RefreshStatusIcon();
 
-        if (itemData == null)
+        if (ItemData == null)
         {
             return;
         }
@@ -96,19 +137,21 @@ public class InventoryItem : MonoBehaviour
             return;
         }
 
-        long totalAmount = (long)CurrentAmount + amount;
-        SetAmountInternal(totalAmount > int.MaxValue ? int.MaxValue : (int)totalAmount);
+        _state.AddAmount(amount);
+        SyncSerializedStateFromState();
+        RefreshCountText();
     }
 
     public bool CanStackWith(ItemData targetItemData)
     {
-        return targetItemData != null && _itemData == targetItemData && IsStackable;
+        return _state.CanStackWith(targetItemData);
     }
 
     public void SetDurability(float durabilityPercent) => SetDurabilityInternal(durabilityPercent);
 
     internal void RefreshIcon(IReadOnlyList<ItemIconPart> runtimeIconParts = null)
     {
+        EnsureViewModel();
         ApplySerializedVisualSettings();
 
         if (runtimeIconParts != null)
@@ -116,17 +159,14 @@ public class InventoryItem : MonoBehaviour
             _visualState.SetRuntimeIconParts(runtimeIconParts);
         }
 
-        if (_itemImage != null)
-        {
-            _itemImage.sprite = _visualState.GetIcon(_itemData);
-        }
+        _viewModel.SetIcon(_visualState.GetIcon(ItemData));
     }
 
     internal void ApplySlotVisual(int slotWidth, int slotHeight, bool useGeneratedSlotIcon)
     {
         ApplySerializedVisualSettings();
 
-        _visualState.ApplySlotVisual(_itemData, slotWidth, slotHeight, useGeneratedSlotIcon);
+        _visualState.ApplySlotVisual(ItemData, slotWidth, slotHeight, useGeneratedSlotIcon);
 
         ApplyVisualSize();
         RefreshIcon();
@@ -148,18 +188,13 @@ public class InventoryItem : MonoBehaviour
 
     internal void SetCellVisualsVisible(bool visible)
     {
+        EnsureViewModel();
         ApplySerializedVisualSettings();
         _visualState.SetCellVisualsVisible(visible);
 
-        if (_cellBackgroundImage != null)
-        {
-            _cellBackgroundImage.enabled = visible && _itemData != null && _itemData.IconBackgroundColor.a > 0f;
-        }
+        RefreshCellBackground();
 
-        if (_cellGridRoot != null)
-        {
-            _cellGridRoot.gameObject.SetActive(visible);
-        }
+        _itemView.SetCellGridVisible(visible);
 
         RefreshDurabilityVisual(visible);
         RefreshStatusIcon();
@@ -167,6 +202,7 @@ public class InventoryItem : MonoBehaviour
 
     internal void SetOverlayTextsVisible(bool visible)
     {
+        EnsureViewModel();
         _visualState.SetOverlayTextsVisible(visible);
         RefreshCountText();
         RefreshShortNameText();
@@ -185,54 +221,42 @@ public class InventoryItem : MonoBehaviour
 
     internal void SetRotated(bool value)
     {
-        bool normalizedValue = value && CanRotate;
-
-        if (IsRotated == normalizedValue)
-        {
-            ApplyRotation();
-            return;
-        }
-
-        IsRotated = normalizedValue;
+        _state.SetRotated(value);
+        SyncSerializedStateFromState();
         ApplyRotation();
     }
 
     private void OnValidate()
     {
-        _currentAmount = Mathf.Max(1, _currentAmount);
-        _currentDurabilityPercent = ItemData.NormalizeDurability(_currentDurabilityPercent);
+        _currentAmount = InventoryItemState.NormalizeAmount(_itemData, _currentAmount);
+        _currentDurabilityPercent = InventoryItemState.NormalizeDurability(_itemData, _currentDurabilityPercent);
     }
 
     private void ApplyRotation()
     {
         ApplySerializedVisualSettings();
-        _rectTransform.localRotation = Quaternion.Euler(0f, 0f, IsVisuallyRotated ? -90f : 0f);
-        ApplyDurabilityLayout();
-        ApplyCountTextLayout();
-        ApplyShortNameTextLayout();
-        ApplyStatusIconLayout();
+        _itemView.ApplyRotation();
     }
 
     private void ApplyVisualSize()
     {
         ApplySerializedVisualSettings();
-        _rectTransform.sizeDelta = new Vector2(VisualWidth * ItemGrid.TILE_SIZE_WIDTH, VisualHeight * ItemGrid.TILE_SIZE_HEIGHT);
-        ApplyDurabilityLayout();
-        ApplyStatusIconLayout();
+        _itemView.ApplyRootSize();
     }
 
     private void SetAmountInternal(int amount)
     {
-        _currentAmount = NormalizeAmount(amount);
+        EnsureViewModel();
+        _state.SetAmount(amount);
+        SyncSerializedStateFromState();
         RefreshCountText();
     }
 
     private void SetDurabilityInternal(float durabilityPercent)
     {
-        float normalizedDurabilityPercent = ItemData.NormalizeDurability(durabilityPercent);
-        bool durabilityChanged = Mathf.Approximately(_currentDurabilityPercent, normalizedDurabilityPercent) == false;
-
-        _currentDurabilityPercent = normalizedDurabilityPercent;
+        EnsureViewModel();
+        bool durabilityChanged = _state.SetDurability(durabilityPercent);
+        SyncSerializedStateFromState();
         RefreshDurabilityVisual(true);
 
         if (durabilityChanged)
@@ -241,88 +265,73 @@ public class InventoryItem : MonoBehaviour
         }
     }
 
-    private float GetDefaultDurabilityPercent() => _itemData == null ? 100f : _itemData.DefaultDurabilityPercent;
-
-    private int NormalizeAmount(int amount)
+    private void RefreshCellBackground()
     {
-        if (_itemData == null || _itemData.IsStackable == false)
-        {
-            return 1;
-        }
-
-        return Mathf.Max(1, amount);
+        EnsureViewModel();
+        _viewModel.SetCellBackground(ItemData, _visualState.CellVisualsVisible);
     }
 
-    private void RefreshCountText() => InventoryItemOverlayPresenter.RefreshCountText(_countText, _countTextRectTransform, _shortNameTextRectTransform, _statusIconRectTransform, _visualState.OverlayTextsVisible, _itemData, CurrentAmount);
-    private void RefreshShortNameText() => InventoryItemOverlayPresenter.RefreshShortNameText(_shortNameText, _shortNameTextRectTransform, _countTextRectTransform, _statusIconRectTransform, _visualState.OverlayTextsVisible, _itemData);
+    private void RefreshCountText()
+    {
+        EnsureViewModel();
+        _viewModel.SetOverlayTexts(ItemData, CurrentAmount, _visualState.OverlayTextsVisible);
+    }
+
+    private void RefreshShortNameText()
+    {
+        EnsureViewModel();
+        _viewModel.SetOverlayTexts(ItemData, CurrentAmount, _visualState.OverlayTextsVisible);
+    }
 
     private void RefreshDurabilityVisual(bool cellVisualsVisible)
     {
-        InventoryItemOverlayPresenter.ApplyDurabilityVisualSettings(_durabilityBackgroundGraphic, _durabilityFillGraphic);
-
-        if (_durabilityBackgroundRectTransform == null)
-        {
-            return;
-        }
-
-        bool showDurability = cellVisualsVisible && HasDurability;
-        _durabilityBackgroundRectTransform.gameObject.SetActive(showDurability);
-
-        if (showDurability == false)
-        {
-            return;
-        }
-
-        ApplyDurabilityLayout();
-        ApplyDurabilityFill();
-        _durabilityBackgroundRectTransform.SetAsLastSibling();
-        InventoryItemOverlayPresenter.BringOverlayTextsToFront(_shortNameTextRectTransform, _countTextRectTransform, _statusIconRectTransform);
+        EnsureViewModel();
+        _itemView.ApplyDurabilityVisualSettings();
+        _viewModel.SetDurability(cellVisualsVisible, HasDurability, CurrentDurabilityPercent);
     }
 
-    private void ApplyDurabilityLayout()
+    private void RefreshStatusIcon()
     {
-        InventoryItemOverlayPresenter.ApplyDurabilityVisualSettings(_durabilityBackgroundGraphic, _durabilityFillGraphic);
-        InventoryItemOverlayLayout.ApplyDurabilityLayout(_durabilityBackgroundRectTransform, _durabilityFillRectTransform, _durabilityFillGraphic, IsVisuallyRotated, CurrentDurabilityPercent);
+        EnsureViewModel();
+        _itemView.ApplyStatusIconSettings();
+        _viewModel.SetStatusIcon(ItemData, _questStatusIcon, _visualState.CellVisualsVisible);
     }
 
-    private void ApplyDurabilityFill()
+    private void ApplySerializedVisualSettings()
     {
-        InventoryItemOverlayPresenter.ApplyDurabilityVisualSettings(_durabilityBackgroundGraphic, _durabilityFillGraphic);
-        InventoryItemOverlayLayout.ApplyDurabilityFill(_durabilityFillRectTransform, _durabilityFillGraphic, IsVisuallyRotated, CurrentDurabilityPercent);
+        EnsureItemView();
+        _itemView.ApplySerializedSettings();
     }
-
-    private void RefreshStatusIcon() => InventoryItemOverlayPresenter.RefreshStatusIcon(_statusIconRectTransform, _statusIconImage, _questStatusIcon, _visualState.CellVisualsVisible, _itemData, IsVisuallyRotated);
-
-    private void ApplyStatusIconLayout()
-    {
-        InventoryItemOverlayPresenter.ApplyStatusIconSettings(_statusIconImage);
-        InventoryItemOverlayLayout.ApplyStatusIconLayout(_statusIconRectTransform, IsVisuallyRotated);
-    }
-
-    private void ApplySerializedVisualSettings() => InventoryItemOverlayPresenter.ApplySerializedSettings(_cellBackgroundImage, _itemImage, _countText, _countTextRectTransform, _shortNameText, _shortNameTextRectTransform, _durabilityBackgroundGraphic, _durabilityFillGraphic, _statusIconImage, _statusIconRectTransform);
 
     private void RebuildCellVisuals()
     {
         ApplySerializedVisualSettings();
-        _cellGridRoot = InventoryItemCellGridBuilder.RebuildCellGrid(transform, _cellGridRoot, _cellBackgroundImage, _itemImage, _itemData, VisualWidth, VisualHeight);
-
+        _itemView.RebuildCellVisuals(ItemData);
         RefreshDurabilityVisual(true);
-        InventoryItemOverlayPresenter.BringOverlayTextsToFront(_shortNameTextRectTransform, _countTextRectTransform, _statusIconRectTransform);
+        _itemView.BringOverlayTextsToFront();
         RefreshStatusIcon();
     }
 
-    private void ApplyCountTextLayout()
+    private void EnsureItemView()
     {
-        InventoryItemOverlayPresenter.ApplyOverlayTextSettings(_countText, _shortNameText);
-        InventoryItemOverlayLayout.ApplyCountTextLayout(_countTextRectTransform, IsVisuallyRotated);
-        InventoryItemOverlayPresenter.BringOverlayTextsToFront(_shortNameTextRectTransform, _countTextRectTransform, _statusIconRectTransform);
+        _itemView ??= new(transform, _rectTransform, _itemImage, _cellBackgroundImage, _countText, _countTextRectTransform, _shortNameText, _shortNameTextRectTransform, _durabilityBackgroundRectTransform, _durabilityBackgroundGraphic, _durabilityFillRectTransform, _durabilityFillGraphic, _statusIconImage, _statusIconRectTransform, () => IsVisuallyRotated, () => VisualWidth, () => VisualHeight, () => CurrentDurabilityPercent);
     }
 
-    private void ApplyShortNameTextLayout()
+    private void EnsureViewModel()
     {
-        InventoryItemOverlayPresenter.ApplyOverlayTextSettings(_countText, _shortNameText);
-        InventoryItemOverlayLayout.ApplyShortNameTextLayout(_shortNameTextRectTransform, IsVisuallyRotated, VisualWidth);
-        InventoryItemOverlayPresenter.BringOverlayTextsToFront(_shortNameTextRectTransform, _countTextRectTransform, _statusIconRectTransform);
+        if (_viewModel != null)
+        {
+            return;
+        }
+
+        Bind(InventoryViewModelFactory.CreateInventoryItem());
+    }
+
+    private void SyncSerializedStateFromState()
+    {
+        _itemData = ItemData;
+        _currentAmount = CurrentAmount;
+        _currentDurabilityPercent = _state.DurabilityPercent;
     }
 
     private int VisualWidth => _visualState.GetVisualWidth(BaseWidth);

@@ -1,5 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
+using System.Threading;
+using Cysharp.Threading.Tasks;
 using TMPro;
 using UnityEngine;
 
@@ -64,6 +66,9 @@ public class InventoryController : MonoBehaviour
     private InventoryHoveredItemActionController _hoveredItemActionController;
     private InventoryUpdateController _updateController;
     private InventoryIconPrewarmController _iconPrewarmController;
+    private InventoryRootView _inventoryView;
+    private InventoryViewModel _viewModel;
+    private GameProjectSettings _settings;
     private readonly InventoryDragState _dragState = new();
     private readonly InventoryDropService _dropService = new();
     private readonly InventoryItemRegistry _itemRegistry = new();
@@ -75,7 +80,11 @@ public class InventoryController : MonoBehaviour
         set
         {
             _selectedItemGrid = value;
-            _inventoryHighlight.SetParent(value);
+
+            if (value != null)
+            {
+                _inventoryHighlight.SetParent(value.RectTransform, value.HighlightSiblingIndex);
+            }
         }
     }
 
@@ -221,11 +230,11 @@ public class InventoryController : MonoBehaviour
     private InventoryQuickActionService CreateQuickActionService() => new(_quickActionGridReferences, _defaultItemGrid, TryMoveItemToGrid, CreateItem, RegisterInventoryItem, RefreshWeightState);
     private InventoryContextMenuController CreateContextMenuController() => new(_itemContextMenu, PlayerInput, () => _selectedItemGrid, () => _dragState.SelectedItem, DragController.GetTileGridPosition, HideItemInfoPanel, TryDropItem);
     private InventoryItemDropProcessor CreateDropProcessor() => new(TrySpawnDroppedWorldItem, TryDetachItemFromGrid, DestroyInventoryItem, RefreshWeightState);
-    private InventoryWeightStateController CreateWeightStateController() => new(_itemRegistry, _equipmentSlotGrids, EquipmentSlotService, _weightText, _playerController, _playerStats, _playerStatsInfoPanel, _hidePlayerStatsInfoWhenEmpty, _maxCarryWeight, _movementBlockExtraWeight);
+    private InventoryWeightStateController CreateWeightStateController() => new(_itemRegistry, _equipmentSlotGrids, EquipmentSlotService, SetWeightViewModelState, RenderCharacterStatsInfo, _playerController, _playerStats, _hidePlayerStatsInfoWhenEmpty, _maxCarryWeight, _movementBlockExtraWeight);
     private InventoryHoverInfoController CreateHoverInfoController() => new(_inventoryHighlight, _itemInfoPanel, IsContextMenuOpen);
     private InventoryDragPlacementService CreateDragPlacementService() => new(_dragState, ItemFactory, _itemRegistry, CanDetachItemWithSlotRestrictions, TryPrepareSlotRestrictionsForPlacement, RefreshWeightState);
     private InventoryDragController CreateDragController() => new(_dragState, DragPlacementService, PlayerInput, _canvasTransform, () => _selectedItemGrid, CanDetachItemWithSlotRestrictions, HideContextMenu, HideItemInfoPanel, RefreshWeightState);
-    private InventoryOpenStateController CreateOpenStateController() => new(_inventoryRoot, _inventoryCanvasGroup, _playerController, _unlockCursorWhileOpen, _disablePlayerControlsWhileOpen, TryStashSelectedItem, ApplyWeightMovementState, HandleInventoryClosed);
+    private InventoryOpenStateController CreateOpenStateController() => new(_playerController, _unlockCursorWhileOpen, _disablePlayerControlsWhileOpen, TryStashSelectedItem, ApplyWeightMovementState, HandleInventoryClosed);
     private InventoryItemPlacementService CreateItemPlacementService() => new(ItemFactory, _itemRegistry, TryPrepareSlotRestrictionsForPlacement, TryDetachItemFromGrid, DestroyInventoryItem, RefreshWeightState);
     private InventoryHoveredItemActionController CreateHoveredItemActionController() => new(PlayerInput, _dragState, () => _selectedItemGrid, DragController.GetTileGridPosition, IsContextMenuOpen, QuickActionService, TryDropItem, HoverInfoController, HideItemInfoPanel, HideContextMenu);
     private InventoryUpdateController CreateUpdateController() => new(PlayerInput, () => IsOpen, () => IconPrewarmController.IconsReady, () => _selectedItemGrid, HoverInfoController, ContextMenuController, ToggleInventory, HideItemInfoPanel, HideContextMenu, DragController.ItemIconDrag, DragController.ReleaseDraggedItem, DragController.RotateSelectedItem, TryHandleHoveredItemDropInput, HandleHighlight, TryHandleQuickItemAction, DragController.BeginDrag);
@@ -233,6 +242,10 @@ public class InventoryController : MonoBehaviour
 
     private void Awake()
     {
+        _settings = GameProjectSettings.LoadDefault();
+        _viewModel = InventoryViewModelFactory.CreateInventory(ToggleInventoryCoreAsync, _settings);
+        _inventoryView = new(_inventoryRoot, _inventoryCanvasGroup, _weightText, _settings);
+
         _itemFactory = new InventoryItemFactory(_itemPrefab);
         _equipmentSlotService = CreateEquipmentSlotService();
         _quickActionService = CreateQuickActionService();
@@ -252,6 +265,7 @@ public class InventoryController : MonoBehaviour
         _contextMenuController.Initialize();
         RegisterExistingInventoryItems();
         SetInventoryOpen(_openOnStart, true);
+        _inventoryView.Bind(_viewModel);
         RefreshWeightState();
     }
 
@@ -264,6 +278,13 @@ public class InventoryController : MonoBehaviour
     private void Update()
     {
         _updateController.Tick();
+    }
+
+    private void OnDestroy()
+    {
+        _itemRegistry.DurabilityChanged -= HandleInventoryItemDurabilityChanged;
+        _inventoryView?.Dispose();
+        _viewModel?.Dispose();
     }
 
     public bool TryInsertItem(ItemData itemData) => TryInsertItem(itemData, 1);
@@ -296,6 +317,17 @@ public class InventoryController : MonoBehaviour
     }
 
     private void RefreshWeightState() => WeightStateController.Refresh();
+    private void SetWeightViewModelState(float currentCarryWeight, float baseMaxCarryWeight, float maxCarryWeight, float movementBlockWeight, bool isMovementBlockedByWeight) => _viewModel?.SetWeightState(currentCarryWeight, baseMaxCarryWeight, maxCarryWeight, movementBlockWeight, isMovementBlockedByWeight);
+    private void RenderCharacterStatsInfo(CharacterStatBlock stats, bool hideRootWhenEmpty, bool showAllStats)
+    {
+        if (_playerStatsInfoPanel == null)
+        {
+            return;
+        }
+
+        _playerStatsInfoPanel.RenderCharacterStats(stats, _settings.StatCurrentValueColor, hideRootWhenEmpty, showAllStats);
+    }
+
     private bool TryPrepareSlotRestrictionsForPlacement(InventoryGrid targetGrid, InventoryItem item) => EquipmentSlotService.TryPrepareSlotRestrictionsForPlacement(targetGrid, item);
     private bool CanDetachItemWithSlotRestrictions(InventoryGrid sourceGrid, InventoryItem item) => EquipmentSlotService.CanDetachItemWithSlotRestrictions(sourceGrid, item);
     private void ApplyWeightMovementState() => WeightStateController.ApplyMovementState();
@@ -311,9 +343,26 @@ public class InventoryController : MonoBehaviour
 
     private void HideContextMenu() => ContextMenuController.Hide();
 
-    private void ToggleInventory() => OpenStateController.Toggle();
+    private void ToggleInventory() => ToggleInventoryAsync(destroyCancellationToken).Forget(Debug.LogException);
 
-    private void SetInventoryOpen(bool isOpen, bool force) => OpenStateController.SetOpen(isOpen, force);
+    private async UniTask ToggleInventoryAsync(CancellationToken cancellationToken)
+    {
+        await _viewModel.ToggleOpenCommand.ExecuteAsync(cancellationToken);
+    }
+
+    private UniTask ToggleInventoryCoreAsync(CancellationToken cancellationToken)
+    {
+        cancellationToken.ThrowIfCancellationRequested();
+        OpenStateController.Toggle();
+        _viewModel.SetOpenState(OpenStateController.IsOpen);
+        return UniTask.CompletedTask;
+    }
+
+    private void SetInventoryOpen(bool isOpen, bool force)
+    {
+        OpenStateController.SetOpen(isOpen, force);
+        _viewModel?.SetOpenState(OpenStateController.IsOpen);
+    }
 
     private void HandleInventoryClosed()
     {

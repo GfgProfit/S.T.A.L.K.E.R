@@ -1,4 +1,4 @@
-public static class ItemTypeFormatter
+internal static class ItemTypeTextFormatter
 {
     public static string ToRussianText(ItemType itemType)
     {

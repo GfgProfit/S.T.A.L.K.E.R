@@ -33,8 +33,7 @@ internal sealed class InventoryHoverInfoController
             if (HighlightedItem != null)
             {
                 _inventoryHighlight.Show(true);
-                _inventoryHighlight.SetSize(selectedItemGrid, HighlightedItem);
-                _inventoryHighlight.SetPosition(selectedItemGrid, HighlightedItem);
+                SetHighlightTransform(selectedItemGrid, HighlightedItem, HighlightedItem.GridPositionX, HighlightedItem.GridPositionY);
                 ShowItemInfoPanel(HighlightedItem);
             }
             else
@@ -55,13 +54,11 @@ internal sealed class InventoryHoverInfoController
 
         if (canMergeStack)
         {
-            _inventoryHighlight.SetSize(selectedItemGrid, stackMergeTarget);
-            _inventoryHighlight.SetPosition(selectedItemGrid, stackMergeTarget);
+            SetHighlightTransform(selectedItemGrid, stackMergeTarget, stackMergeTarget.GridPositionX, stackMergeTarget.GridPositionY);
         }
         else
         {
-            _inventoryHighlight.SetSize(selectedItemGrid, selectedItem, positionOnGrid.x, positionOnGrid.y);
-            _inventoryHighlight.SetPosition(selectedItemGrid, selectedItem, positionOnGrid.x, positionOnGrid.y);
+            SetHighlightTransform(selectedItemGrid, selectedItem, positionOnGrid.x, positionOnGrid.y);
         }
     }
 
@@ -69,7 +66,7 @@ internal sealed class InventoryHoverInfoController
     {
         if (_itemInfoPanel != null && HighlightedItem == item)
         {
-            _itemInfoPanel.Show(item);
+            _itemInfoPanel.Show(CreateTooltipData(item));
         }
     }
 
@@ -103,6 +100,22 @@ internal sealed class InventoryHoverInfoController
             return;
         }
 
-        _itemInfoPanel.Show(item);
+        _itemInfoPanel.Show(CreateTooltipData(item));
+    }
+
+    private void SetHighlightTransform(InventoryGrid grid, InventoryItem item, int posX, int posY)
+    {
+        _inventoryHighlight.SetSize(grid.GetHighlightSize(item, posX, posY));
+        _inventoryHighlight.SetPosition(grid.GetHighlightPosition(item, posX, posY));
+    }
+
+    private static ItemTooltipData CreateTooltipData(InventoryItem item)
+    {
+        if (item == null)
+        {
+            return default;
+        }
+
+        return new(item.ItemData, item.CurrentAmount, item.UnitWeight, item.TotalWeight, item.HasDurability, item.CurrentDurabilityPercent, item.BaseWidth, item.BaseHeight, item.RuntimeIconParts);
     }
 }

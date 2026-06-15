@@ -3,8 +3,6 @@ using UnityEngine;
 
 internal sealed class InventoryOpenStateController
 {
-    private readonly GameObject _inventoryRoot;
-    private readonly CanvasGroup _inventoryCanvasGroup;
     private readonly PlayerController _playerController;
     private readonly bool _unlockCursorWhileOpen;
     private readonly bool _disablePlayerControlsWhileOpen;
@@ -12,10 +10,8 @@ internal sealed class InventoryOpenStateController
     private readonly Action _applyWeightMovementState;
     private readonly Action _handleClosed;
 
-    public InventoryOpenStateController(GameObject inventoryRoot, CanvasGroup inventoryCanvasGroup, PlayerController playerController, bool unlockCursorWhileOpen, bool disablePlayerControlsWhileOpen, Func<bool> tryStashSelectedItem, Action applyWeightMovementState, Action handleClosed)
+    public InventoryOpenStateController(PlayerController playerController, bool unlockCursorWhileOpen, bool disablePlayerControlsWhileOpen, Func<bool> tryStashSelectedItem, Action applyWeightMovementState, Action handleClosed)
     {
-        _inventoryRoot = inventoryRoot;
-        _inventoryCanvasGroup = inventoryCanvasGroup;
         _playerController = playerController;
         _unlockCursorWhileOpen = unlockCursorWhileOpen;
         _disablePlayerControlsWhileOpen = disablePlayerControlsWhileOpen;
@@ -45,8 +41,6 @@ internal sealed class InventoryOpenStateController
 
         IsOpen = isOpen;
 
-        ApplyRootState();
-        ApplyCanvasGroupState();
         ApplyCursorState();
         ApplyPlayerControlsState();
 
@@ -54,30 +48,6 @@ internal sealed class InventoryOpenStateController
         {
             _handleClosed();
         }
-    }
-
-    private void ApplyRootState()
-    {
-        if (_inventoryRoot != null && _inventoryCanvasGroup == null)
-        {
-            _inventoryRoot.SetActive(IsOpen);
-        }
-        else if (_inventoryRoot != null && _inventoryRoot.activeSelf == false)
-        {
-            _inventoryRoot.SetActive(true);
-        }
-    }
-
-    private void ApplyCanvasGroupState()
-    {
-        if (_inventoryCanvasGroup == null)
-        {
-            return;
-        }
-
-        _inventoryCanvasGroup.alpha = IsOpen ? 1f : 0f;
-        _inventoryCanvasGroup.interactable = IsOpen;
-        _inventoryCanvasGroup.blocksRaycasts = IsOpen;
     }
 
     private void ApplyCursorState()

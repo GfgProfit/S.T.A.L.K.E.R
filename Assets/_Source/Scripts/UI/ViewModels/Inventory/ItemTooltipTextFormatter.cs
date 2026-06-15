@@ -2,30 +2,19 @@ using System;
 using System.Text;
 using UnityEngine;
 
-internal static class ItemInfoPanelTextFormatter
+internal static class ItemTooltipTextFormatter
 {
     private static readonly char[] _wordSeparators = { ' ', '\t', '\n', '\r' };
 
-    public static string FormatType(ItemData itemData) => itemData == null ? string.Empty : $"Тип: {ItemTypeFormatter.ToRussianText(itemData.ItemType)}";
+    public static string FormatType(ItemData itemData) => itemData == null ? string.Empty : $"Тип: {ItemTypeTextFormatter.ToRussianText(itemData.ItemType)}";
 
-    public static string FormatWeight(InventoryItem item)
+    public static string FormatWeight(int amount, float unitWeight, float totalWeight)
     {
-        if (item == null)
-        {
-            return string.Empty;
-        }
-
-        return item.CurrentAmount > 1 ? $"Вес: {FormatWeightValue(item.TotalWeight)} ({FormatWeightValue(item.UnitWeight)})" : $"Вес: {FormatWeightValue(item.TotalWeight)}";
+        return amount > 1 ? $"Вес: {FormatWeightValue(totalWeight)} ({FormatWeightValue(unitWeight)})" : $"Вес: {FormatWeightValue(totalWeight)}";
     }
 
-    public static string FormatDurability(InventoryItem item, Color durabilityColor)
+    public static string FormatDurability(float durabilityPercent, Color durabilityColor)
     {
-        if (item == null || item.HasDurability == false)
-        {
-            return string.Empty;
-        }
-
-        float durabilityPercent = item.CurrentDurabilityPercent;
         string percentColor = ColorUtility.ToHtmlStringRGBA(durabilityColor);
         return $"Прочность: <color=#{percentColor}>{durabilityPercent:00.0}%</color>";
     }

@@ -1,43 +1,90 @@
+using System;
+using R3;
 using TMPro;
 using UnityEngine;
 
-public class WorldItemTooltipView : MonoBehaviour
+public class WorldItemTooltipView : MonoBehaviour, IView<WorldItemTooltipViewModel>
 {
     [SerializeField] private CanvasGroup _canvasGroup;
     [SerializeField] private TMP_Text _label;
     [SerializeField] private string _interactKeyColor = "orange";
 
+    private WorldItemTooltipViewModel _viewModel;
+    private IDisposable _isVisibleSubscription;
+    private IDisposable _labelTextSubscription;
+
     private void Awake()
     {
-        Hide();
-    }
+        bool hasViewModel = _viewModel != null;
+        EnsureViewModel();
 
-    public void Show(WorldItem worldItem, string interactKey)
-    {
-        if (worldItem == null)
+        if (hasViewModel == false)
         {
             Hide();
-            return;
         }
-
-        Show(worldItem.DisplayName, interactKey);
     }
 
     public void Show(string itemName, string interactKey)
     {
-        if (_label == null || string.IsNullOrWhiteSpace(itemName) || string.IsNullOrWhiteSpace(interactKey))
+        EnsureViewModel();
+        _viewModel.Show(itemName, interactKey, _interactKeyColor);
+    }
+
+    public void Hide()
+    {
+        EnsureViewModel();
+        _viewModel.Hide();
+    }
+
+    public void Bind(WorldItemTooltipViewModel viewModel)
+    {
+        Unbind();
+        _viewModel = viewModel;
+
+        if (_viewModel == null)
         {
-            Hide();
+            return;
+        }
+
+        _isVisibleSubscription = _viewModel.IsVisible.Subscribe(SetVisible);
+        _labelTextSubscription = _viewModel.LabelText.Subscribe(SetLabelText);
+    }
+
+    public void Unbind()
+    {
+        _isVisibleSubscription?.Dispose();
+        _labelTextSubscription?.Dispose();
+        _isVisibleSubscription = null;
+        _labelTextSubscription = null;
+    }
+
+    private void OnDestroy()
+    {
+        Unbind();
+        _viewModel?.Dispose();
+        _viewModel = null;
+    }
+
+    private void EnsureViewModel()
+    {
+        if (_viewModel != null)
+        {
+            return;
+        }
+
+        Bind(InteractionViewModelFactory.CreateWorldItemTooltip());
+    }
+
+    private void SetLabelText(string labelText)
+    {
+        if (_label == null)
+        {
             return;
         }
 
         _label.richText = true;
-        _label.text = $"[<color={_interactKeyColor}>{interactKey}</color>] - {itemName}";
-
-        SetVisible(true);
+        _label.text = labelText;
     }
-
-    public void Hide() => SetVisible(false);
 
     private void SetVisible(bool visible)
     {

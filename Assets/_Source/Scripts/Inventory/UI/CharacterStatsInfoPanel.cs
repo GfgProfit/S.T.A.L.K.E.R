@@ -1,59 +1,96 @@
+using System;
 using System.Collections.Generic;
+using R3;
 using UnityEngine;
 
-public class CharacterStatsInfoPanel : MonoBehaviour
+public class CharacterStatsInfoPanel : MonoBehaviour, IView<CharacterStatsInfoPanelViewModel>
 {
     [SerializeField] private GameObject _panelRoot;
     [SerializeField] private List<CharacterStatRow> _rows = new();
 
-    public void RenderItemStats(InventoryItem item, Color currentValueColor, Color fullDurabilityValueColor, bool hideRootWhenEmpty)
+    private CharacterStatsInfoPanelViewModel _viewModel;
+    private IDisposable _rootActiveSubscription;
+    private IDisposable _rowsSubscription;
+
+    public void RenderItemStats(ItemTooltipData item, Color currentValueColor, Color fullDurabilityValueColor, bool hideRootWhenEmpty)
     {
-        bool hasAnyVisibleStat = false;
-
-        for (int i = 0; i < _rows.Count; i++)
-        {
-            CharacterStatRow row = _rows[i];
-            bool show = TryGetModifier(item == null ? null : item.ItemData, row.StatType, out CharacterStatModifier modifier);
-
-            row.SetActive(show);
-
-            if (show == false)
-            {
-                continue;
-            }
-
-            float durabilityPercent = item != null && item.HasDurability ? item.CurrentDurabilityPercent : 100f;
-            float currentValue = CharacterStatUtility.CalculateCurrentValue(modifier, durabilityPercent);
-            row.SetText(FormatItemValue(row.StatType, currentValue, modifier.ValueAtFullDurability, durabilityPercent, currentValueColor, fullDurabilityValueColor));
-            hasAnyVisibleStat = true;
-        }
-
-        SetRootActive(hasAnyVisibleStat || hideRootWhenEmpty == false);
+        EnsureViewModel();
+        _viewModel.RenderItemStats(GetRowStatTypes(), item, currentValueColor, fullDurabilityValueColor, hideRootWhenEmpty);
     }
 
     public void RenderCharacterStats(CharacterStatBlock stats, Color currentValueColor, bool hideRootWhenEmpty, bool showAllStats)
     {
-        bool hasAnyVisibleStat = false;
+        EnsureViewModel();
+        _viewModel.RenderCharacterStats(GetRowStatTypes(), stats, currentValueColor, hideRootWhenEmpty, showAllStats);
+    }
+
+    public void Bind(CharacterStatsInfoPanelViewModel viewModel)
+    {
+        Unbind();
+        _viewModel = viewModel;
+
+        if (_viewModel == null)
+        {
+            return;
+        }
+
+        _rootActiveSubscription = _viewModel.RootActive.Subscribe(SetRootActive);
+        _rowsSubscription = _viewModel.Rows.Subscribe(RenderRows);
+    }
+
+    public void Unbind()
+    {
+        _rootActiveSubscription?.Dispose();
+        _rowsSubscription?.Dispose();
+        _rootActiveSubscription = null;
+        _rowsSubscription = null;
+    }
+
+    private void OnDestroy()
+    {
+        Unbind();
+        DisposeRows();
+        _viewModel?.Dispose();
+        _viewModel = null;
+    }
+
+    private void EnsureViewModel()
+    {
+        if (_viewModel != null)
+        {
+            return;
+        }
+
+        Bind(InventoryViewModelFactory.CreateCharacterStatsInfoPanel());
+    }
+
+    private IReadOnlyList<CharacterStatType> GetRowStatTypes()
+    {
+        CharacterStatType[] statTypes = new CharacterStatType[_rows.Count];
 
         for (int i = 0; i < _rows.Count; i++)
         {
-            CharacterStatRow row = _rows[i];
-            float value = stats == null ? 0f : stats.Get(row.StatType);
-            bool show = showAllStats || CharacterStatUtility.IsNonZero(value);
-
-            row.SetActive(show);
-
-            if (show == false)
-            {
-                continue;
-            }
-
-            Color valueColor = CharacterStatUtility.IsNonZero(value) ? currentValueColor : Color.white;
-            row.SetText(FormatColoredValue(row.StatType, value, valueColor));
-            hasAnyVisibleStat = true;
+            statTypes[i] = _rows[i].StatType;
         }
 
-        SetRootActive(showAllStats || hasAnyVisibleStat || hideRootWhenEmpty == false);
+        return statTypes;
+    }
+
+    private void RenderRows(IReadOnlyList<CharacterStatRowState> states)
+    {
+        int count = Mathf.Min(_rows.Count, states == null ? 0 : states.Count);
+
+        for (int i = 0; i < count; i++)
+        {
+            CharacterStatRow row = _rows[i];
+            CharacterStatRowState state = states[i];
+            row.Render(state);
+        }
+
+        for (int i = count; i < _rows.Count; i++)
+        {
+            _rows[i].Hide();
+        }
     }
 
     private void SetRootActive(bool active)
@@ -62,78 +99,11 @@ public class CharacterStatsInfoPanel : MonoBehaviour
         root.SetActive(active);
     }
 
-    private static bool TryGetModifier(ItemData itemData, CharacterStatType statType, out CharacterStatModifier modifier)
+    private void DisposeRows()
     {
-        modifier = default;
-
-        if (itemData == null || itemData.StatModifiers == null)
+        for (int i = 0; i < _rows.Count; i++)
         {
-            return false;
+            _rows[i]?.Dispose();
         }
-
-        for (int i = 0; i < itemData.StatModifiers.Count; i++)
-        {
-            CharacterStatModifier candidate = itemData.StatModifiers[i];
-
-            if (candidate.StatType == statType && candidate.HasValue)
-            {
-                modifier = candidate;
-                return true;
-            }
-        }
-
-        return false;
-    }
-
-    private static string FormatItemValue(CharacterStatType statType, float currentValue, float fullDurabilityValue, float durabilityPercent, Color currentValueColor, Color fullDurabilityValueColor)
-    {
-        string current = FormatColoredValue(statType, currentValue, currentValueColor);
-        bool showFullValue = CharacterStatUtility.IsAffectedByDurability(statType) && Mathf.Approximately(durabilityPercent, 100f) == false && Mathf.Approximately(currentValue, fullDurabilityValue) == false;
-
-        if (showFullValue == false)
-        {
-            return current;
-        }
-
-        return $"{current} ({FormatColoredValue(statType, fullDurabilityValue, fullDurabilityValueColor)})";
-    }
-
-    private static string FormatColoredValue(CharacterStatType statType, float value, Color color)
-    {
-        string htmlColor = ColorUtility.ToHtmlStringRGBA(color);
-        return $"<color=#{htmlColor}>{FormatSignedValue(statType, value)}</color>";
-    }
-
-    private static string FormatSignedValue(CharacterStatType statType, float value)
-    {
-        if (CharacterStatUtility.IsNonZero(value) == false)
-        {
-            return FormatStatValue(statType, 0f);
-        }
-
-        string sign = value >= 0f ? "+" : string.Empty;
-        return $"{sign}{FormatStatValue(statType, value)}";
-    }
-
-    private static string FormatStatValue(CharacterStatType statType, float value)
-    {
-        return statType switch
-        {
-            CharacterStatType.CarryWeight => $"{FormatNumber(value)} КГ",
-            CharacterStatType.ArtifactContainers => $"{FormatNumber(value)} шт.",
-            _ => $"{FormatNumber(value)}%",
-        };
-    }
-
-    private static string FormatNumber(float value)
-    {
-        float roundedTenths = Mathf.Round(value * 10f) / 10f;
-
-        if (Mathf.Approximately(roundedTenths, Mathf.Round(roundedTenths)))
-        {
-            return Mathf.RoundToInt(roundedTenths).ToString();
-        }
-
-        return roundedTenths.ToString("0.#");
     }
 }
