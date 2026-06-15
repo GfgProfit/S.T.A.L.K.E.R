@@ -31,7 +31,7 @@ MonoBehaviour:
     \xAB\u0412\u0438\u043A\u0430\u0441\u043E\u043B\xBB, \xAB\u0411\u0430\u0442\u0438\u043B\u043E\u043B\xBB
     \u0438 \u0421-\u043D\u0430\u0444\u0442\u0438\u0437\u0438\u043D."
   _itemType: 7
-  _rarity: 0
+  _rarity: 3
   _weight: 0.3
   _stackable: 1
   _useDurability: 0
