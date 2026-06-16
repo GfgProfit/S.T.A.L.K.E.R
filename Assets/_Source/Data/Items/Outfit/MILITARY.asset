@@ -38,6 +38,7 @@ MonoBehaviour:
   _stackable: 0
   _useDurability: 1
   _defaultDurabilityPercent: 100
+  _firstPersonLegsMeshName: military_heavy
   _statModifiers:
   - _statType: 0
     _valueAtFullDurability: 40

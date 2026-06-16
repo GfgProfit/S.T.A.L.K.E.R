@@ -14,6 +14,7 @@ public class ItemData : ScriptableObject
     [SerializeField] private bool _useDurability;
     [SerializeField] [Range(0f, 100f)] private float _defaultDurabilityPercent = 100f;
     [SerializeField] private bool _canEquipHelmet = true;
+    [SerializeField] private string _firstPersonLegsMeshName;
     [SerializeField] private List<CharacterStatModifier> _statModifiers = new();
     [SerializeField] private WorldItem _worldItemPrefab;
     [SerializeField] [Min(1)] private int _width = 1;
@@ -60,6 +61,7 @@ public class ItemData : ScriptableObject
     public bool HasDurability => _useDurability;
     public float DefaultDurabilityPercent => NormalizeDurability(_defaultDurabilityPercent);
     public bool CanEquipHelmet => _canEquipHelmet;
+    public string FirstPersonLegsMeshName => string.IsNullOrWhiteSpace(_firstPersonLegsMeshName) ? string.Empty : _firstPersonLegsMeshName;
     public IReadOnlyList<CharacterStatModifier> StatModifiers => _statModifiers;
     public bool HasStatModifiers => CharacterStatUtility.HasAnyModifier(_statModifiers);
     public WorldItem WorldItemPrefab => _worldItemPrefab;

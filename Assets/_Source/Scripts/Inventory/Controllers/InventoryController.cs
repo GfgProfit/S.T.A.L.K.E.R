@@ -17,6 +17,7 @@ public class InventoryController : MonoBehaviour
     [SerializeField] private InventoryHighlight _inventoryHighlight;
     [SerializeField] private PlayerController _playerController;
     [SerializeField] private PlayerCharacterStats _playerStats;
+    [SerializeField] private FirstPersonLegsController _firstPersonLegsController;
 
     [Header("Drop Settings")]
     [SerializeField] private Transform _dropOrigin;
@@ -353,7 +354,18 @@ public class InventoryController : MonoBehaviour
     private void RefreshWeightState()
     {
         WeightStateController.Refresh();
+        RefreshFirstPersonLegs();
         RefreshQuickUseSlotsState();
+    }
+
+    private void RefreshFirstPersonLegs()
+    {
+        if (_firstPersonLegsController == null)
+        {
+            return;
+        }
+
+        _firstPersonLegsController.SetEquippedArmor(GetFirstEquippedItemData(ItemType.Armor));
     }
 
     private void RefreshQuickUseSlotsState()
@@ -565,6 +577,23 @@ public class InventoryController : MonoBehaviour
     private InventoryDropContext CreateDropContext() => new(_dropOrigin, _playerController, transform, _dropCamera, _dropForwardDistance, _dropUpOffset, _dropGroundProbeHeight, _dropGroundProbeDistance, _dropGroundOffset, _dropObstacleClearance, _dropImpulse, _dropGroundLayers, _dropObstacleLayers);
 
     private bool TryDetachItemFromGrid(InventoryGrid grid, InventoryItem item) => DragController.TryDetachItemFromGrid(grid, item);
+
+    private ItemData GetFirstEquippedItemData(ItemType itemType)
+    {
+        for (int i = 0; i < _equipmentSlotGrids.Count; i++)
+        {
+            EquipmentSlotGrid grid = _equipmentSlotGrids[i];
+
+            if (grid == null || grid.AcceptedItemType != itemType)
+            {
+                continue;
+            }
+
+            return grid.EquippedItem == null ? null : grid.EquippedItem.ItemData;
+        }
+
+        return null;
+    }
 
     private void HideContextMenu() => ContextMenuController.Hide();
 

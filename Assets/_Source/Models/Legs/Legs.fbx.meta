@@ -1,0 +1,940 @@
+fileFormatVersion: 2
+guid: efa280c6cad8fa7408cefd8ac727f0e5
+ModelImporter:
+  serializedVersion: 24200
+  internalIDToNameTable: []
+  externalObjects:
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: act_arm_10_exo_1
+    second: {fileID: 2100000, guid: 6ba4615730831614cb98db7cd3ba84cd, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: act_arm_1_exo_1
+    second: {fileID: 2100000, guid: f6d4c21c7a8008340ae1bfb12497d5d6, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: act_arm_2_exo_1
+    second: {fileID: 2100000, guid: 0444b4d99b0448d439398a2b861e3e35, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: act_arm_3_exo_1
+    second: {fileID: 2100000, guid: 13f81d5a3ca9be241a9626d7abd4d1a0, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: act_arm_4_exo_1
+    second: {fileID: 2100000, guid: 86a04a62fe3f1ef409e0fb4f83c96d05, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: act_arm_5_exo_1
+    second: {fileID: 2100000, guid: e99177837ecda154c9e19523a2886932, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: act_arm_6_exo_1
+    second: {fileID: 2100000, guid: 8c817511f30e5874999ab7026d3fbd7c, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: act_arm_7_exo_1
+    second: {fileID: 2100000, guid: 5c14f218da1b85140a48bc7ee115cf1f, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: act_arm_8_exo_1
+    second: {fileID: 2100000, guid: 1b6f46a9041976e49a16d79366475ad9, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: act_nanosuit
+    second: {fileID: 2100000, guid: 4e7a603b822ae6f40abe816b63f7978a, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: act_nanosuit_pockets
+    second: {fileID: 2100000, guid: 03a055fa977c54749a8b7c9004cb0dac, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: act_stalker_nebo_2_olive
+    second: {fileID: 2100000, guid: c36b1d081e21aea4d9bad8c1c8c95f5a, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: act_stalker_nebo_3_1
+    second: {fileID: 2100000, guid: b7472d206f057ec4bb12c2ce5a8b6e33, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: act_stalker_sviter_1
+    second: {fileID: 2100000, guid: e33e55cbd42bec84980ff427404e5d8e, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: armor_ataches_cod_mw2019
+    second: {fileID: 2100000, guid: 950cec3b37f92894aa356313c0652ebe, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: armor_condor_black
+    second: {fileID: 2100000, guid: 35a8e8b7327979843accb377ccbff781, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: armor_condor_olive
+    second: {fileID: 2100000, guid: 0d2fb0a8a54df6e4abe7b4c2a3309742, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: armor_korundvm
+    second: {fileID: 2100000, guid: 896f638b0c7952641b827f7ff987e693, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: arystan_outfit
+    second: {fileID: 2100000, guid: d32a3d6570311b14e825cdaaed4d08f0, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: ataches_cod_mw2019_d
+    second: {fileID: 2100000, guid: 765319f469394e143ac0b555d9214180, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: ataches_cod_mw2019_d_1
+    second: {fileID: 2100000, guid: c4468ab155e58d343bcafa1d5ab931b9, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: ataches_cod_olive_dark_mw2019_d
+    second: {fileID: 2100000, guid: cb261e4975dc595469ca23c3ae4a66af, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: ataches_cod_olive_dark_mw2019_d_black
+    second: {fileID: 2100000, guid: adc696f90e641104bb91af3e3bbf1de0, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: ataches_cod_olive_dark_mw2019_d_v4
+    second: {fileID: 2100000, guid: a00fc7f49b492404eb144587b9ccedb1, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: ataches_cod_olive_mw2019_d
+    second: {fileID: 2100000, guid: 07690aef4f0a2f74e8d444b063aafffe, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: ataches_cod_tan_mw2019_d
+    second: {fileID: 2100000, guid: 21aabdb239273314387b1c5b6a077fe2, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: bandits_body
+    second: {fileID: 2100000, guid: 1377c3aab5c808044b21a307f982fae3, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: bandits_body_blue
+    second: {fileID: 2100000, guid: ffcd198683f6ae141af34c624aab837b, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: bandits_body_poloski
+    second: {fileID: 2100000, guid: d271080e98839b5438fc23828b22787b, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: bandits_body_red
+    second: {fileID: 2100000, guid: 373e42ac60bb4f34da448b86d0a1eba6, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: bandits_pants
+    second: {fileID: 2100000, guid: 9e64ae0d114a8e548a2ecc2670811a6d, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: bandits_pants_poloski
+    second: {fileID: 2100000, guid: 195e5d34160b3234fadc7f001de4bebf, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: belts_cod_mw2019
+    second: {fileID: 2100000, guid: 207762c5efa03564e91842245a510e02, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: belts_cod_mw2019_1
+    second: {fileID: 2100000, guid: 829f505ad9c145b4686222f9320393e4, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: belts_cod_olive_dark_mw2019
+    second: {fileID: 2100000, guid: fc51d3604ab078c4291e5a8d6033c733, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: belts_cod_olive_dark_mw2019_black
+    second: {fileID: 2100000, guid: 61ced215266a01c478defb1166a0b62b, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: belts_cod_olive_mw2019
+    second: {fileID: 2100000, guid: c8e4e9f515531d14d80841254a74c2a8, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: belts_cod_olive_mw2019_1
+    second: {fileID: 2100000, guid: c116c8fba4b12d741ab82d2bed198ebc, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: belts_cod_olive_mw2019_black
+    second: {fileID: 2100000, guid: 33f5b5f27e033ec47ad724f516dab25f, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: body_sold_2
+    second: {fileID: 2100000, guid: 8d540c5dec0fece4aac6015ee83682b8, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: body_sold_2_black
+    second: {fileID: 2100000, guid: 906553797c62a1442b652184416031bf, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: body_sold_2_v4
+    second: {fileID: 2100000, guid: 3b3964b93117bfd40a905967938bf7c2, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: bomberjacket_black_co
+    second: {fileID: 2100000, guid: d322af8ea6824af4c85d597291952770, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: bomberjacket_brown_co
+    second: {fileID: 2100000, guid: d28af49657d5b3842b92ad65a16167fd, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: camo_cargopants_duty
+    second: {fileID: 2100000, guid: 16013ed3559ceaf43844bbf11e4e7738, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: cargopants_black_co
+    second: {fileID: 2100000, guid: 4bd79b6dad4c87842b1150ff4bac44a8, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: cargopants_blue_co
+    second: {fileID: 2100000, guid: 2bfec969d0157604c97b126cba975f84, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: cargopants_blue_co_black
+    second: {fileID: 2100000, guid: 807a850d8dde11b43a2ad266752f1fe8, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: cargopants_duty_black
+    second: {fileID: 2100000, guid: 8b3df4c5924b37e4fbf9a063586ac0a9, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: cargopants_sunrise
+    second: {fileID: 2100000, guid: 1241d33c664d1374684ace73144eb914, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: cargopants_sunrise_ghost
+    second: {fileID: 2100000, guid: 6e821641525b0524a896e389bfdff59d, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: cargopants_sunrise_v1
+    second: {fileID: 2100000, guid: 90b788fae6b5cc247a82160df4ff7536, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: cargopants_sunrise_v2
+    second: {fileID: 2100000, guid: 89b6e36a8217e0043ad1d4d691a9bb7c, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: cargopants_sunrise_v3
+    second: {fileID: 2100000, guid: 75f9b94815beccd46b82f8cca89ed7f5, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: cargopants_sunrise_v4
+    second: {fileID: 2100000, guid: a3135544bfc240943a40e9b8f6388458, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: ciras_armor_olive
+    second: {fileID: 2100000, guid: 31080e09402c8ff4eb3180fa4d86267f, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: ciras_armor_olive_black
+    second: {fileID: 2100000, guid: a07d6182f4d7f7b408a427eed8c8bac4, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: ciras_armor_olive_freedom
+    second: {fileID: 2100000, guid: fad1b62952ddc174494f4eb4813364b4, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: coat_1_black
+    second: {fileID: 2100000, guid: 81e49776d162c7248b6509cd7089ee67, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: coat_1_brown
+    second: {fileID: 2100000, guid: 5e9fea6ea63bf234e99435c46d971329, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: coat_1_brown_green
+    second: {fileID: 2100000, guid: d4e914a98ab694b41a96c195b6975c76, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: coat_1_brown_light
+    second: {fileID: 2100000, guid: 69ca527d9e6081e4f91dc3b4fb21c21c, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: coat_1_white
+    second: {fileID: 2100000, guid: 25f89b9031a26124ab696b80ff18aa86, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: defender_molle_duty
+    second: {fileID: 2100000, guid: e0357ffea05e50c47b212a662183c7e0, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: duty_armor_condor
+    second: {fileID: 2100000, guid: d8585331fb100544ab3993990d1fc97c, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: duty_legs_nebo
+    second: {fileID: 2100000, guid: efedd9b351555b145811f64d6a52459d, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: duty_tacticaljacket
+    second: {fileID: 2100000, guid: 2945516b076eec346b1b7116b29cf7a1, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: exo_body_cs
+    second: {fileID: 2100000, guid: 57e913adc5f98ed47add8cd313c2f219, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: exo_body_dolg_c
+    second: {fileID: 2100000, guid: f9ee9c340ce4b9a48b66ca75023a4995, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: exo_body_freedom
+    second: {fileID: 2100000, guid: 8452dc6662210ee4f87a8e7e72b93b14, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: exo_body_merc
+    second: {fileID: 2100000, guid: 554f9aa7dd12ac84bada0ba71f4ddd52, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: exo_body_monolith
+    second: {fileID: 2100000, guid: 5cac46654e56a3547a0735de12590fc0, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: exo_body_neutral
+    second: {fileID: 2100000, guid: 0c67c599ab33c8445ba32cbf64144b9c, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: exo_body_soldier
+    second: {fileID: 2100000, guid: 7d75565e5b9c6e949b6d1dca5214a305, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: exo_privoda_bd
+    second: {fileID: 2100000, guid: 50dba3a1c8e9bdf4f9c1ece37880b237, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: exo_privoda_cs
+    second: {fileID: 2100000, guid: 2f985ede75cbcce44b33b42dd57975af, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: exo_privoda_duty
+    second: {fileID: 2100000, guid: ac5904ad919dd634bb6b945f591834b1, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: exo_privoda_freedom
+    second: {fileID: 2100000, guid: db4797df732f5f14db0dc325501dc4b7, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: exo_privoda_merc
+    second: {fileID: 2100000, guid: 26d6a1c700c8c6940ad859aa2632b3b5, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: exo_privoda_monolith
+    second: {fileID: 2100000, guid: bf329bb93c23ee944925cffaefb1772f, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: exo_privoda_neutral
+    second: {fileID: 2100000, guid: df1e2b5fa6456c041bdc65c500dbe5a0, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: freedom_cargo_pants
+    second: {fileID: 2100000, guid: 4a5b0bac816fe8b4d8057e6f43b05234, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: freedom_jacket_1
+    second: {fileID: 2100000, guid: 9c8a4f2fa390666488f94741d08e7e68, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: freedom_jacket_2
+    second: {fileID: 2100000, guid: d8ccc38f394c1a24ea92a6b3318945e4, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: freedom_jacket_3
+    second: {fileID: 2100000, guid: 1a683a1396d9f5e408e4fe85d98a12d2, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: freedom_legs_1
+    second: {fileID: 2100000, guid: 7bf5243d52807a64a90ef935f6a69dd3, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: freedom_legs_12
+    second: {fileID: 2100000, guid: 8d615b4c71ca83246bf755bf201788f6, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: freedom_legs_2_alt
+    second: {fileID: 2100000, guid: 886b4f6dc43e8ba44911162e057ddd2a, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: leather_jacket_protect_1
+    second: {fileID: 2100000, guid: bed473958515709498aa46cdae563af0, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: leather_jacket_protect_black_1
+    second: {fileID: 2100000, guid: c8f3abd5ef25ec54e913681ed09c262b, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: lower_body_jeans_1
+    second: {fileID: 2100000, guid: e2b8f445627e6ac4dad23bd4249aa585, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: m65_jacket_camo1_1
+    second: {fileID: 2100000, guid: 20a6b92a01e9054438cdbfb7d132c551, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: m65_jacket_camo2_1
+    second: {fileID: 2100000, guid: 60b90a317527cee4c95c9796f6f0e20b, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: m65_jacket_dark_1
+    second: {fileID: 2100000, guid: eb774e964f5f3b647b7b7945033fbc2b, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: m65_jacket_light_1
+    second: {fileID: 2100000, guid: 343bd2cb320b3f84aa03103c796c0c7b, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: m65_jacket_wight_1
+    second: {fileID: 2100000, guid: ff5a91fe406e2bc4bbb0713ae9e8857a, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: m9_d_1_1
+    second: {fileID: 2100000, guid: d3ef53f253e17af4298c8a802c918321, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: m9_d_2_1
+    second: {fileID: 2100000, guid: 3989001035ccde348947b19a5a898d53, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: mbav_armor_olive_1
+    second: {fileID: 2100000, guid: 52d7f4221076e5d4f825d7ed8b649965, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: merc_bandit_pants_brown_1
+    second: {fileID: 2100000, guid: 6336f0d334d5bbd4e936e0d0d9eab3a6, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: merc_jacket_sky_greyblue_1
+    second: {fileID: 2100000, guid: b199f069b154bf740b20c263e758790b, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: merc_jacket_sky_greyblue_black_1
+    second: {fileID: 2100000, guid: d74c6b6a47e0fa8418fad347b7a82e70, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: merc_outfit2_armor_d_1
+    second: {fileID: 2100000, guid: 659321b6aa2ac974a94699739502d968, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: merc_outfit2_details_d_1
+    second: {fileID: 2100000, guid: 75abbd86c0be3ee40a6df2b5ce1c1595, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: merc_qui_gear_d_1
+    second: {fileID: 2100000, guid: 2133659d80b999b4ab230079940b6ff4, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: merc_vest_light_black_1
+    second: {fileID: 2100000, guid: eac7f939ff8704b428405df9e659f199, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: mono_armor_1
+    second: {fileID: 2100000, guid: 4e3ef7c921de1784393501876d0f0011, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: mono_heavy_ataches_1
+    second: {fileID: 2100000, guid: df36a25e785e95f429bc12a7b5059fdf, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: mono_hood_foldet_1
+    second: {fileID: 2100000, guid: 57d0995e42ad0b346b3b61acdc854ea0, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: mono_jacket_1
+    second: {fileID: 2100000, guid: ec616179373b4a64d9b8385db390bd7d, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: mono_jacket_black_1
+    second: {fileID: 2100000, guid: aed1be2916f136b4ea61ed0daff2906c, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: mono_legs_1
+    second: {fileID: 2100000, guid: b69c1ae65949af041b6793be79ef6ca5, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: mono_legs_black_1
+    second: {fileID: 2100000, guid: 70273039bbf33044bbb77982a5804e80, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: mono_pants_cargo_1
+    second: {fileID: 2100000, guid: db4f4b215a934514681dc11d572fef58, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: mono_shirt_tacticaljacket_1
+    second: {fileID: 2100000, guid: ef6addcf5d9ffde4a82848ef800480dd, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: mp443_d_1_1
+    second: {fileID: 2100000, guid: a04cc7ac7137c354e88227b60f7cf875, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: mp443_d_2_1
+    second: {fileID: 2100000, guid: 7d6202c12e02a8f43b24a1046092e1ac, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: nebo_upperbody_modul_3_1
+    second: {fileID: 2100000, guid: 6ef830638717a704c9fa918d940aa7ed, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: outfit2_armor_freed_1
+    second: {fileID: 2100000, guid: 45a15462ab8f0dd479d3a9cf7a9a0669, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: outfit2_armor_solde_1
+    second: {fileID: 2100000, guid: 8d3ca20d174140b46a6ec24bf41ae85d, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: outfit2_details_freed_1
+    second: {fileID: 2100000, guid: 1185dfbdf123e2f478da7b052f4a4029, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: p226_d_1
+    second: {fileID: 2100000, guid: 4f00654b24e0775468d89022851f9504, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: pouches_2_cod_olive_dark_mw2019_d_1
+    second: {fileID: 2100000, guid: 96e5ad7cad142f749887232c55f5d85d, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: pouches_cod_mw2019_d_1_1
+    second: {fileID: 2100000, guid: ab9160bb4f833d643869f82fed2c57b8, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: pouches_cod_mw2019_d_2_1
+    second: {fileID: 2100000, guid: 5cd7f46fef7ee9b4abc887dfb2af0b25, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: pouches_cod_olive_dark_mw2019_d_1
+    second: {fileID: 2100000, guid: cd38e5aed0eb9c54bb0bcb5be9dd88df, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: pouches_cod_olive_dark_mw2019_d_black_1
+    second: {fileID: 2100000, guid: 9cbf036461001894e8094614e109454a, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: pouches_cod_olive_mw2019_d_1_1
+    second: {fileID: 2100000, guid: 7cd9b8dee18a40a43af060248428f95a, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: pouches_cod_olive_mw2019_d_2_1
+    second: {fileID: 2100000, guid: 131d01ef19ed2b54bab5d3a48423817d, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: ps5m_vest_1_1
+    second: {fileID: 2100000, guid: e292f5ad00de5df41b912f7f77adbb11, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: ps5m_vest_2_1
+    second: {fileID: 2100000, guid: 056c79e2838ff8b4287f6dd4dc2bf464, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: ps5m_vest_3_1
+    second: {fileID: 2100000, guid: 6a018f3875c655e4aa5be51df2441b42, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: ps5m_vest_loner_1
+    second: {fileID: 2100000, guid: 7b7e8422c330ccd4d8c60258372849a5, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: ps5m_vest_olive_1
+    second: {fileID: 2100000, guid: 159a7d8437f2f4f45905174d8c51b5ac, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: rus_sniper_torso_d_1
+    second: {fileID: 2100000, guid: 3a2d61d3420b48648aa111411a36ecb2, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: rus_upper_d_1_1
+    second: {fileID: 2100000, guid: 9e56e9289b83c6d43a68f509c88546e5, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: rus_upper_d_2_1
+    second: {fileID: 2100000, guid: 9c0716ce7ed35194e966136704cd7f6c, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: russian_loyalist_loadout_b_col_1
+    second: {fileID: 2100000, guid: 5665c482eabdf5f41a209f1f7b813046, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: sas_ct_price_upperbody_col_freedom_1
+    second: {fileID: 2100000, guid: c9bccc5b96573344ca27b97e3a6bb78e, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: seva_hazmat_loner_1
+    second: {fileID: 2100000, guid: f45b8b28070b46d4e9deb64a48bb5143, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: seva_hazmat_loner_red_1
+    second: {fileID: 2100000, guid: 6804c13dd3e6c8f49bb75da6f428ddf2, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: seva_hazmat_loner_white_1
+    second: {fileID: 2100000, guid: 72a3584b6b105d647a06774cc88f914b, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: seva_hazmat_loner_yellow_1
+    second: {fileID: 2100000, guid: 4aa591f1d9f945346818d6a39c8f9c57, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: seva_pmc_boot_a_col_1
+    second: {fileID: 2100000, guid: f056f90f3e58c804ba90449e2fbaeec7, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: shirt_tacticaljacket_clearsky_1
+    second: {fileID: 2100000, guid: c4276009ec9132b42a216de64f59f516, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: sold_ttsko_jacket_co_1
+    second: {fileID: 2100000, guid: 8f391e1c7fed0134d9580f7791924426, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: soldier_bagarii_armor_alt_1
+    second: {fileID: 2100000, guid: 2d1638e60a523df499c7481a56d44c83, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: soldier_body_1
+    second: {fileID: 2100000, guid: 2c7267973858cfc4a8549ae8b8dd7c50, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: soldier_body_black_1
+    second: {fileID: 2100000, guid: 238e954b7d7a47e4cafc11464aba6190, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: soldier_pants_cargo_1
+    second: {fileID: 2100000, guid: 0e936e3ec330cf046bce1931b3776e80, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: soldier_pants_cargo_black_1
+    second: {fileID: 2100000, guid: 24d1710667fe3fc42b96dd5fc654d522, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: soldier_pants_cargo_butan_1
+    second: {fileID: 2100000, guid: bc50cc7815cb8924a869149560dcb785, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: soldier_tarzan_1
+    second: {fileID: 2100000, guid: 7a5dc102da525084fbcd6f86fa1fa367, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: spldier_shirt_tacticaljacket_1
+    second: {fileID: 2100000, guid: e56a1426c96a1c046a7106536d1c0945, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: spldier_shirt_tacticaljacket_black_1
+    second: {fileID: 2100000, guid: 346465d8b2c4ce344803cd5edd5bb361, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: sunrise_vest_1
+    second: {fileID: 2100000, guid: 70211a0a2c2ff7541b17e61d23a48096, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: sunrise_vest_ghost_1
+    second: {fileID: 2100000, guid: 32741eaee0691594f87308bac9982d59, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: sunrise_vest_v1_1
+    second: {fileID: 2100000, guid: 9316e051d78377f43bf4092d3e33ec96, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: sunrise_vest_v2_1
+    second: {fileID: 2100000, guid: fc2ef9c72e45bd94ca8d4d7afd85f942, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: sunrise_vest_v3_1
+    second: {fileID: 2100000, guid: 126d2dad7d158544a905d134edb4b2df, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: sunrise_vest_v4_1
+    second: {fileID: 2100000, guid: 0f3c05d3f71935e449684388e2f27bf9, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: tarzan_1
+    second: {fileID: 2100000, guid: 630744cc56d59f148b9fe706ff5facdb, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: ttsko_pants_camo_co_1
+    second: {fileID: 2100000, guid: f21aa0ffcdf4eeb4b884fbc2d5b8788f, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: vest_light_black_1
+    second: {fileID: 2100000, guid: 9477ec2b48700fe4f84db80d2d953a9d, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: vest_tactical_olive_1
+    second: {fileID: 2100000, guid: 64e90c8888898c44cb3dd8b97c223c79, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: wpn_colt1911_an
+    second: {fileID: 2100000, guid: 6b21985bf3a8a7149b461faeda14a9bc, type: 2}
+  materials:
+    materialImportMode: 2
+    materialName: 0
+    materialSearch: 1
+    materialLocation: 1
+  animations:
+    legacyGenerateAnimations: 4
+    bakeSimulation: 0
+    resampleCurves: 1
+    optimizeGameObjects: 0
+    removeConstantScaleCurves: 0
+    motionNodeName: 
+    animationImportErrors: 
+    animationImportWarnings: 
+    animationRetargetingWarnings: 
+    animationDoRetargetingWarnings: 0
+    importAnimatedCustomProperties: 0
+    importConstraints: 0
+    animationCompression: 1
+    animationRotationError: 0.5
+    animationPositionError: 0.5
+    animationScaleError: 0.5
+    animationWrapMode: 0
+    extraExposedTransformPaths: []
+    extraUserProperties: []
+    clipAnimations: []
+    isReadable: 0
+  meshes:
+    lODScreenPercentages: []
+    globalScale: 1
+    meshCompression: 0
+    addColliders: 0
+    useSRGBMaterialColor: 1
+    sortHierarchyByName: 1
+    importPhysicalCameras: 1
+    importVisibility: 1
+    importBlendShapes: 1
+    importCameras: 1
+    importLights: 1
+    nodeNameCollisionStrategy: 1
+    fileIdsGeneration: 2
+    swapUVChannels: 0
+    generateSecondaryUV: 0
+    useFileUnits: 1
+    keepQuads: 0
+    weldVertices: 1
+    bakeAxisConversion: 0
+    preserveHierarchy: 0
+    skinWeightsMode: 0
+    maxBonesPerVertex: 4
+    minBoneWeight: 0.001
+    optimizeBones: 1
+    generateMeshLods: 0
+    meshLodGenerationFlags: 0
+    maximumMeshLod: -1
+    meshOptimizationFlags: -1
+    indexFormat: 0
+    secondaryUVAngleDistortion: 8
+    secondaryUVAreaDistortion: 15.000001
+    secondaryUVHardAngle: 88
+    secondaryUVMarginMethod: 1
+    secondaryUVMinLightmapResolution: 40
+    secondaryUVMinObjectScale: 1
+    secondaryUVPackMargin: 4
+    useFileScale: 1
+    strictVertexDataChecks: 0
+  tangentSpace:
+    normalSmoothAngle: 60
+    normalImportMode: 0
+    tangentImportMode: 3
+    normalCalculationMode: 4
+    legacyComputeAllNormalsFromSmoothingGroupsWhenMeshHasBlendShapes: 0
+    blendShapeNormalImportMode: 1
+    normalSmoothingSource: 0
+  referencedClips: []
+  importAnimation: 1
+  humanDescription:
+    serializedVersion: 3
+    human: []
+    skeleton: []
+    armTwist: 0.5
+    foreArmTwist: 0.5
+    upperLegTwist: 0.5
+    legTwist: 0.5
+    armStretch: 0.05
+    legStretch: 0.05
+    feetSpacing: 0
+    globalScale: 1
+    rootMotionBoneName: 
+    hasTranslationDoF: 0
+    hasExtraRoot: 0
+    skeletonHasParents: 1
+  lastHumanDescriptionAvatarSource: {instanceID: 0}
+  autoGenerateAvatarMappingIfUnspecified: 1
+  animationType: 2
+  humanoidOversampling: 1
+  avatarSetup: 0
+  addHumanoidExtraRootOnlyWhenUsingAvatar: 1
+  importBlendShapeDeformPercent: 1
+  remapMaterialsIfMaterialImportModeIsNone: 0
+  additionalBone: 0
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 

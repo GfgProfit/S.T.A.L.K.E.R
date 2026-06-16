@@ -34,6 +34,8 @@ MonoBehaviour:
   _stackable: 0
   _useDurability: 1
   _defaultDurabilityPercent: 100
+  _canEquipHelmet: 1
+  _firstPersonLegsMeshName: bandit_coat
   _statModifiers:
   - _statType: 0
     _valueAtFullDurability: 10
