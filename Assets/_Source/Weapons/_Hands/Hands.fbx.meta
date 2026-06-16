@@ -1,0 +1,480 @@
+fileFormatVersion: 2
+guid: 041c1dbe0fc75bd4fb645e86edfd3894
+ModelImporter:
+  serializedVersion: 24200
+  internalIDToNameTable: []
+  externalObjects:
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: act_arm_1_exo_1
+    second: {fileID: 2100000, guid: 0f4f23ce93d03474e81085542939fd7b, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: act_arm_2_1
+    second: {fileID: 2100000, guid: 01456ed6496d58d4881fd0422d5aa483, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: act_arm_2_exo_1
+    second: {fileID: 2100000, guid: 422fdb7c8598db3488bb9626c5cb51f8, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: act_arm_3_exo_1
+    second: {fileID: 2100000, guid: 0ce0e5d1c2176f047b668d61f222823e, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: act_arm_4_exo_1
+    second: {fileID: 2100000, guid: ee15016f169c7284c94aa6f9105f905e, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: act_arm_5_1
+    second: {fileID: 2100000, guid: e8cdaf1730851784aad78616bcec09d4, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: act_arm_5_exo_1
+    second: {fileID: 2100000, guid: b46f29c1229cbfb448ad8e17d79fd2cf, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: act_arm_6_exo_1
+    second: {fileID: 2100000, guid: ed2b2aecb877d1e4ea4f95b22c77c503, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: act_arm_7_exo_1
+    second: {fileID: 2100000, guid: 52ea728fe80e08841b2f6090de99bf53, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: act_arm_8_exo_1
+    second: {fileID: 2100000, guid: 56fd2bad730facc4d8e6ee3e7ec4ebd7, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: act_arm_skin_1
+    second: {fileID: 2100000, guid: d3bec279f85a177478e1aa36fa5a8324, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: act_arms_nanosuit
+    second: {fileID: 2100000, guid: 1aa17c914034d8e4688c141e7a0e470f, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: bf3_novice_sleeve_1
+    second: {fileID: 2100000, guid: 7ad657d502839654f994a14f74faf8b8, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: bf3_novice_sleeve_camo1_1
+    second: {fileID: 2100000, guid: ac72accade4d1f64bba222e322cfcb4b, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: bf3_novice_sleeve_camo2_1
+    second: {fileID: 2100000, guid: 5627b5f24e768af4da592bd5b8885ca9, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: bf3_novice_sleeve_v2_1
+    second: {fileID: 2100000, guid: 97108ae2f2dba0a4382cd0f95a47ff9d, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: bf3_novice_sleeve_white_1
+    second: {fileID: 2100000, guid: 586ff238a55842e45bd0625e985c013f, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: bf4_ru_sleeves_1
+    second: {fileID: 2100000, guid: a5c3b94ad3217f443b71a136ad4acb12, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: bf4_ru_sleeves_black_1
+    second: {fileID: 2100000, guid: b8a3d060ceb9ebb42a3f7e0c99d23977, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: bf4alpha_gloves_1
+    second: {fileID: 2100000, guid: 8e719c99a8a6b7b4cb8fe2055f43c4a9, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: bf4alpha_gloves_black_1
+    second: {fileID: 2100000, guid: 3e825414222a0bc4f81fecab24851917, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: cod_bo2_bulat_hands_1
+    second: {fileID: 2100000, guid: b24f1240ac273fe4a9a8764f39829e16, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: cod_bo2_dolg_seva_1
+    second: {fileID: 2100000, guid: e506ea209bb800c47838b8192a08f973, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: cod_bo2_dolg_seva_cs_1
+    second: {fileID: 2100000, guid: b79a3e7931b48034ca2d574fca2dfb74, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: cod_bo2_dolg_seva_duty_1
+    second: {fileID: 2100000, guid: ecea1a4fcf11c1f41ba51546a6868b45, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: cod_bo2_dolg_seva_freedom_1
+    second: {fileID: 2100000, guid: 2d697e75c17065548b14bcf7e4bee100, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: cod_bo2_dolg_seva_killer_1
+    second: {fileID: 2100000, guid: 09e76addb59039341b9086b33f18aedc, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: cod_bo2_dolg_seva_monolith_1
+    second: {fileID: 2100000, guid: faf884db04f335b4880501525c990f29, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: cod_bo2_exo_gloves_1
+    second: {fileID: 2100000, guid: 4dc1f83a7ceb4934ebe883f9f8b5bc7b, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: cod_bo2_nano_gloves_1
+    second: {fileID: 2100000, guid: f748e2104467f374190602727cda5390, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: cod_bo2_stalker_gloves_1
+    second: {fileID: 2100000, guid: 450530f022c3b4041b05f597d47635a7, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: cod_bo2_stalker_sleeves_1
+    second: {fileID: 2100000, guid: e32d5284fbe92b5429921dc93ffba28e, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: cod_bo2_stalker_sleeves_v1_1
+    second: {fileID: 2100000, guid: 4b286ed265cf5aa40b2b947863b5b4c6, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: cod_bo2_stalker_sleeves_v4_1
+    second: {fileID: 2100000, guid: 8387c8ef6ddf8ce459c4ae3d9232585c, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: cod_bo2_sviter_hands_1
+    second: {fileID: 2100000, guid: 8c4b3a4204203944cb6d765f120247e7, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: cod_bo2_tactical_hands_1
+    second: {fileID: 2100000, guid: bcb87d9f72d2e4a4d9a9e4e50581045f, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: cod_bo2_veter_gloves_1
+    second: {fileID: 2100000, guid: 5d69e16fb574bf243804cac5c06a1f39, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: cod_bo2_veter_sleeves_1
+    second: {fileID: 2100000, guid: cdedf362c65a3a3479df58a384e30796, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: cod_bo_bandit_black_1
+    second: {fileID: 2100000, guid: 2f6f41078c8020c4a9efc4c203996870, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: cod_bo_bandit_ginger_1
+    second: {fileID: 2100000, guid: e8e1b72a6ed7a93479ac928e6e60712c, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: cod_bo_bandit_ginger_green_1
+    second: {fileID: 2100000, guid: 5d33fc877d7fbbc42ab22c2da057ca9a, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: cod_bo_bandit_ginger_light_1
+    second: {fileID: 2100000, guid: 83f9cf129d327d84d83e54c77e01cd95, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: cod_bo_bandit_white_1
+    second: {fileID: 2100000, guid: 207a4573ed2c9704697eb95fd78adfa6, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: cod_bo_hazmat_1
+    second: {fileID: 2100000, guid: 1157c63f972fb884a995d8c9b9451dbc, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: cod_bo_hazmat_green_1
+    second: {fileID: 2100000, guid: 66e6f08ff1b2c384dae0188c4bf14c36, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: cod_bo_hazmat_white_1
+    second: {fileID: 2100000, guid: 6d68e8bc71a62d1409eafe196575507c, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: cod_bo_hazmat_yellow_1
+    second: {fileID: 2100000, guid: b67d170f809b1074b8342b6be35ca9b8, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: cod_ghosts_exo_computer_1
+    second: {fileID: 2100000, guid: 9edc3aa13b09f174b98800fb8a7aee0d, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: cod_ghosts_exo_computer_glass_1
+    second: {fileID: 2100000, guid: a3e2ca66e39c8e441b258498aec15354, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: cod_ghosts_fed_gloves_1
+    second: {fileID: 2100000, guid: 6cda62bc1fc2aba4e964c2b68952e1b6, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: cod_ghosts_oakley_gloves_1
+    second: {fileID: 2100000, guid: 3344dab7329400b45ad890411a148c4d, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: cod_mwr_clearsky_1
+    second: {fileID: 2100000, guid: d85a954db13556942a57785ab7361c6f, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: cod_mwr_clearsky_v2_1
+    second: {fileID: 2100000, guid: 9f4a99c83d647d04c978e18c4ebfdfd7, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: csgo_sleeves_1
+    second: {fileID: 2100000, guid: 7d160ed6b024993418eab8979c566bb1, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: csgo_sleeves_v2_1
+    second: {fileID: 2100000, guid: df5370fda455a114c9db4ceaeb6c8bd4, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: csgo_sleeves_v3_1
+    second: {fileID: 2100000, guid: 843736232761aed45a9c671e6e646d47, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: csgo_sleeves_v4_1
+    second: {fileID: 2100000, guid: bfd89d088ac3dc948a0575d9697e3157, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: homefront_dolg_gloves_1
+    second: {fileID: 2100000, guid: 5e1e3c5612e1b1c47b73a43632a1109c, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: metro_sviter_1
+    second: {fileID: 2100000, guid: 1a54fc0496bffb94dae7ab950ecfb336, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: moh2010_dolg_sleeve_1
+    second: {fileID: 2100000, guid: dd9c08571d51ddc448fdac4afd2e7975, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: moh2010_dolg_sleeve_ghost_1
+    second: {fileID: 2100000, guid: afcf228b6536d9344a3835ae3a17cdef, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: moh2010_dolg_sleeve_v2_1
+    second: {fileID: 2100000, guid: c59e450167645e146a7eb5e136061420, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: moh2010_ratnik_sleeves_1
+    second: {fileID: 2100000, guid: 97e0a19567e009e41bc1b5a57262b7cc, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: nebo_uppera_1
+    second: {fileID: 2100000, guid: f627cd24f1bd74c4b96fb8aae957afba, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: nebo_upperb_1
+    second: {fileID: 2100000, guid: f3b759e87fec6c545ba232448e884853, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: pla_bandit_gloves_1
+    second: {fileID: 2100000, guid: ac0e2ee351796484b8d452fff9ea1a1c, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: pla_bandit_sleeves_1
+    second: {fileID: 2100000, guid: 5ef39827d3da51d46b2f6c4e95d59e45, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: pla_bandit_sleeves_black_1
+    second: {fileID: 2100000, guid: 42e434842b7eab64b8f445ed52d8b856, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: pla_dolg_gloves_1
+    second: {fileID: 2100000, guid: 9dc41b84369d19c468a6c6564873a6d9, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: pla_mechanix_gloves_1
+    second: {fileID: 2100000, guid: aa0de893e7e80f14fa760004a353b5db, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: pla_swat_gloves_1
+    second: {fileID: 2100000, guid: a5a027323a0fd7d4fa5d9472780b6573, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: skat_gl_1
+    second: {fileID: 2100000, guid: 144aa9c594c5a584c896e98d3a9af524, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: skat_up_1
+    second: {fileID: 2100000, guid: 1bef7ce58aecf4447a1db749fdaccf86, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: tigg_sleeves_1
+    second: {fileID: 2100000, guid: e4d698274ce028540a70ddd6a0df5bd9, type: 2}
+  materials:
+    materialImportMode: 2
+    materialName: 1
+    materialSearch: 2
+    materialLocation: 1
+  animations:
+    legacyGenerateAnimations: 4
+    bakeSimulation: 0
+    resampleCurves: 1
+    optimizeGameObjects: 0
+    removeConstantScaleCurves: 0
+    motionNodeName: 
+    animationImportErrors: 
+    animationImportWarnings: 
+    animationRetargetingWarnings: 
+    animationDoRetargetingWarnings: 0
+    importAnimatedCustomProperties: 0
+    importConstraints: 0
+    animationCompression: 1
+    animationRotationError: 0.5
+    animationPositionError: 0.5
+    animationScaleError: 0.5
+    animationWrapMode: 0
+    extraExposedTransformPaths: []
+    extraUserProperties: []
+    clipAnimations: []
+    isReadable: 0
+  meshes:
+    lODScreenPercentages: []
+    globalScale: 1
+    meshCompression: 0
+    addColliders: 0
+    useSRGBMaterialColor: 1
+    sortHierarchyByName: 1
+    importPhysicalCameras: 1
+    importVisibility: 0
+    importBlendShapes: 0
+    importCameras: 0
+    importLights: 0
+    nodeNameCollisionStrategy: 1
+    fileIdsGeneration: 2
+    swapUVChannels: 0
+    generateSecondaryUV: 0
+    useFileUnits: 1
+    keepQuads: 0
+    weldVertices: 1
+    bakeAxisConversion: 0
+    preserveHierarchy: 0
+    skinWeightsMode: 0
+    maxBonesPerVertex: 4
+    minBoneWeight: 0.001
+    optimizeBones: 1
+    generateMeshLods: 0
+    meshLodGenerationFlags: 0
+    maximumMeshLod: -1
+    meshOptimizationFlags: -1
+    indexFormat: 0
+    secondaryUVAngleDistortion: 8
+    secondaryUVAreaDistortion: 15.000001
+    secondaryUVHardAngle: 88
+    secondaryUVMarginMethod: 1
+    secondaryUVMinLightmapResolution: 40
+    secondaryUVMinObjectScale: 1
+    secondaryUVPackMargin: 4
+    useFileScale: 1
+    strictVertexDataChecks: 0
+  tangentSpace:
+    normalSmoothAngle: 60
+    normalImportMode: 0
+    tangentImportMode: 3
+    normalCalculationMode: 4
+    legacyComputeAllNormalsFromSmoothingGroupsWhenMeshHasBlendShapes: 0
+    blendShapeNormalImportMode: 1
+    normalSmoothingSource: 0
+  referencedClips: []
+  importAnimation: 0
+  humanDescription:
+    serializedVersion: 3
+    human: []
+    skeleton: []
+    armTwist: 0.5
+    foreArmTwist: 0.5
+    upperLegTwist: 0.5
+    legTwist: 0.5
+    armStretch: 0.05
+    legStretch: 0.05
+    feetSpacing: 0
+    globalScale: 1
+    rootMotionBoneName: 
+    hasTranslationDoF: 0
+    hasExtraRoot: 0
+    skeletonHasParents: 1
+  lastHumanDescriptionAvatarSource: {instanceID: 0}
+  autoGenerateAvatarMappingIfUnspecified: 1
+  animationType: 2
+  humanoidOversampling: 1
+  avatarSetup: 0
+  addHumanoidExtraRootOnlyWhenUsingAvatar: 1
+  importBlendShapeDeformPercent: 0
+  remapMaterialsIfMaterialImportModeIsNone: 0
+  additionalBone: 0
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
