@@ -7359,6 +7359,8 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 894237190183251460}
+  - component: {fileID: 7286989086306202301}
+  - component: {fileID: 7286989086306202302}
   m_Layer: 0
   m_Name: PM_Hud
   m_TagString: Untagged
@@ -7376,13 +7378,98 @@ Transform:
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_LocalScale: {x: 0.6, y: 0.6, z: 0.6}
   m_ConstrainProportionsScale: 0
   m_Children:
   - {fileID: 2983177902827244441}
   - {fileID: 4118358329025707837}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &7286989086306202301
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6240861392481664039}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e724ef5982a24779833f381aab6ffcee, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  _handsAnimator: {fileID: 2569036294764916909}
+  _weaponAnimator: {fileID: 2439478620227799}
+  _weaponFollowSource: {fileID: 8758453679316008897}
+  _weaponFollowTarget: {fileID: 7245889433960214650}
+  _weaponFollowSourceName: lead_gun
+  _weaponFollowTargetName: wpn_body
+  _followHands: 1
+  _weaponFollowPositionOffset: {x: -0.00114, y: 0.0007, z: 0.0024}
+  _weaponFollowRotationOffset: {x: 0, y: 180, z: 0}
+  _clips:
+    _weaponIdle: {fileID: -2395465779950759759, guid: 7d7dfd928375c8747aea6665baae5ff7, type: 3}
+    _weaponIdleEmpty: {fileID: -5899778943368726693, guid: 47bb2e3ee10fe244dbdebd6ddc52f3ae, type: 3}
+    _weaponIdleJammed: {fileID: 2250723162445599784, guid: 19114e76f4c47d2499a3828bf77b0dae, type: 3}
+    _weaponReload: {fileID: 1145436320399109127, guid: acd0cfb0b47e0dd4a9e8c6bf86b7f931, type: 3}
+    _weaponReloadFull: {fileID: 4017868446987214096, guid: 224bf9cad43a8d5469eac7404d8f8ec8, type: 3}
+    _weaponMisfire: {fileID: 3243022163051455350, guid: 767ad66fd46f5f34bbaa63427f0c44fe, type: 3}
+    _weaponRevival: {fileID: -1142928590039301712, guid: b2f4d05eed0c87b4cbf012a860458193, type: 3}
+    _weaponRevivalLast: {fileID: 3656919934254476533, guid: c3f80ffad90df5b429522b9f71fade2f, type: 3}
+    _weaponShoot: {fileID: 5551793249471952369, guid: b05119ec14bb1fc46b20167ecac9a53c, type: 3}
+    _weaponShootLast: {fileID: -5089274137456430735, guid: 7690d026a7050e24c841dcb19b02c432, type: 3}
+    _handsDraw: {fileID: -4260023250038264454, guid: 96e92b3ad7fd0ca4faef932deab4e3e7, type: 3}
+    _handsHeadflash: {fileID: 1011390761825376841, guid: 220f8395e1a35c44584786f0259a477d, type: 3}
+    _handsHide: {fileID: -8987999441038440535, guid: 2e426d922f49826448c21b66d602eb2f, type: 3}
+    _handsIdle: {fileID: -415091744542372501, guid: dee6c2b7acfbb9649b41247d7887cbd3, type: 3}
+    _handsNvgOff: {fileID: 8619394166045250751, guid: 22981aac2dd125a49860932412d26757, type: 3}
+    _handsNvgOn: {fileID: -4175917119319075264, guid: 8cb4208a5c53d96439f71397a966ed5d, type: 3}
+    _handsReload: {fileID: 1100886324497952310, guid: e50b69cb852ab4449a20e055540ca1ca, type: 3}
+    _handsReloadFull: {fileID: 5496242955839853812, guid: fb7677dcdf8ed7742a3fcc488f7f84d5, type: 3}
+    _handsReloadMisfire: {fileID: 4440884522485091634, guid: 2bc4aabcdc6c05e44861aa40cd421aeb, type: 3}
+    _handsRevival: {fileID: -3235544276666710456, guid: 6718b4cdfa928b74999ec4589a9b0d08, type: 3}
+    _handsRevivalLast: {fileID: 3524889263993550146, guid: 31f82aa10fd58bf43afca1064f9df826, type: 3}
+    _handsShoot: {fileID: 277592469488526425, guid: c39d78af1016a034f84d013a9bb47a64, type: 3}
+    _handsSprint: {fileID: 8651143680162665186, guid: 94a813427fb53914ab3f0e1071e40128, type: 3}
+    _handsSprintEnd: {fileID: 55759226801725321, guid: 5ccec02b004fae346a158598a7f18b76, type: 3}
+    _handsSprintStart: {fileID: 752286490704501488, guid: 4cce3d8db6a27a340b1c1c9bf286845f, type: 3}
+    _handsWalk: {fileID: 8328879601452114933, guid: 654fe77a6b6a3234c8b3df8214851e06, type: 3}
+  _crossFadeDuration: 0.05
+  _weaponCondition: 0
+  _startupAnimation: 8
+  _playStartupAnimation: 1
+--- !u!114 &7286989086306202302
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6240861392481664039}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 2f762bbf39ea4b05a0b80ea62537249a, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  _weaponController: {fileID: 7286989086306202301}
+  _shootKey: 323
+  _shootLastKey: 324
+  _reloadKey: 114
+  _reloadFullKey: 116
+  _misfireKey: 102
+  _revivalKey: 103
+  _revivalLastKey: 104
+  _drawKey: 49
+  _hideKey: 50
+  _headflashKey: 108
+  _nvgOnKey: 110
+  _nvgOffKey: 98
+  _idleKey: 105
+  _walkKey: 120
+  _sprintKey: 304
+  _sprintStartKey: 113
+  _sprintEndKey: 101
+  _normalConditionKey: 282
+  _emptyConditionKey: 283
+  _jammedConditionKey: 284
 --- !u!1 &6268347750282449693
 GameObject:
   m_ObjectHideFlags: 0

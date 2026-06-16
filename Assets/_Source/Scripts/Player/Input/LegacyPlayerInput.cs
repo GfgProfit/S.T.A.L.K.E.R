@@ -18,6 +18,13 @@ public class LegacyPlayerInput : IPlayerInput
         KeyCode.F5,
         KeyCode.F6
     };
+    private static readonly KeyCode[] WEAPON_SLOT_KEYS =
+    {
+        KeyCode.Alpha1,
+        KeyCode.Alpha2,
+        KeyCode.Alpha3,
+        KeyCode.Alpha4
+    };
 
     public string InteractKeyDisplayName => INTERACT_KEY.ToString();
 
@@ -63,6 +70,19 @@ public class LegacyPlayerInput : IPlayerInput
         }
 
         return INVENTORY_QUICK_USE_KEYS[slotIndex].ToString();
+    }
+
+    public int GetWeaponSlotIndexPressed()
+    {
+        for (int i = 0; i < WEAPON_SLOT_KEYS.Length; i++)
+        {
+            if (Input.GetKeyDown(WEAPON_SLOT_KEYS[i]))
+            {
+                return i;
+            }
+        }
+
+        return -1;
     }
 
     public bool IsInventoryDropPressed() => Input.GetKeyDown(INVENTORY_DROP_KEY);

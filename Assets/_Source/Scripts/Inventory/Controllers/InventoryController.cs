@@ -18,6 +18,8 @@ public class InventoryController : MonoBehaviour
     [SerializeField] private PlayerController _playerController;
     [SerializeField] private PlayerCharacterStats _playerStats;
     [SerializeField] private FirstPersonLegsController _firstPersonLegsController;
+    [SerializeField] private FirstPersonWeaponHolderController _firstPersonWeaponHolderController;
+    [SerializeField] [Min(0)] private int _pistolWeaponSlotIndex = 2;
 
     [Header("Drop Settings")]
     [SerializeField] private Transform _dropOrigin;
@@ -86,6 +88,7 @@ public class InventoryController : MonoBehaviour
     private readonly InventoryDropService _dropService = new();
     private readonly InventoryItemRegistry _itemRegistry = new();
     private InventoryGrid _selectedItemGrid;
+    private int _activeWeaponSlotIndex = -1;
     private CancellationTokenSource _miniActionTextCancellation;
 
     public InventoryGrid SelectedItemGrid
@@ -307,6 +310,7 @@ public class InventoryController : MonoBehaviour
     private void Update()
     {
         RefreshQuickUseKeyTexts();
+        TryHandleWeaponSlotInput();
         TryHandleQuickUseInput();
         _updateController.Tick();
     }
@@ -355,6 +359,7 @@ public class InventoryController : MonoBehaviour
     {
         WeightStateController.Refresh();
         RefreshFirstPersonLegs();
+        RefreshFirstPersonWeapon();
         RefreshQuickUseSlotsState();
     }
 
@@ -366,6 +371,38 @@ public class InventoryController : MonoBehaviour
         }
 
         _firstPersonLegsController.SetEquippedArmor(GetFirstEquippedItemData(ItemType.Armor));
+    }
+
+    private void RefreshFirstPersonWeapon()
+    {
+        if (_firstPersonWeaponHolderController == null)
+        {
+            return;
+        }
+
+        if (_activeWeaponSlotIndex == _pistolWeaponSlotIndex)
+        {
+            _firstPersonWeaponHolderController.SetWeapon(GetFirstEquippedItemData(ItemType.Pistol));
+            return;
+        }
+
+        _firstPersonWeaponHolderController.ClearWeapon();
+    }
+
+    private void TryHandleWeaponSlotInput()
+    {
+        int slotIndex = PlayerInput.GetWeaponSlotIndexPressed();
+
+        if (slotIndex < 0)
+        {
+            return;
+        }
+
+        if (slotIndex == _pistolWeaponSlotIndex)
+        {
+            _activeWeaponSlotIndex = slotIndex;
+            RefreshFirstPersonWeapon();
+        }
     }
 
     private void RefreshQuickUseSlotsState()

@@ -1,6 +1,6 @@
 using UnityEngine;
 
-public interface IPlayerInput : IPlayerLookInput, IPlayerMovementInput, IPlayerInteractionInput, IInventoryInput, IMiniMapInput
+public interface IPlayerInput : IPlayerLookInput, IPlayerMovementInput, IPlayerInteractionInput, IInventoryInput, IWeaponSlotInput, IMiniMapInput
 {
 }
 
@@ -53,4 +53,9 @@ public interface IInventoryInput : IPlayerPointerInput
     bool IsInventoryPrimaryActionReleased();
     bool IsInventorySecondaryActionPressed();
     bool IsInventoryRotatePressed();
+}
+
+public interface IWeaponSlotInput
+{
+    int GetWeaponSlotIndexPressed();
 }
