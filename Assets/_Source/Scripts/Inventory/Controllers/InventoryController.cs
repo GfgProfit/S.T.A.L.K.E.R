@@ -3,67 +3,71 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Threading;
 using Cysharp.Threading.Tasks;
+using NaughtyAttributes;
 using TMPro;
 using UnityEngine;
 
 public class InventoryController : MonoBehaviour
 {
-    [SerializeField] private List<ItemData> _items;
-    [SerializeField] private InventoryItem _itemPrefab;
-    [SerializeField] private Transform _canvasTransform;
-    [SerializeField] private GameObject _inventoryRoot;
-    [SerializeField] private CanvasGroup _inventoryCanvasGroup;
-    [SerializeField] private InventoryGrid _defaultItemGrid;
-    [SerializeField] private InventoryHighlight _inventoryHighlight;
-    [SerializeField] private PlayerController _playerController;
-    [SerializeField] private PlayerCharacterStats _playerStats;
-    [SerializeField] private FirstPersonLegsController _firstPersonLegsController;
-    [SerializeField] private FirstPersonWeaponHolderController _firstPersonWeaponHolderController;
-    [SerializeField] [Min(0)] private int _pistolWeaponSlotIndex = 2;
+    [SerializeField] [BoxGroup("Items")] private List<ItemData> _items;
+    [SerializeField] [BoxGroup("Items")] private InventoryItem _itemPrefab;
+    [SerializeField] [BoxGroup("UI")] private Transform _canvasTransform;
+    [SerializeField] [BoxGroup("UI")] private GameObject _inventoryRoot;
+    [SerializeField] [BoxGroup("UI")] private CanvasGroup _inventoryCanvasGroup;
+    [SerializeField] [BoxGroup("Grids")] private InventoryGrid _defaultItemGrid;
+    [SerializeField] [BoxGroup("UI")] private InventoryHighlight _inventoryHighlight;
+    [SerializeField] [BoxGroup("Player")] private PlayerController _playerController;
+    [SerializeField] [BoxGroup("Player")] private PlayerCharacterStats _playerStats;
+    [SerializeField] [BoxGroup("First Person")] private FirstPersonLegsController _firstPersonLegsController;
+    [SerializeField] [BoxGroup("First Person")] private FirstPersonWeaponHolderController _firstPersonWeaponHolderController;
+    [SerializeField] [BoxGroup("Weapon Slots")] [Min(0)] private int _primaryWeaponSlotIndex = 0;
+    [SerializeField] [BoxGroup("Weapon Slots")] [Min(0)] private int _secondaryWeaponSlotIndex = 1;
+    [SerializeField] [BoxGroup("Weapon Slots")] [Min(0)] private int _pistolWeaponSlotIndex = 2;
 
     [Header("Drop Settings")]
-    [SerializeField] private Transform _dropOrigin;
-    [SerializeField] private Camera _dropCamera;
-    [SerializeField] [Min(0f)] private float _dropForwardDistance = 1.2f;
-    [SerializeField] [Min(0f)] private float _dropUpOffset = 0.45f;
-    [SerializeField] [Min(0f)] private float _dropGroundProbeHeight = 1.5f;
-    [SerializeField] [Min(0f)] private float _dropGroundProbeDistance = 3f;
-    [SerializeField] [Min(0f)] private float _dropGroundOffset = 0.08f;
-    [SerializeField] [Min(0f)] private float _dropObstacleClearance = 0.2f;
-    [SerializeField] [Min(0f)] private float _dropImpulse = 1.2f;
-    [SerializeField] private LayerMask _dropGroundLayers = ~0;
-    [SerializeField] private LayerMask _dropObstacleLayers = ~0;
-    [SerializeField] private TMP_Text _weightText;
-    [SerializeField] private ItemInfoPanel _itemInfoPanel;
-    [SerializeField] private InventoryItemContextMenu _itemContextMenu;
-    [SerializeField] private GameObject _closedSlotPrefab;
-    [SerializeField] private List<InventoryItem> _initialInventoryItems = new();
-    [SerializeField] private List<InventoryGrid> _quickActionGridReferences = new();
+    [SerializeField] [BoxGroup("Drop Settings")] private Transform _dropOrigin;
+    [SerializeField] [BoxGroup("Drop Settings")] private Camera _dropCamera;
+    [SerializeField] [BoxGroup("Drop Settings")] [Min(0f)] private float _dropForwardDistance = 1.2f;
+    [SerializeField] [BoxGroup("Drop Settings")] [Min(0f)] private float _dropUpOffset = 0.45f;
+    [SerializeField] [BoxGroup("Drop Settings")] [Min(0f)] private float _dropGroundProbeHeight = 1.5f;
+    [SerializeField] [BoxGroup("Drop Settings")] [Min(0f)] private float _dropGroundProbeDistance = 3f;
+    [SerializeField] [BoxGroup("Drop Settings")] [Min(0f)] private float _dropGroundOffset = 0.08f;
+    [SerializeField] [BoxGroup("Drop Settings")] [Min(0f)] private float _dropObstacleClearance = 0.2f;
+    [SerializeField] [BoxGroup("Drop Settings")] [Min(0f)] private float _dropImpulse = 1.2f;
+    [SerializeField] [BoxGroup("Drop Settings")] private LayerMask _dropGroundLayers = ~0;
+    [SerializeField] [BoxGroup("Drop Settings")] private LayerMask _dropObstacleLayers = ~0;
+    [SerializeField] [BoxGroup("UI")] private TMP_Text _weightText;
+    [SerializeField] [BoxGroup("UI")] private ItemInfoPanel _itemInfoPanel;
+    [SerializeField] [BoxGroup("UI")] private InventoryItemContextMenu _itemContextMenu;
+    [SerializeField] [BoxGroup("Grids")] private GameObject _closedSlotPrefab;
+    [SerializeField] [BoxGroup("Items")] private List<InventoryItem> _initialInventoryItems = new();
+    [SerializeField] [BoxGroup("Grids")] private List<InventoryGrid> _quickActionGridReferences = new();
 
     [Header("Quick Use")]
-    [SerializeField] private List<QuickUseSlotBinding> _quickUseSlotBindings = new();
-    [SerializeField] private TMP_Text _miniActionText;
-    [SerializeField] [Min(0f)] private float _miniActionTextDuration = 2.5f;
+    [SerializeField] [BoxGroup("Quick Use")] private List<QuickUseSlotBinding> _quickUseSlotBindings = new();
+    [SerializeField] [BoxGroup("Quick Use")] private TMP_Text _miniActionText;
+    [SerializeField] [BoxGroup("Quick Use")] [EnableIf(nameof(UsesMiniActionText))] [Min(0f)] private float _miniActionTextDuration = 2.5f;
 
-    [SerializeField] private List<EquipmentSlotGrid> _equipmentSlotGrids = new();
-    [SerializeField] private List<SlottedItemGrid> _slottedItemGrids = new();
+    [SerializeField] [BoxGroup("Grids")] private List<EquipmentSlotGrid> _equipmentSlotGrids = new();
+    [SerializeField] [BoxGroup("Grids")] private List<SlottedItemGrid> _slottedItemGrids = new();
 
     [Header("Stats Info")]
-    [SerializeField] private CharacterStatsInfoPanel _playerStatsInfoPanel;
-    [SerializeField] private bool _hidePlayerStatsInfoWhenEmpty = true;
-    [SerializeField] [Min(0f)] private float _maxCarryWeight = 50f;
-    [SerializeField] [Min(0f)] private float _movementBlockExtraWeight = 10f;
-    [SerializeField] private bool _openOnStart;
-    [SerializeField] private bool _unlockCursorWhileOpen = true;
-    [SerializeField] private bool _disablePlayerControlsWhileOpen = true;
-    [SerializeField] private bool _prewarmItemIconsOnStart = true;
-    [SerializeField] private bool _logIconPrewarmProgress;
+    [SerializeField] [BoxGroup("Stats Info")] private CharacterStatsInfoPanel _playerStatsInfoPanel;
+    [SerializeField] [BoxGroup("Stats Info")] private bool _hidePlayerStatsInfoWhenEmpty = true;
+    [SerializeField] [BoxGroup("Weight")] [Min(0f)] private float _maxCarryWeight = 50f;
+    [SerializeField] [BoxGroup("Weight")] [Min(0f)] private float _movementBlockExtraWeight = 10f;
+    [SerializeField] [BoxGroup("Open State")] private bool _openOnStart;
+    [SerializeField] [BoxGroup("Open State")] private bool _unlockCursorWhileOpen = true;
+    [SerializeField] [BoxGroup("Open State")] private bool _disablePlayerControlsWhileOpen = true;
+    [SerializeField] [BoxGroup("Icon Prewarm")] private bool _prewarmItemIconsOnStart = true;
+    [SerializeField] [BoxGroup("Icon Prewarm")] [EnableIf(nameof(PrewarmsItemIcons))] private bool _logIconPrewarmProgress;
 
     [Inject] private IPlayerInput _playerInput = null;
 
     private IPlayerInput _fallbackPlayerInput;
     private InventoryItemFactory _itemFactory;
     private InventoryEquipmentSlotService _equipmentSlotService;
+    private InventoryEquipmentActionService _equipmentActionService;
     private InventoryQuickActionService _quickActionService;
     private InventoryContextMenuController _contextMenuController;
     private InventoryItemDropProcessor _dropProcessor;
@@ -111,6 +115,8 @@ public class InventoryController : MonoBehaviour
     public float MaxCarryWeight => WeightStateController.MaxCarryWeight;
     public float MovementBlockWeight => WeightStateController.MovementBlockWeight;
     public bool IsMovementBlockedByWeight => WeightStateController.IsMovementBlockedByWeight;
+    private bool UsesMiniActionText() => _miniActionText != null;
+    private bool PrewarmsItemIcons() => _prewarmItemIconsOnStart;
 
     private IPlayerInput PlayerInput
     {
@@ -234,6 +240,15 @@ public class InventoryController : MonoBehaviour
         }
     }
 
+    private InventoryEquipmentActionService EquipmentActionService
+    {
+        get
+        {
+            _equipmentActionService ??= CreateEquipmentActionService();
+            return _equipmentActionService;
+        }
+    }
+
     private InventoryQuickUseService QuickUseService
     {
         get
@@ -253,8 +268,9 @@ public class InventoryController : MonoBehaviour
     }
 
     private InventoryEquipmentSlotService CreateEquipmentSlotService() => new(_equipmentSlotGrids, _slottedItemGrids, _defaultItemGrid, InsertItem, TryDetachItemFromGrid, RegisterInventoryItem, RefreshWeightState, () => _closedSlotPrefab);
+    private InventoryEquipmentActionService CreateEquipmentActionService() => new(_equipmentSlotGrids, _defaultItemGrid, InsertItem, TryDetachItemFromGrid, TryPrepareSlotRestrictionsForPlacement, RegisterInventoryItem, RefreshWeightState);
     private InventoryQuickActionService CreateQuickActionService() => new(_quickActionGridReferences, _defaultItemGrid, TryMoveItemToGrid, CreateItem, RegisterInventoryItem, RefreshWeightState);
-    private InventoryContextMenuController CreateContextMenuController() => new(_itemContextMenu, PlayerInput, () => _selectedItemGrid, () => _dragState.SelectedItem, DragController.GetTileGridPosition, HideItemInfoPanel, TryUseContextMenuItem, TryDropItem);
+    private InventoryContextMenuController CreateContextMenuController() => new(_itemContextMenu, PlayerInput, () => _selectedItemGrid, () => _dragState.SelectedItem, DragController.GetTileGridPosition, HideItemInfoPanel, TryUseContextMenuItem, TryUnloadContextMenuWeapon, CanEquipPrimaryContextMenuWeapon, TryEquipPrimaryContextMenuWeapon, CanEquipSecondaryContextMenuWeapon, TryEquipSecondaryContextMenuWeapon, CanEquipContextMenuItem, TryEquipContextMenuItem, CanUnequipContextMenuItem, TryUnequipContextMenuItem, TryDropItem);
     private InventoryItemDropProcessor CreateDropProcessor() => new(TrySpawnDroppedWorldItem, TryDetachItemFromGrid, DestroyInventoryItem, RefreshWeightState);
     private InventoryWeightStateController CreateWeightStateController() => new(_itemRegistry, _equipmentSlotGrids, EquipmentSlotService, SetWeightViewModelState, RenderCharacterStatsInfo, _playerController, _playerStats, _hidePlayerStatsInfoWhenEmpty, _maxCarryWeight, _movementBlockExtraWeight);
     private InventoryHoverInfoController CreateHoverInfoController() => new(_inventoryHighlight, _itemInfoPanel, IsContextMenuOpen);
@@ -277,6 +293,7 @@ public class InventoryController : MonoBehaviour
 
         _itemFactory = new InventoryItemFactory(_itemPrefab);
         _equipmentSlotService = CreateEquipmentSlotService();
+        _equipmentActionService = CreateEquipmentActionService();
         _quickActionService = CreateQuickActionService();
         _contextMenuController = CreateContextMenuController();
         _dropProcessor = CreateDropProcessor();
@@ -329,6 +346,94 @@ public class InventoryController : MonoBehaviour
     public bool TryInsertItem(ItemData itemData) => TryInsertItem(itemData, 1);
     public bool TryInsertItem(ItemData itemData, int amount) => TryInsertItem(itemData, amount, null);
     public bool TryInsertItem(ItemData itemData, int amount, float? durabilityPercent) => ItemPlacementService.TryInsertItem(itemData, amount, durabilityPercent, IconPrewarmController.IconsReady, GetInsertionGrid(), _defaultItemGrid);
+
+    public int GetInventoryItemCount(ItemData itemData)
+    {
+        if (itemData == null)
+        {
+            return 0;
+        }
+
+        int count = 0;
+        IReadOnlyList<InventoryItem> items = _itemRegistry.Items;
+
+        for (int i = 0; i < items.Count; i++)
+        {
+            InventoryItem item = items[i];
+
+            if (item != null && item.ItemData == itemData)
+            {
+                count += item.CurrentAmount;
+            }
+        }
+
+        return count;
+    }
+
+    public int ConsumeInventoryItem(ItemData itemData, int amount)
+    {
+        if (itemData == null || amount <= 0)
+        {
+            return 0;
+        }
+
+        int remainingAmount = amount;
+        List<InventoryItem> items = new(_itemRegistry.Items);
+
+        for (int i = items.Count - 1; i >= 0 && remainingAmount > 0; i--)
+        {
+            InventoryItem item = items[i];
+
+            if (item == null || item.ItemData != itemData)
+            {
+                continue;
+            }
+
+            int itemAmount = item.CurrentAmount;
+
+            if (itemAmount > remainingAmount)
+            {
+                item.SetAmount(itemAmount - remainingAmount);
+                remainingAmount = 0;
+                continue;
+            }
+
+            if (TryGetItemGrid(item, out InventoryGrid itemGrid) == false || TryDetachItemFromGrid(itemGrid, item) == false)
+            {
+                continue;
+            }
+
+            DestroyInventoryItem(item);
+            remainingAmount -= itemAmount;
+        }
+
+        int consumedAmount = amount - remainingAmount;
+
+        if (consumedAmount > 0)
+        {
+            RefreshWeightState();
+        }
+
+        return consumedAmount;
+    }
+
+    public bool TryReturnItemToInventoryOrDrop(ItemData itemData, int amount)
+    {
+        if (itemData == null || amount <= 0)
+        {
+            return true;
+        }
+
+        if (TryInsertItem(itemData, amount))
+        {
+            return true;
+        }
+
+        return TrySpawnDroppedWorldItem(itemData, amount, itemData.DefaultDurabilityPercent);
+    }
+
+    public void RefreshInventoryWeightState() => RefreshWeightState();
+
     private bool InsertItem(InventoryItem itemToInsert, InventoryGrid targetGrid) => ItemPlacementService.InsertItem(itemToInsert, targetGrid);
     private bool TryHandleQuickItemAction() => HoveredItemActionController.TryHandleQuickItemAction();
     private bool TryHandleHoveredItemDropInput() => HoveredItemActionController.TryHandleHoveredItemDropInput();
@@ -365,12 +470,16 @@ public class InventoryController : MonoBehaviour
 
     private void RefreshFirstPersonLegs()
     {
+        ItemData equippedArmor = GetFirstEquippedItemData(ItemType.Armor);
+
         if (_firstPersonLegsController == null)
         {
+            _firstPersonWeaponHolderController?.SetEquippedArmor(equippedArmor);
             return;
         }
 
-        _firstPersonLegsController.SetEquippedArmor(GetFirstEquippedItemData(ItemType.Armor));
+        _firstPersonLegsController.SetEquippedArmor(equippedArmor);
+        _firstPersonWeaponHolderController?.SetEquippedArmor(equippedArmor);
     }
 
     private void RefreshFirstPersonWeapon()
@@ -380,9 +489,11 @@ public class InventoryController : MonoBehaviour
             return;
         }
 
-        if (_activeWeaponSlotIndex == _pistolWeaponSlotIndex)
+        InventoryItem activeWeaponItem = GetActiveWeaponItem();
+
+        if (activeWeaponItem != null)
         {
-            _firstPersonWeaponHolderController.SetWeapon(GetFirstEquippedItemData(ItemType.Pistol));
+            _firstPersonWeaponHolderController.SetWeapon(activeWeaponItem);
             return;
         }
 
@@ -398,7 +509,12 @@ public class InventoryController : MonoBehaviour
             return;
         }
 
-        if (slotIndex == _pistolWeaponSlotIndex)
+        if (_firstPersonWeaponHolderController != null && _firstPersonWeaponHolderController.IsWeaponChangeLocked)
+        {
+            return;
+        }
+
+        if (IsHandledWeaponSlotIndex(slotIndex))
         {
             _activeWeaponSlotIndex = slotIndex;
             RefreshFirstPersonWeapon();
@@ -609,14 +725,162 @@ public class InventoryController : MonoBehaviour
         return true;
     }
 
+    private bool TryUnloadContextMenuWeapon(InventoryGrid grid, InventoryItem item)
+    {
+        if (item == null || item.ItemData == null || item.ItemData.WeaponData == null)
+        {
+            return false;
+        }
+
+        FirstPersonWeaponMagazineState magazineState = item.WeaponMagazineState;
+
+        if (magazineState.LoadedAmmoData == null || magazineState.LoadedAmmoAmount <= 0)
+        {
+            return false;
+        }
+
+        if (_firstPersonWeaponHolderController != null && _firstPersonWeaponHolderController.CurrentWeaponItem == item)
+        {
+            bool unloadedCurrentWeapon = _firstPersonWeaponHolderController.TryUnloadCurrentWeapon();
+
+            if (unloadedCurrentWeapon)
+            {
+                RefreshWeightState();
+            }
+
+            return unloadedCurrentWeapon;
+        }
+
+        ItemData loadedAmmoData = magazineState.LoadedAmmoData;
+        int loadedAmmoAmount = magazineState.LoadedAmmoAmount;
+        magazineState.ClearLoadedAmmo();
+
+        bool returnedAmmo = TryReturnItemToInventoryOrDrop(loadedAmmoData, loadedAmmoAmount);
+        RefreshWeightState();
+        return returnedAmmo;
+    }
+
+    private bool CanEquipPrimaryContextMenuWeapon(InventoryGrid grid, InventoryItem item)
+    {
+        return IsContextMenuWeaponItem(item) && EquipmentActionService.CanEquipToSlot(grid, item, ItemType.Weapon, 0);
+    }
+
+    private bool TryEquipPrimaryContextMenuWeapon(InventoryGrid grid, InventoryItem item)
+    {
+        return IsContextMenuWeaponItem(item) && EquipmentActionService.TryEquipToSlot(grid, item, ItemType.Weapon, 0);
+    }
+
+    private bool CanEquipSecondaryContextMenuWeapon(InventoryGrid grid, InventoryItem item)
+    {
+        return IsContextMenuWeaponItem(item) && EquipmentActionService.CanEquipToSlot(grid, item, ItemType.Weapon, 1);
+    }
+
+    private bool TryEquipSecondaryContextMenuWeapon(InventoryGrid grid, InventoryItem item)
+    {
+        return IsContextMenuWeaponItem(item) && EquipmentActionService.TryEquipToSlot(grid, item, ItemType.Weapon, 1);
+    }
+
+    private bool CanEquipContextMenuItem(InventoryGrid grid, InventoryItem item)
+    {
+        return IsGenericEquipContextMenuItem(item) && CanEquipContextMenuItemWithCurrentArmor(item) && EquipmentActionService.CanEquipToSlot(grid, item, item.ItemData.ItemType, 0);
+    }
+
+    private bool TryEquipContextMenuItem(InventoryGrid grid, InventoryItem item)
+    {
+        return IsGenericEquipContextMenuItem(item) && CanEquipContextMenuItemWithCurrentArmor(item) && EquipmentActionService.TryEquipToSlot(grid, item, item.ItemData.ItemType, 0);
+    }
+
+    private bool CanUnequipContextMenuItem(InventoryGrid grid, InventoryItem item)
+    {
+        return EquipmentActionService.CanUnequip(grid, item);
+    }
+
+    private bool TryUnequipContextMenuItem(InventoryGrid grid, InventoryItem item)
+    {
+        return EquipmentActionService.TryUnequip(grid, item);
+    }
+
     private bool TryDropItem(InventoryGrid grid, InventoryItem item, bool wholeStack) => DropProcessor.TryDropItem(grid, item, wholeStack);
     private bool TrySpawnDroppedWorldItem(ItemData itemData, int amount, float durabilityPercent) => _dropService.TrySpawnDroppedWorldItem(itemData, amount, durabilityPercent, CreateDropContext());
     private InventoryDropContext CreateDropContext() => new(_dropOrigin, _playerController, transform, _dropCamera, _dropForwardDistance, _dropUpOffset, _dropGroundProbeHeight, _dropGroundProbeDistance, _dropGroundOffset, _dropObstacleClearance, _dropImpulse, _dropGroundLayers, _dropObstacleLayers);
 
     private bool TryDetachItemFromGrid(InventoryGrid grid, InventoryItem item) => DragController.TryDetachItemFromGrid(grid, item);
 
+    private bool TryGetItemGrid(InventoryItem item, out InventoryGrid itemGrid)
+    {
+        itemGrid = null;
+
+        if (item == null)
+        {
+            return false;
+        }
+
+        if (TryUseItemGrid(_defaultItemGrid, item, out itemGrid))
+        {
+            return true;
+        }
+
+        for (int i = 0; i < _equipmentSlotGrids.Count; i++)
+        {
+            if (TryUseItemGrid(_equipmentSlotGrids[i], item, out itemGrid))
+            {
+                return true;
+            }
+        }
+
+        for (int i = 0; i < _slottedItemGrids.Count; i++)
+        {
+            if (TryUseItemGrid(_slottedItemGrids[i], item, out itemGrid))
+            {
+                return true;
+            }
+        }
+
+        for (int i = 0; i < _quickActionGridReferences.Count; i++)
+        {
+            if (TryUseItemGrid(_quickActionGridReferences[i], item, out itemGrid))
+            {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    private static bool TryUseItemGrid(InventoryGrid grid, InventoryItem item, out InventoryGrid itemGrid)
+    {
+        itemGrid = null;
+
+        if (grid == null || item == null)
+        {
+            return false;
+        }
+
+        if (grid.GetItem(item.GridPositionX, item.GridPositionY) != item)
+        {
+            return false;
+        }
+
+        itemGrid = grid;
+        return true;
+    }
+
     private ItemData GetFirstEquippedItemData(ItemType itemType)
     {
+        InventoryItem item = GetFirstEquippedItem(itemType);
+        return item == null ? null : item.ItemData;
+    }
+
+    private InventoryItem GetFirstEquippedItem(ItemType itemType)
+    {
+        return GetEquippedItem(itemType, 0);
+    }
+
+    private InventoryItem GetEquippedItem(ItemType itemType, int itemTypeSlotIndex)
+    {
+        int resolvedSlotIndex = Mathf.Max(0, itemTypeSlotIndex);
+        int matchedSlotIndex = 0;
+
         for (int i = 0; i < _equipmentSlotGrids.Count; i++)
         {
             EquipmentSlotGrid grid = _equipmentSlotGrids[i];
@@ -626,10 +890,72 @@ public class InventoryController : MonoBehaviour
                 continue;
             }
 
-            return grid.EquippedItem == null ? null : grid.EquippedItem.ItemData;
+            if (matchedSlotIndex == resolvedSlotIndex)
+            {
+                return grid.EquippedItem;
+            }
+
+            matchedSlotIndex++;
         }
 
         return null;
+    }
+
+    private InventoryItem GetActiveWeaponItem()
+    {
+        if (_activeWeaponSlotIndex == _primaryWeaponSlotIndex)
+        {
+            return GetEquippedItem(ItemType.Weapon, 0);
+        }
+
+        if (_activeWeaponSlotIndex == _secondaryWeaponSlotIndex)
+        {
+            return GetEquippedItem(ItemType.Weapon, 1);
+        }
+
+        if (_activeWeaponSlotIndex == _pistolWeaponSlotIndex)
+        {
+            return GetFirstEquippedItem(ItemType.Pistol);
+        }
+
+        return null;
+    }
+
+    private bool IsHandledWeaponSlotIndex(int slotIndex)
+    {
+        return slotIndex == _primaryWeaponSlotIndex ||
+               slotIndex == _secondaryWeaponSlotIndex ||
+               slotIndex == _pistolWeaponSlotIndex;
+    }
+
+    private static bool IsContextMenuWeaponItem(InventoryItem item)
+    {
+        return item != null && item.ItemData != null && item.ItemData.ItemType == ItemType.Weapon;
+    }
+
+    private static bool IsGenericEquipContextMenuItem(InventoryItem item)
+    {
+        if (item == null || item.ItemData == null)
+        {
+            return false;
+        }
+
+        return item.ItemData.ItemType == ItemType.Armor ||
+               item.ItemData.ItemType == ItemType.Knife ||
+               item.ItemData.ItemType == ItemType.Pistol ||
+               item.ItemData.ItemType == ItemType.Helmet ||
+               item.ItemData.ItemType == ItemType.Detector;
+    }
+
+    private bool CanEquipContextMenuItemWithCurrentArmor(InventoryItem item)
+    {
+        if (item == null || item.ItemData == null || item.ItemData.ItemType != ItemType.Helmet)
+        {
+            return true;
+        }
+
+        ItemData equippedArmor = GetFirstEquippedItemData(ItemType.Armor);
+        return equippedArmor == null || equippedArmor.CanEquipHelmet;
     }
 
     private void HideContextMenu() => ContextMenuController.Hide();

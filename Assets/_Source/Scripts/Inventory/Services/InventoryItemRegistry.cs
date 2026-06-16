@@ -6,6 +6,7 @@ internal sealed class InventoryItemRegistry
     private readonly List<InventoryItem> _items = new();
 
     public event Action<InventoryItem> DurabilityChanged;
+    public IReadOnlyList<InventoryItem> Items => _items;
 
     public void Register(InventoryItem item)
     {
