@@ -40,6 +40,10 @@ MonoBehaviour:
   _defaultDurabilityPercent: 100
   _canEquipHelmet: 0
   _firstPersonLegsMeshName: stalker_sci
+  _firstPersonHandsMeshName: wpn_hand_21
+  _firstPersonWeaponPrefab: {fileID: 0}
+  _firstPersonWeaponSpawnScale: {x: 1, y: 1, z: 1}
+  _weaponData: {fileID: 0}
   _statModifiers:
   - _statType: 0
     _valueAtFullDurability: 50

@@ -12,7 +12,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 737e751cd05516846acf43daad139c9e, type: 3}
   m_Name: SPECOPS
   m_EditorClassIdentifier: 
-  _itemName: "\u0411\u0440\u043E\u043D\u0435\u043A\u043E\u0441\u0442\u044E\u043C \xAB\u0411\u0435\u0440\u0438\u043B\u043B-5\u041C\xBB"
+  _itemName: "\u0411\u0440\u043E\u043D\u0435\u043A\u043E\u0441\u0442\u044E\u043C
+    \xAB\u0411\u0435\u0440\u0438\u043B\u043B-5\u041C\xBB"
   _shortName: "\u0411-5\u041C"
   _description: "\u041C\u043E\u0434\u0438\u0444\u0438\u0446\u0438\u0440\u043E\u0432\u0430\u043D\u043D\u044B\u0439
     \u0434\u043B\u044F \u0440\u0430\u0431\u043E\u0442\u044B \u0432 \u0443\u0441\u043B\u043E\u0432\u0438\u044F\u0445
@@ -39,7 +40,12 @@ MonoBehaviour:
   _stackable: 0
   _useDurability: 1
   _defaultDurabilityPercent: 100
+  _canEquipHelmet: 1
   _firstPersonLegsMeshName: military_medium
+  _firstPersonHandsMeshName: wpn_hand_11_guard
+  _firstPersonWeaponPrefab: {fileID: 0}
+  _firstPersonWeaponSpawnScale: {x: 1, y: 1, z: 1}
+  _weaponData: {fileID: 0}
   _statModifiers:
   - _statType: 0
     _valueAtFullDurability: 30

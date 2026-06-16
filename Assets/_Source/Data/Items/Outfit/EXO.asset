@@ -41,6 +41,7 @@ MonoBehaviour:
   _defaultDurabilityPercent: 100
   _canEquipHelmet: 1
   _firstPersonLegsMeshName: stalker_exo
+  _firstPersonHandsMeshName: wpn_hand_exo
   _statModifiers:
   - _statType: 0
     _valueAtFullDurability: 40

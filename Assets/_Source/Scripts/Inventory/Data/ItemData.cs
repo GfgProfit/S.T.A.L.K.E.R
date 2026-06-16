@@ -1,54 +1,58 @@
 using System.Collections.Generic;
+using NaughtyAttributes;
 using UnityEngine;
 
 [CreateAssetMenu]
 public class ItemData : ScriptableObject
 {
-    [SerializeField] private string _itemName;
-    [SerializeField] private string _shortName;
-    [SerializeField] [TextArea(3, 8)] private string _description;
-    [SerializeField] private ItemType _itemType = ItemType.Misc;
-    [SerializeField] private ItemRarity _rarity = ItemRarity.Common;
-    [SerializeField] [Min(0f)] private float _weight;
-    [SerializeField] private bool _stackable;
-    [SerializeField] private bool _useDurability;
-    [SerializeField] [Range(0f, 100f)] private float _defaultDurabilityPercent = 100f;
-    [SerializeField] private bool _canEquipHelmet = true;
-    [SerializeField] private string _firstPersonLegsMeshName;
-    [SerializeField] private GameObject _firstPersonWeaponPrefab;
-    [SerializeField] private List<CharacterStatModifier> _statModifiers = new();
-    [SerializeField] private WorldItem _worldItemPrefab;
-    [SerializeField] [Min(1)] private int _width = 1;
-    [SerializeField] [Min(1)] private int _height = 1;
-    [SerializeField] private Sprite _itemIcon;
-    [SerializeField] private bool _generateIconAtRuntime = true;
-    [SerializeField] private GameObject _iconPrefab;
-    [SerializeField] private List<ItemIconPart> _iconParts = new List<ItemIconPart>();
-    [SerializeField] [Min(16)] private int _iconPixelsPerCell = 64;
-    [SerializeField] [Range(1, 4)] private int _iconRenderScale = 2;
-    [SerializeField] [Range(1f, 2f)] private float _iconPadding = 1.15f;
-    [SerializeField] [Range(1, 8)] private int _iconAntiAliasing = 4;
-    [SerializeField] private bool _iconUseOutline = true;
-    [SerializeField] [Range(0, 8)] private int _iconOutlineWidth = 1;
-    [SerializeField] private bool _iconUseShadow = true;
-    [SerializeField] private Vector2 _iconShadowOffset = new(2f, -2f);
-    [SerializeField] [Range(0, 8)] private int _iconShadowBlur = 2;
-    [SerializeField] private Vector3 _iconModelEulerAngles = Vector3.zero;
-    [SerializeField] private Vector3 _iconModelScale = Vector3.one;
-    [SerializeField] private Vector3 _iconCameraEulerAngles = new(25f, -35f, 0f);
-    [SerializeField] private Vector3 _slotIconModelEulerAngles = Vector3.zero;
-    [SerializeField] private Vector3 _slotIconModelScale = Vector3.one;
-    [SerializeField] private Vector3 _slotIconCameraEulerAngles = new(25f, -35f, 0f);
-    [SerializeField] [Range(1f, 2f)] private float _slotIconPadding = 1.15f;
-    [SerializeField] private bool _iconShowCellGrid = true;
-    [SerializeField] private bool _iconShowCellGridBorder = true;
-    [SerializeField] [Range(1, 8)] private int _iconCellGridBorderLineThickness = 2;
-    [SerializeField] private bool _iconUseDirectionalLight = true;
-    [SerializeField] private Vector3 _iconLightEulerAngles = new(50f, -30f, 0f);
-    [SerializeField] private float _iconLightIntensity = 1.5f;
-    [SerializeField] private bool _slotIconUseDirectionalLight = true;
-    [SerializeField] private Vector3 _slotIconLightEulerAngles = new(50f, -30f, 0f);
-    [SerializeField] private float _slotIconLightIntensity = 1.5f;
+    [SerializeField] [BoxGroup("Identity")] private string _itemName;
+    [SerializeField] [BoxGroup("Identity")] private string _shortName;
+    [SerializeField] [BoxGroup("Identity")] [TextArea(3, 8)] private string _description;
+    [SerializeField] [BoxGroup("Identity")] private ItemType _itemType = ItemType.Misc;
+    [SerializeField] [BoxGroup("Identity")] private ItemRarity _rarity = ItemRarity.Common;
+    [SerializeField] [BoxGroup("Inventory")] [Min(0f)] private float _weight;
+    [SerializeField] [BoxGroup("Inventory")] private bool _stackable;
+    [SerializeField] [BoxGroup("Durability")] private bool _useDurability;
+    [SerializeField] [BoxGroup("Durability")] [ShowIf(nameof(UsesDurability))] [Range(0f, 100f)] private float _defaultDurabilityPercent = 100f;
+    [SerializeField] [BoxGroup("Equipment")] [ShowIf(nameof(IsArmor))] private bool _canEquipHelmet = true;
+    [SerializeField] [BoxGroup("First Person")] [ShowIf(nameof(IsArmor))] private string _firstPersonLegsMeshName;
+    [SerializeField] [BoxGroup("First Person")] [ShowIf(nameof(IsArmor))] private string _firstPersonHandsMeshName;
+    [SerializeField] [BoxGroup("First Person")] [ShowIf(nameof(UsesFirstPersonWeapon))] private GameObject _firstPersonWeaponPrefab;
+    [SerializeField] [BoxGroup("First Person")] [ShowIf(nameof(UsesFirstPersonWeapon))] private Vector3 _firstPersonWeaponSpawnScale = Vector3.one;
+    [SerializeField] [BoxGroup("Weapon")] [ShowIf(nameof(UsesWeaponData))] private WeaponData _weaponData;
+    [SerializeField] [BoxGroup("Stats")] [ShowIf(nameof(CanHaveStats))] private List<CharacterStatModifier> _statModifiers = new();
+    [SerializeField] [BoxGroup("World")] private WorldItem _worldItemPrefab;
+    [SerializeField] [BoxGroup("Grid Size")] [Min(1)] private int _width = 1;
+    [SerializeField] [BoxGroup("Grid Size")] [Min(1)] private int _height = 1;
+    [SerializeField] [BoxGroup("Icon/Base")] private Sprite _itemIcon;
+    [SerializeField] [BoxGroup("Icon/Runtime")] private bool _generateIconAtRuntime = true;
+    [SerializeField] [BoxGroup("Icon/Runtime")] [EnableIf(nameof(GeneratesIconAtRuntime))] private GameObject _iconPrefab;
+    [SerializeField] [BoxGroup("Icon/Runtime")] [EnableIf(nameof(GeneratesIconAtRuntime))] private List<ItemIconPart> _iconParts = new List<ItemIconPart>();
+    [SerializeField] [BoxGroup("Icon/Texture")] [Min(16)] private int _iconPixelsPerCell = 64;
+    [SerializeField] [BoxGroup("Icon/Texture")] [Range(1, 4)] private int _iconRenderScale = 2;
+    [SerializeField] [BoxGroup("Icon/Texture")] [Range(1f, 2f)] private float _iconPadding = 1.15f;
+    [SerializeField] [BoxGroup("Icon/Texture")] [Range(1, 8)] private int _iconAntiAliasing = 4;
+    [SerializeField] [BoxGroup("Icon/Effects")] private bool _iconUseOutline = true;
+    [SerializeField] [BoxGroup("Icon/Effects")] [EnableIf(nameof(UsesIconOutline))] [Range(0, 8)] private int _iconOutlineWidth = 1;
+    [SerializeField] [BoxGroup("Icon/Effects")] private bool _iconUseShadow = true;
+    [SerializeField] [BoxGroup("Icon/Effects")] [EnableIf(nameof(UsesIconShadow))] private Vector2 _iconShadowOffset = new(2f, -2f);
+    [SerializeField] [BoxGroup("Icon/Effects")] [EnableIf(nameof(UsesIconShadow))] [Range(0, 8)] private int _iconShadowBlur = 2;
+    [SerializeField] [BoxGroup("Icon/Model")] private Vector3 _iconModelEulerAngles = Vector3.zero;
+    [SerializeField] [BoxGroup("Icon/Model")] private Vector3 _iconModelScale = Vector3.one;
+    [SerializeField] [BoxGroup("Icon/Model")] private Vector3 _iconCameraEulerAngles = new(25f, -35f, 0f);
+    [SerializeField] [BoxGroup("Slot Icon/Model")] private Vector3 _slotIconModelEulerAngles = Vector3.zero;
+    [SerializeField] [BoxGroup("Slot Icon/Model")] private Vector3 _slotIconModelScale = Vector3.one;
+    [SerializeField] [BoxGroup("Slot Icon/Model")] private Vector3 _slotIconCameraEulerAngles = new(25f, -35f, 0f);
+    [SerializeField] [BoxGroup("Slot Icon/Texture")] [Range(1f, 2f)] private float _slotIconPadding = 1.15f;
+    [SerializeField] [BoxGroup("Icon/Grid")] private bool _iconShowCellGrid = true;
+    [SerializeField] [BoxGroup("Icon/Grid")] [EnableIf(nameof(ShowsIconCellGrid))] private bool _iconShowCellGridBorder = true;
+    [SerializeField] [BoxGroup("Icon/Grid")] [EnableIf(nameof(ShowsIconCellGridBorder))] [Range(1, 8)] private int _iconCellGridBorderLineThickness = 2;
+    [SerializeField] [BoxGroup("Icon/Light")] private bool _iconUseDirectionalLight = true;
+    [SerializeField] [BoxGroup("Icon/Light")] [EnableIf(nameof(UsesIconDirectionalLight))] private Vector3 _iconLightEulerAngles = new(50f, -30f, 0f);
+    [SerializeField] [BoxGroup("Icon/Light")] [EnableIf(nameof(UsesIconDirectionalLight))] private float _iconLightIntensity = 1.5f;
+    [SerializeField] [BoxGroup("Slot Icon/Light")] private bool _slotIconUseDirectionalLight = true;
+    [SerializeField] [BoxGroup("Slot Icon/Light")] [EnableIf(nameof(UsesSlotIconDirectionalLight))] private Vector3 _slotIconLightEulerAngles = new(50f, -30f, 0f);
+    [SerializeField] [BoxGroup("Slot Icon/Light")] [EnableIf(nameof(UsesSlotIconDirectionalLight))] private float _slotIconLightIntensity = 1.5f;
     [SerializeField, HideInInspector] private bool _slotIconSettingsInitialized;
 
     public string ItemName => string.IsNullOrWhiteSpace(_itemName) ? name : _itemName;
@@ -63,7 +67,10 @@ public class ItemData : ScriptableObject
     public float DefaultDurabilityPercent => NormalizeDurability(_defaultDurabilityPercent);
     public bool CanEquipHelmet => _canEquipHelmet;
     public string FirstPersonLegsMeshName => string.IsNullOrWhiteSpace(_firstPersonLegsMeshName) ? string.Empty : _firstPersonLegsMeshName;
+    public string FirstPersonHandsMeshName => string.IsNullOrWhiteSpace(_firstPersonHandsMeshName) ? string.Empty : _firstPersonHandsMeshName;
     public GameObject FirstPersonWeaponPrefab => _firstPersonWeaponPrefab;
+    public Vector3 FirstPersonWeaponSpawnScale => _firstPersonWeaponSpawnScale == Vector3.zero ? Vector3.one : _firstPersonWeaponSpawnScale;
+    public WeaponData WeaponData => _weaponData;
     public IReadOnlyList<CharacterStatModifier> StatModifiers => _statModifiers;
     public bool HasStatModifiers => CharacterStatUtility.HasAnyModifier(_statModifiers);
     public WorldItem WorldItemPrefab => _worldItemPrefab;
@@ -165,6 +172,18 @@ public class ItemData : ScriptableObject
     public float IconSpritePixelsPerUnit => IconPixelsPerCell * IconRenderScale;
 
     private GameProjectSettings Settings => GameProjectSettings.LoadDefault();
+    private bool UsesDurability() => _useDurability;
+    private bool IsArmor() => _itemType == ItemType.Armor;
+    private bool UsesFirstPersonWeapon() => _itemType == ItemType.Weapon || _itemType == ItemType.Pistol || _itemType == ItemType.Knife;
+    private bool UsesWeaponData() => _itemType == ItemType.Weapon || _itemType == ItemType.Pistol;
+    private bool CanHaveStats() => _itemType == ItemType.Armor || _itemType == ItemType.Helmet || _itemType == ItemType.Artifact;
+    private bool GeneratesIconAtRuntime() => _generateIconAtRuntime;
+    private bool UsesIconOutline() => _iconUseOutline;
+    private bool UsesIconShadow() => _iconUseShadow;
+    private bool ShowsIconCellGrid() => _iconShowCellGrid;
+    private bool ShowsIconCellGridBorder() => _iconShowCellGrid && _iconShowCellGridBorder;
+    private bool UsesIconDirectionalLight() => _iconUseDirectionalLight;
+    private bool UsesSlotIconDirectionalLight() => _slotIconUseDirectionalLight;
 
     private void OnEnable() => EnsureSlotIconSettingsInitialized();
 
@@ -174,6 +193,7 @@ public class ItemData : ScriptableObject
         _width = Mathf.Max(1, _width);
         _height = Mathf.Max(1, _height);
         _defaultDurabilityPercent = NormalizeDurability(_defaultDurabilityPercent);
+        _firstPersonWeaponSpawnScale = _firstPersonWeaponSpawnScale == Vector3.zero ? Vector3.one : _firstPersonWeaponSpawnScale;
     }
 
     public Sprite GetIcon(IReadOnlyList<ItemIconPart> runtimeIconParts = null)
