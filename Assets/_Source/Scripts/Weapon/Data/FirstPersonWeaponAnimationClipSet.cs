@@ -72,6 +72,24 @@ public sealed class FirstPersonWeaponAnimationClipSet
         return Mathf.Max(weaponLength, handsLength);
     }
 
+    public float GetFrameTime(FirstPersonWeaponAnimationKey key, WeaponCondition condition, int frame)
+    {
+        if (frame <= 0)
+        {
+            return 0f;
+        }
+
+        FirstPersonWeaponAnimationClipPair pair = GetPair(key, condition);
+        AnimationClip clip = pair.HandsClip != null ? pair.HandsClip : pair.WeaponClip;
+
+        if (clip == null || clip.frameRate <= 0f)
+        {
+            return 0f;
+        }
+
+        return Mathf.Min(frame / clip.frameRate, GetLength(key, condition));
+    }
+
     private AnimationClip GetIdleWeaponClip(WeaponCondition condition)
     {
         return condition switch

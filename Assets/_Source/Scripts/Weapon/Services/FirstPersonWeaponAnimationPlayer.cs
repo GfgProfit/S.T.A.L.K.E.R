@@ -9,19 +9,22 @@ internal sealed class FirstPersonWeaponAnimationPlayer : IDisposable
 
     private readonly Animator _weaponAnimator;
     private readonly Animator _handsAnimator;
-    private readonly float _crossFadeDuration;
+    private readonly float _defaultCrossFadeDuration;
     private readonly AnimationClipPlayable[] _weaponClipPlayables = new AnimationClipPlayable[INPUT_COUNT];
     private readonly AnimationClipPlayable[] _handsClipPlayables = new AnimationClipPlayable[INPUT_COUNT];
     private readonly FirstPersonWeaponAnimationClipPair[] _inputPairs = new FirstPersonWeaponAnimationClipPair[INPUT_COUNT];
+    private readonly FirstPersonWeaponAnimationKey[] _inputKeys = new FirstPersonWeaponAnimationKey[INPUT_COUNT];
 
     private PlayableGraph _graph;
     private AnimationMixerPlayable _weaponMixer;
     private AnimationMixerPlayable _handsMixer;
     private FirstPersonWeaponAnimationClipPair _currentPair;
+    private FirstPersonWeaponAnimationKey _currentKey;
     private int _activeInput;
     private int _fadingInput;
     private float _fadeElapsed;
     private float _fadeDuration;
+    private double _loopPlaybackSpeed = 1d;
     private bool _hasActivePair;
     private bool _isFading;
 
@@ -29,38 +32,58 @@ internal sealed class FirstPersonWeaponAnimationPlayer : IDisposable
     {
         _weaponAnimator = weaponAnimator;
         _handsAnimator = handsAnimator;
-        _crossFadeDuration = Mathf.Max(0f, crossFadeDuration);
+        _defaultCrossFadeDuration = Mathf.Max(0f, crossFadeDuration);
     }
 
-    public void Play(FirstPersonWeaponAnimationClipPair pair, bool restartIfSame)
+    public bool HasActivePair => _hasActivePair;
+
+    public void SetLoopPlaybackSpeed(float speed)
+    {
+        _loopPlaybackSpeed = Mathf.Max(0.01f, speed);
+        ApplyLoopPlaybackSpeed();
+    }
+
+    public void Play(FirstPersonWeaponAnimationKey key, FirstPersonWeaponAnimationClipPair pair, bool restartIfSame)
+    {
+        Play(key, pair, restartIfSame, _defaultCrossFadeDuration);
+    }
+
+    public void Play(FirstPersonWeaponAnimationKey key, FirstPersonWeaponAnimationClipPair pair, bool restartIfSame, float crossFadeDuration)
     {
         if ((_weaponAnimator == null && _handsAnimator == null) || pair.HasAnyClip == false)
         {
             return;
         }
 
-        if (_hasActivePair && restartIfSame == false && _currentPair.IsSameAs(pair))
+        if (_hasActivePair && restartIfSame == false && _currentKey == key && _currentPair.IsSameAs(pair))
         {
             return;
         }
 
         EnsureGraph();
 
+        float resolvedCrossFadeDuration = Mathf.Max(0f, crossFadeDuration);
         int nextInput = _hasActivePair ? 1 - _activeInput : _activeInput;
-        SetPair(nextInput, pair);
+        SetPair(nextInput, key, pair);
 
-        if (_hasActivePair == false || _crossFadeDuration <= 0f)
+        if (_hasActivePair == false || resolvedCrossFadeDuration <= 0f)
         {
-            CompleteImmediate(nextInput, pair);
+            CompleteImmediate(nextInput, key, pair);
             return;
         }
 
         _fadingInput = nextInput;
         _fadeElapsed = 0f;
-        _fadeDuration = _crossFadeDuration;
+        _fadeDuration = resolvedCrossFadeDuration;
         _currentPair = pair;
+        _currentKey = key;
         _isFading = true;
         SetInputWeight(_fadingInput, 0f);
+
+        if (ShouldDelayClipStart(key))
+        {
+            SetInputSpeed(_fadingInput, 0d);
+        }
     }
 
     public void Tick(float deltaTime)
@@ -120,15 +143,19 @@ internal sealed class FirstPersonWeaponAnimationPlayer : IDisposable
         _graph.Play();
     }
 
-    private void SetPair(int inputIndex, FirstPersonWeaponAnimationClipPair pair)
+    private void SetPair(int inputIndex, FirstPersonWeaponAnimationKey key, FirstPersonWeaponAnimationClipPair pair)
     {
+        double weaponStartTime = GetStartTime(key, pair.WeaponClip, false);
+        double handsStartTime = GetStartTime(key, pair.HandsClip, true);
+
         DisconnectInput(inputIndex);
-        ConnectClip(_weaponMixer, _weaponClipPlayables, inputIndex, pair.WeaponClip);
-        ConnectClip(_handsMixer, _handsClipPlayables, inputIndex, pair.HandsClip);
+        ConnectClip(_weaponMixer, _weaponClipPlayables, inputIndex, pair.WeaponClip, weaponStartTime);
+        ConnectClip(_handsMixer, _handsClipPlayables, inputIndex, pair.HandsClip, handsStartTime);
         _inputPairs[inputIndex] = pair;
+        _inputKeys[inputIndex] = key;
     }
 
-    private void ConnectClip(AnimationMixerPlayable mixer, AnimationClipPlayable[] playables, int inputIndex, AnimationClip clip)
+    private void ConnectClip(AnimationMixerPlayable mixer, AnimationClipPlayable[] playables, int inputIndex, AnimationClip clip, double startTime)
     {
         if (mixer.IsValid() == false || clip == null)
         {
@@ -136,7 +163,7 @@ internal sealed class FirstPersonWeaponAnimationPlayer : IDisposable
         }
 
         AnimationClipPlayable playable = AnimationClipPlayable.Create(_graph, clip);
-        playable.SetTime(0d);
+        playable.SetTime(startTime);
         playable.SetSpeed(1d);
         playable.SetApplyFootIK(false);
 
@@ -144,7 +171,48 @@ internal sealed class FirstPersonWeaponAnimationPlayer : IDisposable
         _graph.Connect(playable, 0, mixer, inputIndex);
     }
 
-    private void CompleteImmediate(int inputIndex, FirstPersonWeaponAnimationClipPair pair)
+    private double GetStartTime(FirstPersonWeaponAnimationKey nextKey, AnimationClip nextClip, bool hands)
+    {
+        if (_hasActivePair == false)
+        {
+            return 0d;
+        }
+
+        int sourceInput = GetDominantInput();
+        FirstPersonWeaponAnimationKey sourceKey = _inputKeys[sourceInput];
+
+        if (CanSynchronizePhase(sourceKey, nextKey) == false)
+        {
+            return 0d;
+        }
+
+        AnimationClip sourceClip = hands ? _inputPairs[sourceInput].HandsClip : _inputPairs[sourceInput].WeaponClip;
+        AnimationClipPlayable sourcePlayable = hands ? _handsClipPlayables[sourceInput] : _weaponClipPlayables[sourceInput];
+
+        if (sourceClip == null || nextClip == null || sourceClip.length <= 0f || nextClip.length <= 0f || sourcePlayable.IsValid() == false)
+        {
+            return 0d;
+        }
+
+        double normalizedTime = sourcePlayable.GetTime() / sourceClip.length;
+        normalizedTime -= Math.Floor(normalizedTime);
+
+        return normalizedTime * nextClip.length;
+    }
+
+    private int GetDominantInput()
+    {
+        if (_isFading == false)
+        {
+            return _activeInput;
+        }
+
+        float fadingWeight = GetInputWeight(_fadingInput);
+        float activeWeight = GetInputWeight(_activeInput);
+        return fadingWeight > activeWeight ? _fadingInput : _activeInput;
+    }
+
+    private void CompleteImmediate(int inputIndex, FirstPersonWeaponAnimationKey key, FirstPersonWeaponAnimationClipPair pair)
     {
         if (_hasActivePair && inputIndex != _activeInput)
         {
@@ -153,8 +221,10 @@ internal sealed class FirstPersonWeaponAnimationPlayer : IDisposable
 
         _activeInput = inputIndex;
         _currentPair = pair;
+        _currentKey = key;
         _hasActivePair = true;
         _isFading = false;
+        SetInputSpeed(_activeInput, GetPlaybackSpeed(key));
 
         for (int i = 0; i < INPUT_COUNT; i++)
         {
@@ -167,8 +237,10 @@ internal sealed class FirstPersonWeaponAnimationPlayer : IDisposable
         DisconnectInput(_activeInput);
         _activeInput = _fadingInput;
         _currentPair = _inputPairs[_activeInput];
+        _currentKey = _inputKeys[_activeInput];
         _hasActivePair = true;
         _isFading = false;
+        SetInputSpeed(_activeInput, GetPlaybackSpeed(_currentKey));
 
         for (int i = 0; i < INPUT_COUNT; i++)
         {
@@ -189,11 +261,58 @@ internal sealed class FirstPersonWeaponAnimationPlayer : IDisposable
         }
     }
 
+    private float GetInputWeight(int inputIndex)
+    {
+        if (_handsMixer.IsValid())
+        {
+            return _handsMixer.GetInputWeight(inputIndex);
+        }
+
+        return _weaponMixer.IsValid() ? _weaponMixer.GetInputWeight(inputIndex) : 0f;
+    }
+
+    private void ApplyLoopPlaybackSpeed()
+    {
+        if (_hasActivePair == false || IsLoopLike(_currentKey) == false)
+        {
+            return;
+        }
+
+        ApplyLoopPlaybackSpeed(_activeInput);
+
+        if (_isFading)
+        {
+            ApplyLoopPlaybackSpeed(_fadingInput);
+        }
+    }
+
+    private void ApplyLoopPlaybackSpeed(int inputIndex)
+    {
+        if (_inputKeys[inputIndex] == _currentKey)
+        {
+            SetInputSpeed(inputIndex, _loopPlaybackSpeed);
+        }
+    }
+
+    private void SetInputSpeed(int inputIndex, double speed)
+    {
+        if (_weaponClipPlayables[inputIndex].IsValid())
+        {
+            _weaponClipPlayables[inputIndex].SetSpeed(speed);
+        }
+
+        if (_handsClipPlayables[inputIndex].IsValid())
+        {
+            _handsClipPlayables[inputIndex].SetSpeed(speed);
+        }
+    }
+
     private void DisconnectInput(int inputIndex)
     {
         DisconnectClip(_weaponMixer, _weaponClipPlayables, inputIndex);
         DisconnectClip(_handsMixer, _handsClipPlayables, inputIndex);
         _inputPairs[inputIndex] = default;
+        _inputKeys[inputIndex] = default;
     }
 
     private void DisconnectClip(AnimationMixerPlayable mixer, AnimationClipPlayable[] playables, int inputIndex)
@@ -210,5 +329,21 @@ internal sealed class FirstPersonWeaponAnimationPlayer : IDisposable
         }
 
         playables[inputIndex] = default;
+    }
+
+    private static bool CanSynchronizePhase(FirstPersonWeaponAnimationKey sourceKey, FirstPersonWeaponAnimationKey targetKey)
+    {
+        return IsLoopLike(sourceKey) && IsLoopLike(targetKey);
+    }
+
+    private static bool ShouldDelayClipStart(FirstPersonWeaponAnimationKey key) => IsLoopLike(key) == false;
+
+    private double GetPlaybackSpeed(FirstPersonWeaponAnimationKey key) => IsLoopLike(key) ? _loopPlaybackSpeed : 1d;
+
+    private static bool IsLoopLike(FirstPersonWeaponAnimationKey key)
+    {
+        return key == FirstPersonWeaponAnimationKey.Idle ||
+               key == FirstPersonWeaponAnimationKey.Walk ||
+               key == FirstPersonWeaponAnimationKey.Sprint;
     }
 }
