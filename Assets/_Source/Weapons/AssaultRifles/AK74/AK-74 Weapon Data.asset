@@ -1,0 +1,23 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: a657d0e2334e4f7ca6b9eaf4776f4209, type: 3}
+  m_Name: AK-74 Weapon Data
+  m_EditorClassIdentifier: Assembly-CSharp::WeaponData
+  _magazineCapacity: 30
+  _durabilityShotsResource: 1000
+  _fireRateRoundsPerMinute: 600
+  _fireMode: 1
+  _reloadAmmoApplyFrame: 70
+  _reloadFullAmmoApplyFrame: 95
+  _compatibleAmmo:
+  - {fileID: 11400000, guid: 0921ba32c21f58e479afd8ec656e6d4d, type: 2}
+  - {fileID: 11400000, guid: a5dcd94f92e8dd949b78c4d4733b76cb, type: 2}
