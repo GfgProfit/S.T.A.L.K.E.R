@@ -10,6 +10,9 @@ public sealed class FirstPersonLegsController : MonoBehaviour
     [SerializeField] [Min(0f)] private float _crossFadeDuration = 0.1f;
     [SerializeField] [Min(0f)] private float _movementDeadZone = 0.1f;
     [SerializeField] [Min(0f)] private float _turnDeadZone = 0.2f;
+    [SerializeField] [Min(0f)] private float _movementSmoothTime = 0.06f;
+    [SerializeField] [Min(0f)] private float _turnSmoothTime = 0.04f;
+    [SerializeField] [Min(0f)] private float _stateMinDuration = 0.12f;
     [SerializeField] [Min(0f)] private float _jumpStartMinDuration = 0.1f;
     [SerializeField] [Min(0f)] private float _landingMinDuration = 0.12f;
 
@@ -22,6 +25,13 @@ public sealed class FirstPersonLegsController : MonoBehaviour
     private bool _wasGrounded = true;
     private float _jumpStartEndTime;
     private float _landingEndTime;
+    private Vector2 _smoothedMovementInput;
+    private Vector2 _movementInputVelocity;
+    private float _smoothedYawInput;
+    private float _yawInputVelocity;
+    private FirstPersonLegsAnimationKey _currentAnimationKey;
+    private bool _hasCurrentAnimationKey;
+    private float _nextAnimationSwitchTime;
 
     private IPlayerInput PlayerInput
     {
@@ -46,6 +56,7 @@ public sealed class FirstPersonLegsController : MonoBehaviour
     {
         EnsureInitialized();
         _wasGrounded = _playerController == null || _playerController.IsGrounded;
+        ResetAnimationState();
         ApplyEquippedArmorMesh();
     }
 
@@ -64,7 +75,7 @@ public sealed class FirstPersonLegsController : MonoBehaviour
 
     private void OnDisable() => DisposeAnimationPlayer();
     private void OnDestroy() => DisposeAnimationPlayer();
-	
+
     public void SetEquippedArmor(ItemData armorItemData)
     {
         _equippedArmor = armorItemData != null && armorItemData.ItemType == ItemType.Armor ? armorItemData : null;
@@ -120,23 +131,86 @@ public sealed class FirstPersonLegsController : MonoBehaviour
 
         if (isGrounded == false)
         {
-            return time < _jumpStartEndTime ? FirstPersonLegsAnimationKey.JumpStart : FirstPersonLegsAnimationKey.JumpLoop;
+            FirstPersonLegsAnimationKey airborneKey = time < _jumpStartEndTime ? FirstPersonLegsAnimationKey.JumpStart : FirstPersonLegsAnimationKey.JumpLoop;
+            return SetCurrentAnimationKey(airborneKey, time);
         }
 
         if (time < _landingEndTime)
         {
-            return FirstPersonLegsAnimationKey.JumpEnd;
+            return SetCurrentAnimationKey(FirstPersonLegsAnimationKey.JumpEnd, time);
         }
 
-        Vector2 movementInput = _playerController != null && _playerController.IsWalking ? PlayerInput.GetMovementInput() : Vector2.zero;
+        Vector2 movementInput = _playerController != null && _playerController.IsWalking ? GetSmoothedMovementInput() : Vector2.zero;
         bool isSprinting = _playerController != null && _playerController.IsSprinting;
         bool isCrouching = _playerController != null && _playerController.IsCrouching;
-        float yawInput = Cursor.lockState == CursorLockMode.Locked ? PlayerInput.GetMouseDelta().x : 0f;
+        float yawInput = GetSmoothedYawInput();
 
-        return FirstPersonLegsAnimationStateResolver.ResolveGrounded(movementInput, isSprinting, isCrouching, yawInput, _movementDeadZone, _turnDeadZone);
+        FirstPersonLegsAnimationKey candidateKey = FirstPersonLegsAnimationStateResolver.ResolveGrounded(movementInput, isSprinting, isCrouching, yawInput, _movementDeadZone, _turnDeadZone);
+        return StabilizeAnimationKey(candidateKey, time);
     }
 
     private float GetHoldDuration(FirstPersonLegsAnimationKey key, float minimumDuration) => Mathf.Max(minimumDuration, _clips == null ? 0f : _clips.GetLength(key));
+
+    private Vector2 GetSmoothedMovementInput()
+    {
+        Vector2 targetInput = PlayerInput.GetMovementInput();
+
+        if (_movementSmoothTime <= 0f)
+        {
+            _smoothedMovementInput = targetInput;
+            return _smoothedMovementInput;
+        }
+
+        _smoothedMovementInput = Vector2.SmoothDamp(_smoothedMovementInput, targetInput, ref _movementInputVelocity, _movementSmoothTime);
+        return _smoothedMovementInput;
+    }
+
+    private float GetSmoothedYawInput()
+    {
+        float targetYawInput = Cursor.lockState == CursorLockMode.Locked ? PlayerInput.GetMouseDelta().x : 0f;
+
+        if (_turnSmoothTime <= 0f)
+        {
+            _smoothedYawInput = targetYawInput;
+            return _smoothedYawInput;
+        }
+
+        _smoothedYawInput = Mathf.SmoothDamp(_smoothedYawInput, targetYawInput, ref _yawInputVelocity, _turnSmoothTime);
+        return _smoothedYawInput;
+    }
+
+    private FirstPersonLegsAnimationKey StabilizeAnimationKey(FirstPersonLegsAnimationKey candidateKey, float time)
+    {
+        if (_hasCurrentAnimationKey == false || candidateKey == _currentAnimationKey)
+        {
+            return SetCurrentAnimationKey(candidateKey, time);
+        }
+
+        if (time < _nextAnimationSwitchTime)
+        {
+            return _currentAnimationKey;
+        }
+
+        return SetCurrentAnimationKey(candidateKey, time);
+    }
+
+    private FirstPersonLegsAnimationKey SetCurrentAnimationKey(FirstPersonLegsAnimationKey key, float time)
+    {
+        _currentAnimationKey = key;
+        _hasCurrentAnimationKey = true;
+        _nextAnimationSwitchTime = time + Mathf.Max(_stateMinDuration, _crossFadeDuration);
+        return _currentAnimationKey;
+    }
+
+    private void ResetAnimationState()
+    {
+        _smoothedMovementInput = Vector2.zero;
+        _movementInputVelocity = Vector2.zero;
+        _smoothedYawInput = 0f;
+        _yawInputVelocity = 0f;
+        _hasCurrentAnimationKey = false;
+        _nextAnimationSwitchTime = 0f;
+    }
 
     private void DisposeAnimationPlayer()
     {

@@ -11,6 +11,8 @@ internal sealed class FirstPersonLegsAnimationPlayer : IDisposable
     private readonly FirstPersonLegsAnimationClipSet _clips;
     private readonly float _crossFadeDuration;
     private readonly AnimationClipPlayable[] _clipPlayables = new AnimationClipPlayable[INPUT_COUNT];
+    private readonly AnimationClip[] _inputClips = new AnimationClip[INPUT_COUNT];
+    private readonly FirstPersonLegsAnimationKey[] _inputKeys = new FirstPersonLegsAnimationKey[INPUT_COUNT];
 
     private PlayableGraph _graph;
     private AnimationMixerPlayable _mixer;
@@ -49,7 +51,8 @@ internal sealed class FirstPersonLegsAnimationPlayer : IDisposable
 
         EnsureGraph();
         int nextInput = _hasActiveClip ? 1 - _activeInput : _activeInput;
-        SetClip(nextInput, clip);
+        double startTime = GetStartTime(key, clip);
+        SetClip(nextInput, clip, key, startTime);
 
         if (_hasActiveClip == false || _crossFadeDuration <= 0f)
         {
@@ -112,17 +115,57 @@ internal sealed class FirstPersonLegsAnimationPlayer : IDisposable
         _graph.Play();
     }
 
-    private void SetClip(int inputIndex, AnimationClip clip)
+    private void SetClip(int inputIndex, AnimationClip clip, FirstPersonLegsAnimationKey key, double startTime)
     {
         DisconnectInput(inputIndex);
 
         AnimationClipPlayable playable = AnimationClipPlayable.Create(_graph, clip);
-        playable.SetTime(0d);
+        playable.SetTime(startTime);
         playable.SetSpeed(1d);
         playable.SetApplyFootIK(false);
 
         _clipPlayables[inputIndex] = playable;
+        _inputClips[inputIndex] = clip;
+        _inputKeys[inputIndex] = key;
         _graph.Connect(playable, 0, _mixer, inputIndex);
+    }
+
+    private double GetStartTime(FirstPersonLegsAnimationKey nextKey, AnimationClip nextClip)
+    {
+        if (_hasActiveClip == false)
+        {
+            return 0d;
+        }
+
+        int sourceInput = GetDominantInput();
+        FirstPersonLegsAnimationKey sourceKey = _inputKeys[sourceInput];
+
+        if (CanSynchronizePhase(sourceKey, nextKey) == false)
+        {
+            return 0d;
+        }
+
+        AnimationClip sourceClip = _inputClips[sourceInput];
+
+        if (sourceClip == null || nextClip == null || sourceClip.length <= 0f || nextClip.length <= 0f || _clipPlayables[sourceInput].IsValid() == false)
+        {
+            return 0d;
+        }
+
+        double normalizedTime = _clipPlayables[sourceInput].GetTime() / sourceClip.length;
+        normalizedTime -= Math.Floor(normalizedTime);
+
+        return normalizedTime * nextClip.length;
+    }
+
+    private int GetDominantInput()
+    {
+        if (_isFading == false || _mixer.IsValid() == false)
+        {
+            return _activeInput;
+        }
+
+        return _mixer.GetInputWeight(_fadingInput) > _mixer.GetInputWeight(_activeInput) ? _fadingInput : _activeInput;
     }
 
     private void CompleteImmediate(int inputIndex, FirstPersonLegsAnimationKey key)
@@ -168,5 +211,18 @@ internal sealed class FirstPersonLegsAnimationPlayer : IDisposable
         {
             _clipPlayables[inputIndex].Destroy();
         }
+
+        _inputClips[inputIndex] = null;
+        _inputKeys[inputIndex] = default;
+    }
+
+    private static bool CanSynchronizePhase(FirstPersonLegsAnimationKey sourceKey, FirstPersonLegsAnimationKey targetKey)
+    {
+        return IsGroundedMove(sourceKey) && IsGroundedMove(targetKey);
+    }
+
+    private static bool IsGroundedMove(FirstPersonLegsAnimationKey key)
+    {
+        return key >= FirstPersonLegsAnimationKey.WalkForward && key <= FirstPersonLegsAnimationKey.SprintForwardRight;
     }
 }
