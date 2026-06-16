@@ -14,9 +14,9 @@ internal static class InventoryViewModelFactory
         return new();
     }
 
-    public static InventoryItemContextMenuViewModel CreateContextMenu(Action useAction, Action dropOneAction, Action dropStackAction)
+    public static InventoryItemContextMenuViewModel CreateContextMenu(Action useAction, Action unloadAction, Action equipPrimaryWeaponAction, Action equipSecondaryWeaponAction, Action equipAction, Action unequipAction, Action dropOneAction, Action dropStackAction)
     {
-        return new(useAction, dropOneAction, dropStackAction);
+        return new(useAction, unloadAction, equipPrimaryWeaponAction, equipSecondaryWeaponAction, equipAction, unequipAction, dropOneAction, dropStackAction);
     }
 
     public static InventoryHighlightViewModel CreateHighlight()

@@ -33,6 +33,7 @@ public class InventoryItem : MonoBehaviour, IView<InventoryItemViewModel>
     }
 
     private readonly InventoryItemState _state = new();
+    private readonly FirstPersonWeaponMagazineState _weaponMagazineState = new();
     private readonly InventoryItemVisualState _visualState = new InventoryItemVisualState();
     private InventoryItemView _itemView;
     private InventoryItemViewModel _viewModel;
@@ -47,11 +48,12 @@ public class InventoryItem : MonoBehaviour, IView<InventoryItemViewModel>
     public bool HasDurability => _state.HasDurability;
     public float CurrentDurabilityPercent => _state.CurrentDurabilityPercent;
     public float UnitWeight => _state.UnitWeight;
-    public float TotalWeight => _state.TotalWeight;
+    public float TotalWeight => _state.TotalWeight + LoadedMagazineWeight;
     public int BaseWidth => _state.BaseWidth;
     public int BaseHeight => _state.BaseHeight;
     public bool CanRotate => _state.CanRotate;
     public RectTransform RectTransform => _rectTransform;
+    public FirstPersonWeaponMagazineState WeaponMagazineState => _weaponMagazineState;
     internal IReadOnlyList<ItemIconPart> RuntimeIconParts => _visualState.RuntimeIconParts;
 
     private void Awake()
@@ -105,7 +107,14 @@ public class InventoryItem : MonoBehaviour, IView<InventoryItemViewModel>
     {
         ApplySerializedVisualSettings();
 
+        ItemData previousItemData = ItemData;
         _state.SetItem(itemData, amount, durabilityPercent ?? InventoryItemState.GetDefaultDurabilityPercent(itemData));
+
+        if (previousItemData != itemData)
+        {
+            _weaponMagazineState.Clear();
+        }
+
         SyncSerializedStateFromState();
         _visualState.SetRuntimeIconParts(runtimeIconParts);
         _visualState.RestoreDefaultVisual();
@@ -337,5 +346,6 @@ public class InventoryItem : MonoBehaviour, IView<InventoryItemViewModel>
     private int VisualWidth => _visualState.GetVisualWidth(BaseWidth);
     private int VisualHeight => _visualState.GetVisualHeight(BaseHeight);
     private bool IsVisuallyRotated => _visualState.HasVisualSizeOverride == false && IsRotated;
+    private float LoadedMagazineWeight => _weaponMagazineState.LoadedAmmoData == null || _weaponMagazineState.LoadedAmmoAmount <= 0 ? 0f : _weaponMagazineState.LoadedAmmoData.Weight * _weaponMagazineState.LoadedAmmoAmount;
 
 }

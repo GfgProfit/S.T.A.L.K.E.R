@@ -21,6 +21,21 @@ public class InventoryItemContextMenu : MonoBehaviour, IView<InventoryItemContex
     [SerializeField] private Canvas _canvas;
     [SerializeField] private Button _useButton;
     [SerializeField] private TMP_Text _useButtonText;
+    [SerializeField] private Button _unloadButton;
+    [SerializeField] private TMP_Text _unloadButtonText;
+    [SerializeField] private Button _equipPrimaryWeaponButton;
+    [SerializeField] private TMP_Text _equipPrimaryWeaponButtonText;
+    [SerializeField] private Button _equipSecondaryWeaponButton;
+    [SerializeField] private TMP_Text _equipSecondaryWeaponButtonText;
+    [SerializeField] private Button _equipButton;
+    [SerializeField] private TMP_Text _equipButtonText;
+    [SerializeField] private Button _unequipButton;
+    [SerializeField] private TMP_Text _unequipButtonText;
+    [SerializeField] private string _unloadButtonLabel = "\u0420\u0430\u0437\u0440\u044f\u0434\u0438\u0442\u044c";
+    [SerializeField] private string _equipPrimaryWeaponButtonLabel = "\u042d\u043a\u0438\u043f\u0438\u0440\u043e\u0432\u0430\u0442\u044c \u0432 \u043e\u0441\u043d\u043e\u0432\u043d\u043e\u0439 \u0441\u043b\u043e\u0442";
+    [SerializeField] private string _equipSecondaryWeaponButtonLabel = "\u042d\u043a\u0438\u043f\u0438\u0440\u043e\u0432\u0430\u0442\u044c \u0432\u043e \u0432\u0442\u043e\u0440\u0438\u0447\u043d\u044b\u0439 \u0441\u043b\u043e\u0442";
+    [SerializeField] private string _equipButtonLabel = "\u042d\u043a\u0438\u043f\u0438\u0440\u043e\u0432\u0430\u0442\u044c";
+    [SerializeField] private string _unequipButtonLabel = "\u0421\u043d\u044f\u0442\u044c";
     [SerializeField] private Button _dropOneButton;
     [SerializeField] private Button _dropStackButton;
     [SerializeField] private TMP_Text _dropStackButtonText;
@@ -29,12 +44,23 @@ public class InventoryItemContextMenu : MonoBehaviour, IView<InventoryItemContex
     [SerializeField] private Color _closeRadiusEditorColor = new(1f, 0.65f, 0f, 0.9f);
 
     private Action _onUse;
+    private Action _onUnload;
+    private Action _onEquipPrimaryWeapon;
+    private Action _onEquipSecondaryWeapon;
+    private Action _onEquip;
+    private Action _onUnequip;
     private Action _onDropOne;
     private Action _onDropStack;
     private InventoryContextMenuPositioner _positioner;
     private InventoryItemContextMenuViewModel _viewModel;
     private IDisposable _isVisibleSubscription;
     private IDisposable _canUseSubscription;
+    private IDisposable _showUnloadSubscription;
+    private IDisposable _canUnloadSubscription;
+    private IDisposable _canEquipPrimaryWeaponSubscription;
+    private IDisposable _canEquipSecondaryWeaponSubscription;
+    private IDisposable _canEquipSubscription;
+    private IDisposable _canUnequipSubscription;
     private IDisposable _canDropStackSubscription;
 
     public bool IsOpen => gameObject.activeSelf;
@@ -56,12 +82,18 @@ public class InventoryItemContextMenu : MonoBehaviour, IView<InventoryItemContex
         }
     }
 
-    public void Initialize(Action useAction, Action dropOneAction, Action dropStackAction)
+    public void Initialize(Action useAction, Action unloadAction, Action equipPrimaryWeaponAction, Action equipSecondaryWeaponAction, Action equipAction, Action unequipAction, Action dropOneAction, Action dropStackAction)
     {
         _onUse = useAction;
+        _onUnload = unloadAction;
+        _onEquipPrimaryWeapon = equipPrimaryWeaponAction;
+        _onEquipSecondaryWeapon = equipSecondaryWeaponAction;
+        _onEquip = equipAction;
+        _onUnequip = unequipAction;
         _onDropOne = dropOneAction;
         _onDropStack = dropStackAction;
-        Bind(InventoryViewModelFactory.CreateContextMenu(_onUse, _onDropOne, _onDropStack));
+        EnsureContextButtons();
+        Bind(InventoryViewModelFactory.CreateContextMenu(_onUse, _onUnload, _onEquipPrimaryWeapon, _onEquipSecondaryWeapon, _onEquip, _onUnequip, _onDropOne, _onDropStack));
 
         if (_useButton != null)
         {
@@ -75,6 +107,36 @@ public class InventoryItemContextMenu : MonoBehaviour, IView<InventoryItemContex
             _dropOneButton.onClick.AddListener(HandleDropOneClicked);
         }
 
+        if (_unloadButton != null)
+        {
+            _unloadButton.onClick.RemoveListener(HandleUnloadClicked);
+            _unloadButton.onClick.AddListener(HandleUnloadClicked);
+        }
+
+        if (_equipPrimaryWeaponButton != null)
+        {
+            _equipPrimaryWeaponButton.onClick.RemoveListener(HandleEquipPrimaryWeaponClicked);
+            _equipPrimaryWeaponButton.onClick.AddListener(HandleEquipPrimaryWeaponClicked);
+        }
+
+        if (_equipSecondaryWeaponButton != null)
+        {
+            _equipSecondaryWeaponButton.onClick.RemoveListener(HandleEquipSecondaryWeaponClicked);
+            _equipSecondaryWeaponButton.onClick.AddListener(HandleEquipSecondaryWeaponClicked);
+        }
+
+        if (_equipButton != null)
+        {
+            _equipButton.onClick.RemoveListener(HandleEquipClicked);
+            _equipButton.onClick.AddListener(HandleEquipClicked);
+        }
+
+        if (_unequipButton != null)
+        {
+            _unequipButton.onClick.RemoveListener(HandleUnequipClicked);
+            _unequipButton.onClick.AddListener(HandleUnequipClicked);
+        }
+
         if (_dropStackButton != null)
         {
             _dropStackButton.onClick.RemoveListener(HandleDropStackClicked);
@@ -82,7 +144,7 @@ public class InventoryItemContextMenu : MonoBehaviour, IView<InventoryItemContex
         }
     }
 
-    public void Show(bool canUse, bool canDropStack, Vector2 screenPosition)
+    public void Show(bool canUse, bool showUnload, bool canUnload, bool canEquipPrimaryWeapon, bool canEquipSecondaryWeapon, bool canEquip, bool canUnequip, bool canDropStack, Vector2 screenPosition)
     {
         if (_viewModel == null)
         {
@@ -90,7 +152,7 @@ public class InventoryItemContextMenu : MonoBehaviour, IView<InventoryItemContex
             return;
         }
 
-        _viewModel.Show(canUse, canDropStack);
+        _viewModel.Show(canUse, showUnload, canUnload, canEquipPrimaryWeapon, canEquipSecondaryWeapon, canEquip, canUnequip, canDropStack);
         transform.SetAsLastSibling();
 
         RebuildLayout();
@@ -132,17 +194,35 @@ public class InventoryItemContextMenu : MonoBehaviour, IView<InventoryItemContex
         }
 
         _isVisibleSubscription = _viewModel.IsVisible.Subscribe(SetVisible);
-        _canUseSubscription = _viewModel.CanUse.Subscribe(SetUseButtonEnabled);
-        _canDropStackSubscription = _viewModel.CanDropStack.Subscribe(SetDropStackButtonEnabled);
+        _canUseSubscription = _viewModel.CanUse.Subscribe(SetUseButtonVisible);
+        _showUnloadSubscription = _viewModel.ShowUnload.Subscribe(SetUnloadButtonVisible);
+        _canUnloadSubscription = _viewModel.CanUnload.Subscribe(SetUnloadButtonVisible);
+        _canEquipPrimaryWeaponSubscription = _viewModel.CanEquipPrimaryWeapon.Subscribe(SetEquipPrimaryWeaponButtonVisible);
+        _canEquipSecondaryWeaponSubscription = _viewModel.CanEquipSecondaryWeapon.Subscribe(SetEquipSecondaryWeaponButtonVisible);
+        _canEquipSubscription = _viewModel.CanEquip.Subscribe(SetEquipButtonVisible);
+        _canUnequipSubscription = _viewModel.CanUnequip.Subscribe(SetUnequipButtonVisible);
+        _canDropStackSubscription = _viewModel.CanDropStack.Subscribe(SetDropStackButtonVisible);
     }
 
     public void Unbind()
     {
         _isVisibleSubscription?.Dispose();
         _canUseSubscription?.Dispose();
+        _showUnloadSubscription?.Dispose();
+        _canUnloadSubscription?.Dispose();
+        _canEquipPrimaryWeaponSubscription?.Dispose();
+        _canEquipSecondaryWeaponSubscription?.Dispose();
+        _canEquipSubscription?.Dispose();
+        _canUnequipSubscription?.Dispose();
         _canDropStackSubscription?.Dispose();
         _isVisibleSubscription = null;
         _canUseSubscription = null;
+        _showUnloadSubscription = null;
+        _canUnloadSubscription = null;
+        _canEquipPrimaryWeaponSubscription = null;
+        _canEquipSecondaryWeaponSubscription = null;
+        _canEquipSubscription = null;
+        _canUnequipSubscription = null;
         _canDropStackSubscription = null;
     }
 
@@ -155,6 +235,11 @@ public class InventoryItemContextMenu : MonoBehaviour, IView<InventoryItemContex
     }
 
     private void HandleUseClicked() => ExecuteCommandAsync(_viewModel?.UseCommand, destroyCancellationToken).Forget(Debug.LogException);
+    private void HandleUnloadClicked() => ExecuteCommandAsync(_viewModel?.UnloadCommand, destroyCancellationToken).Forget(Debug.LogException);
+    private void HandleEquipPrimaryWeaponClicked() => ExecuteCommandAsync(_viewModel?.EquipPrimaryWeaponCommand, destroyCancellationToken).Forget(Debug.LogException);
+    private void HandleEquipSecondaryWeaponClicked() => ExecuteCommandAsync(_viewModel?.EquipSecondaryWeaponCommand, destroyCancellationToken).Forget(Debug.LogException);
+    private void HandleEquipClicked() => ExecuteCommandAsync(_viewModel?.EquipCommand, destroyCancellationToken).Forget(Debug.LogException);
+    private void HandleUnequipClicked() => ExecuteCommandAsync(_viewModel?.UnequipCommand, destroyCancellationToken).Forget(Debug.LogException);
     private void HandleDropOneClicked() => ExecuteCommandAsync(_viewModel?.DropOneCommand, destroyCancellationToken).Forget(Debug.LogException);
     private void HandleDropStackClicked() => ExecuteCommandAsync(_viewModel?.DropStackCommand, destroyCancellationToken).Forget(Debug.LogException);
 
@@ -163,6 +248,31 @@ public class InventoryItemContextMenu : MonoBehaviour, IView<InventoryItemContex
         if (_useButton != null)
         {
             _useButton.onClick.RemoveListener(HandleUseClicked);
+        }
+
+        if (_unloadButton != null)
+        {
+            _unloadButton.onClick.RemoveListener(HandleUnloadClicked);
+        }
+
+        if (_equipPrimaryWeaponButton != null)
+        {
+            _equipPrimaryWeaponButton.onClick.RemoveListener(HandleEquipPrimaryWeaponClicked);
+        }
+
+        if (_equipSecondaryWeaponButton != null)
+        {
+            _equipSecondaryWeaponButton.onClick.RemoveListener(HandleEquipSecondaryWeaponClicked);
+        }
+
+        if (_equipButton != null)
+        {
+            _equipButton.onClick.RemoveListener(HandleEquipClicked);
+        }
+
+        if (_unequipButton != null)
+        {
+            _unequipButton.onClick.RemoveListener(HandleUnequipClicked);
         }
 
         if (_dropOneButton != null)
@@ -188,26 +298,76 @@ public class InventoryItemContextMenu : MonoBehaviour, IView<InventoryItemContex
 
     private void SetVisible(bool visible) => gameObject.SetActive(visible);
 
-    private void SetUseButtonEnabled(bool enabled)
-    {
-        SetButtonEnabled(_useButton, _useButtonText, enabled);
-    }
+    private void SetUseButtonVisible(bool visible) => SetButtonVisible(_useButton, _useButtonText, visible);
+    private void SetUnloadButtonVisible(bool visible) => SetButtonVisible(_unloadButton, _unloadButtonText, visible);
+    private void SetEquipPrimaryWeaponButtonVisible(bool visible) => SetButtonVisible(_equipPrimaryWeaponButton, _equipPrimaryWeaponButtonText, visible);
+    private void SetEquipSecondaryWeaponButtonVisible(bool visible) => SetButtonVisible(_equipSecondaryWeaponButton, _equipSecondaryWeaponButtonText, visible);
+    private void SetEquipButtonVisible(bool visible) => SetButtonVisible(_equipButton, _equipButtonText, visible);
+    private void SetUnequipButtonVisible(bool visible) => SetButtonVisible(_unequipButton, _unequipButtonText, visible);
+    private void SetDropStackButtonVisible(bool visible) => SetButtonVisible(_dropStackButton, _dropStackButtonText, visible);
 
-    private void SetDropStackButtonEnabled(bool enabled)
-    {
-        SetButtonEnabled(_dropStackButton, _dropStackButtonText, enabled);
-    }
-
-    private static void SetButtonEnabled(Button button, TMP_Text buttonText, bool enabled)
+    private static void SetButtonVisible(Button button, TMP_Text buttonText, bool visible)
     {
         if (button != null)
         {
-            button.interactable = enabled;
+            button.interactable = visible;
+            button.gameObject.SetActive(visible);
         }
 
         if (buttonText != null)
         {
-            buttonText.color = enabled ? _textColor : _disabledTextColor;
+            buttonText.color = visible ? _textColor : _disabledTextColor;
+        }
+    }
+
+    private void EnsureContextButtons()
+    {
+        int nextSiblingIndex = GetNextButtonSiblingIndex(_useButton);
+        EnsureActionButton(ref _equipPrimaryWeaponButton, ref _equipPrimaryWeaponButtonText, "Equip Primary Weapon Button", _equipPrimaryWeaponButtonLabel, nextSiblingIndex++);
+        EnsureActionButton(ref _equipSecondaryWeaponButton, ref _equipSecondaryWeaponButtonText, "Equip Secondary Weapon Button", _equipSecondaryWeaponButtonLabel, nextSiblingIndex++);
+        EnsureActionButton(ref _equipButton, ref _equipButtonText, "Equip Button", _equipButtonLabel, nextSiblingIndex++);
+        EnsureActionButton(ref _unequipButton, ref _unequipButtonText, "Unequip Button", _unequipButtonLabel, nextSiblingIndex++);
+        EnsureActionButton(ref _unloadButton, ref _unloadButtonText, "Unload Button", _unloadButtonLabel, nextSiblingIndex);
+    }
+
+    private void EnsureActionButton(ref Button button, ref TMP_Text buttonText, string objectName, string label, int siblingIndex)
+    {
+        if (button != null)
+        {
+            SetButtonText(buttonText, label);
+            return;
+        }
+
+        Button template = _useButton != null ? _useButton : _dropOneButton;
+
+        if (template == null || template.transform.parent == null)
+        {
+            return;
+        }
+
+        GameObject buttonObject = Instantiate(template.gameObject, template.transform.parent);
+        buttonObject.name = objectName;
+        buttonObject.transform.SetSiblingIndex(Mathf.Clamp(siblingIndex, 0, template.transform.parent.childCount - 1));
+        buttonObject.SetActive(false);
+
+        button = buttonObject.GetComponent<Button>();
+        buttonText = buttonObject.GetComponentInChildren<TMP_Text>(true);
+
+        if (button != null)
+        {
+            button.onClick.RemoveAllListeners();
+        }
+
+        SetButtonText(buttonText, label);
+    }
+
+    private static int GetNextButtonSiblingIndex(Button button) => button == null ? 0 : button.transform.GetSiblingIndex() + 1;
+
+    private static void SetButtonText(TMP_Text buttonText, string label)
+    {
+        if (buttonText != null)
+        {
+            buttonText.text = label;
         }
     }
 
