@@ -14,7 +14,7 @@ GameObject:
   - component: {fileID: -54779392775756760}
   - component: {fileID: 5376533540520260304}
   - component: {fileID: 8697299415580268448}
-  m_Layer: 0
+  m_Layer: 7
   m_Name: ammo_12x76_zhekan
   m_TagString: Untagged
   m_Icon: {fileID: 0}

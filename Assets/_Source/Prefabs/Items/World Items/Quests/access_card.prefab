@@ -14,7 +14,7 @@ GameObject:
   - component: {fileID: 2294687423805933849}
   - component: {fileID: -4492968562108089179}
   - component: {fileID: -5082308703401351162}
-  m_Layer: 0
+  m_Layer: 7
   m_Name: access_card
   m_TagString: Untagged
   m_Icon: {fileID: 0}

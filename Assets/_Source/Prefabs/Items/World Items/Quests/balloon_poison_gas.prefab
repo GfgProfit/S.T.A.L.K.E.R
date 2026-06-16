@@ -14,7 +14,7 @@ GameObject:
   - component: {fileID: -7851473047436211211}
   - component: {fileID: 8711629354212791073}
   - component: {fileID: -3902057484827015828}
-  m_Layer: 0
+  m_Layer: 7
   m_Name: balloon_poison_gas
   m_TagString: Untagged
   m_Icon: {fileID: 0}

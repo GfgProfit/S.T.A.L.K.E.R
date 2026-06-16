@@ -14,7 +14,7 @@ GameObject:
   - component: {fileID: 7769052811083931310}
   - component: {fileID: 6391772994441896781}
   - component: {fileID: 23983163275417349}
-  m_Layer: 0
+  m_Layer: 7
   m_Name: antidot
   m_TagString: Untagged
   m_Icon: {fileID: 0}

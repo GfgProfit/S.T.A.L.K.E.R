@@ -1,10 +1,6 @@
 using UnityEngine;
 
-public interface IPlayerInput :
-    IPlayerLookInput,
-    IPlayerMovementInput,
-    IPlayerInteractionInput,
-    IInventoryInput
+public interface IPlayerInput : IPlayerLookInput, IPlayerMovementInput, IPlayerInteractionInput, IInventoryInput, IMiniMapInput
 {
 }
 
@@ -37,10 +33,18 @@ public interface IPlayerPointerInput
     Vector2 GetPointerPosition();
 }
 
+public interface IMiniMapInput
+{
+    bool IsMiniMapZoomPlusPressed();
+    bool IsMiniMapZoomMinusPressed();
+}
+
 public interface IInventoryInput : IPlayerPointerInput
 {
     bool IsEscapePressed();
     bool IsInventoryPressed();
+    int GetInventoryQuickUseSlotIndexPressed();
+    string GetInventoryQuickUseSlotDisplayName(int slotIndex);
     bool IsInventoryDropPressed();
     bool IsInventoryDropStackModifierHeld();
     bool IsInventoryQuickEquipModifierHeld();

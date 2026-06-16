@@ -14,7 +14,7 @@ GameObject:
   - component: {fileID: 4942015530166897143}
   - component: {fileID: 6958793581355991833}
   - component: {fileID: 8179683466324753776}
-  m_Layer: 0
+  m_Layer: 7
   m_Name: drink_stalker
   m_TagString: Untagged
   m_Icon: {fileID: 0}

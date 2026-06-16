@@ -5,34 +5,49 @@ using R3;
 
 public sealed class InventoryItemContextMenuViewModel : ViewModelBase
 {
+    private readonly Action _useAction;
     private readonly Action _dropOneAction;
     private readonly Action _dropStackAction;
     private readonly ReactiveProperty<bool> _isVisible = new();
+    private readonly ReactiveProperty<bool> _canUse = new();
     private readonly ReactiveProperty<bool> _canDropStack = new();
 
-    public InventoryItemContextMenuViewModel(Action dropOneAction, Action dropStackAction)
+    public InventoryItemContextMenuViewModel(Action useAction, Action dropOneAction, Action dropStackAction)
     {
+        _useAction = useAction;
         _dropOneAction = dropOneAction;
         _dropStackAction = dropStackAction;
+        UseCommand = new(UseAsync, () => _canUse.Value);
         DropOneCommand = new(DropOneAsync);
         DropStackCommand = new(DropStackAsync, () => _canDropStack.Value);
     }
 
     public ReadOnlyReactiveProperty<bool> IsVisible => _isVisible;
+    public ReadOnlyReactiveProperty<bool> CanUse => _canUse;
     public ReadOnlyReactiveProperty<bool> CanDropStack => _canDropStack;
+    public AsyncReactiveCommand UseCommand { get; }
     public AsyncReactiveCommand DropOneCommand { get; }
     public AsyncReactiveCommand DropStackCommand { get; }
 
-    public void Show(bool canDropStack)
+    public void Show(bool canUse, bool canDropStack)
     {
+        _canUse.Value = canUse;
         _canDropStack.Value = canDropStack;
         _isVisible.Value = true;
+        UseCommand.RefreshCanExecute();
         DropStackCommand.RefreshCanExecute();
     }
 
     public void Hide()
     {
         _isVisible.Value = false;
+    }
+
+    private UniTask UseAsync(CancellationToken cancellationToken)
+    {
+        cancellationToken.ThrowIfCancellationRequested();
+        _useAction?.Invoke();
+        return UniTask.CompletedTask;
     }
 
     private UniTask DropOneAsync(CancellationToken cancellationToken)
@@ -51,9 +66,11 @@ public sealed class InventoryItemContextMenuViewModel : ViewModelBase
 
     protected override void DisposeManaged()
     {
+        UseCommand.Dispose();
         DropOneCommand.Dispose();
         DropStackCommand.Dispose();
         _isVisible.Dispose();
+        _canUse.Dispose();
         _canDropStack.Dispose();
     }
 }

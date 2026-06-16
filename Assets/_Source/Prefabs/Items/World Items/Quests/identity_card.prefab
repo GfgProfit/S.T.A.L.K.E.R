@@ -14,7 +14,7 @@ GameObject:
   - component: {fileID: -2115356308446758909}
   - component: {fileID: 4582681408349384060}
   - component: {fileID: 8246156702917426190}
-  m_Layer: 0
+  m_Layer: 7
   m_Name: identity_card
   m_TagString: Untagged
   m_Icon: {fileID: 0}

@@ -14,7 +14,7 @@ GameObject:
   - component: {fileID: -612372553327728703}
   - component: {fileID: 6374319948933205637}
   - component: {fileID: 5602418863637470028}
-  m_Layer: 0
+  m_Layer: 7
   m_Name: ammo_vog_25p
   m_TagString: Untagged
   m_Icon: {fileID: 0}

@@ -14,7 +14,7 @@ GameObject:
   - component: {fileID: 7081543613459409807}
   - component: {fileID: 2895489664002229428}
   - component: {fileID: 9126912423229845879}
-  m_Layer: 0
+  m_Layer: 7
   m_Name: kolbasa
   m_TagString: Untagged
   m_Icon: {fileID: 0}

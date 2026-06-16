@@ -14,7 +14,7 @@ GameObject:
   - component: {fileID: 7937516979056251710}
   - component: {fileID: 6562394708194961707}
   - component: {fileID: 2353669961008627839}
-  m_Layer: 0
+  m_Layer: 7
   m_Name: materials_wire
   m_TagString: Untagged
   m_Icon: {fileID: 0}

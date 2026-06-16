@@ -14,7 +14,7 @@ GameObject:
   - component: {fileID: -5090887445124783509}
   - component: {fileID: -2955388474673946410}
   - component: {fileID: 4187701220938451215}
-  m_Layer: 0
+  m_Layer: 7
   m_Name: box_condensers
   m_TagString: Untagged
   m_Icon: {fileID: 0}

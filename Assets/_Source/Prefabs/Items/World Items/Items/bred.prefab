@@ -14,7 +14,7 @@ GameObject:
   - component: {fileID: 5151157507305175801}
   - component: {fileID: 5648979003144169488}
   - component: {fileID: 7593227413146790653}
-  m_Layer: 0
+  m_Layer: 7
   m_Name: bred
   m_TagString: Untagged
   m_Icon: {fileID: 0}

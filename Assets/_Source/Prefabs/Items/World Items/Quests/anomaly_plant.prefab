@@ -14,7 +14,7 @@ GameObject:
   - component: {fileID: 907441450120095623}
   - component: {fileID: 3713444337556532797}
   - component: {fileID: 3208217879785832445}
-  m_Layer: 0
+  m_Layer: 7
   m_Name: anomaly_plant
   m_TagString: Untagged
   m_Icon: {fileID: 0}

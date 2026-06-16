@@ -14,7 +14,7 @@ GameObject:
   - component: {fileID: -3782501644110283644}
   - component: {fileID: 2375216292482209227}
   - component: {fileID: 608373259508701597}
-  m_Layer: 0
+  m_Layer: 7
   m_Name: helm_respirator
   m_TagString: Untagged
   m_Icon: {fileID: 0}

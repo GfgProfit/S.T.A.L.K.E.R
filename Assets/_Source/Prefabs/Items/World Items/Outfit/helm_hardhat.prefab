@@ -14,7 +14,7 @@ GameObject:
   - component: {fileID: -5442811854473175216}
   - component: {fileID: 3876199058699676400}
   - component: {fileID: 4741277162504096182}
-  m_Layer: 0
+  m_Layer: 7
   m_Name: helm_hardhat
   m_TagString: Untagged
   m_Icon: {fileID: 0}

@@ -14,7 +14,7 @@ GameObject:
   - component: {fileID: -6873409479230146194}
   - component: {fileID: 8229064377908836049}
   - component: {fileID: 6141983289805573172}
-  m_Layer: 0
+  m_Layer: 7
   m_Name: dolg_heavy_outfit
   m_TagString: Untagged
   m_Icon: {fileID: 0}

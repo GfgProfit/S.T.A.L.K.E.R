@@ -14,9 +14,9 @@ internal static class InventoryViewModelFactory
         return new();
     }
 
-    public static InventoryItemContextMenuViewModel CreateContextMenu(Action dropOneAction, Action dropStackAction)
+    public static InventoryItemContextMenuViewModel CreateContextMenu(Action useAction, Action dropOneAction, Action dropStackAction)
     {
-        return new(dropOneAction, dropStackAction);
+        return new(useAction, dropOneAction, dropStackAction);
     }
 
     public static InventoryHighlightViewModel CreateHighlight()
@@ -35,6 +35,21 @@ internal static class InventoryViewModelFactory
     }
 
     public static CharacterStatRowViewModel CreateCharacterStatRow()
+    {
+        return new();
+    }
+
+    public static QuickUseHudSlotViewModel CreateQuickUseHudSlot()
+    {
+        return new();
+    }
+
+    public static QuickUseInventorySlotViewModel CreateQuickUseInventorySlot()
+    {
+        return new();
+    }
+
+    public static MiniActionTextViewModel CreateMiniActionText()
     {
         return new();
     }

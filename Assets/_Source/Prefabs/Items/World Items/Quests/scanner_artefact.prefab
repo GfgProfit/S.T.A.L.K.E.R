@@ -14,7 +14,7 @@ GameObject:
   - component: {fileID: -2187311370943130423}
   - component: {fileID: -6294051174936603597}
   - component: {fileID: -98682938248300138}
-  m_Layer: 0
+  m_Layer: 7
   m_Name: scanner_artefact
   m_TagString: Untagged
   m_Icon: {fileID: 0}

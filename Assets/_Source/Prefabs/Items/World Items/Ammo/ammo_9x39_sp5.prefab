@@ -14,7 +14,7 @@ GameObject:
   - component: {fileID: 1958578592199928409}
   - component: {fileID: 3541649878749897647}
   - component: {fileID: 2848314009222835605}
-  m_Layer: 0
+  m_Layer: 7
   m_Name: ammo_9x39_sp5
   m_TagString: Untagged
   m_Icon: {fileID: 0}

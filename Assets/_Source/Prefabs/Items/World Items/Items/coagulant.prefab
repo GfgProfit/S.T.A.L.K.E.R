@@ -14,7 +14,7 @@ GameObject:
   - component: {fileID: 6656044913889544502}
   - component: {fileID: 5986370364965874132}
   - component: {fileID: 2116886277701680505}
-  m_Layer: 0
+  m_Layer: 7
   m_Name: coagulant
   m_TagString: Untagged
   m_Icon: {fileID: 0}

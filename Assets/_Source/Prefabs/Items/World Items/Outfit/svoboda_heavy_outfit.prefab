@@ -14,7 +14,7 @@ GameObject:
   - component: {fileID: -5770183203185967171}
   - component: {fileID: 8334507565337038947}
   - component: {fileID: 6434139897479257848}
-  m_Layer: 0
+  m_Layer: 7
   m_Name: svoboda_heavy_outfit
   m_TagString: Untagged
   m_Icon: {fileID: 0}

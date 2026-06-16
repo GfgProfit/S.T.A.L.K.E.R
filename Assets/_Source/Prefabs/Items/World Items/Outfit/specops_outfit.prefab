@@ -14,7 +14,7 @@ GameObject:
   - component: {fileID: -3853707236623284599}
   - component: {fileID: 4280004835992887896}
   - component: {fileID: 2340778866610453765}
-  m_Layer: 0
+  m_Layer: 7
   m_Name: specops_outfit
   m_TagString: Untagged
   m_Icon: {fileID: 0}

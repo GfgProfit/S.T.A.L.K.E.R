@@ -14,7 +14,7 @@ GameObject:
   - component: {fileID: 3684670460492449426}
   - component: {fileID: 4887649197450678219}
   - component: {fileID: 919014018468211934}
-  m_Layer: 0
+  m_Layer: 7
   m_Name: ammo_gauss_custom
   m_TagString: Untagged
   m_Icon: {fileID: 0}

@@ -14,7 +14,7 @@ GameObject:
   - component: {fileID: 534701554549039282}
   - component: {fileID: 1330721035539825628}
   - component: {fileID: 7053550028162551366}
-  m_Layer: 0
+  m_Layer: 7
   m_Name: novice_outfit
   m_TagString: Untagged
   m_Icon: {fileID: 0}

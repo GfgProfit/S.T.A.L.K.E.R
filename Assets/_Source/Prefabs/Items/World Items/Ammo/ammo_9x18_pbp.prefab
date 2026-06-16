@@ -14,7 +14,7 @@ GameObject:
   - component: {fileID: 2045879592895126491}
   - component: {fileID: 4935490622311477859}
   - component: {fileID: 710096280130394752}
-  m_Layer: 0
+  m_Layer: 7
   m_Name: ammo_9x18_pbp
   m_TagString: Untagged
   m_Icon: {fileID: 0}

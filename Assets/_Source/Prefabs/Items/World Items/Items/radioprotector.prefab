@@ -14,7 +14,7 @@ GameObject:
   - component: {fileID: 5930396052583028567}
   - component: {fileID: 180849811062049212}
   - component: {fileID: 6848789316988387457}
-  m_Layer: 0
+  m_Layer: 7
   m_Name: radioprotector
   m_TagString: Untagged
   m_Icon: {fileID: 0}

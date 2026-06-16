@@ -14,7 +14,7 @@ GameObject:
   - component: {fileID: 3933080726700799852}
   - component: {fileID: 631562603539077298}
   - component: {fileID: 7148856070310418789}
-  m_Layer: 0
+  m_Layer: 7
   m_Name: psy_blockade
   m_TagString: Untagged
   m_Icon: {fileID: 0}

@@ -14,7 +14,7 @@ GameObject:
   - component: {fileID: -2436877174477789958}
   - component: {fileID: 2144035032442575399}
   - component: {fileID: 6363899696280088314}
-  m_Layer: 0
+  m_Layer: 7
   m_Name: military_outfit
   m_TagString: Untagged
   m_Icon: {fileID: 0}

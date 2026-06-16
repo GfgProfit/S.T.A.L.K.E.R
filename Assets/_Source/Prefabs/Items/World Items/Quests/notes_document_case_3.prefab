@@ -14,7 +14,7 @@ GameObject:
   - component: {fileID: -7442563118775227289}
   - component: {fileID: 5276598176944131014}
   - component: {fileID: -8157684347127507333}
-  m_Layer: 0
+  m_Layer: 7
   m_Name: notes_document_case_3
   m_TagString: Untagged
   m_Icon: {fileID: 0}

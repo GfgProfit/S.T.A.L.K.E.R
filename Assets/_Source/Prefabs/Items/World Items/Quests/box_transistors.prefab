@@ -14,7 +14,7 @@ GameObject:
   - component: {fileID: 4577647857029126320}
   - component: {fileID: 1934294949778743564}
   - component: {fileID: 1309182909780688202}
-  m_Layer: 0
+  m_Layer: 7
   m_Name: box_transistors
   m_TagString: Untagged
   m_Icon: {fileID: 0}

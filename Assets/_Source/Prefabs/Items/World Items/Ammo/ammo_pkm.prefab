@@ -14,7 +14,7 @@ GameObject:
   - component: {fileID: 568311467143349256}
   - component: {fileID: 7691179814294375844}
   - component: {fileID: 6046133466127159984}
-  m_Layer: 0
+  m_Layer: 7
   m_Name: ammo_pkm
   m_TagString: Untagged
   m_Icon: {fileID: 0}

@@ -14,7 +14,7 @@ GameObject:
   - component: {fileID: -6151026981552054692}
   - component: {fileID: 1670189644281193593}
   - component: {fileID: 263063015632883937}
-  m_Layer: 0
+  m_Layer: 7
   m_Name: ammo_m209
   m_TagString: Untagged
   m_Icon: {fileID: 0}

@@ -14,7 +14,7 @@ GameObject:
   - component: {fileID: 4275143036492336313}
   - component: {fileID: 1219521178383121616}
   - component: {fileID: 1725513151785076871}
-  m_Layer: 0
+  m_Layer: 7
   m_Name: helm_battle
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -172,7 +172,7 @@ GameObject:
   - component: {fileID: 6939577169038493204}
   - component: {fileID: 6035380131621524663}
   - component: {fileID: 3402940804276395188}
-  m_Layer: 0
+  m_Layer: 7
   m_Name: helm_battle_prot
   m_TagString: Untagged
   m_Icon: {fileID: 0}

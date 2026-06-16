@@ -14,7 +14,7 @@ GameObject:
   - component: {fileID: 8939760191214384668}
   - component: {fileID: 1507910618813714384}
   - component: {fileID: 3980600615778522225}
-  m_Layer: 0
+  m_Layer: 7
   m_Name: ammo_1143x23_hydro
   m_TagString: Untagged
   m_Icon: {fileID: 0}

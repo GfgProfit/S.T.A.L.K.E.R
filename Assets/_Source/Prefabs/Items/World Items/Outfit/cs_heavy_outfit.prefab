@@ -14,7 +14,7 @@ GameObject:
   - component: {fileID: -718196567452840868}
   - component: {fileID: 5423980466126877114}
   - component: {fileID: 1561245377490704241}
-  m_Layer: 0
+  m_Layer: 7
   m_Name: cs_heavy_outfit
   m_TagString: Untagged
   m_Icon: {fileID: 0}

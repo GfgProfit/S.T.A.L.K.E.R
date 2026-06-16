@@ -14,7 +14,7 @@ GameObject:
   - component: {fileID: 8216836978810895521}
   - component: {fileID: 3372359262485384806}
   - component: {fileID: 380445021044284550}
-  m_Layer: 0
+  m_Layer: 7
   m_Name: antirad
   m_TagString: Untagged
   m_Icon: {fileID: 0}

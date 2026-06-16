@@ -19,6 +19,8 @@ public class InventoryItemContextMenu : MonoBehaviour, IView<InventoryItemContex
 
     [SerializeField] private RectTransform _panelRectTransform;
     [SerializeField] private Canvas _canvas;
+    [SerializeField] private Button _useButton;
+    [SerializeField] private TMP_Text _useButtonText;
     [SerializeField] private Button _dropOneButton;
     [SerializeField] private Button _dropStackButton;
     [SerializeField] private TMP_Text _dropStackButtonText;
@@ -26,11 +28,13 @@ public class InventoryItemContextMenu : MonoBehaviour, IView<InventoryItemContex
     [SerializeField] private bool _showCloseRadiusInEditor = true;
     [SerializeField] private Color _closeRadiusEditorColor = new(1f, 0.65f, 0f, 0.9f);
 
+    private Action _onUse;
     private Action _onDropOne;
     private Action _onDropStack;
     private InventoryContextMenuPositioner _positioner;
     private InventoryItemContextMenuViewModel _viewModel;
     private IDisposable _isVisibleSubscription;
+    private IDisposable _canUseSubscription;
     private IDisposable _canDropStackSubscription;
 
     public bool IsOpen => gameObject.activeSelf;
@@ -52,11 +56,18 @@ public class InventoryItemContextMenu : MonoBehaviour, IView<InventoryItemContex
         }
     }
 
-    public void Initialize(Action dropOneAction, Action dropStackAction)
+    public void Initialize(Action useAction, Action dropOneAction, Action dropStackAction)
     {
+        _onUse = useAction;
         _onDropOne = dropOneAction;
         _onDropStack = dropStackAction;
-        Bind(InventoryViewModelFactory.CreateContextMenu(_onDropOne, _onDropStack));
+        Bind(InventoryViewModelFactory.CreateContextMenu(_onUse, _onDropOne, _onDropStack));
+
+        if (_useButton != null)
+        {
+            _useButton.onClick.RemoveListener(HandleUseClicked);
+            _useButton.onClick.AddListener(HandleUseClicked);
+        }
 
         if (_dropOneButton != null)
         {
@@ -71,7 +82,7 @@ public class InventoryItemContextMenu : MonoBehaviour, IView<InventoryItemContex
         }
     }
 
-    public void Show(bool canDropStack, Vector2 screenPosition)
+    public void Show(bool canUse, bool canDropStack, Vector2 screenPosition)
     {
         if (_viewModel == null)
         {
@@ -79,7 +90,7 @@ public class InventoryItemContextMenu : MonoBehaviour, IView<InventoryItemContex
             return;
         }
 
-        _viewModel.Show(canDropStack);
+        _viewModel.Show(canUse, canDropStack);
         transform.SetAsLastSibling();
 
         RebuildLayout();
@@ -121,14 +132,17 @@ public class InventoryItemContextMenu : MonoBehaviour, IView<InventoryItemContex
         }
 
         _isVisibleSubscription = _viewModel.IsVisible.Subscribe(SetVisible);
+        _canUseSubscription = _viewModel.CanUse.Subscribe(SetUseButtonEnabled);
         _canDropStackSubscription = _viewModel.CanDropStack.Subscribe(SetDropStackButtonEnabled);
     }
 
     public void Unbind()
     {
         _isVisibleSubscription?.Dispose();
+        _canUseSubscription?.Dispose();
         _canDropStackSubscription?.Dispose();
         _isVisibleSubscription = null;
+        _canUseSubscription = null;
         _canDropStackSubscription = null;
     }
 
@@ -140,11 +154,17 @@ public class InventoryItemContextMenu : MonoBehaviour, IView<InventoryItemContex
         _viewModel = null;
     }
 
+    private void HandleUseClicked() => ExecuteCommandAsync(_viewModel?.UseCommand, destroyCancellationToken).Forget(Debug.LogException);
     private void HandleDropOneClicked() => ExecuteCommandAsync(_viewModel?.DropOneCommand, destroyCancellationToken).Forget(Debug.LogException);
     private void HandleDropStackClicked() => ExecuteCommandAsync(_viewModel?.DropStackCommand, destroyCancellationToken).Forget(Debug.LogException);
 
     private void UnsubscribeButtons()
     {
+        if (_useButton != null)
+        {
+            _useButton.onClick.RemoveListener(HandleUseClicked);
+        }
+
         if (_dropOneButton != null)
         {
             _dropOneButton.onClick.RemoveListener(HandleDropOneClicked);
@@ -168,16 +188,26 @@ public class InventoryItemContextMenu : MonoBehaviour, IView<InventoryItemContex
 
     private void SetVisible(bool visible) => gameObject.SetActive(visible);
 
+    private void SetUseButtonEnabled(bool enabled)
+    {
+        SetButtonEnabled(_useButton, _useButtonText, enabled);
+    }
+
     private void SetDropStackButtonEnabled(bool enabled)
     {
-        if (_dropStackButton != null)
+        SetButtonEnabled(_dropStackButton, _dropStackButtonText, enabled);
+    }
+
+    private static void SetButtonEnabled(Button button, TMP_Text buttonText, bool enabled)
+    {
+        if (button != null)
         {
-            _dropStackButton.interactable = enabled;
+            button.interactable = enabled;
         }
 
-        if (_dropStackButtonText != null)
+        if (buttonText != null)
         {
-            _dropStackButtonText.color = enabled ? _textColor : _disabledTextColor;
+            buttonText.color = enabled ? _textColor : _disabledTextColor;
         }
     }
 

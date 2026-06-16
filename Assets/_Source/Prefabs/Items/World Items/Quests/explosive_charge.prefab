@@ -14,7 +14,7 @@ GameObject:
   - component: {fileID: 4592576579897462249}
   - component: {fileID: 5389446931091730426}
   - component: {fileID: -1364083075549751750}
-  m_Layer: 0
+  m_Layer: 7
   m_Name: explosive_charge
   m_TagString: Untagged
   m_Icon: {fileID: 0}

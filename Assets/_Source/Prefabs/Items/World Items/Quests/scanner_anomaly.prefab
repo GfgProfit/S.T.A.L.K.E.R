@@ -14,7 +14,7 @@ GameObject:
   - component: {fileID: 4393122523127881771}
   - component: {fileID: 4096304194577507233}
   - component: {fileID: 7261109326492068705}
-  m_Layer: 0
+  m_Layer: 7
   m_Name: scanner_anomaly
   m_TagString: Untagged
   m_Icon: {fileID: 0}

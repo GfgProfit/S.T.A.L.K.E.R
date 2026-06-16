@@ -14,7 +14,7 @@ GameObject:
   - component: {fileID: 6015843024927636850}
   - component: {fileID: 1537916101858307651}
   - component: {fileID: 6223848665835766774}
-  m_Layer: 0
+  m_Layer: 7
   m_Name: aptechka_mid
   m_TagString: Untagged
   m_Icon: {fileID: 0}

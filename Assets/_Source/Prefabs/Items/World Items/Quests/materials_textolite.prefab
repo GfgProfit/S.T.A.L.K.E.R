@@ -14,7 +14,7 @@ GameObject:
   - component: {fileID: -2322490471427107422}
   - component: {fileID: 5700132679301476525}
   - component: {fileID: -1617010378225194475}
-  m_Layer: 0
+  m_Layer: 7
   m_Name: materials_textolite
   m_TagString: Untagged
   m_Icon: {fileID: 0}

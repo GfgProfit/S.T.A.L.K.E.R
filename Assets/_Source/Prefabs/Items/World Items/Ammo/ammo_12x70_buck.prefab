@@ -14,7 +14,7 @@ GameObject:
   - component: {fileID: 304055853885140470}
   - component: {fileID: 4359865424609636211}
   - component: {fileID: 7267573863156417742}
-  m_Layer: 0
+  m_Layer: 7
   m_Name: ammo_12x70_buck
   m_TagString: Untagged
   m_Icon: {fileID: 0}

@@ -14,7 +14,7 @@ GameObject:
   - component: {fileID: 1155302085231343078}
   - component: {fileID: 4639105802219423166}
   - component: {fileID: -435262044235096314}
-  m_Layer: 0
+  m_Layer: 7
   m_Name: box_kanifol
   m_TagString: Untagged
   m_Icon: {fileID: 0}

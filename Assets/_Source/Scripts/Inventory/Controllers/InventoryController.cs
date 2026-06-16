@@ -1,3 +1,4 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Threading;
@@ -35,6 +36,12 @@ public class InventoryController : MonoBehaviour
     [SerializeField] private GameObject _closedSlotPrefab;
     [SerializeField] private List<InventoryItem> _initialInventoryItems = new();
     [SerializeField] private List<InventoryGrid> _quickActionGridReferences = new();
+
+    [Header("Quick Use")]
+    [SerializeField] private List<QuickUseSlotBinding> _quickUseSlotBindings = new();
+    [SerializeField] private TMP_Text _miniActionText;
+    [SerializeField] [Min(0f)] private float _miniActionTextDuration = 2.5f;
+
     [SerializeField] private List<EquipmentSlotGrid> _equipmentSlotGrids = new();
     [SerializeField] private List<SlottedItemGrid> _slottedItemGrids = new();
 
@@ -64,15 +71,21 @@ public class InventoryController : MonoBehaviour
     private InventoryOpenStateController _openStateController;
     private InventoryItemPlacementService _itemPlacementService;
     private InventoryHoveredItemActionController _hoveredItemActionController;
+    private InventoryQuickUseService _quickUseService;
     private InventoryUpdateController _updateController;
     private InventoryIconPrewarmController _iconPrewarmController;
     private InventoryRootView _inventoryView;
+    private MiniActionTextView _miniActionTextView;
     private InventoryViewModel _viewModel;
+    private MiniActionTextViewModel _miniActionTextViewModel;
     private GameProjectSettings _settings;
+    private readonly Dictionary<int, QuickUseInventorySlotViewModel> _quickUseInventorySlotViewModels = new();
+    private readonly Dictionary<int, QuickUseHudSlotViewModel> _quickUseHudSlotViewModels = new();
     private readonly InventoryDragState _dragState = new();
     private readonly InventoryDropService _dropService = new();
     private readonly InventoryItemRegistry _itemRegistry = new();
     private InventoryGrid _selectedItemGrid;
+    private CancellationTokenSource _miniActionTextCancellation;
 
     public InventoryGrid SelectedItemGrid
     {
@@ -217,6 +230,15 @@ public class InventoryController : MonoBehaviour
         }
     }
 
+    private InventoryQuickUseService QuickUseService
+    {
+        get
+        {
+            _quickUseService ??= CreateQuickUseService();
+            return _quickUseService;
+        }
+    }
+
     private InventoryIconPrewarmController IconPrewarmController
     {
         get
@@ -228,7 +250,7 @@ public class InventoryController : MonoBehaviour
 
     private InventoryEquipmentSlotService CreateEquipmentSlotService() => new(_equipmentSlotGrids, _slottedItemGrids, _defaultItemGrid, InsertItem, TryDetachItemFromGrid, RegisterInventoryItem, RefreshWeightState, () => _closedSlotPrefab);
     private InventoryQuickActionService CreateQuickActionService() => new(_quickActionGridReferences, _defaultItemGrid, TryMoveItemToGrid, CreateItem, RegisterInventoryItem, RefreshWeightState);
-    private InventoryContextMenuController CreateContextMenuController() => new(_itemContextMenu, PlayerInput, () => _selectedItemGrid, () => _dragState.SelectedItem, DragController.GetTileGridPosition, HideItemInfoPanel, TryDropItem);
+    private InventoryContextMenuController CreateContextMenuController() => new(_itemContextMenu, PlayerInput, () => _selectedItemGrid, () => _dragState.SelectedItem, DragController.GetTileGridPosition, HideItemInfoPanel, TryUseContextMenuItem, TryDropItem);
     private InventoryItemDropProcessor CreateDropProcessor() => new(TrySpawnDroppedWorldItem, TryDetachItemFromGrid, DestroyInventoryItem, RefreshWeightState);
     private InventoryWeightStateController CreateWeightStateController() => new(_itemRegistry, _equipmentSlotGrids, EquipmentSlotService, SetWeightViewModelState, RenderCharacterStatsInfo, _playerController, _playerStats, _hidePlayerStatsInfoWhenEmpty, _maxCarryWeight, _movementBlockExtraWeight);
     private InventoryHoverInfoController CreateHoverInfoController() => new(_inventoryHighlight, _itemInfoPanel, IsContextMenuOpen);
@@ -237,6 +259,7 @@ public class InventoryController : MonoBehaviour
     private InventoryOpenStateController CreateOpenStateController() => new(_playerController, _unlockCursorWhileOpen, _disablePlayerControlsWhileOpen, TryStashSelectedItem, ApplyWeightMovementState, HandleInventoryClosed);
     private InventoryItemPlacementService CreateItemPlacementService() => new(ItemFactory, _itemRegistry, TryPrepareSlotRestrictionsForPlacement, TryDetachItemFromGrid, DestroyInventoryItem, RefreshWeightState);
     private InventoryHoveredItemActionController CreateHoveredItemActionController() => new(PlayerInput, _dragState, () => _selectedItemGrid, DragController.GetTileGridPosition, IsContextMenuOpen, QuickActionService, TryDropItem, HoverInfoController, HideItemInfoPanel, HideContextMenu);
+    private InventoryQuickUseService CreateQuickUseService() => new(_quickUseSlotBindings, TryDetachItemFromGrid, DestroyInventoryItem, RefreshWeightState);
     private InventoryUpdateController CreateUpdateController() => new(PlayerInput, () => IsOpen, () => IconPrewarmController.IconsReady, () => _selectedItemGrid, HoverInfoController, ContextMenuController, ToggleInventory, HideItemInfoPanel, HideContextMenu, DragController.ItemIconDrag, DragController.ReleaseDraggedItem, DragController.RotateSelectedItem, TryHandleHoveredItemDropInput, HandleHighlight, TryHandleQuickItemAction, DragController.BeginDrag);
     private InventoryIconPrewarmController CreateIconPrewarmController() => new(_items, _prewarmItemIconsOnStart, _logIconPrewarmProgress, this);
 
@@ -244,7 +267,9 @@ public class InventoryController : MonoBehaviour
     {
         _settings = GameProjectSettings.LoadDefault();
         _viewModel = InventoryViewModelFactory.CreateInventory(ToggleInventoryCoreAsync, _settings);
+        _miniActionTextViewModel = InventoryViewModelFactory.CreateMiniActionText();
         _inventoryView = new(_inventoryRoot, _inventoryCanvasGroup, _weightText, _settings);
+        _miniActionTextView = new(_miniActionText);
 
         _itemFactory = new InventoryItemFactory(_itemPrefab);
         _equipmentSlotService = CreateEquipmentSlotService();
@@ -258,14 +283,17 @@ public class InventoryController : MonoBehaviour
         _openStateController = CreateOpenStateController();
         _itemPlacementService = CreateItemPlacementService();
         _hoveredItemActionController = CreateHoveredItemActionController();
+        _quickUseService = CreateQuickUseService();
         _iconPrewarmController = CreateIconPrewarmController();
         _updateController = CreateUpdateController();
         _itemRegistry.DurabilityChanged += HandleInventoryItemDurabilityChanged;
 
         _contextMenuController.Initialize();
+        BindQuickUseSlots();
         RegisterExistingInventoryItems();
         SetInventoryOpen(_openOnStart, true);
         _inventoryView.Bind(_viewModel);
+        _miniActionTextView.Bind(_miniActionTextViewModel);
         RefreshWeightState();
     }
 
@@ -277,13 +305,19 @@ public class InventoryController : MonoBehaviour
 
     private void Update()
     {
+        RefreshQuickUseKeyTexts();
+        TryHandleQuickUseInput();
         _updateController.Tick();
     }
 
     private void OnDestroy()
     {
+        CancelMiniActionText();
         _itemRegistry.DurabilityChanged -= HandleInventoryItemDurabilityChanged;
+        _miniActionTextView?.Dispose();
+        DisposeQuickUseSlots();
         _inventoryView?.Dispose();
+        _miniActionTextViewModel?.Dispose();
         _viewModel?.Dispose();
     }
 
@@ -316,7 +350,187 @@ public class InventoryController : MonoBehaviour
         HoverInfoController.RefreshHighlightedItemInfo(item);
     }
 
-    private void RefreshWeightState() => WeightStateController.Refresh();
+    private void RefreshWeightState()
+    {
+        WeightStateController.Refresh();
+        RefreshQuickUseSlotsState();
+    }
+
+    private void RefreshQuickUseSlotsState()
+    {
+        for (int i = 0; i < _quickUseSlotBindings.Count; i++)
+        {
+            QuickUseSlotBinding binding = _quickUseSlotBindings[i];
+
+            if (binding == null)
+            {
+                continue;
+            }
+
+            string keyText = PlayerInput.GetInventoryQuickUseSlotDisplayName(binding.SlotIndex);
+            InventoryItem item = QuickUseService.GetSlotItem(binding.SlotIndex);
+
+            if (_quickUseHudSlotViewModels.TryGetValue(binding.SlotIndex, out QuickUseHudSlotViewModel viewModel))
+            {
+                viewModel.SetKeyText(keyText);
+                viewModel.SetItem(item);
+            }
+
+            RefreshQuickUseInventorySlot(binding, keyText);
+        }
+    }
+
+    private void RefreshQuickUseKeyTexts()
+    {
+        foreach (KeyValuePair<int, QuickUseInventorySlotViewModel> slotViewModel in _quickUseInventorySlotViewModels)
+        {
+            slotViewModel.Value.SetKeyText(PlayerInput.GetInventoryQuickUseSlotDisplayName(slotViewModel.Key));
+        }
+
+        foreach (KeyValuePair<int, QuickUseHudSlotViewModel> slotViewModel in _quickUseHudSlotViewModels)
+        {
+            slotViewModel.Value.SetKeyText(PlayerInput.GetInventoryQuickUseSlotDisplayName(slotViewModel.Key));
+        }
+    }
+
+    private void BindQuickUseSlots()
+    {
+        DisposeQuickUseSlots();
+
+        for (int i = 0; i < _quickUseSlotBindings.Count; i++)
+        {
+            QuickUseSlotBinding binding = _quickUseSlotBindings[i];
+
+            if (binding == null)
+            {
+                continue;
+            }
+
+            string keyText = PlayerInput.GetInventoryQuickUseSlotDisplayName(binding.SlotIndex);
+            BindQuickUseInventorySlot(binding, keyText);
+            BindQuickUseHudSlot(binding, keyText);
+        }
+    }
+
+    private void BindQuickUseInventorySlot(QuickUseSlotBinding binding, string keyText)
+    {
+        if (binding.InventorySlotView == null || _quickUseInventorySlotViewModels.ContainsKey(binding.SlotIndex))
+        {
+            return;
+        }
+
+        QuickUseInventorySlotViewModel viewModel = InventoryViewModelFactory.CreateQuickUseInventorySlot();
+        viewModel.SetKeyText(keyText);
+        binding.InventorySlotView.Bind(viewModel);
+        binding.InventorySlotView.BringKeyTextToFront();
+        _quickUseInventorySlotViewModels.Add(binding.SlotIndex, viewModel);
+    }
+
+    private void BindQuickUseHudSlot(QuickUseSlotBinding binding, string keyText)
+    {
+        if (binding.HudSlotView == null || _quickUseHudSlotViewModels.ContainsKey(binding.SlotIndex))
+        {
+            return;
+        }
+
+        QuickUseHudSlotViewModel viewModel = InventoryViewModelFactory.CreateQuickUseHudSlot();
+        viewModel.SetKeyText(keyText);
+        binding.HudSlotView.Bind(viewModel);
+        _quickUseHudSlotViewModels.Add(binding.SlotIndex, viewModel);
+    }
+
+    private void RefreshQuickUseInventorySlot(QuickUseSlotBinding binding, string keyText)
+    {
+        if (binding.InventorySlotView == null || _quickUseInventorySlotViewModels.TryGetValue(binding.SlotIndex, out QuickUseInventorySlotViewModel viewModel) == false)
+        {
+            return;
+        }
+
+        viewModel.SetKeyText(keyText);
+        binding.InventorySlotView.BringKeyTextToFront();
+    }
+
+    private void DisposeQuickUseSlots()
+    {
+        for (int i = 0; i < _quickUseSlotBindings.Count; i++)
+        {
+            _quickUseSlotBindings[i]?.InventorySlotView?.Unbind();
+            _quickUseSlotBindings[i]?.HudSlotView?.Unbind();
+        }
+
+        foreach (QuickUseInventorySlotViewModel viewModel in _quickUseInventorySlotViewModels.Values)
+        {
+            viewModel.Dispose();
+        }
+
+        foreach (QuickUseHudSlotViewModel viewModel in _quickUseHudSlotViewModels.Values)
+        {
+            viewModel.Dispose();
+        }
+
+        _quickUseInventorySlotViewModels.Clear();
+        _quickUseHudSlotViewModels.Clear();
+    }
+
+    private void TryHandleQuickUseInput()
+    {
+        int slotIndex = PlayerInput.GetInventoryQuickUseSlotIndexPressed();
+
+        if (slotIndex < 0 || _dragState.HasSelectedItem || IconPrewarmController.IconsReady == false)
+        {
+            return;
+        }
+
+        if (QuickUseService.TryUseSlot(slotIndex, out ItemData usedItemData))
+        {
+            ShowMiniActionText(usedItemData);
+        }
+    }
+
+    private void ShowMiniActionText(ItemData itemData)
+    {
+        if (itemData == null || _miniActionTextViewModel == null)
+        {
+            return;
+        }
+
+        CancelMiniActionText();
+        _miniActionTextCancellation = CancellationTokenSource.CreateLinkedTokenSource(destroyCancellationToken);
+        ShowMiniActionTextAsync($"\u0418\u0441\u043f\u043e\u043b\u044c\u0437\u043e\u0432\u0430\u043d\u043e: {itemData.ItemName}", _miniActionTextCancellation.Token).Forget(Debug.LogException);
+    }
+
+    private async UniTask ShowMiniActionTextAsync(string text, CancellationToken cancellationToken)
+    {
+        _miniActionTextViewModel.Show(text);
+
+        if (_miniActionTextDuration <= 0f)
+        {
+            _miniActionTextViewModel.Hide();
+            return;
+        }
+
+        bool isCanceled = await UniTask.Delay(TimeSpan.FromSeconds(_miniActionTextDuration), cancellationToken: cancellationToken).SuppressCancellationThrow();
+
+        if (isCanceled)
+        {
+            return;
+        }
+
+        _miniActionTextViewModel.Hide();
+    }
+
+    private void CancelMiniActionText()
+    {
+        if (_miniActionTextCancellation == null)
+        {
+            return;
+        }
+
+        _miniActionTextCancellation.Cancel();
+        _miniActionTextCancellation.Dispose();
+        _miniActionTextCancellation = null;
+    }
+
     private void SetWeightViewModelState(float currentCarryWeight, float baseMaxCarryWeight, float maxCarryWeight, float movementBlockWeight, bool isMovementBlockedByWeight) => _viewModel?.SetWeightState(currentCarryWeight, baseMaxCarryWeight, maxCarryWeight, movementBlockWeight, isMovementBlockedByWeight);
     private void RenderCharacterStatsInfo(CharacterStatBlock stats, bool hideRootWhenEmpty, bool showAllStats)
     {
@@ -335,6 +549,17 @@ public class InventoryController : MonoBehaviour
     private bool IsContextMenuOpen() => ContextMenuController.IsOpen;
     private InventoryGrid GetInsertionGrid() => _selectedItemGrid != null ? _selectedItemGrid : _defaultItemGrid;
     private void DestroyInventoryItem(InventoryItem item) => DragController.DestroyInventoryItem(item);
+    private bool TryUseContextMenuItem(InventoryGrid grid, InventoryItem item)
+    {
+        if (QuickUseService.TryUseItem(grid, item, out ItemData usedItemData) == false)
+        {
+            return false;
+        }
+
+        ShowMiniActionText(usedItemData);
+        return true;
+    }
+
     private bool TryDropItem(InventoryGrid grid, InventoryItem item, bool wholeStack) => DropProcessor.TryDropItem(grid, item, wholeStack);
     private bool TrySpawnDroppedWorldItem(ItemData itemData, int amount, float durabilityPercent) => _dropService.TrySpawnDroppedWorldItem(itemData, amount, durabilityPercent, CreateDropContext());
     private InventoryDropContext CreateDropContext() => new(_dropOrigin, _playerController, transform, _dropCamera, _dropForwardDistance, _dropUpOffset, _dropGroundProbeHeight, _dropGroundProbeDistance, _dropGroundOffset, _dropObstacleClearance, _dropImpulse, _dropGroundLayers, _dropObstacleLayers);

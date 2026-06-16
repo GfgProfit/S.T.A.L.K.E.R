@@ -14,7 +14,7 @@ GameObject:
   - component: {fileID: -3834908707062947436}
   - component: {fileID: 3875845555160307856}
   - component: {fileID: 2663868794198608637}
-  m_Layer: 0
+  m_Layer: 7
   m_Name: ammo_556x45_ss190
   m_TagString: Untagged
   m_Icon: {fileID: 0}

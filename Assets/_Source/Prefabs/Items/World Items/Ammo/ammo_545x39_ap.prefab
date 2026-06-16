@@ -14,7 +14,7 @@ GameObject:
   - component: {fileID: -7811181728690715197}
   - component: {fileID: 3816018312490051821}
   - component: {fileID: 6352150595349052869}
-  m_Layer: 0
+  m_Layer: 7
   m_Name: ammo_545x39_ap
   m_TagString: Untagged
   m_Icon: {fileID: 0}

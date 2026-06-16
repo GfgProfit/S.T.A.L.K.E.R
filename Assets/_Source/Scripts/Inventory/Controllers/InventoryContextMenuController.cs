@@ -9,11 +9,12 @@ internal sealed class InventoryContextMenuController
     private readonly Func<InventoryItem> _getSelectedItem;
     private readonly Func<Vector2Int> _getTileGridPosition;
     private readonly Action _hideItemInfoPanel;
+    private readonly Func<InventoryGrid, InventoryItem, bool> _useItem;
     private readonly Func<InventoryGrid, InventoryItem, bool, bool> _dropItem;
     private InventoryGrid _contextMenuGrid;
     private InventoryItem _contextMenuItem;
 
-    public InventoryContextMenuController(InventoryItemContextMenu contextMenu, IInventoryInput playerInput, Func<InventoryGrid> getSelectedGrid, Func<InventoryItem> getSelectedItem, Func<Vector2Int> getTileGridPosition, Action hideItemInfoPanel, Func<InventoryGrid, InventoryItem, bool, bool> dropItem)
+    public InventoryContextMenuController(InventoryItemContextMenu contextMenu, IInventoryInput playerInput, Func<InventoryGrid> getSelectedGrid, Func<InventoryItem> getSelectedItem, Func<Vector2Int> getTileGridPosition, Action hideItemInfoPanel, Func<InventoryGrid, InventoryItem, bool> useItem, Func<InventoryGrid, InventoryItem, bool, bool> dropItem)
     {
         _contextMenu = contextMenu;
         _playerInput = playerInput;
@@ -21,12 +22,13 @@ internal sealed class InventoryContextMenuController
         _getSelectedItem = getSelectedItem;
         _getTileGridPosition = getTileGridPosition;
         _hideItemInfoPanel = hideItemInfoPanel;
+        _useItem = useItem;
         _dropItem = dropItem;
     }
 
     public bool IsOpen => _contextMenu != null && _contextMenu.IsOpen;
 
-    public void Initialize() => _contextMenu?.Initialize(DropSingleItem, DropItemStack);
+    public void Initialize() => _contextMenu?.Initialize(UseContextMenuItem, DropSingleItem, DropItemStack);
 
     public bool HandleInput()
     {
@@ -100,11 +102,21 @@ internal sealed class InventoryContextMenuController
         _contextMenuItem = item;
 
         _hideItemInfoPanel();
-        _contextMenu.Show(CanDropStack(item), _playerInput.GetPointerPosition());
+        _contextMenu.Show(CanUseItem(item), CanDropStack(item), _playerInput.GetPointerPosition());
+    }
+
+    private void UseContextMenuItem()
+    {
+        InventoryItem item = _contextMenuItem;
+        InventoryGrid grid = _contextMenuGrid;
+        Hide();
+
+        _useItem(grid, item);
     }
 
     private void DropSingleItem() => DropContextMenuItem(false);
     private void DropItemStack() => DropContextMenuItem(true);
+    private static bool CanUseItem(InventoryItem item) => item != null && item.ItemData != null && item.ItemData.ItemType == ItemType.Consumable;
     private static bool CanDropStack(InventoryItem item) => item != null && item.IsStackable && item.CurrentAmount > 1;
 
     private void DropContextMenuItem(bool wholeStack)

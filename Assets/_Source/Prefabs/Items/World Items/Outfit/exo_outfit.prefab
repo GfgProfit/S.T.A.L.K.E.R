@@ -14,7 +14,7 @@ GameObject:
   - component: {fileID: 4119499643615831027}
   - component: {fileID: 16814860687022296}
   - component: {fileID: 3269962884562995573}
-  m_Layer: 0
+  m_Layer: 7
   m_Name: exo_outfit
   m_TagString: Untagged
   m_Icon: {fileID: 0}

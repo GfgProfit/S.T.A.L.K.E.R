@@ -11,7 +11,7 @@ GameObject:
   - component: {fileID: 1033559466226941355}
   - component: {fileID: 4880416580237452297}
   - component: {fileID: 2096997809803026888}
-  m_Layer: 0
+  m_Layer: 7
   m_Name: scientific_outfit_glass
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -104,7 +104,7 @@ GameObject:
   - component: {fileID: -4009447370380101023}
   - component: {fileID: 1070052694263544113}
   - component: {fileID: 217209326969153803}
-  m_Layer: 0
+  m_Layer: 7
   m_Name: scientific_outfit
   m_TagString: Untagged
   m_Icon: {fileID: 0}
