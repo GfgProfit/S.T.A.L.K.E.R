@@ -9,6 +9,9 @@ public class LegacyPlayerInput : IPlayerInput
     private const KeyCode INVENTORY_DROP_STACK_MODIFIER_KEY = KeyCode.LeftShift;
     private const KeyCode INVENTORY_QUICK_EQUIP_MODIFIER_KEY = KeyCode.LeftAlt;
     private const KeyCode INVENTORY_QUICK_MOVE_MODIFIER_KEY = KeyCode.LeftControl;
+    private const KeyCode WEAPON_SHOOT_KEY = KeyCode.Mouse0;
+    private const KeyCode WEAPON_RELOAD_KEY = KeyCode.R;
+    private const KeyCode WEAPON_AMMO_TYPE_CHANGE_KEY = KeyCode.Y;
     private static readonly KeyCode[] INVENTORY_QUICK_USE_KEYS =
     {
         KeyCode.F1,
@@ -84,6 +87,11 @@ public class LegacyPlayerInput : IPlayerInput
 
         return -1;
     }
+
+    public bool IsWeaponShootPressed() => Input.GetKeyDown(WEAPON_SHOOT_KEY);
+    public bool IsWeaponShootHeld() => Input.GetKey(WEAPON_SHOOT_KEY);
+    public bool IsWeaponReloadPressed() => Input.GetKeyDown(WEAPON_RELOAD_KEY);
+    public bool IsWeaponAmmoTypeChangePressed() => Input.GetKeyDown(WEAPON_AMMO_TYPE_CHANGE_KEY);
 
     public bool IsInventoryDropPressed() => Input.GetKeyDown(INVENTORY_DROP_KEY);
     public bool IsInventoryDropStackModifierHeld() => Input.GetKey(INVENTORY_DROP_STACK_MODIFIER_KEY);
