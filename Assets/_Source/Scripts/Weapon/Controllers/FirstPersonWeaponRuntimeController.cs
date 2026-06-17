@@ -50,6 +50,7 @@ public sealed class FirstPersonWeaponRuntimeController : MonoBehaviour
         _playerInput = playerInput;
         _ammoHudViewModel = ammoHudViewModel;
         _animationController = GetComponent<FirstPersonWeaponController>();
+        _animationController?.SetAimRootPositionOffsetActive(false, true);
         _weaponRecoilService?.Reset();
         _weaponRecoilService = _weaponData == null ? null : new WeaponRecoilService(FindWeaponRecoilTransform());
         RestoreMagazineState();
@@ -70,12 +71,14 @@ public sealed class FirstPersonWeaponRuntimeController : MonoBehaviour
 
     private void OnDestroy()
     {
+        _animationController?.SetAimRootPositionOffsetActive(false, true);
         CancelReload();
         ResetWeaponRecoil();
     }
 
     private void OnDisable()
     {
+        _animationController?.SetAimRootPositionOffsetActive(false, true);
         CancelReload();
         ResetWeaponRecoil();
     }
@@ -548,18 +551,20 @@ public sealed class FirstPersonWeaponRuntimeController : MonoBehaviour
 
     private void UpdateAimState(bool isSprintInputActive)
     {
-        if (_animationController == null || _playerInput == null || IsMovementAnimationLocked)
+        if (_animationController == null || IsMovementAnimationLocked)
         {
             return;
         }
 
-        bool shouldAim = isSprintInputActive == false && _playerInput.IsWeaponAimHeld();
+        bool isAimInputActive = _playerInput != null && _playerInput.IsWeaponAimHeld();
+        bool shouldAim = isSprintInputActive == false && (_animationController.ForceAim || isAimInputActive);
 
         if (shouldAim)
         {
             if (_isAiming == false)
             {
                 _isAiming = true;
+                _animationController.SetAimRootPositionOffsetActive(true);
                 _movementAnimationState = WeaponMovementAnimationState.None;
                 _animationController.Play(FirstPersonWeaponAnimationKey.AimIn);
                 LockMovementAnimation(FirstPersonWeaponAnimationKey.AimIn);
@@ -574,6 +579,7 @@ public sealed class FirstPersonWeaponRuntimeController : MonoBehaviour
         }
 
         _isAiming = false;
+        _animationController.SetAimRootPositionOffsetActive(false);
         _movementAnimationState = WeaponMovementAnimationState.None;
         _animationController.Play(FirstPersonWeaponAnimationKey.AimOut);
         LockMovementAnimation(FirstPersonWeaponAnimationKey.AimOut);

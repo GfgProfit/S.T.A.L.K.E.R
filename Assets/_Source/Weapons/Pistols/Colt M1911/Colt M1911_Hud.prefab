@@ -304,7 +304,9 @@ MonoBehaviour:
   _weaponFollowSource: {fileID: 290156940438517500}
   _weaponFollowTarget: {fileID: 6656840369524638270}
   _followHands: 1
+  _forceAim: 0
   _rootPositionOffset: {x: -0.03, y: -0.05, z: -0.125}
+  _aimRootPositionOffset: {x: -0.001, y: -0.063, z: -0.18}
   _weaponFollowPositionOffset: {x: -0.0015, y: -0.00034, z: 0.00005}
   _weaponFollowRotationOffset: {x: 0, y: 180, z: 0}
   _clips:

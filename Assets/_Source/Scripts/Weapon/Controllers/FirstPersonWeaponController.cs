@@ -3,6 +3,7 @@ using UnityEngine;
 public sealed class FirstPersonWeaponController : MonoBehaviour
 {
     private const float STARTUP_CROSS_FADE_DURATION = 0f;
+    private const float ROOT_POSITION_OFFSET_EPSILON = 0.000001f;
 
     [SerializeField] private Animator _handsAnimator;
     [SerializeField] private Animator _weaponAnimator;
@@ -11,7 +12,10 @@ public sealed class FirstPersonWeaponController : MonoBehaviour
     [SerializeField] private Transform _weaponFollowSource;
     [SerializeField] private Transform _weaponFollowTarget;
     [SerializeField] private bool _followHands = true;
+    [SerializeField] private bool _forceAim;
     [SerializeField] private Vector3 _rootPositionOffset;
+    [SerializeField] private Vector3 _aimRootPositionOffset;
+    [SerializeField] [Min(0f)] private float _rootPositionOffsetLerpSpeed = 12f;
     [SerializeField] private Vector3 _weaponFollowPositionOffset;
     [SerializeField] private Vector3 _weaponFollowRotationOffset;
     [SerializeField] private FirstPersonWeaponAnimationClipSet _clips = new();
@@ -27,19 +31,18 @@ public sealed class FirstPersonWeaponController : MonoBehaviour
     private ItemData _equippedArmor;
     private FirstPersonWeaponAnimationKey _currentAnimationKey = FirstPersonWeaponAnimationKey.Idle;
     private FirstPersonWeaponAnimationKey _returnAnimationKey = FirstPersonWeaponAnimationKey.Idle;
-    private Vector3 _initialLocalPosition;
     private float _returnTime;
     private float _lastAnimationStartDelay;
     private bool _hasPendingReturn;
-    private bool _initialLocalPositionStored;
+    private bool _useAimRootPositionOffset;
 
     public WeaponCondition Condition => _weaponCondition;
     public FirstPersonWeaponAnimationKey CurrentAnimationKey => _currentAnimationKey;
+    public bool ForceAim => _forceAim;
 
     private void Awake()
     {
-        StoreInitialLocalPosition();
-        ApplyRootPositionOffset();
+        SnapRootPositionOffset();
         EnsureInitialized();
     }
 
@@ -74,7 +77,7 @@ public sealed class FirstPersonWeaponController : MonoBehaviour
 
     private void LateUpdate()
     {
-        ApplyRootPositionOffset();
+        UpdateRootPositionOffset(Time.deltaTime);
         _weaponFollower?.SetEnabled(_followHands);
         _weaponFollower?.SetAdditionalOffset(_weaponFollowPositionOffset, _weaponFollowRotationOffset);
         _weaponFollower?.Tick();
@@ -95,6 +98,16 @@ public sealed class FirstPersonWeaponController : MonoBehaviour
         if (IsConditionSensitive(_currentAnimationKey))
         {
             Play(_currentAnimationKey);
+        }
+    }
+
+    public void SetAimRootPositionOffsetActive(bool active, bool instant = false)
+    {
+        _useAimRootPositionOffset = active;
+
+        if (instant)
+        {
+            SnapRootPositionOffset();
         }
     }
 
@@ -241,22 +254,24 @@ public sealed class FirstPersonWeaponController : MonoBehaviour
         _animationPlayer = null;
     }
 
-    private void StoreInitialLocalPosition()
+    private void UpdateRootPositionOffset(float deltaTime)
     {
-        if (_initialLocalPositionStored)
+        Vector3 targetPosition = GetActiveRootPositionOffset();
+
+        if (_rootPositionOffsetLerpSpeed <= 0f || deltaTime <= 0f)
         {
+            transform.localPosition = targetPosition;
             return;
         }
 
-        _initialLocalPosition = transform.localPosition;
-        _initialLocalPositionStored = true;
+        float t = 1f - Mathf.Exp(-_rootPositionOffsetLerpSpeed * deltaTime);
+        Vector3 nextPosition = Vector3.Lerp(transform.localPosition, targetPosition, t);
+        transform.localPosition = (nextPosition - targetPosition).sqrMagnitude <= ROOT_POSITION_OFFSET_EPSILON ? targetPosition : nextPosition;
     }
 
-    private void ApplyRootPositionOffset()
-    {
-        StoreInitialLocalPosition();
-        transform.localPosition = _initialLocalPosition + _rootPositionOffset;
-    }
+    private void SnapRootPositionOffset() => transform.localPosition = GetActiveRootPositionOffset();
+
+    private Vector3 GetActiveRootPositionOffset() => _useAimRootPositionOffset ? _aimRootPositionOffset : _rootPositionOffset;
 
     private static FirstPersonWeaponAnimationKey GetDefaultReturnKey(FirstPersonWeaponAnimationKey key)
     {
