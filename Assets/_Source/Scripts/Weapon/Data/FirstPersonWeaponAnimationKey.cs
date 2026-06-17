@@ -16,5 +16,12 @@ public enum FirstPersonWeaponAnimationKey
     Sprint = 13,
     SprintEnd = 14,
     SprintStart = 15,
-    Walk = 16
+    Walk = 16,
+    AimIn = 17,
+    AimOut = 18,
+    AimIdle = 19,
+    AimShoot = 20,
+    AimWalk = 21,
+    AimShootLast = 22,
+    DryEmpty = 23
 }

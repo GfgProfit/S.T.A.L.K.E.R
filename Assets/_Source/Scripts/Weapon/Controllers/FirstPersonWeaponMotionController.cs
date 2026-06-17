@@ -2,9 +2,12 @@ using UnityEngine;
 
 public sealed class FirstPersonWeaponMotionController : MonoBehaviour
 {
+    private const string WEAPON_SWAY_OBJECT_NAME = "Weapon Sway";
+
     [SerializeField] private PlayerController _playerController;
     [SerializeField] private Transform _weaponBob;
     [SerializeField] private Transform _weaponCrouch;
+    [SerializeField] private Transform _weaponSway;
     [SerializeField] private Transform _weaponHolder;
 
     [Header("Crouch")]
@@ -21,16 +24,41 @@ public sealed class FirstPersonWeaponMotionController : MonoBehaviour
     [SerializeField] [Min(0f)] private float _landingKickDuration = 0.08f;
     [SerializeField] [Min(0f)] private float _landingReturnDuration = 0.16f;
 
+    [Header("Mouse Sway")]
+    [SerializeField] private Vector2 _swayRotationAmount = new(2f, 2f);
+    [SerializeField] [Min(0f)] private float _swayRollAmount = 1f;
+    [SerializeField] [Min(0f)] private float _swayMaxRotation = 6f;
+    [SerializeField] [Min(0f)] private float _swaySmoothSpeed = 12f;
+
+    [Inject] private IPlayerInput _playerInput = null;
+
+    private IPlayerInput _fallbackPlayerInput;
     private Vector3 _bobBasePosition;
     private Quaternion _bobBaseRotation;
     private Vector3 _crouchBasePosition;
     private Quaternion _crouchBaseRotation;
+    private Vector3 _swayBasePosition;
+    private Quaternion _swayBaseRotation;
     private Vector3 _landingStartPosition;
     private Quaternion _landingStartRotation;
     private bool _hasGroundState;
     private bool _wasGrounded;
     private float _landingElapsed;
     private WeaponJumpBobState _jumpBobState;
+
+    private IPlayerInput PlayerInput
+    {
+        get
+        {
+            if (_playerInput != null)
+            {
+                return _playerInput;
+            }
+
+            _fallbackPlayerInput ??= new LegacyPlayerInput();
+            return _fallbackPlayerInput;
+        }
+    }
 
     private void Awake() => CacheBaseTransforms();
 
@@ -46,16 +74,20 @@ public sealed class FirstPersonWeaponMotionController : MonoBehaviour
         float deltaTime = Time.deltaTime;
         UpdateCrouch(deltaTime);
         UpdateJumpBob(deltaTime);
+        UpdateMouseSway(deltaTime);
     }
 
     private void OnDisable()
     {
         ResetTransform(_weaponBob, _bobBasePosition, _bobBaseRotation);
         ResetTransform(_weaponCrouch, _crouchBasePosition, _crouchBaseRotation);
+        ResetTransform(_weaponSway, _swayBasePosition, _swayBaseRotation);
     }
 
     private void CacheBaseTransforms()
     {
+        ResolveWeaponSwayTransform();
+
         if (_weaponBob != null)
         {
             _bobBasePosition = _weaponBob.localPosition;
@@ -66,6 +98,12 @@ public sealed class FirstPersonWeaponMotionController : MonoBehaviour
         {
             _crouchBasePosition = _weaponCrouch.localPosition;
             _crouchBaseRotation = _weaponCrouch.localRotation;
+        }
+
+        if (_weaponSway != null)
+        {
+            _swayBasePosition = _weaponSway.localPosition;
+            _swayBaseRotation = _weaponSway.localRotation;
         }
     }
 
@@ -155,6 +193,40 @@ public sealed class FirstPersonWeaponMotionController : MonoBehaviour
         if (returnProgress >= 1f)
         {
             _jumpBobState = WeaponJumpBobState.Grounded;
+        }
+    }
+
+    private void UpdateMouseSway(float deltaTime)
+    {
+        if (_weaponSway == null)
+        {
+            return;
+        }
+
+        Vector2 mouseDelta = Cursor.lockState == CursorLockMode.Locked ? PlayerInput.GetMouseDelta() : Vector2.zero;
+        float pitch = Mathf.Clamp(-mouseDelta.y * _swayRotationAmount.y, -_swayMaxRotation, _swayMaxRotation);
+        float yaw = Mathf.Clamp(mouseDelta.x * _swayRotationAmount.x, -_swayMaxRotation, _swayMaxRotation);
+        float roll = Mathf.Clamp(-mouseDelta.x * _swayRollAmount, -_swayMaxRotation, _swayMaxRotation);
+        Quaternion targetRotation = _swayBaseRotation * Quaternion.Euler(pitch, yaw, roll);
+
+        _weaponSway.localRotation = Quaternion.Slerp(_weaponSway.localRotation, targetRotation, GetLerpFactor(_swaySmoothSpeed, deltaTime));
+    }
+
+    private void ResolveWeaponSwayTransform()
+    {
+        if (_weaponSway != null)
+        {
+            return;
+        }
+
+        if (_weaponCrouch != null)
+        {
+            _weaponSway = _weaponCrouch.Find(WEAPON_SWAY_OBJECT_NAME);
+        }
+
+        if (_weaponSway == null && _weaponHolder != null && _weaponHolder.parent != null && _weaponHolder.parent.name == WEAPON_SWAY_OBJECT_NAME)
+        {
+            _weaponSway = _weaponHolder.parent;
         }
     }
 

@@ -8,6 +8,8 @@ public sealed class FirstPersonWeaponRuntimeController : MonoBehaviour
     private const float MOVEMENT_INPUT_THRESHOLD = 0.01f;
     private const float DEFAULT_LOOP_ANIMATION_SPEED = 1f;
     private const float CROUCH_WALK_ANIMATION_SPEED = 0.5f;
+    private const string WEAPON_RECOIL_OBJECT_NAME = "Weapon Recoil";
+    private const string WEAPON_RECOIL_OBJECT_NAME_COMPACT = "WeaponRecoil";
 
     private InventoryItem _weaponItem;
     private ItemData _weaponItemData;
@@ -16,6 +18,7 @@ public sealed class FirstPersonWeaponRuntimeController : MonoBehaviour
     private IPlayerInput _playerInput;
     private FirstPersonWeaponController _animationController;
     private FirstPersonWeaponAmmoHudViewModel _ammoHudViewModel;
+    private WeaponRecoilService _weaponRecoilService;
     private CancellationTokenSource _reloadCancellation;
     private ItemData _requestedAmmoData;
     private ItemData _loadedAmmoData;
@@ -28,6 +31,7 @@ public sealed class FirstPersonWeaponRuntimeController : MonoBehaviour
     private float _nextShootTime;
     private bool _initialized;
     private bool _isReloading;
+    private bool _isAiming;
     private bool _reloadAmmoApplied;
 
     public ItemData RequestedAmmoData => _requestedAmmoData;
@@ -46,6 +50,8 @@ public sealed class FirstPersonWeaponRuntimeController : MonoBehaviour
         _playerInput = playerInput;
         _ammoHudViewModel = ammoHudViewModel;
         _animationController = GetComponent<FirstPersonWeaponController>();
+        _weaponRecoilService?.Reset();
+        _weaponRecoilService = _weaponData == null ? null : new WeaponRecoilService(FindWeaponRecoilTransform());
         RestoreMagazineState();
         _reloadAmmoData = null;
         _movementAnimationState = WeaponMovementAnimationState.None;
@@ -53,6 +59,7 @@ public sealed class FirstPersonWeaponRuntimeController : MonoBehaviour
         _weaponInputLockUntilTime = 0f;
         _nextShootTime = 0f;
         _isReloading = false;
+        _isAiming = false;
         _reloadAmmoApplied = false;
         _initialized = _weaponData != null;
 
@@ -64,11 +71,13 @@ public sealed class FirstPersonWeaponRuntimeController : MonoBehaviour
     private void OnDestroy()
     {
         CancelReload();
+        ResetWeaponRecoil();
     }
 
     private void OnDisable()
     {
         CancelReload();
+        ResetWeaponRecoil();
     }
 
     private void Update()
@@ -77,6 +86,8 @@ public sealed class FirstPersonWeaponRuntimeController : MonoBehaviour
         {
             return;
         }
+
+        UpdateWeaponRecoil();
 
         if (_inventoryController != null && _inventoryController.IsOpen)
         {
@@ -102,8 +113,9 @@ public sealed class FirstPersonWeaponRuntimeController : MonoBehaviour
         }
 
         bool isSprintInputActive = IsSprintInputActive();
+        UpdateAimState(isSprintInputActive);
 
-        if (isSprintInputActive == false && _playerInput != null && _playerInput.IsWeaponReloadPressed() && TryReload())
+        if (isSprintInputActive == false && _isAiming == false && _playerInput != null && _playerInput.IsWeaponReloadPressed() && TryReload())
         {
             UpdateAmmoHud();
             return;
@@ -125,9 +137,15 @@ public sealed class FirstPersonWeaponRuntimeController : MonoBehaviour
 
     public bool TryShoot()
     {
-        if (_weaponData == null || _isReloading || IsSprintInputActive() || Time.time < _nextShootTime || _loadedAmmoAmount <= 0)
+        if (_weaponData == null || _isReloading || IsSprintInputActive() || Time.time < _nextShootTime)
         {
             return false;
+        }
+
+        if (_loadedAmmoAmount <= 0)
+        {
+            PlayDryEmptyAnimation();
+            return true;
         }
 
         bool isLastRound = _loadedAmmoAmount == 1;
@@ -135,8 +153,20 @@ public sealed class FirstPersonWeaponRuntimeController : MonoBehaviour
         _loadedAmmoAmount--;
         ApplyDurabilityShotCost();
 
-        FirstPersonWeaponAnimationKey animationKey = isLastRound ? FirstPersonWeaponAnimationKey.ShootLast : FirstPersonWeaponAnimationKey.Shoot;
-        _animationController?.Shoot(isLastRound);
+        FirstPersonWeaponAnimationKey animationKey = _isAiming
+            ? (isLastRound ? FirstPersonWeaponAnimationKey.AimShootLast : FirstPersonWeaponAnimationKey.AimShoot)
+            : (isLastRound ? FirstPersonWeaponAnimationKey.ShootLast : FirstPersonWeaponAnimationKey.Shoot);
+
+        if (_isAiming)
+        {
+            _animationController?.PlayAimShoot(isLastRound);
+        }
+        else
+        {
+            _animationController?.Shoot(isLastRound);
+        }
+
+        _weaponRecoilService?.RecoilShoot(_weaponData.RecoilX, _weaponData.RecoilY, _weaponData.RecoilZ);
         LockMovementAnimation(animationKey);
         _movementAnimationState = WeaponMovementAnimationState.None;
 
@@ -151,9 +181,22 @@ public sealed class FirstPersonWeaponRuntimeController : MonoBehaviour
         return true;
     }
 
+    private void PlayDryEmptyAnimation()
+    {
+        FirstPersonWeaponAnimationKey animationKey = FirstPersonWeaponAnimationKey.DryEmpty;
+
+        _loadedAmmoData = null;
+        _animationController?.SetCondition(WeaponCondition.Empty);
+        float animationLength = _animationController == null ? 0f : _animationController.PlayDryEmpty(_isAiming);
+        _nextShootTime = Time.time + Mathf.Max(_weaponData.SecondsBetweenShots, animationLength);
+        LockMovementAnimation(animationKey);
+        _movementAnimationState = WeaponMovementAnimationState.None;
+        SyncMagazineState();
+    }
+
     public bool TryReload()
     {
-        if (_weaponData == null || _inventoryController == null || _requestedAmmoData == null || _isReloading || IsSprintInputActive())
+        if (_weaponData == null || _inventoryController == null || _requestedAmmoData == null || _isReloading || _isAiming || IsSprintInputActive())
         {
             return false;
         }
@@ -231,6 +274,30 @@ public sealed class FirstPersonWeaponRuntimeController : MonoBehaviour
         bool hasMovement = movementInput.sqrMagnitude > MOVEMENT_INPUT_THRESHOLD;
         bool isSprinting = IsSprintInputActive(movementInput);
         bool isCrouching = _playerInput.IsCrouchingHold();
+
+        if (_isAiming)
+        {
+            if (hasMovement)
+            {
+                if (_animationController.CurrentAnimationKey != FirstPersonWeaponAnimationKey.AimWalk)
+                {
+                    _animationController.PlayAimWalk();
+                }
+
+                _animationController.SetLoopPlaybackSpeed(isCrouching ? CROUCH_WALK_ANIMATION_SPEED : DEFAULT_LOOP_ANIMATION_SPEED);
+                _movementAnimationState = WeaponMovementAnimationState.Walking;
+                return;
+            }
+
+            if (_animationController.CurrentAnimationKey != FirstPersonWeaponAnimationKey.AimIdle)
+            {
+                _animationController.PlayAimIdle();
+            }
+
+            _animationController.SetLoopPlaybackSpeed(DEFAULT_LOOP_ANIMATION_SPEED);
+            _movementAnimationState = WeaponMovementAnimationState.Idle;
+            return;
+        }
 
         if (isSprinting)
         {
@@ -479,6 +546,39 @@ public sealed class FirstPersonWeaponRuntimeController : MonoBehaviour
         return _weaponData.FireMode == WeaponFireMode.Auto ? _playerInput.IsWeaponShootHeld() : _playerInput.IsWeaponShootPressed();
     }
 
+    private void UpdateAimState(bool isSprintInputActive)
+    {
+        if (_animationController == null || _playerInput == null || IsMovementAnimationLocked)
+        {
+            return;
+        }
+
+        bool shouldAim = isSprintInputActive == false && _playerInput.IsWeaponAimHeld();
+
+        if (shouldAim)
+        {
+            if (_isAiming == false)
+            {
+                _isAiming = true;
+                _movementAnimationState = WeaponMovementAnimationState.None;
+                _animationController.Play(FirstPersonWeaponAnimationKey.AimIn);
+                LockMovementAnimation(FirstPersonWeaponAnimationKey.AimIn);
+            }
+
+            return;
+        }
+
+        if (_isAiming == false)
+        {
+            return;
+        }
+
+        _isAiming = false;
+        _movementAnimationState = WeaponMovementAnimationState.None;
+        _animationController.Play(FirstPersonWeaponAnimationKey.AimOut);
+        LockMovementAnimation(FirstPersonWeaponAnimationKey.AimOut);
+    }
+
     private bool IsSprintInputActive()
     {
         if (_playerInput == null)
@@ -535,6 +635,39 @@ public sealed class FirstPersonWeaponRuntimeController : MonoBehaviour
         return _animationController == null ? 0f : Mathf.Max(0f, _animationController.GetCurrentAnimationLength(animationKey));
     }
 
+    private void UpdateWeaponRecoil()
+    {
+        if (_weaponData == null)
+        {
+            return;
+        }
+
+        _weaponRecoilService?.Tick(_weaponData.RecoilReturnSpeed, _weaponData.RecoilSnappiness);
+    }
+
+    private Transform FindWeaponRecoilTransform()
+    {
+        Transform current = transform;
+
+        while (current != null)
+        {
+            if (IsWeaponRecoilTransform(current))
+            {
+                return current;
+            }
+
+            current = current.parent;
+        }
+
+        return null;
+    }
+
+    private void ResetWeaponRecoil()
+    {
+        _weaponRecoilService?.Reset();
+        _weaponRecoilService = null;
+    }
+
     private void CancelReload()
     {
         if (_reloadCancellation == null)
@@ -569,4 +702,5 @@ public sealed class FirstPersonWeaponRuntimeController : MonoBehaviour
 
     private bool IsMovementAnimationLocked => Time.time < _movementAnimationLockUntilTime;
     private bool IsWeaponInputLocked => Time.time < _weaponInputLockUntilTime;
+    private static bool IsWeaponRecoilTransform(Transform target) => target != null && (target.name == WEAPON_RECOIL_OBJECT_NAME || target.name == WEAPON_RECOIL_OBJECT_NAME_COMPACT);
 }

@@ -15,6 +15,8 @@ public sealed class FirstPersonWeaponAnimationClipSet
     [SerializeField] private AnimationClip _weaponRevivalLast;
     [SerializeField] private AnimationClip _weaponShoot;
     [SerializeField] private AnimationClip _weaponShootLast;
+    [SerializeField] private AnimationClip _weaponAimShoot;
+    [SerializeField] private AnimationClip _weaponAimShootLast;
 
     [Header("Hands")]
     [SerializeField] private AnimationClip _handsDraw;
@@ -29,10 +31,16 @@ public sealed class FirstPersonWeaponAnimationClipSet
     [SerializeField] private AnimationClip _handsRevival;
     [SerializeField] private AnimationClip _handsRevivalLast;
     [SerializeField] private AnimationClip _handsShoot;
+    [SerializeField] private AnimationClip _handsDryEmpty;
     [SerializeField] private AnimationClip _handsSprint;
     [SerializeField] private AnimationClip _handsSprintEnd;
     [SerializeField] private AnimationClip _handsSprintStart;
     [SerializeField] private AnimationClip _handsWalk;
+    [SerializeField] private AnimationClip _handsAimIn;
+    [SerializeField] private AnimationClip _handsAimOut;
+    [SerializeField] private AnimationClip _handsAimIdle;
+    [SerializeField] private AnimationClip _handsAimShoot;
+    [SerializeField] private AnimationClip _handsAimWalk;
 
     public FirstPersonWeaponAnimationClipPair GetPair(FirstPersonWeaponAnimationKey key, WeaponCondition condition)
     {
@@ -45,6 +53,7 @@ public sealed class FirstPersonWeaponAnimationClipSet
             FirstPersonWeaponAnimationKey.RevivalLast => new FirstPersonWeaponAnimationClipPair(_weaponRevivalLast, _handsRevivalLast),
             FirstPersonWeaponAnimationKey.Shoot => new FirstPersonWeaponAnimationClipPair(_weaponShoot, _handsShoot),
             FirstPersonWeaponAnimationKey.ShootLast => new FirstPersonWeaponAnimationClipPair(_weaponShootLast, _handsShoot),
+            FirstPersonWeaponAnimationKey.DryEmpty => CreateIdleWeaponPair(condition, _handsDryEmpty),
             FirstPersonWeaponAnimationKey.Draw => CreateIdleWeaponPair(condition, _handsDraw),
             FirstPersonWeaponAnimationKey.Headflash => CreateIdleWeaponPair(condition, _handsHeadflash),
             FirstPersonWeaponAnimationKey.Hide => CreateIdleWeaponPair(condition, _handsHide),
@@ -54,6 +63,12 @@ public sealed class FirstPersonWeaponAnimationClipSet
             FirstPersonWeaponAnimationKey.SprintEnd => CreateIdleWeaponPair(condition, _handsSprintEnd),
             FirstPersonWeaponAnimationKey.SprintStart => CreateIdleWeaponPair(condition, _handsSprintStart),
             FirstPersonWeaponAnimationKey.Walk => CreateIdleWeaponPair(condition, _handsWalk),
+            FirstPersonWeaponAnimationKey.AimIn => CreateIdleWeaponPair(condition, _handsAimIn),
+            FirstPersonWeaponAnimationKey.AimOut => CreateIdleWeaponPair(condition, _handsAimOut),
+            FirstPersonWeaponAnimationKey.AimIdle => CreateIdleWeaponPair(condition, _handsAimIdle),
+            FirstPersonWeaponAnimationKey.AimShoot => new FirstPersonWeaponAnimationClipPair(_weaponAimShoot, _handsAimShoot),
+            FirstPersonWeaponAnimationKey.AimShootLast => new FirstPersonWeaponAnimationClipPair(_weaponAimShootLast, _handsAimShoot),
+            FirstPersonWeaponAnimationKey.AimWalk => CreateIdleWeaponPair(condition, _handsAimWalk),
             _ => CreateIdleWeaponPair(condition, _handsIdle)
         };
     }

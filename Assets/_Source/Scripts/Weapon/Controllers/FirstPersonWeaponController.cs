@@ -11,6 +11,7 @@ public sealed class FirstPersonWeaponController : MonoBehaviour
     [SerializeField] private Transform _weaponFollowSource;
     [SerializeField] private Transform _weaponFollowTarget;
     [SerializeField] private bool _followHands = true;
+    [SerializeField] private Vector3 _rootPositionOffset;
     [SerializeField] private Vector3 _weaponFollowPositionOffset;
     [SerializeField] private Vector3 _weaponFollowRotationOffset;
     [SerializeField] private FirstPersonWeaponAnimationClipSet _clips = new();
@@ -26,14 +27,21 @@ public sealed class FirstPersonWeaponController : MonoBehaviour
     private ItemData _equippedArmor;
     private FirstPersonWeaponAnimationKey _currentAnimationKey = FirstPersonWeaponAnimationKey.Idle;
     private FirstPersonWeaponAnimationKey _returnAnimationKey = FirstPersonWeaponAnimationKey.Idle;
+    private Vector3 _initialLocalPosition;
     private float _returnTime;
     private float _lastAnimationStartDelay;
     private bool _hasPendingReturn;
+    private bool _initialLocalPositionStored;
 
     public WeaponCondition Condition => _weaponCondition;
     public FirstPersonWeaponAnimationKey CurrentAnimationKey => _currentAnimationKey;
 
-    private void Awake() => EnsureInitialized();
+    private void Awake()
+    {
+        StoreInitialLocalPosition();
+        ApplyRootPositionOffset();
+        EnsureInitialized();
+    }
 
     private void OnEnable()
     {
@@ -66,6 +74,7 @@ public sealed class FirstPersonWeaponController : MonoBehaviour
 
     private void LateUpdate()
     {
+        ApplyRootPositionOffset();
         _weaponFollower?.SetEnabled(_followHands);
         _weaponFollower?.SetAdditionalOffset(_weaponFollowPositionOffset, _weaponFollowRotationOffset);
         _weaponFollower?.Tick();
@@ -103,6 +112,13 @@ public sealed class FirstPersonWeaponController : MonoBehaviour
     public void PlayIdle() => PlayContinuous(FirstPersonWeaponAnimationKey.Idle);
     public void PlayWalk() => PlayContinuous(FirstPersonWeaponAnimationKey.Walk);
     public void PlaySprint() => PlayContinuous(FirstPersonWeaponAnimationKey.Sprint);
+    public void PlayAimIdle() => PlayContinuous(FirstPersonWeaponAnimationKey.AimIdle);
+    public void PlayAimWalk() => PlayContinuous(FirstPersonWeaponAnimationKey.AimWalk);
+    public void PlayAimShoot(bool lastRound = false)
+    {
+        Play(lastRound ? FirstPersonWeaponAnimationKey.AimShootLast : FirstPersonWeaponAnimationKey.AimShoot);
+    }
+
     public void SetLoopPlaybackSpeed(float speed) => _animationPlayer?.SetLoopPlaybackSpeed(speed);
     public float PlayStartup()
     {
@@ -121,6 +137,12 @@ public sealed class FirstPersonWeaponController : MonoBehaviour
     public float PlayDraw() => PlayTransitionAndGetDuration(FirstPersonWeaponAnimationKey.Draw);
     public float PlayHide() => PlayTransitionAndGetDuration(FirstPersonWeaponAnimationKey.Hide);
     public void Shoot(bool lastRound = false) => Play(lastRound ? FirstPersonWeaponAnimationKey.ShootLast : FirstPersonWeaponAnimationKey.Shoot);
+    public float PlayDryEmpty(bool returnToAim = false)
+    {
+        PlayTransient(FirstPersonWeaponAnimationKey.DryEmpty, returnToAim ? FirstPersonWeaponAnimationKey.AimIdle : FirstPersonWeaponAnimationKey.Idle);
+        return GetCurrentAnimationLength(FirstPersonWeaponAnimationKey.DryEmpty);
+    }
+
     public void Reload(bool full = false) => Play(full ? FirstPersonWeaponAnimationKey.ReloadFull : FirstPersonWeaponAnimationKey.Reload);
     public void PlayMisfire() => Play(FirstPersonWeaponAnimationKey.Misfire);
     public void PlayRevival(bool lastRound = false) => Play(lastRound ? FirstPersonWeaponAnimationKey.RevivalLast : FirstPersonWeaponAnimationKey.Revival);
@@ -219,11 +241,55 @@ public sealed class FirstPersonWeaponController : MonoBehaviour
         _animationPlayer = null;
     }
 
-    private static FirstPersonWeaponAnimationKey GetDefaultReturnKey(FirstPersonWeaponAnimationKey key) => key == FirstPersonWeaponAnimationKey.SprintStart ? FirstPersonWeaponAnimationKey.Sprint : FirstPersonWeaponAnimationKey.Idle;
-    private static bool IsContinuous(FirstPersonWeaponAnimationKey key) => key == FirstPersonWeaponAnimationKey.Idle || key == FirstPersonWeaponAnimationKey.Walk || key == FirstPersonWeaponAnimationKey.Sprint;
-    private static bool IsConditionSensitive(FirstPersonWeaponAnimationKey key) => key == FirstPersonWeaponAnimationKey.Idle || key == FirstPersonWeaponAnimationKey.Walk || key == FirstPersonWeaponAnimationKey.Sprint;
+    private void StoreInitialLocalPosition()
+    {
+        if (_initialLocalPositionStored)
+        {
+            return;
+        }
+
+        _initialLocalPosition = transform.localPosition;
+        _initialLocalPositionStored = true;
+    }
+
+    private void ApplyRootPositionOffset()
+    {
+        StoreInitialLocalPosition();
+        transform.localPosition = _initialLocalPosition + _rootPositionOffset;
+    }
+
+    private static FirstPersonWeaponAnimationKey GetDefaultReturnKey(FirstPersonWeaponAnimationKey key)
+    {
+        return key switch
+        {
+            FirstPersonWeaponAnimationKey.SprintStart => FirstPersonWeaponAnimationKey.Sprint,
+            FirstPersonWeaponAnimationKey.AimIn => FirstPersonWeaponAnimationKey.AimIdle,
+            FirstPersonWeaponAnimationKey.AimShoot => FirstPersonWeaponAnimationKey.AimIdle,
+            FirstPersonWeaponAnimationKey.AimShootLast => FirstPersonWeaponAnimationKey.AimIdle,
+            _ => FirstPersonWeaponAnimationKey.Idle
+        };
+    }
+
+    private static bool IsContinuous(FirstPersonWeaponAnimationKey key)
+    {
+        return key == FirstPersonWeaponAnimationKey.Idle ||
+               key == FirstPersonWeaponAnimationKey.Walk ||
+               key == FirstPersonWeaponAnimationKey.Sprint ||
+               key == FirstPersonWeaponAnimationKey.AimIdle ||
+               key == FirstPersonWeaponAnimationKey.AimWalk;
+    }
+
+    private static bool IsConditionSensitive(FirstPersonWeaponAnimationKey key)
+    {
+        return key == FirstPersonWeaponAnimationKey.Idle ||
+               key == FirstPersonWeaponAnimationKey.Walk ||
+               key == FirstPersonWeaponAnimationKey.Sprint ||
+               key == FirstPersonWeaponAnimationKey.AimIdle ||
+               key == FirstPersonWeaponAnimationKey.AimWalk;
+    }
+
     private void ApplyEquippedArmorHandsMesh() => _handsMeshSwitcher?.SetMesh(_equippedArmor == null ? string.Empty : _equippedArmor.FirstPersonHandsMeshName);
-    private float GetCrossFadeDuration(FirstPersonWeaponAnimationKey key) => key == FirstPersonWeaponAnimationKey.Walk ? _walkCrossFadeDuration : _crossFadeDuration;
+    private float GetCrossFadeDuration(FirstPersonWeaponAnimationKey key) => key == FirstPersonWeaponAnimationKey.Walk || key == FirstPersonWeaponAnimationKey.AimWalk ? _walkCrossFadeDuration : _crossFadeDuration;
     private float GetNextAnimationStartDelay(FirstPersonWeaponAnimationKey key) => GetNextAnimationStartDelay(key, GetCrossFadeDuration(key));
     private float GetNextAnimationStartDelay(FirstPersonWeaponAnimationKey key, float crossFadeDuration) => _animationPlayer != null && _animationPlayer.HasActivePair && ShouldDelayAnimationStart(key) ? Mathf.Max(0f, crossFadeDuration) : 0f;
     private bool IsRuntimeControlled => TryGetComponent(out FirstPersonWeaponRuntimeController _);

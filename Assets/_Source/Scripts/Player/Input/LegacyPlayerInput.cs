@@ -10,6 +10,7 @@ public class LegacyPlayerInput : IPlayerInput
     private const KeyCode INVENTORY_QUICK_EQUIP_MODIFIER_KEY = KeyCode.LeftAlt;
     private const KeyCode INVENTORY_QUICK_MOVE_MODIFIER_KEY = KeyCode.LeftControl;
     private const KeyCode WEAPON_SHOOT_KEY = KeyCode.Mouse0;
+    private const KeyCode WEAPON_AIM_KEY = KeyCode.Mouse1;
     private const KeyCode WEAPON_RELOAD_KEY = KeyCode.R;
     private const KeyCode WEAPON_AMMO_TYPE_CHANGE_KEY = KeyCode.Y;
     private static readonly KeyCode[] INVENTORY_QUICK_USE_KEYS =
@@ -90,6 +91,7 @@ public class LegacyPlayerInput : IPlayerInput
 
     public bool IsWeaponShootPressed() => Input.GetKeyDown(WEAPON_SHOOT_KEY);
     public bool IsWeaponShootHeld() => Input.GetKey(WEAPON_SHOOT_KEY);
+    public bool IsWeaponAimHeld() => Input.GetKey(WEAPON_AIM_KEY);
     public bool IsWeaponReloadPressed() => Input.GetKeyDown(WEAPON_RELOAD_KEY);
     public bool IsWeaponAmmoTypeChangePressed() => Input.GetKeyDown(WEAPON_AMMO_TYPE_CHANGE_KEY);
 

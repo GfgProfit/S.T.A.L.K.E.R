@@ -1,24 +1,21 @@
 using System;
+using Animancer;
 using UnityEngine;
-using UnityEngine.Animations;
-using UnityEngine.Playables;
 
 internal sealed class FirstPersonLegsAnimationPlayer : IDisposable
 {
-    private const int INPUT_COUNT = 2;
-
     private readonly Animator _animator;
     private readonly FirstPersonLegsAnimationClipSet _clips;
     private readonly float _crossFadeDuration;
-    private readonly AnimationClipPlayable[] _clipPlayables = new AnimationClipPlayable[INPUT_COUNT];
-    private readonly AnimationClip[] _inputClips = new AnimationClip[INPUT_COUNT];
-    private readonly FirstPersonLegsAnimationKey[] _inputKeys = new FirstPersonLegsAnimationKey[INPUT_COUNT];
 
-    private PlayableGraph _graph;
-    private AnimationMixerPlayable _mixer;
+    private AnimancerComponent _animancer;
+    private AnimancerState _activeState;
+    private AnimancerState _fadingState;
+    private AnimationClip _activeClip;
+    private AnimationClip _fadingClip;
+    private FirstPersonLegsAnimationKey _activeKey;
+    private FirstPersonLegsAnimationKey _fadingKey;
     private FirstPersonLegsAnimationKey _currentKey;
-    private int _activeInput;
-    private int _fadingInput;
     private float _fadeElapsed;
     private float _fadeDuration;
     private bool _hasActiveClip;
@@ -49,37 +46,35 @@ internal sealed class FirstPersonLegsAnimationPlayer : IDisposable
             return;
         }
 
-        EnsureGraph();
-        int nextInput = _hasActiveClip ? 1 - _activeInput : _activeInput;
         double startTime = GetStartTime(key, clip);
-        SetClip(nextInput, clip, key, startTime);
+        EnsureAnimancer();
+        float fadeDuration = _hasActiveClip ? _crossFadeDuration : 0f;
+        AnimancerState state = PlayClip(clip, startTime, fadeDuration);
 
         if (_hasActiveClip == false || _crossFadeDuration <= 0f)
         {
-            CompleteImmediate(nextInput, key);
+            CompleteImmediate(key, clip, state);
             return;
         }
 
-        _fadingInput = nextInput;
+        _fadingKey = key;
+        _fadingClip = clip;
+        _fadingState = state;
         _fadeElapsed = 0f;
         _fadeDuration = _crossFadeDuration;
         _currentKey = key;
         _isFading = true;
-        _mixer.SetInputWeight(_fadingInput, 0f);
     }
 
     public void Tick(float deltaTime)
     {
-        if (_isFading == false || _mixer.IsValid() == false)
+        if (_isFading == false)
         {
             return;
         }
 
         _fadeElapsed += Mathf.Max(0f, deltaTime);
         float weight = _fadeDuration <= 0f ? 1f : Mathf.Clamp01(_fadeElapsed / _fadeDuration);
-
-        _mixer.SetInputWeight(_activeInput, 1f - weight);
-        _mixer.SetInputWeight(_fadingInput, weight);
 
         if (weight >= 1f)
         {
@@ -89,45 +84,44 @@ internal sealed class FirstPersonLegsAnimationPlayer : IDisposable
 
     public void Dispose()
     {
-        if (_graph.IsValid())
+        if (_animancer != null && _animancer.IsGraphInitialized)
         {
-            _graph.Destroy();
+            _animancer.Graph.Destroy();
         }
 
         _hasActiveClip = false;
         _isFading = false;
+        _activeState = null;
+        _fadingState = null;
+        _activeClip = null;
+        _fadingClip = null;
     }
 
-    private void EnsureGraph()
+    private void EnsureAnimancer()
     {
-        if (_graph.IsValid())
+        if (_animancer != null)
         {
             return;
         }
 
-        _graph = PlayableGraph.Create($"{_animator.name} First Person Legs");
-        _graph.SetTimeUpdateMode(DirectorUpdateMode.GameTime);
+        if (_animator.TryGetComponent(out _animancer) == false)
+        {
+            _animancer = _animator.gameObject.AddComponent<AnimancerComponent>();
+        }
 
-        _mixer = AnimationMixerPlayable.Create(_graph, INPUT_COUNT);
-        AnimationPlayableOutput output = AnimationPlayableOutput.Create(_graph, "First Person Legs", _animator);
-        output.SetSourcePlayable(_mixer);
-
-        _graph.Play();
+        _animancer.Animator = _animator;
     }
 
-    private void SetClip(int inputIndex, AnimationClip clip, FirstPersonLegsAnimationKey key, double startTime)
+    private AnimancerState PlayClip(AnimationClip clip, double startTime, float fadeDuration)
     {
-        DisconnectInput(inputIndex);
+        AnimancerState state = fadeDuration <= 0f
+            ? _animancer.Play(clip)
+            : _animancer.Play(clip, fadeDuration, FadeMode.FixedDuration);
 
-        AnimationClipPlayable playable = AnimationClipPlayable.Create(_graph, clip);
-        playable.SetTime(startTime);
-        playable.SetSpeed(1d);
-        playable.SetApplyFootIK(false);
-
-        _clipPlayables[inputIndex] = playable;
-        _inputClips[inputIndex] = clip;
-        _inputKeys[inputIndex] = key;
-        _graph.Connect(playable, 0, _mixer, inputIndex);
+        state.ApplyFootIK = false;
+        state.TimeD = startTime;
+        state.Speed = 1f;
+        return state;
     }
 
     private double GetStartTime(FirstPersonLegsAnimationKey nextKey, AnimationClip nextClip)
@@ -137,83 +131,81 @@ internal sealed class FirstPersonLegsAnimationPlayer : IDisposable
             return 0d;
         }
 
-        int sourceInput = GetDominantInput();
-        FirstPersonLegsAnimationKey sourceKey = _inputKeys[sourceInput];
+        FirstPersonLegsAnimationKey sourceKey = GetDominantKey();
 
         if (CanSynchronizePhase(sourceKey, nextKey) == false)
         {
             return 0d;
         }
 
-        AnimationClip sourceClip = _inputClips[sourceInput];
+        AnimationClip sourceClip = GetDominantClip();
+        AnimancerState sourceState = GetDominantState();
 
-        if (sourceClip == null || nextClip == null || sourceClip.length <= 0f || nextClip.length <= 0f || _clipPlayables[sourceInput].IsValid() == false)
+        if (sourceClip == null || nextClip == null || sourceClip.length <= 0f || nextClip.length <= 0f || sourceState == null)
         {
             return 0d;
         }
 
-        double normalizedTime = _clipPlayables[sourceInput].GetTime() / sourceClip.length;
+        double normalizedTime = sourceState.TimeD / sourceClip.length;
         normalizedTime -= Math.Floor(normalizedTime);
 
         return normalizedTime * nextClip.length;
     }
 
-    private int GetDominantInput()
+    private FirstPersonLegsAnimationKey GetDominantKey()
     {
-        if (_isFading == false || _mixer.IsValid() == false)
+        if (_isFading == false)
         {
-            return _activeInput;
+            return _activeKey;
         }
 
-        return _mixer.GetInputWeight(_fadingInput) > _mixer.GetInputWeight(_activeInput) ? _fadingInput : _activeInput;
+        return GetFadeWeight() > 0.5f ? _fadingKey : _activeKey;
     }
 
-    private void CompleteImmediate(int inputIndex, FirstPersonLegsAnimationKey key)
+    private AnimationClip GetDominantClip()
     {
-        if (_hasActiveClip && inputIndex != _activeInput)
+        if (_isFading == false)
         {
-            DisconnectInput(_activeInput);
+            return _activeClip;
         }
 
-        _activeInput = inputIndex;
+        return GetFadeWeight() > 0.5f ? _fadingClip : _activeClip;
+    }
+
+    private AnimancerState GetDominantState()
+    {
+        if (_isFading == false)
+        {
+            return _activeState;
+        }
+
+        return GetFadeWeight() > 0.5f ? _fadingState : _activeState;
+    }
+
+    private float GetFadeWeight() => _fadeDuration <= 0f ? 1f : Mathf.Clamp01(_fadeElapsed / _fadeDuration);
+
+    private void CompleteImmediate(FirstPersonLegsAnimationKey key, AnimationClip clip, AnimancerState state)
+    {
+        _activeKey = key;
+        _activeClip = clip;
+        _activeState = state;
         _currentKey = key;
         _hasActiveClip = true;
         _isFading = false;
-
-        for (int i = 0; i < INPUT_COUNT; i++)
-        {
-            _mixer.SetInputWeight(i, i == _activeInput ? 1f : 0f);
-        }
+        _fadingClip = null;
+        _fadingState = null;
     }
 
     private void CompleteFade()
     {
-        DisconnectInput(_activeInput);
-        _activeInput = _fadingInput;
+        _activeKey = _fadingKey;
+        _activeClip = _fadingClip;
+        _activeState = _fadingState;
+        _currentKey = _activeKey;
         _hasActiveClip = true;
         _isFading = false;
-
-        for (int i = 0; i < INPUT_COUNT; i++)
-        {
-            _mixer.SetInputWeight(i, i == _activeInput ? 1f : 0f);
-        }
-    }
-
-    private void DisconnectInput(int inputIndex)
-    {
-        if (_mixer.IsValid())
-        {
-            _mixer.DisconnectInput(inputIndex);
-            _mixer.SetInputWeight(inputIndex, 0f);
-        }
-
-        if (_clipPlayables[inputIndex].IsValid())
-        {
-            _clipPlayables[inputIndex].Destroy();
-        }
-
-        _inputClips[inputIndex] = null;
-        _inputKeys[inputIndex] = default;
+        _fadingClip = null;
+        _fadingState = null;
     }
 
     private static bool CanSynchronizePhase(FirstPersonLegsAnimationKey sourceKey, FirstPersonLegsAnimationKey targetKey)

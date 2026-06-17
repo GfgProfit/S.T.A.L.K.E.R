@@ -12,6 +12,13 @@ public sealed class WeaponData : ScriptableObject
     [SerializeField] [Min(0)] private int _reloadFullAmmoApplyFrame;
     [SerializeField] private List<ItemData> _compatibleAmmo = new();
 
+    [Header("Recoil")]
+    [SerializeField] [Min(0f)] private float _recoilX = 2f;
+    [SerializeField] [Min(0f)] private float _recoilY = 1f;
+    [SerializeField] [Min(0f)] private float _recoilZ = 0.2f;
+    [SerializeField] [Min(0f)] private float _recoilReturnSpeed = 8f;
+    [SerializeField] [Min(0f)] private float _recoilSnappiness = 16f;
+
     public int MagazineCapacity => Mathf.Max(1, _magazineCapacity);
     public int DurabilityShotsResource => Mathf.Max(1, _durabilityShotsResource);
     public float DurabilityPercentPerShot => 100f / DurabilityShotsResource;
@@ -20,6 +27,11 @@ public sealed class WeaponData : ScriptableObject
     public WeaponFireMode FireMode => _fireMode;
     public IReadOnlyList<ItemData> CompatibleAmmo => _compatibleAmmo;
     public bool HasCompatibleAmmo => _compatibleAmmo != null && _compatibleAmmo.Count > 0;
+    public float RecoilX => Mathf.Max(0f, _recoilX);
+    public float RecoilY => Mathf.Max(0f, _recoilY);
+    public float RecoilZ => Mathf.Max(0f, _recoilZ);
+    public float RecoilReturnSpeed => Mathf.Max(0f, _recoilReturnSpeed);
+    public float RecoilSnappiness => Mathf.Max(0f, _recoilSnappiness);
 
     private void OnValidate()
     {
@@ -28,6 +40,11 @@ public sealed class WeaponData : ScriptableObject
         _fireRateRoundsPerMinute = Mathf.Max(1, _fireRateRoundsPerMinute);
         _reloadAmmoApplyFrame = Mathf.Max(0, _reloadAmmoApplyFrame);
         _reloadFullAmmoApplyFrame = Mathf.Max(0, _reloadFullAmmoApplyFrame);
+        _recoilX = Mathf.Max(0f, _recoilX);
+        _recoilY = Mathf.Max(0f, _recoilY);
+        _recoilZ = Mathf.Max(0f, _recoilZ);
+        _recoilReturnSpeed = Mathf.Max(0f, _recoilReturnSpeed);
+        _recoilSnappiness = Mathf.Max(0f, _recoilSnappiness);
     }
 
     public int GetReloadAmmoApplyFrame(bool fullReload) => fullReload ? Mathf.Max(0, _reloadFullAmmoApplyFrame) : Mathf.Max(0, _reloadAmmoApplyFrame);
