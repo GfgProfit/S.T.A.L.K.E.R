@@ -29,6 +29,22 @@ MonoBehaviour:
   _useDurability: 0
   _defaultDurabilityPercent: 100
   _canEquipHelmet: 1
+  _ammoFleshDamage: 0
+  _ammoArmorPenetration: 0
+  _ammoBulletVelocityMetersPerSecondFallback: 828
+  _ammoBulletMassGrams: 9.4
+  _ammoBulletDiameterMillimeters: 7.92
+  _ammoBulletDragCoefficient: 0.27
+  _ammoRicochetChance: 0.5
+  _ammoWeaponRecoilPercentModifier: 0
+  _ammoWeaponAccuracyPercentModifier: 0
+  _ammoWeaponAccuracyPenaltyPercentModifier: 0
+  _ammoWeaponDurabilityLossPercentModifier: 0
+  _firstPersonLegsMeshName: 
+  _firstPersonHandsMeshName: 
+  _firstPersonWeaponPrefab: {fileID: 0}
+  _firstPersonWeaponSpawnScale: {x: 1, y: 1, z: 1}
+  _weaponData: {fileID: 0}
   _statModifiers: []
   _worldItemPrefab: {fileID: 6046133466127159984, guid: 060943d1e32e980498ab4290d0dd7113, type: 3}
   _width: 2

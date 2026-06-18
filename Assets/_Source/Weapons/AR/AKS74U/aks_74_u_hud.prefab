@@ -4745,6 +4745,37 @@ Transform:
   - {fileID: 6669131057020975170}
   m_Father: {fileID: 4089729159858101878}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!1 &2749154357566298305
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 7793870008397231018}
+  m_Layer: 0
+  m_Name: MUZZLE
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &7793870008397231018
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2749154357566298305}
+  serializedVersion: 2
+  m_LocalRotation: {x: -0.0000000027939677, y: -1, z: -0.000000029220246, w: 0.000000055879354}
+  m_LocalPosition: {x: 0, y: 0.0104, z: -0.5836}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 4015449409940446236}
+  m_LocalEulerAnglesHint: {x: 0, y: -180, z: 0}
 --- !u!1 &2766036844961885083
 GameObject:
   m_ObjectHideFlags: 0
@@ -7208,6 +7239,7 @@ Transform:
   - {fileID: 8640557211008178164}
   - {fileID: 3738297256602010291}
   - {fileID: 8237143155340321773}
+  - {fileID: 7793870008397231018}
   m_Father: {fileID: 7000059758659270980}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &4272143534551186418
@@ -13967,6 +13999,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 8b5cb5953fc94e7a9f6df8057b2b4907, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::FirstPersonWeaponRuntimeController
+  _muzzle: {fileID: 7793870008397231018}
 --- !u!1 &7941712757134899504
 GameObject:
   m_ObjectHideFlags: 0

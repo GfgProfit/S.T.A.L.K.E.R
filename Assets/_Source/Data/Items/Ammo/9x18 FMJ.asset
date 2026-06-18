@@ -31,6 +31,11 @@ MonoBehaviour:
   _useDurability: 0
   _defaultDurabilityPercent: 100
   _canEquipHelmet: 1
+  _ammoBulletVelocityMetersPerSecondFallback: 315
+  _ammoBulletMassGrams: 6.1
+  _ammoBulletDiameterMillimeters: 9.27
+  _ammoBulletDragCoefficient: 0.36
+  _ammoRicochetChance: 0.18
   _firstPersonLegsMeshName: 
   _firstPersonHandsMeshName: 
   _firstPersonWeaponPrefab: {fileID: 0}

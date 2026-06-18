@@ -32,6 +32,11 @@ MonoBehaviour:
   _useDurability: 0
   _defaultDurabilityPercent: 100
   _canEquipHelmet: 1
+  _ammoBulletVelocityMetersPerSecondFallback: 410
+  _ammoBulletMassGrams: 5.5
+  _ammoBulletDiameterMillimeters: 9.27
+  _ammoBulletDragCoefficient: 0.37
+  _ammoRicochetChance: 0.24
   _statModifiers: []
   _worldItemPrefab: {fileID: 8185805837017162338, guid: 30912c06eec5aac49a3af594fa29b61b, type: 3}
   _width: 1

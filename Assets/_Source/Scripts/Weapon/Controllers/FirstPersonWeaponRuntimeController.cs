@@ -10,6 +10,9 @@ public sealed class FirstPersonWeaponRuntimeController : MonoBehaviour
     private const float CROUCH_WALK_ANIMATION_SPEED = 0.5f;
     private const string WEAPON_RECOIL_OBJECT_NAME = "Weapon Recoil";
     private const string WEAPON_RECOIL_OBJECT_NAME_COMPACT = "WeaponRecoil";
+    private const string MUZZLE_OBJECT_NAME = "Muzzle";
+
+    [SerializeField] private Transform _muzzle;
 
     private InventoryItem _weaponItem;
     private ItemData _weaponItemData;
@@ -36,6 +39,7 @@ public sealed class FirstPersonWeaponRuntimeController : MonoBehaviour
     private bool _isAiming;
     private bool _sprintBlockedByAim;
     private bool _reloadAmmoApplied;
+    private bool _ballisticConfigurationErrorLogged;
 
     public ItemData RequestedAmmoData => _requestedAmmoData;
     public ItemData LoadedAmmoData => _loadedAmmoData;
@@ -55,6 +59,7 @@ public sealed class FirstPersonWeaponRuntimeController : MonoBehaviour
         _playerInput = playerInput;
         _ammoHudViewModel = ammoHudViewModel;
         _animationController = GetComponent<FirstPersonWeaponController>();
+        _muzzle = FindMuzzleTransform();
         _cameraAllAnimationController = FindCameraAllAnimationController();
         _cameraAllAnimationController?.SetAimActive(false);
         _animationController?.SetAimRootPositionOffsetActive(false, true);
@@ -70,6 +75,7 @@ public sealed class FirstPersonWeaponRuntimeController : MonoBehaviour
         _isReloading = false;
         _isAiming = false;
         _reloadAmmoApplied = false;
+        _ballisticConfigurationErrorLogged = false;
         _initialized = _weaponData != null;
 
         _animationController?.SetCondition(_loadedAmmoAmount > 0 ? WeaponCondition.Normal : WeaponCondition.Empty);
@@ -161,6 +167,13 @@ public sealed class FirstPersonWeaponRuntimeController : MonoBehaviour
         {
             PlayDryEmptyAnimation();
             return true;
+        }
+
+        ItemData firedAmmoData = _loadedAmmoData;
+
+        if (TrySpawnProjectile(firedAmmoData) == false)
+        {
+            return false;
         }
 
         bool isLastRound = _loadedAmmoAmount == 1;
@@ -701,6 +714,89 @@ public sealed class FirstPersonWeaponRuntimeController : MonoBehaviour
         }
 
         return null;
+    }
+
+    private Transform FindMuzzleTransform()
+    {
+        if (_muzzle != null)
+        {
+            return _muzzle;
+        }
+
+        Transform[] childTransforms = GetComponentsInChildren<Transform>(true);
+
+        for (int i = 0; i < childTransforms.Length; i++)
+        {
+            if (childTransforms[i].name == MUZZLE_OBJECT_NAME)
+            {
+                return childTransforms[i];
+            }
+        }
+
+        return null;
+    }
+
+    private bool TrySpawnProjectile(ItemData ammoData)
+    {
+        _muzzle = FindMuzzleTransform();
+
+        if (_muzzle == null)
+        {
+            return ReportBallisticConfigurationError($"Runtime weapon requires a {MUZZLE_OBJECT_NAME} transform at the barrel end.");
+        }
+
+        if (_weaponData.BulletPrefab == null)
+        {
+            return ReportBallisticConfigurationError($"{_weaponData.name} has no bullet prefab assigned.");
+        }
+
+        float bulletVelocity = _weaponData.GetBulletVelocityMetersPerSecond(ammoData);
+
+        if (bulletVelocity <= 0f)
+        {
+            return ReportBallisticConfigurationError($"{ammoData?.name ?? "Loaded ammo"} has no bullet velocity for {_weaponData.name}.");
+        }
+
+        GameObject projectileObject = Instantiate(_weaponData.BulletPrefab, _muzzle.position, _muzzle.rotation);
+        BallisticProjectile projectile = projectileObject.GetComponent<BallisticProjectile>();
+
+        if (projectile == null)
+        {
+            projectile = projectileObject.AddComponent<BallisticProjectile>();
+        }
+
+        projectile.enabled = true;
+        projectile.Initialize(
+            _weaponData,
+            ammoData,
+            _muzzle.position,
+            _muzzle.forward,
+            bulletVelocity,
+            ResolveBallisticOwnerRoot(),
+            transform);
+        return true;
+    }
+
+    private bool ReportBallisticConfigurationError(string message)
+    {
+        if (_ballisticConfigurationErrorLogged == false)
+        {
+            Debug.LogError($"[{nameof(FirstPersonWeaponRuntimeController)}] {message}", this);
+            _ballisticConfigurationErrorLogged = true;
+        }
+
+        return false;
+    }
+
+    private Transform ResolveBallisticOwnerRoot()
+    {
+        if (_playerController != null)
+        {
+            return _playerController.transform;
+        }
+
+        FirstPersonWeaponHolderController weaponHolder = GetComponentInParent<FirstPersonWeaponHolderController>();
+        return weaponHolder == null ? null : weaponHolder.transform;
     }
 
     private FirstPersonCameraAllAnimationController FindCameraAllAnimationController()

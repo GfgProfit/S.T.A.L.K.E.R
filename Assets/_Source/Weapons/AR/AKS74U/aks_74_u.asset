@@ -47,7 +47,7 @@ MonoBehaviour:
   _canEquipHelmet: 1
   _ammoFleshDamage: 0
   _ammoArmorPenetration: 0
-  _ammoBulletVelocityMetersPerSecond: 0
+  _ammoBulletVelocityMetersPerSecondFallback: 0
   _ammoWeaponRecoilPercentModifier: 0
   _ammoWeaponAccuracyPercentModifier: 0
   _ammoWeaponAccuracyPenaltyPercentModifier: 0

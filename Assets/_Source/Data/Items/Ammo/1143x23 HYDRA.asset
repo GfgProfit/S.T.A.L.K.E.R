@@ -10,10 +10,10 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 737e751cd05516846acf43daad139c9e, type: 3}
-  m_Name: 1143x23 HYDRO
+  m_Name: 1143x23 HYDRA
   m_EditorClassIdentifier: 
-  _itemName: .45 ACP Hydroshock
-  _shortName: Hydro
+  _itemName: .45 ACP Hydra-Shok
+  _shortName: Hydra
   _description: "\u041D\u0435\u0441\u0442\u0430\u043D\u0434\u0430\u0440\u0442\u043D\u044B\u0439
     \u0442\u0438\u043F \u043F\u0430\u0442\u0440\u043E\u043D\u0430 \u0434\u043B\u044F
     \u043A\u0430\u043B\u0438\u0431\u0440\u0430 .45 ACP \u2014 \u043F\u043E\u043B\u0443\u043E\u0431\u043E\u043B\u043E\u0447\u0435\u0447\u043D\u0430\u044F
@@ -34,6 +34,22 @@ MonoBehaviour:
   _useDurability: 0
   _defaultDurabilityPercent: 100
   _canEquipHelmet: 1
+  _ammoFleshDamage: 0
+  _ammoArmorPenetration: 0
+  _ammoBulletVelocityMetersPerSecondFallback: 320
+  _ammoBulletMassGrams: 14.9
+  _ammoBulletDiameterMillimeters: 11.45
+  _ammoBulletDragCoefficient: 0.4
+  _ammoRicochetChance: 0.02
+  _ammoWeaponRecoilPercentModifier: 0
+  _ammoWeaponAccuracyPercentModifier: 0
+  _ammoWeaponAccuracyPenaltyPercentModifier: 0
+  _ammoWeaponDurabilityLossPercentModifier: 0
+  _firstPersonLegsMeshName: 
+  _firstPersonHandsMeshName: 
+  _firstPersonWeaponPrefab: {fileID: 0}
+  _firstPersonWeaponSpawnScale: {x: 1, y: 1, z: 1}
+  _weaponData: {fileID: 0}
   _statModifiers: []
   _worldItemPrefab: {fileID: 3980600615778522225, guid: 9bf30ab758ebaaa4e97428b2a798b89b, type: 3}
   _width: 1

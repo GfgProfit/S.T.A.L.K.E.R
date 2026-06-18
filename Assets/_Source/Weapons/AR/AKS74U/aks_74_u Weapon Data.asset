@@ -19,8 +19,28 @@ MonoBehaviour:
   _reloadAmmoApplyFrame: 530
   _reloadFullAmmoApplyFrame: 700
   _compatibleAmmo:
-  - {fileID: 11400000, guid: 0921ba32c21f58e479afd8ec656e6d4d, type: 2}
-  - {fileID: 11400000, guid: a5dcd94f92e8dd949b78c4d4733b76cb, type: 2}
+  - _ammoData: {fileID: 11400000, guid: 0921ba32c21f58e479afd8ec656e6d4d, type: 2}
+    _bulletVelocityMetersPerSecondOverride: 735
+  - _ammoData: {fileID: 11400000, guid: a5dcd94f92e8dd949b78c4d4733b76cb, type: 2}
+    _bulletVelocityMetersPerSecondOverride: 750
+  _bulletPrefab: {fileID: 9140050282074990077, guid: 675c1b0c73b6e5f4bbaec433b5278638, type: 3}
+  _ballisticHitMask:
+    serializedVersion: 2
+    m_Bits: 4294967227
+  _ballisticCollisionRadiusMeters: 0
+  _ballisticSimulationStepSeconds: 0.004166667
+  _ballisticMaxSimulationStepsPerFrame: 64
+  _ballisticMaxLifetimeSeconds: 10
+  _ballisticMaxDistanceMeters: 2000
+  _ballisticGravityScale: 1
+  _useAirResistance: 1
+  _airDensityKilogramsPerCubicMeter: 1.225
+  _enableRicochet: 1
+  _ricochetMinimumIncidenceAngleDegrees: 70
+  _ricochetSpeedRetention: 0.55
+  _ricochetSurfaceOffsetMeters: 0.002
+  _drawBallisticDebug: 1
+  _ballisticDebugDurationSeconds: 5
   _recoilX: 4
   _recoilY: 3
   _recoilZ: 0.3

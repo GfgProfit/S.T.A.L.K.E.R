@@ -17,7 +17,11 @@ public class ItemData : ScriptableObject
     [SerializeField] [BoxGroup("Equipment")] [ShowIf(nameof(IsArmor))] private bool _canEquipHelmet = true;
     [SerializeField] [BoxGroup("Ammo")] [ShowIf(nameof(IsAmmo))] [Min(0f)] private float _ammoFleshDamage;
     [SerializeField] [BoxGroup("Ammo")] [ShowIf(nameof(IsAmmo))] [Min(0f)] private float _ammoArmorPenetration;
-    [SerializeField] [BoxGroup("Ammo")] [ShowIf(nameof(IsAmmo))] [Min(0f)] private float _ammoBulletVelocityMetersPerSecond;
+    [SerializeField] [BoxGroup("Ammo/Ballistics")] [ShowIf(nameof(IsAmmo))] [Min(0f)] private float _ammoBulletVelocityMetersPerSecondFallback;
+    [SerializeField] [BoxGroup("Ammo/Ballistics")] [ShowIf(nameof(IsAmmo))] [Min(0f)] private float _ammoBulletMassGrams;
+    [SerializeField] [BoxGroup("Ammo/Ballistics")] [ShowIf(nameof(IsAmmo))] [Min(0f)] private float _ammoBulletDiameterMillimeters;
+    [SerializeField] [BoxGroup("Ammo/Ballistics")] [ShowIf(nameof(IsAmmo))] [Min(0f)] private float _ammoBulletDragCoefficient;
+    [SerializeField] [BoxGroup("Ammo/Ballistics")] [ShowIf(nameof(IsAmmo))] [Range(0f, 1f)] private float _ammoRicochetChance;
     [SerializeField] [BoxGroup("Ammo")] [ShowIf(nameof(IsAmmo))] private float _ammoWeaponRecoilPercentModifier;
     [SerializeField] [BoxGroup("Ammo")] [ShowIf(nameof(IsAmmo))] private float _ammoWeaponAccuracyPercentModifier;
     [SerializeField] [BoxGroup("Ammo")] [ShowIf(nameof(IsAmmo))] private float _ammoWeaponAccuracyPenaltyPercentModifier;
@@ -75,7 +79,11 @@ public class ItemData : ScriptableObject
     public bool CanEquipHelmet => _canEquipHelmet;
     public float AmmoFleshDamage => Mathf.Max(0f, _ammoFleshDamage);
     public float AmmoArmorPenetration => Mathf.Max(0f, _ammoArmorPenetration);
-    public float AmmoBulletVelocityMetersPerSecond => Mathf.Max(0f, _ammoBulletVelocityMetersPerSecond);
+    public float AmmoBulletVelocityMetersPerSecondFallback => Mathf.Max(0f, _ammoBulletVelocityMetersPerSecondFallback);
+    public float AmmoBulletMassKilograms => Mathf.Max(0f, _ammoBulletMassGrams) * 0.001f;
+    public float AmmoBulletDiameterMeters => Mathf.Max(0f, _ammoBulletDiameterMillimeters) * 0.001f;
+    public float AmmoBulletDragCoefficient => Mathf.Max(0f, _ammoBulletDragCoefficient);
+    public float AmmoRicochetChance => Mathf.Clamp01(_ammoRicochetChance);
     public float AmmoWeaponRecoilPercentModifier => _ammoWeaponRecoilPercentModifier;
     public float AmmoWeaponAccuracyPercentModifier => _ammoWeaponAccuracyPercentModifier;
     public float AmmoWeaponAccuracyPenaltyPercentModifier => _ammoWeaponAccuracyPenaltyPercentModifier;
@@ -211,7 +219,11 @@ public class ItemData : ScriptableObject
         _firstPersonWeaponSpawnScale = _firstPersonWeaponSpawnScale == Vector3.zero ? Vector3.one : _firstPersonWeaponSpawnScale;
         _ammoFleshDamage = Mathf.Max(0f, _ammoFleshDamage);
         _ammoArmorPenetration = Mathf.Max(0f, _ammoArmorPenetration);
-        _ammoBulletVelocityMetersPerSecond = Mathf.Max(0f, _ammoBulletVelocityMetersPerSecond);
+        _ammoBulletVelocityMetersPerSecondFallback = Mathf.Max(0f, _ammoBulletVelocityMetersPerSecondFallback);
+        _ammoBulletMassGrams = Mathf.Max(0f, _ammoBulletMassGrams);
+        _ammoBulletDiameterMillimeters = Mathf.Max(0f, _ammoBulletDiameterMillimeters);
+        _ammoBulletDragCoefficient = Mathf.Max(0f, _ammoBulletDragCoefficient);
+        _ammoRicochetChance = Mathf.Clamp01(_ammoRicochetChance);
     }
 
     public Sprite GetIcon(IReadOnlyList<ItemIconPart> runtimeIconParts = null)
