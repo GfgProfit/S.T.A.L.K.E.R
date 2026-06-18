@@ -18,6 +18,7 @@ public sealed class BallisticProjectile : MonoBehaviour
     private float _simulationAccumulator;
     private float _elapsedLifetime;
     private float _distanceTravelled;
+    private BallisticTracerView _tracerView;
     private bool _initialized;
 
     public Vector3 Velocity => _velocity;
@@ -47,6 +48,8 @@ public sealed class BallisticProjectile : MonoBehaviour
             Destroy(gameObject);
             return;
         }
+
+        _tracerView = BallisticTracerView.Create(_ammoData, _position);
 
         if (_weaponData.DrawBallisticDebug)
         {
@@ -86,6 +89,7 @@ public sealed class BallisticProjectile : MonoBehaviour
 
         if (_elapsedLifetime >= _weaponData.BallisticMaxLifetimeSeconds || _distanceTravelled >= _weaponData.BallisticMaxDistanceMeters)
         {
+            CompleteTracer();
             Destroy(gameObject);
             return false;
         }
@@ -95,6 +99,7 @@ public sealed class BallisticProjectile : MonoBehaviour
         if (IsFinite(nextPosition) == false || IsFinite(nextVelocity) == false)
         {
             Debug.LogError($"[{nameof(BallisticProjectile)}] Simulation produced a non-finite trajectory. Check ballistic mass, diameter, drag and velocity settings.", this);
+            CompleteTracer();
             Destroy(gameObject);
             return false;
         }
@@ -113,6 +118,7 @@ public sealed class BallisticProjectile : MonoBehaviour
             float impactFraction = Mathf.Clamp01(hit.distance / travelDistance);
             Vector3 impactVelocity = Vector3.Lerp(_velocity, nextVelocity, impactFraction);
             _distanceTravelled += hit.distance;
+            MoveTracer(hit.point);
 
             if (_weaponData.DrawBallisticDebug)
             {
@@ -131,6 +137,7 @@ public sealed class BallisticProjectile : MonoBehaviour
         _position = nextPosition;
         _velocity = nextVelocity;
         transform.SetPositionAndRotation(_position, ResolveRotation(_velocity, transform.rotation));
+        MoveTracer(_position);
         return true;
     }
 
@@ -147,6 +154,7 @@ public sealed class BallisticProjectile : MonoBehaviour
             _position = penetrationResult.ExitPosition + exitDirection * offset;
             _velocity = penetrationResult.ExitVelocity;
             transform.SetPositionAndRotation(_position, ResolveRotation(_velocity, transform.rotation));
+            MoveTracer(_position);
 
             if (_weaponData.DrawBallisticDebug)
             {
@@ -169,6 +177,7 @@ public sealed class BallisticProjectile : MonoBehaviour
             DrawMarker(_position, IMPACT_DEBUG_SIZE, Color.red);
         }
 
+        CompleteTracer();
         Destroy(gameObject);
         return false;
     }
@@ -197,6 +206,7 @@ public sealed class BallisticProjectile : MonoBehaviour
         _position = hit.point + hit.normal * Mathf.Max(_weaponData.RicochetSurfaceOffsetMeters, 0.0001f);
         _velocity = reflectedVelocity;
         transform.SetPositionAndRotation(_position, ResolveRotation(_velocity, transform.rotation));
+        MoveTracer(_position);
 
         if (_weaponData.DrawBallisticDebug)
         {
@@ -326,6 +336,28 @@ public sealed class BallisticProjectile : MonoBehaviour
             rigidbodies[i].useGravity = false;
             rigidbodies[i].isKinematic = true;
         }
+    }
+
+    private void OnDestroy()
+    {
+        CompleteTracer();
+    }
+
+    private void MoveTracer(Vector3 position)
+    {
+        // The tracer consumes resolved ballistic positions and never participates in collision queries.
+        _tracerView?.MoveTo(position, _distanceTravelled, _elapsedLifetime);
+    }
+
+    private void CompleteTracer()
+    {
+        if (_tracerView == null)
+        {
+            return;
+        }
+
+        _tracerView.Complete();
+        _tracerView = null;
     }
 
     private void DrawMarker(Vector3 position, float size, Color color)

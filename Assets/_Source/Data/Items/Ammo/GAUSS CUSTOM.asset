@@ -31,6 +31,30 @@ MonoBehaviour:
   _useDurability: 0
   _defaultDurabilityPercent: 100
   _canEquipHelmet: 1
+  _ammoFleshDamage: 0
+  _ammoArmorPenetration: 0
+  _ammoBulletVelocityMetersPerSecondFallback: 2200
+  _ammoBulletMassGrams: 4.5
+  _ammoBulletDiameterMillimeters: 3.2
+  _ammoBulletDragCoefficient: 0.18
+  _ammoRicochetChance: 0.45
+  _ammoTracerEnabled: 1
+  _ammoTracerMaterial: {fileID: 2100000, guid: c3f23a18333449a688dfc526f601f118, type: 2}
+  _ammoTracerColor: {r: 0.019607842, g: 0.2885316, b: 1, a: 1}
+  _ammoTracerWidthMeters: 0.2
+  _ammoTracerTrailDurationSeconds: 0.02
+  _ammoTracerIgnitionDistanceMeters: 2
+  _ammoTracerBurnDurationSeconds: 3
+  _ammoTracerEmissionIntensity: 10
+  _ammoWeaponRecoilPercentModifier: 0
+  _ammoWeaponAccuracyPercentModifier: 0
+  _ammoWeaponAccuracyPenaltyPercentModifier: 0
+  _ammoWeaponDurabilityLossPercentModifier: 0
+  _firstPersonLegsMeshName: 
+  _firstPersonHandsMeshName: 
+  _firstPersonWeaponPrefab: {fileID: 0}
+  _firstPersonWeaponSpawnScale: {x: 1, y: 1, z: 1}
+  _weaponData: {fileID: 0}
   _statModifiers: []
   _worldItemPrefab: {fileID: 919014018468211934, guid: fba15402e5d99fa4c8a82c05b3fdcf78, type: 3}
   _width: 1

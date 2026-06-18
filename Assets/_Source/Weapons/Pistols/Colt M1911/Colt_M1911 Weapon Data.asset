@@ -14,7 +14,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::WeaponData
   _magazineCapacity: 7
   _durabilityShotsResource: 1200
-  _fireRateRoundsPerMinute: 450
+  _fireRateRoundsPerMinute: 600
   _fireMode: 0
   _reloadAmmoApplyFrame: 480
   _reloadFullAmmoApplyFrame: 413

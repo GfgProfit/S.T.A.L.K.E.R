@@ -23,6 +23,42 @@ MonoBehaviour:
     _bulletVelocityMetersPerSecondOverride: 735
   - _ammoData: {fileID: 11400000, guid: a5dcd94f92e8dd949b78c4d4733b76cb, type: 2}
     _bulletVelocityMetersPerSecondOverride: 750
+  - _ammoData: {fileID: 11400000, guid: d588af4cd4f839245acb1f06f96c46cd, type: 2}
+    _bulletVelocityMetersPerSecondOverride: 0
+  - _ammoData: {fileID: 11400000, guid: af5922a987e4c3f44b98a9e179a88100, type: 2}
+    _bulletVelocityMetersPerSecondOverride: 0
+  - _ammoData: {fileID: 11400000, guid: f23c0e75209c7ae4ba667e94571eb98f, type: 2}
+    _bulletVelocityMetersPerSecondOverride: 0
+  - _ammoData: {fileID: 11400000, guid: 63592a545a540b6499e112abd5a519f7, type: 2}
+    _bulletVelocityMetersPerSecondOverride: 0
+  - _ammoData: {fileID: 11400000, guid: c1a8239caad8ce0428121a07f9bef6d8, type: 2}
+    _bulletVelocityMetersPerSecondOverride: 0
+  - _ammoData: {fileID: 11400000, guid: 1f47ae8515a532f4081e1434c5b110ce, type: 2}
+    _bulletVelocityMetersPerSecondOverride: 0
+  - _ammoData: {fileID: 11400000, guid: f6aa0f59de773844c8774c57ff24d7f1, type: 2}
+    _bulletVelocityMetersPerSecondOverride: 0
+  - _ammoData: {fileID: 11400000, guid: 0a9eca98f392b924aa8c7e8b10a69885, type: 2}
+    _bulletVelocityMetersPerSecondOverride: 0
+  - _ammoData: {fileID: 11400000, guid: d1184077d177a5a44b425cfdd883d907, type: 2}
+    _bulletVelocityMetersPerSecondOverride: 0
+  - _ammoData: {fileID: 11400000, guid: ef0c02c6087ae1a418aa5e575182ec21, type: 2}
+    _bulletVelocityMetersPerSecondOverride: 0
+  - _ammoData: {fileID: 11400000, guid: e48dbac9531b3ea4a9c3dd49b6c42d31, type: 2}
+    _bulletVelocityMetersPerSecondOverride: 0
+  - _ammoData: {fileID: 11400000, guid: dacc3d680ea713a4b8c13bf7b15a7feb, type: 2}
+    _bulletVelocityMetersPerSecondOverride: 0
+  - _ammoData: {fileID: 11400000, guid: 88ebd74e9c392e045a140240ef85cfb0, type: 2}
+    _bulletVelocityMetersPerSecondOverride: 0
+  - _ammoData: {fileID: 11400000, guid: aba132c289ae47446841ee7f1fb63b4d, type: 2}
+    _bulletVelocityMetersPerSecondOverride: 0
+  - _ammoData: {fileID: 11400000, guid: 9281b10b7e5542e4b9a800e45e638d0c, type: 2}
+    _bulletVelocityMetersPerSecondOverride: 0
+  - _ammoData: {fileID: 11400000, guid: ba29e50dc010ef5489d15ac69eaf5fb7, type: 2}
+    _bulletVelocityMetersPerSecondOverride: 0
+  - _ammoData: {fileID: 11400000, guid: b982b7bcaa352b34aa433ecdf6c3a786, type: 2}
+    _bulletVelocityMetersPerSecondOverride: 0
+  - _ammoData: {fileID: 11400000, guid: 98f6f965a3d618f4a80dafd449c6f3b2, type: 2}
+    _bulletVelocityMetersPerSecondOverride: 0
   _bulletPrefab: {fileID: 9140050282074990077, guid: 675c1b0c73b6e5f4bbaec433b5278638, type: 3}
   _ballisticHitMask:
     serializedVersion: 2

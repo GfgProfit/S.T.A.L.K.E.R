@@ -41,6 +41,14 @@ MonoBehaviour:
   _ammoBulletDiameterMillimeters: 11.45
   _ammoBulletDragCoefficient: 0.4
   _ammoRicochetChance: 0.02
+  _ammoTracerEnabled: 1
+  _ammoTracerMaterial: {fileID: 2100000, guid: c3f23a18333449a688dfc526f601f118, type: 2}
+  _ammoTracerColor: {r: 1, g: 0.12, b: 0.02, a: 1}
+  _ammoTracerWidthMeters: 0.225
+  _ammoTracerTrailDurationSeconds: 0.025
+  _ammoTracerIgnitionDistanceMeters: 20
+  _ammoTracerBurnDurationSeconds: 1.5
+  _ammoTracerEmissionIntensity: 8
   _ammoWeaponRecoilPercentModifier: 0
   _ammoWeaponAccuracyPercentModifier: 0
   _ammoWeaponAccuracyPenaltyPercentModifier: 0
