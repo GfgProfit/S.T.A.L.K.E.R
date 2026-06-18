@@ -6710,6 +6710,7 @@ Transform:
   - {fileID: 3738297256602010291}
   - {fileID: 8237143155340321773}
   - {fileID: 7793870008397231018}
+  - {fileID: 7306850673869283597}
   m_Father: {fileID: 7000059758659270980}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &4272143534551186418
@@ -9779,6 +9780,59 @@ Transform:
   m_Children: []
   m_Father: {fileID: 4015449409940446236}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!1 &6230441801633537272
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 7306850673869283597}
+  - component: {fileID: 7000000000000000001}
+  m_Layer: 0
+  m_Name: shell_ejector
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &7306850673869283597
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6230441801633537272}
+  serializedVersion: 2
+  m_LocalRotation: {x: -0.0000000027939677, y: -1, z: -0.000000029220246, w: 0.000000055879354}
+  m_LocalPosition: {x: -0.0362, y: 0.0394, z: -0.1411}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 4015449409940446236}
+  m_LocalEulerAnglesHint: {x: 0, y: -180, z: 0}
+--- !u!114 &7000000000000000001
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6230441801633537272}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 4e1c39b9f0e745d9bc9837c936a2de77, type: 3}
+  m_Name:
+  m_EditorClassIdentifier: Assembly-CSharp::WeaponShellEjector
+  _shellPrefab: {fileID: 5096568820295910427, guid: e59c02eec580c234598dbb104b86d49e, type: 3}
+  _minimumLocalEjectionVelocity: {x: 1.75, y: 1.4, z: -0.4}
+  _maximumLocalEjectionVelocity: {x: 2.6, y: 2.2, z: 0.4}
+  _minimumLocalAngularVelocity: {x: -35, y: -35, z: -35}
+  _maximumLocalAngularVelocity: {x: 35, y: 35, z: 35}
+  _shellLifetimeSeconds: 12
+  _maximumAngularVelocity: 50
+  _inheritOwnerVelocity: 1
+  _ignoreOwnerCollisions: 1
 --- !u!1 &6271587153328747631
 GameObject:
   m_ObjectHideFlags: 0
@@ -14397,6 +14451,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::FirstPersonWeaponRuntimeController
   _muzzle: {fileID: 7793870008397231018}
+  _shellEjector: {fileID: 7000000000000000001}
 --- !u!1 &7966500466355514695
 GameObject:
   m_ObjectHideFlags: 0

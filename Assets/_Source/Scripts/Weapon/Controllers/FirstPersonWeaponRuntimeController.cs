@@ -13,6 +13,7 @@ public sealed class FirstPersonWeaponRuntimeController : MonoBehaviour
     private const string MUZZLE_OBJECT_NAME = "Muzzle";
 
     [SerializeField] private Transform _muzzle;
+    [SerializeField] private WeaponShellEjector _shellEjector;
 
     private InventoryItem _weaponItem;
     private ItemData _weaponItemData;
@@ -180,6 +181,7 @@ public sealed class FirstPersonWeaponRuntimeController : MonoBehaviour
         _nextShootTime = Time.time + _weaponData.SecondsBetweenShots;
         _loadedAmmoAmount--;
         ApplyDurabilityShotCost(firedAmmoData);
+        _shellEjector?.Eject();
 
         FirstPersonWeaponAnimationKey animationKey = _isAiming
             ? (isLastRound ? FirstPersonWeaponAnimationKey.AimShootLast : FirstPersonWeaponAnimationKey.AimShoot)

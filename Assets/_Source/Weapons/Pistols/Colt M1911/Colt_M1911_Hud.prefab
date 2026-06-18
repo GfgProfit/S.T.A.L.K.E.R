@@ -31,6 +31,59 @@ Transform:
   m_Children: []
   m_Father: {fileID: 997372272139229193}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!1 &129709224105484039
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 2996337171900117490}
+  - component: {fileID: 7000000000000000002}
+  m_Layer: 0
+  m_Name: shell_ejector
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &2996337171900117490
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 129709224105484039}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: -1, z: 0, w: 0}
+  m_LocalPosition: {x: 0.005, y: 0.1169, z: -0.2132}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 997372272139229193}
+  m_LocalEulerAnglesHint: {x: 0, y: -180, z: 0}
+--- !u!114 &7000000000000000002
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 129709224105484039}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 4e1c39b9f0e745d9bc9837c936a2de77, type: 3}
+  m_Name:
+  m_EditorClassIdentifier: Assembly-CSharp::WeaponShellEjector
+  _shellPrefab: {fileID: 1479859614106749825, guid: efb4041f00300f24fb57de4b654ea4bb, type: 3}
+  _minimumLocalEjectionVelocity: {x: 1.25, y: 1.1, z: -0.3}
+  _maximumLocalEjectionVelocity: {x: 2, y: 1.8, z: 0.3}
+  _minimumLocalAngularVelocity: {x: -30, y: -30, z: -30}
+  _maximumLocalAngularVelocity: {x: 30, y: 30, z: 30}
+  _shellLifetimeSeconds: 12
+  _maximumAngularVelocity: 50
+  _inheritOwnerVelocity: 1
+  _ignoreOwnerCollisions: 1
 --- !u!1 &165832044280026526
 GameObject:
   m_ObjectHideFlags: 0
@@ -2552,6 +2605,7 @@ Transform:
   m_ConstrainProportionsScale: 0
   m_Children:
   - {fileID: 5266183356716218734}
+  - {fileID: 2996337171900117490}
   - {fileID: 8871511013582120469}
   - {fileID: 3474096612423919381}
   - {fileID: 9180768433804013409}
@@ -2878,6 +2932,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::FirstPersonWeaponRuntimeController
   _muzzle: {fileID: 5266183356716218734}
+  _shellEjector: {fileID: 7000000000000000002}
 --- !u!1 &2636073322731359187
 GameObject:
   m_ObjectHideFlags: 0
