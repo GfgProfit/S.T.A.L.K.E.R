@@ -13,7 +13,7 @@ MonoBehaviour:
   m_Name: Colt_M1911 Weapon Data
   m_EditorClassIdentifier: Assembly-CSharp::WeaponData
   _magazineCapacity: 7
-  _durabilityShotsResource: 1200
+  _durabilityShotsResource: 900
   _fireRateRoundsPerMinute: 600
   _fireMode: 0
   _reloadAmmoApplyFrame: 480
@@ -24,6 +24,10 @@ MonoBehaviour:
     _bulletVelocityMetersPerSecondOverride: 255
   - _ammoData: {fileID: 11400000, guid: ba87b39b2541642478660d6a8ef9404d, type: 2}
     _bulletVelocityMetersPerSecondOverride: 320
+  _jammingDurabilityThreshold: 95
+  _baseJammedChance: 5
+  _maximumJammedChance: 40
+  _jammedAmmoRemovalFrame: 250
   _bulletPrefab: {fileID: 9140050282074990077, guid: 675c1b0c73b6e5f4bbaec433b5278638, type: 3}
   _ballisticHitMask:
     serializedVersion: 2

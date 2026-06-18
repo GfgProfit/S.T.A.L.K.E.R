@@ -4,6 +4,7 @@ public sealed class FirstPersonWeaponMagazineState
     public ItemData RequestedAmmoData { get; private set; }
     public ItemData LoadedAmmoData { get; private set; }
     public int LoadedAmmoAmount { get; private set; }
+    public bool IsJammed { get; private set; }
 
     public void SetRequestedAmmo(int requestedAmmoIndex, ItemData requestedAmmoData)
     {
@@ -29,10 +30,13 @@ public sealed class FirstPersonWeaponMagazineState
         LoadedAmmoAmount = 0;
     }
 
+    public void SetJammed(bool isJammed) => IsJammed = isJammed;
+
     public void Clear()
     {
         RequestedAmmoIndex = 0;
         RequestedAmmoData = null;
         ClearLoadedAmmo();
+        IsJammed = false;
     }
 }

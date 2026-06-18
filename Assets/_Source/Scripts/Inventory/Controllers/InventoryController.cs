@@ -652,16 +652,26 @@ public class InventoryController : MonoBehaviour
         }
     }
 
-    private void ShowMiniActionText(ItemData itemData)
+    public void ShowMiniActionText(string text)
     {
-        if (itemData == null || _miniActionTextViewModel == null)
+        if (string.IsNullOrWhiteSpace(text) || _miniActionTextViewModel == null)
         {
             return;
         }
 
         CancelMiniActionText();
         _miniActionTextCancellation = CancellationTokenSource.CreateLinkedTokenSource(destroyCancellationToken);
-        ShowMiniActionTextAsync($"\u0418\u0441\u043f\u043e\u043b\u044c\u0437\u043e\u0432\u0430\u043d\u043e: {itemData.ItemName}", _miniActionTextCancellation.Token).Forget(Debug.LogException);
+        ShowMiniActionTextAsync(text, _miniActionTextCancellation.Token).Forget(Debug.LogException);
+    }
+
+    private void ShowMiniActionText(ItemData itemData)
+    {
+        if (itemData == null)
+        {
+            return;
+        }
+
+        ShowMiniActionText($"Использовано: {itemData.ItemName}");
     }
 
     private async UniTask ShowMiniActionTextAsync(string text, CancellationToken cancellationToken)
@@ -734,7 +744,7 @@ public class InventoryController : MonoBehaviour
 
         FirstPersonWeaponMagazineState magazineState = item.WeaponMagazineState;
 
-        if (magazineState.LoadedAmmoData == null || magazineState.LoadedAmmoAmount <= 0)
+        if (magazineState.IsJammed || magazineState.LoadedAmmoData == null || magazineState.LoadedAmmoAmount <= 0)
         {
             return false;
         }

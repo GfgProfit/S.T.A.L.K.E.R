@@ -28,6 +28,7 @@ public sealed class FirstPersonWeaponRuntimeController : MonoBehaviour
     private WeaponRecoilService _weaponRecoilService;
     private Material _defaultAmmoMaterial;
     private CancellationTokenSource _reloadCancellation;
+    private CancellationTokenSource _jamClearingCancellation;
     private ItemData _requestedAmmoData;
     private ItemData _loadedAmmoData;
     private ItemData _reloadAmmoData;
@@ -39,6 +40,10 @@ public sealed class FirstPersonWeaponRuntimeController : MonoBehaviour
     private float _nextShootTime;
     private bool _initialized;
     private bool _isReloading;
+    private bool _isJammed;
+    private bool _isClearingJam;
+    private bool _jammedOnLastRound;
+    private bool _jammedAmmoRemoved;
     private bool _isAiming;
     private bool _sprintBlockedByAim;
     private bool _reloadAmmoApplied;
@@ -48,11 +53,14 @@ public sealed class FirstPersonWeaponRuntimeController : MonoBehaviour
     public ItemData LoadedAmmoData => _loadedAmmoData;
     public int LoadedAmmoAmount => _loadedAmmoAmount;
     public bool IsReloading => _isReloading;
+    public bool IsJammed => _isJammed;
+    public bool IsClearingJam => _isClearingJam;
     public bool IsAiming => _isAiming;
 
     public void Initialize(InventoryItem weaponItem, InventoryController inventoryController, IPlayerInput playerInput, FirstPersonWeaponAmmoHudViewModel ammoHudViewModel)
     {
         CancelReload();
+        CancelJamClearing();
         SetSprintBlockedByAim(false);
 
         _weaponItem = weaponItem;
@@ -78,12 +86,19 @@ public sealed class FirstPersonWeaponRuntimeController : MonoBehaviour
         _weaponInputLockUntilTime = 0f;
         _nextShootTime = 0f;
         _isReloading = false;
+        _isJammed = _weaponItem != null && _weaponItem.WeaponMagazineState.IsJammed && _loadedAmmoAmount > 0;
+        _isClearingJam = false;
+        _jammedOnLastRound = _isJammed && _loadedAmmoAmount == 1;
+        _jammedAmmoRemoved = false;
         _isAiming = false;
         _reloadAmmoApplied = false;
         _ballisticConfigurationErrorLogged = false;
         _initialized = _weaponData != null;
 
-        _animationController?.SetCondition(_loadedAmmoAmount > 0 ? WeaponCondition.Normal : WeaponCondition.Empty);
+        WeaponCondition initialCondition = _isJammed
+            ? WeaponCondition.Jammed
+            : _loadedAmmoAmount > 0 ? WeaponCondition.Normal : WeaponCondition.Empty;
+        _animationController?.SetCondition(initialCondition);
         SyncMagazineState();
         UpdateAmmoHud();
     }
@@ -94,6 +109,7 @@ public sealed class FirstPersonWeaponRuntimeController : MonoBehaviour
         _cameraAllAnimationController?.SetAimActive(false);
         _animationController?.SetAimRootPositionOffsetActive(false, true);
         CancelReload();
+        CancelJamClearing();
         ResetWeaponRecoil();
     }
 
@@ -103,6 +119,7 @@ public sealed class FirstPersonWeaponRuntimeController : MonoBehaviour
         _cameraAllAnimationController?.SetAimActive(false);
         _animationController?.SetAimRootPositionOffsetActive(false, true);
         CancelReload();
+        CancelJamClearing();
         ResetWeaponRecoil();
     }
 
@@ -121,7 +138,7 @@ public sealed class FirstPersonWeaponRuntimeController : MonoBehaviour
             return;
         }
 
-        if (_isReloading)
+        if (_isReloading || _isClearingJam)
         {
             UpdateAmmoHud();
             return;
@@ -129,6 +146,31 @@ public sealed class FirstPersonWeaponRuntimeController : MonoBehaviour
 
         if (IsWeaponInputLocked)
         {
+            UpdateAmmoHud();
+            return;
+        }
+
+        if (_isJammed)
+        {
+            bool jammedSprintInputActive = IsSprintInputActive();
+            UpdateAimState(jammedSprintInputActive);
+
+            if (_playerInput != null && _playerInput.IsWeaponShootPressed())
+            {
+                ShowJammedActionText();
+            }
+
+            if (_playerInput != null && _playerInput.IsWeaponReloadPressed() && TryClearJam())
+            {
+                UpdateAmmoHud();
+                return;
+            }
+
+            if (IsMovementAnimationLocked == false)
+            {
+                UpdateMovementAnimation();
+            }
+
             UpdateAmmoHud();
             return;
         }
@@ -147,7 +189,7 @@ public sealed class FirstPersonWeaponRuntimeController : MonoBehaviour
             return;
         }
 
-        if (isSprintInputActive == false && IsShootInputActive() && TryShoot())
+        if (isSprintInputActive == false && IsShootInputActive() && TryHandleShootInput())
         {
             UpdateAmmoHud();
             return;
@@ -163,7 +205,7 @@ public sealed class FirstPersonWeaponRuntimeController : MonoBehaviour
 
     public bool TryShoot()
     {
-        if (_weaponData == null || _isReloading || IsSprintInputActive() || Time.time < _nextShootTime)
+        if (_weaponData == null || _isReloading || _isJammed || _isClearingJam || IsSprintInputActive() || Time.time < _nextShootTime)
         {
             return false;
         }
@@ -216,6 +258,67 @@ public sealed class FirstPersonWeaponRuntimeController : MonoBehaviour
         return true;
     }
 
+    private bool TryHandleShootInput()
+    {
+        if (_weaponData == null || _isReloading || _isJammed || _isClearingJam || IsSprintInputActive() || Time.time < _nextShootTime)
+        {
+            return false;
+        }
+
+        if (_loadedAmmoAmount > 0 && TryJamWeapon())
+        {
+            return true;
+        }
+
+        return TryShoot();
+    }
+
+    private bool TryJamWeapon()
+    {
+        if (_weaponItem == null || _weaponItem.HasDurability == false)
+        {
+            return false;
+        }
+
+        float jammedChancePercent = _weaponData.GetJammedChancePercent(_weaponItem.CurrentDurabilityPercent);
+
+        if (jammedChancePercent <= 0f || UnityEngine.Random.value * 100f >= jammedChancePercent)
+        {
+            return false;
+        }
+
+        EnterJammedState();
+        return true;
+    }
+
+    private void EnterJammedState()
+    {
+        bool jammedWhileAiming = _isAiming;
+        _isJammed = true;
+        _isClearingJam = false;
+        _jammedOnLastRound = _loadedAmmoAmount == 1;
+        _jammedAmmoRemoved = false;
+        _movementAnimationState = WeaponMovementAnimationState.None;
+        _animationController?.SetConditionInstant(WeaponCondition.Jammed);
+        float animationLength = _animationController == null ? 0f : _animationController.PlayDryEmpty(jammedWhileAiming, true);
+        _nextShootTime = Time.time + Mathf.Max(_weaponData.SecondsBetweenShots, animationLength);
+        LockMovementAnimation(jammedWhileAiming ? FirstPersonWeaponAnimationKey.AimDry : FirstPersonWeaponAnimationKey.DryEmpty);
+        SyncMagazineState();
+        ShowJammedActionText();
+    }
+
+    private void ShowJammedActionText()
+    {
+        if (_inventoryController == null || _playerInput == null)
+        {
+            return;
+        }
+
+        string reloadKey = _playerInput.WeaponReloadKeyDisplayName;
+        string actionColor = GameProjectSettings.LoadDefault().ActionColorHtml;
+        _inventoryController.ShowMiniActionText($"Оружие заклинило! Нажмите [<color={actionColor}>{reloadKey}</color>] что бы устранить неполадку.");
+    }
+
     private void PlayDryEmptyAnimation()
     {
         FirstPersonWeaponAnimationKey animationKey = FirstPersonWeaponAnimationKey.DryEmpty;
@@ -231,7 +334,7 @@ public sealed class FirstPersonWeaponRuntimeController : MonoBehaviour
 
     public bool TryReload()
     {
-        if (_weaponData == null || _inventoryController == null || _requestedAmmoData == null || _isReloading || _isAiming || IsSprintInputActive())
+        if (_weaponData == null || _inventoryController == null || _requestedAmmoData == null || _isReloading || _isJammed || _isClearingJam || _isAiming || IsSprintInputActive())
         {
             return false;
         }
@@ -252,9 +355,30 @@ public sealed class FirstPersonWeaponRuntimeController : MonoBehaviour
         return true;
     }
 
+    public bool TryClearJam()
+    {
+        if (_weaponData == null || _isJammed == false || _isClearingJam || _isAiming || _loadedAmmoAmount <= 0)
+        {
+            return false;
+        }
+
+        FirstPersonWeaponAnimationKey animationKey = _jammedOnLastRound ? FirstPersonWeaponAnimationKey.RevivalLast : FirstPersonWeaponAnimationKey.Revival;
+        float ammoRemovalDelay = GetJammedAmmoRemovalDelay(animationKey);
+        float animationLength = GetAnimationLength(animationKey);
+
+        _isClearingJam = true;
+        _movementAnimationState = WeaponMovementAnimationState.None;
+        _animationController?.PlayRevival(_jammedOnLastRound);
+        LockMovementAnimation(animationKey);
+
+        _jamClearingCancellation = CancellationTokenSource.CreateLinkedTokenSource(destroyCancellationToken);
+        ClearJamAsync(ammoRemovalDelay, animationLength, _jamClearingCancellation).Forget(Debug.LogException);
+        return true;
+    }
+
     public bool TryChangeAmmoType()
     {
-        if (_weaponData == null || _inventoryController == null)
+        if (_weaponData == null || _inventoryController == null || _isJammed || _isClearingJam)
         {
             return false;
         }
@@ -275,7 +399,7 @@ public sealed class FirstPersonWeaponRuntimeController : MonoBehaviour
 
     public bool TryUnloadMagazine()
     {
-        if (_weaponData == null || _isReloading || _loadedAmmoData == null || _loadedAmmoAmount <= 0)
+        if (_weaponData == null || _isReloading || _isJammed || _isClearingJam || _loadedAmmoData == null || _loadedAmmoAmount <= 0)
         {
             return false;
         }
@@ -504,6 +628,41 @@ public sealed class FirstPersonWeaponRuntimeController : MonoBehaviour
         UpdateAmmoHud();
     }
 
+    private async UniTask ClearJamAsync(float ammoRemovalDelay, float animationLength, CancellationTokenSource jamClearingCancellation)
+    {
+        CancellationToken cancellationToken = jamClearingCancellation.Token;
+
+        if (await DelaySecondsAsync(ammoRemovalDelay, cancellationToken))
+        {
+            return;
+        }
+
+        RemoveJammedAmmo();
+
+        float remainingDelay = Mathf.Max(0f, animationLength - ammoRemovalDelay);
+
+        if (await DelaySecondsAsync(remainingDelay, cancellationToken))
+        {
+            return;
+        }
+
+        if (_jamClearingCancellation != jamClearingCancellation)
+        {
+            return;
+        }
+
+        _isClearingJam = false;
+        _isJammed = false;
+        _jammedOnLastRound = false;
+        _jammedAmmoRemoved = false;
+        SyncMagazineState();
+        _animationController?.SetCondition(_loadedAmmoAmount > 0 ? WeaponCondition.Normal : WeaponCondition.Empty);
+
+        _jamClearingCancellation = null;
+        jamClearingCancellation.Dispose();
+        UpdateAmmoHud();
+    }
+
     private async UniTask<bool> DelaySecondsAsync(float delay, CancellationToken cancellationToken)
     {
         if (delay <= 0f)
@@ -540,6 +699,27 @@ public sealed class FirstPersonWeaponRuntimeController : MonoBehaviour
         _loadedAmmoData = _reloadAmmoData;
         _loadedAmmoAmount = consumedAmmoAmount;
         _reloadAmmoApplied = true;
+        SyncMagazineState();
+        RefreshInventoryWeightState();
+        UpdateAmmoHud();
+    }
+
+    private void RemoveJammedAmmo()
+    {
+        if (_isJammed == false || _jammedAmmoRemoved || _loadedAmmoAmount <= 0)
+        {
+            return;
+        }
+
+        _loadedAmmoAmount--;
+
+        if (_loadedAmmoAmount <= 0)
+        {
+            _loadedAmmoAmount = 0;
+            _loadedAmmoData = null;
+        }
+
+        _jammedAmmoRemoved = true;
         SyncMagazineState();
         RefreshInventoryWeightState();
         UpdateAmmoHud();
@@ -639,6 +819,7 @@ public sealed class FirstPersonWeaponRuntimeController : MonoBehaviour
         FirstPersonWeaponMagazineState magazineState = _weaponItem.WeaponMagazineState;
         magazineState.SetRequestedAmmo(_requestedAmmoIndex, _requestedAmmoData);
         magazineState.SetLoadedAmmo(_loadedAmmoData, _loadedAmmoAmount);
+        magazineState.SetJammed(_isJammed);
     }
 
     private void RefreshInventoryWeightState()
@@ -769,6 +950,16 @@ public sealed class FirstPersonWeaponRuntimeController : MonoBehaviour
         }
 
         return _animationController.GetNextAnimationFrameTime(animationKey, _weaponData.GetReloadAmmoMaterialApplyFrame());
+    }
+
+    private float GetJammedAmmoRemovalDelay(FirstPersonWeaponAnimationKey animationKey)
+    {
+        if (_weaponData == null || _animationController == null)
+        {
+            return 0f;
+        }
+
+        return _animationController.GetNextAnimationFrameTime(animationKey, _weaponData.GetJammedAmmoRemovalFrame());
     }
 
     private float GetAnimationLength(FirstPersonWeaponAnimationKey animationKey)
@@ -948,6 +1139,18 @@ public sealed class FirstPersonWeaponRuntimeController : MonoBehaviour
         _reloadAmmoData = null;
         _reloadAmmoApplied = false;
         _isReloading = false;
+    }
+
+    private void CancelJamClearing()
+    {
+        if (_jamClearingCancellation != null)
+        {
+            _jamClearingCancellation.Cancel();
+            _jamClearingCancellation.Dispose();
+            _jamClearingCancellation = null;
+        }
+
+        _isClearingJam = false;
     }
 
     private void UpdateAmmoHud()

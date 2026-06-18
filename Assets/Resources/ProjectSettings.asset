@@ -60,3 +60,4 @@ MonoBehaviour:
   _normalWeightColor: {r: 1, g: 1, b: 1, a: 1}
   _overweightColor: {r: 1, g: 0.7019608, b: 0, a: 1}
   _movementBlockedWeightColor: {r: 1, g: 0, b: 0.25882354, a: 1}
+  _actionColor: {r: 1, g: 0.64705884, b: 0, a: 1}

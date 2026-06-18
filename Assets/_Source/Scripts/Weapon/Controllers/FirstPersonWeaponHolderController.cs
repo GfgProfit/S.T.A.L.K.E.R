@@ -26,7 +26,7 @@ public sealed class FirstPersonWeaponHolderController : MonoBehaviour
     public ItemData CurrentWeaponItemData => _currentWeaponItemData;
     public InventoryItem CurrentWeaponItem => _currentWeaponItem;
     public bool IsSwitchingWeapon => _isSwitchingWeapon;
-    public bool IsWeaponChangeLocked => _isSwitchingWeapon || IsCurrentWeaponReloading;
+    public bool IsWeaponChangeLocked => _isSwitchingWeapon || IsCurrentWeaponBusy;
 
     private IPlayerInput PlayerInput
     {
@@ -286,7 +286,7 @@ public sealed class FirstPersonWeaponHolderController : MonoBehaviour
         weaponController?.SetEquippedArmor(_equippedArmorItemData);
     }
 
-    private bool IsCurrentWeaponReloading
+    private bool IsCurrentWeaponBusy
     {
         get
         {
@@ -296,7 +296,7 @@ public sealed class FirstPersonWeaponHolderController : MonoBehaviour
             }
 
             FirstPersonWeaponRuntimeController runtimeController = _spawnedWeapon.GetComponent<FirstPersonWeaponRuntimeController>();
-            return runtimeController != null && runtimeController.IsReloading;
+            return runtimeController != null && (runtimeController.IsReloading || runtimeController.IsClearingJam);
         }
     }
 }

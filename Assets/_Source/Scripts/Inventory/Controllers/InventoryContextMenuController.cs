@@ -149,7 +149,10 @@ internal sealed class InventoryContextMenuController
     private void DropSingleItem() => DropContextMenuItem(false);
     private void DropItemStack() => DropContextMenuItem(true);
     private static bool CanUseItem(InventoryItem item) => item != null && item.ItemData != null && item.ItemData.ItemType == ItemType.Consumable;
-    private static bool CanUnloadWeapon(InventoryItem item) => IsWeapon(item) && item.WeaponMagazineState.LoadedAmmoData != null && item.WeaponMagazineState.LoadedAmmoAmount > 0;
+    private static bool CanUnloadWeapon(InventoryItem item) => IsWeapon(item) &&
+                                                               item.WeaponMagazineState.IsJammed == false &&
+                                                               item.WeaponMagazineState.LoadedAmmoData != null &&
+                                                               item.WeaponMagazineState.LoadedAmmoAmount > 0;
     private static bool CanDropStack(InventoryItem item) => item != null && item.IsStackable && item.CurrentAmount > 1;
     private static bool IsWeapon(InventoryItem item) => item != null && item.ItemData != null && item.ItemData.WeaponData != null;
 

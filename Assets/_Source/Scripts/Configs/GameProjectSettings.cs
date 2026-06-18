@@ -48,6 +48,9 @@ public class GameProjectSettings : ScriptableObject
     [SerializeField] private Color _overweightColor = new Color(1f, 0.7033792f, 0f, 1f);
     [SerializeField] private Color _movementBlockedWeightColor = new Color(1f, 0f, 0.26052094f, 1f);
 
+    [Header("Action Visual Settings")]
+    [SerializeField] private Color _actionColor = new Color(1f, 0.64705884f, 0f, 1f);
+
     public bool ShowCellGrid => _showCellGrid;
     public bool ShowCellGridBorder => _showCellGridBorder;
     public Color IconOutlineColor => _iconOutlineColor;
@@ -64,6 +67,8 @@ public class GameProjectSettings : ScriptableObject
     public Color NormalWeightColor => _normalWeightColor;
     public Color OverweightColor => _overweightColor;
     public Color MovementBlockedWeightColor => _movementBlockedWeightColor;
+    public Color ActionColor => _actionColor;
+    public string ActionColorHtml => $"#{ColorUtility.ToHtmlStringRGB(_actionColor)}";
 
     public Color GetLineColor(bool isBorderLine) => isBorderLine ? _cellGridBorderColor : _cellGridColor;
 

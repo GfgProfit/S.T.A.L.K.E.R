@@ -10946,7 +10946,6 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::WorldItemTooltipView
   _canvasGroup: {fileID: 254217036}
   _label: {fileID: 254217037}
-  _interactKeyColor: orange
 --- !u!114 &602623719
 MonoBehaviour:
   m_ObjectHideFlags: 0

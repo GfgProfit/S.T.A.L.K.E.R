@@ -31,6 +31,7 @@ public class LegacyPlayerInput : IPlayerInput
     };
 
     public string InteractKeyDisplayName => INTERACT_KEY.ToString();
+    public string WeaponReloadKeyDisplayName => WEAPON_RELOAD_KEY.ToString();
 
     public Vector2 GetMouseDelta()
     {

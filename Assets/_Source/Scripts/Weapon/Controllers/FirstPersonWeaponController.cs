@@ -102,6 +102,16 @@ public sealed class FirstPersonWeaponController : MonoBehaviour
 
     public void SetCondition(WeaponCondition condition)
     {
+        SetCondition(condition, false);
+    }
+
+    public void SetConditionInstant(WeaponCondition condition)
+    {
+        SetCondition(condition, true);
+    }
+
+    private void SetCondition(WeaponCondition condition, bool instant)
+    {
         if (_weaponCondition == condition)
         {
             return;
@@ -111,7 +121,7 @@ public sealed class FirstPersonWeaponController : MonoBehaviour
 
         if (IsConditionSensitive(_currentAnimationKey))
         {
-            Play(_currentAnimationKey);
+            PlayContinuous(_currentAnimationKey, instant ? 0f : GetCrossFadeDuration(_currentAnimationKey));
         }
     }
 
@@ -165,10 +175,10 @@ public sealed class FirstPersonWeaponController : MonoBehaviour
     public float PlayDraw() => PlayTransitionAndGetDuration(FirstPersonWeaponAnimationKey.Draw);
     public float PlayHide() => PlayTransitionAndGetDuration(FirstPersonWeaponAnimationKey.Hide);
     public void Shoot(bool lastRound = false) => Play(lastRound ? FirstPersonWeaponAnimationKey.ShootLast : FirstPersonWeaponAnimationKey.Shoot);
-    public float PlayDryEmpty(bool returnToAim = false)
+    public float PlayDryEmpty(bool returnToAim = false, bool instant = false)
     {
         FirstPersonWeaponAnimationKey key = returnToAim ? FirstPersonWeaponAnimationKey.AimDry : FirstPersonWeaponAnimationKey.DryEmpty;
-        PlayTransient(key, returnToAim ? FirstPersonWeaponAnimationKey.AimIdle : FirstPersonWeaponAnimationKey.Idle);
+        PlayTransient(key, returnToAim ? FirstPersonWeaponAnimationKey.AimIdle : FirstPersonWeaponAnimationKey.Idle, instant ? 0f : GetCrossFadeDuration(key));
         return GetCurrentAnimationLength(key);
     }
 

@@ -7,7 +7,6 @@ public class WorldItemTooltipView : MonoBehaviour, IView<WorldItemTooltipViewMod
 {
     [SerializeField] private CanvasGroup _canvasGroup;
     [SerializeField] private TMP_Text _label;
-    [SerializeField] private string _interactKeyColor = "orange";
 
     private WorldItemTooltipViewModel _viewModel;
     private IDisposable _isVisibleSubscription;
@@ -27,7 +26,7 @@ public class WorldItemTooltipView : MonoBehaviour, IView<WorldItemTooltipViewMod
     public void Show(string itemName, string interactKey)
     {
         EnsureViewModel();
-        _viewModel.Show(itemName, interactKey, _interactKeyColor);
+        _viewModel.Show(itemName, interactKey, GameProjectSettings.LoadDefault().ActionColorHtml);
     }
 
     public void Hide()

@@ -14,6 +14,13 @@ public sealed class WeaponData : ScriptableObject
     [SerializeField] [Min(0)] private int _reloadAmmoMaterialApplyFrame;
     [SerializeField] private List<WeaponAmmoBallisticsData> _compatibleAmmo = new();
 
+    [Header("Jamming")]
+    [SerializeField] [Range(0f, 100f)] private float _jammingDurabilityThreshold = 90f;
+    [SerializeField] [Range(0f, 100f)] private float _baseJammedChance = 10f;
+    [SerializeField] [Range(0f, 100f)] private float _maximumJammedChance = 80f;
+    [Tooltip("Revival animation frame when the jammed round is removed from the magazine.")]
+    [SerializeField] [Min(0)] private int _jammedAmmoRemovalFrame;
+
     [Header("Ballistics")]
     [SerializeField] private GameObject _bulletPrefab;
     [SerializeField] private LayerMask _ballisticHitMask = Physics.DefaultRaycastLayers;
@@ -75,6 +82,9 @@ public sealed class WeaponData : ScriptableObject
     public float RecoilReturnSpeed => Mathf.Max(0f, _recoilReturnSpeed);
     public float RecoilSnappiness => Mathf.Max(0f, _recoilSnappiness);
     public float CrouchRecoilReductionPercent => Mathf.Clamp(_crouchRecoilReductionPercent, 0f, 100f);
+    public float JammingDurabilityThreshold => Mathf.Clamp(_jammingDurabilityThreshold, 0f, 100f);
+    public float BaseJammedChance => Mathf.Clamp(_baseJammedChance, 0f, 100f);
+    public float MaximumJammedChance => Mathf.Max(BaseJammedChance, Mathf.Clamp(_maximumJammedChance, 0f, 100f));
 
     private void OnValidate()
     {
@@ -84,6 +94,10 @@ public sealed class WeaponData : ScriptableObject
         _reloadAmmoApplyFrame = Mathf.Max(0, _reloadAmmoApplyFrame);
         _reloadFullAmmoApplyFrame = Mathf.Max(0, _reloadFullAmmoApplyFrame);
         _reloadAmmoMaterialApplyFrame = Mathf.Max(0, _reloadAmmoMaterialApplyFrame);
+        _jammingDurabilityThreshold = Mathf.Clamp(_jammingDurabilityThreshold, 0f, 100f);
+        _baseJammedChance = Mathf.Clamp(_baseJammedChance, 0f, 100f);
+        _maximumJammedChance = Mathf.Clamp(_maximumJammedChance, _baseJammedChance, 100f);
+        _jammedAmmoRemovalFrame = Mathf.Max(0, _jammedAmmoRemovalFrame);
         _ballisticCollisionRadiusMeters = Mathf.Max(0f, _ballisticCollisionRadiusMeters);
         _ballisticSimulationStepSeconds = Mathf.Max(0.0001f, _ballisticSimulationStepSeconds);
         _ballisticMaxSimulationStepsPerFrame = Mathf.Max(1, _ballisticMaxSimulationStepsPerFrame);
@@ -105,6 +119,21 @@ public sealed class WeaponData : ScriptableObject
 
     public int GetReloadAmmoApplyFrame(bool fullReload) => fullReload ? Mathf.Max(0, _reloadFullAmmoApplyFrame) : Mathf.Max(0, _reloadAmmoApplyFrame);
     public int GetReloadAmmoMaterialApplyFrame() => Mathf.Max(0, _reloadAmmoMaterialApplyFrame);
+    public int GetJammedAmmoRemovalFrame() => Mathf.Max(0, _jammedAmmoRemovalFrame);
+
+    public float GetJammedChancePercent(float durabilityPercent)
+    {
+        float durability = Mathf.Clamp(durabilityPercent, 0f, 100f);
+        float threshold = JammingDurabilityThreshold;
+
+        if (durability > threshold)
+        {
+            return 0f;
+        }
+
+        float wearBelowThreshold = threshold <= 0f ? 1f : Mathf.InverseLerp(threshold, 0f, durability);
+        return Mathf.Lerp(BaseJammedChance, MaximumJammedChance, wearBelowThreshold);
+    }
 
     public ItemData GetCompatibleAmmo(int index)
     {

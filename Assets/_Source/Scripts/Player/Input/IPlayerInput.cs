@@ -62,6 +62,8 @@ public interface IWeaponSlotInput
 
 public interface IWeaponInput
 {
+    string WeaponReloadKeyDisplayName { get; }
+
     bool IsWeaponShootPressed();
     bool IsWeaponShootHeld();
     bool IsWeaponAimHeld();
