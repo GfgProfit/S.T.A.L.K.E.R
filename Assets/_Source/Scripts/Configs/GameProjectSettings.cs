@@ -32,6 +32,17 @@ public class GameProjectSettings : ScriptableObject
     [SerializeField] private Color _statCurrentValueColor = new Color(0f, 1f, 0.5568628f, 1f);
     [SerializeField] private Color _statFullDurabilityValueColor = new Color(1f, 0.55f, 0f, 1f);
 
+    [Header("Ammo Classification Visual Settings")]
+    [SerializeField] private Color _veryLowAmmoClassificationColor = new Color(1f, 0f, 0.25882354f, 1f);
+    [SerializeField] private Color _lowAmmoClassificationColor = new Color(1f, 0.35f, 0f, 1f);
+    [SerializeField] private Color _mediumAmmoClassificationColor = new Color(1f, 0.7019608f, 0f, 1f);
+    [SerializeField] private Color _highAmmoClassificationColor = new Color(0.6f, 1f, 0.2f, 1f);
+    [SerializeField] private Color _veryHighAmmoClassificationColor = new Color(0f, 1f, 0.5568628f, 1f);
+
+    [Header("Ammo Modifier Visual Settings")]
+    [SerializeField] private Color _positiveAmmoModifierColor = new Color(0f, 1f, 0.5568628f, 1f);
+    [SerializeField] private Color _negativeAmmoModifierColor = new Color(1f, 0f, 0.25882354f, 1f);
+
     [Header("Inventory Weight Visual Settings")]
     [SerializeField] private Color _normalWeightColor = Color.white;
     [SerializeField] private Color _overweightColor = new Color(1f, 0.7033792f, 0f, 1f);
@@ -43,6 +54,13 @@ public class GameProjectSettings : ScriptableObject
     public Color IconShadowColor => _iconShadowColor;
     public Color StatCurrentValueColor => _statCurrentValueColor;
     public Color StatFullDurabilityValueColor => _statFullDurabilityValueColor;
+    public Color VeryLowAmmoClassificationColor => _veryLowAmmoClassificationColor;
+    public Color LowAmmoClassificationColor => _lowAmmoClassificationColor;
+    public Color MediumAmmoClassificationColor => _mediumAmmoClassificationColor;
+    public Color HighAmmoClassificationColor => _highAmmoClassificationColor;
+    public Color VeryHighAmmoClassificationColor => _veryHighAmmoClassificationColor;
+    public Color PositiveAmmoModifierColor => _positiveAmmoModifierColor;
+    public Color NegativeAmmoModifierColor => _negativeAmmoModifierColor;
     public Color NormalWeightColor => _normalWeightColor;
     public Color OverweightColor => _overweightColor;
     public Color MovementBlockedWeightColor => _movementBlockedWeightColor;

@@ -86,6 +86,8 @@ public class ItemData : ScriptableObject
     public float AmmoFleshDamage => Mathf.Max(0f, _ammoFleshDamage);
     public float AmmoArmorPenetration => Mathf.Max(0f, _ammoArmorPenetration);
     public float AmmoBulletVelocityMetersPerSecondFallback => Mathf.Max(0f, _ammoBulletVelocityMetersPerSecondFallback);
+    public float AmmoBulletMassGrams => Mathf.Max(0f, _ammoBulletMassGrams);
+    public float AmmoBulletDiameterMillimeters => Mathf.Max(0f, _ammoBulletDiameterMillimeters);
     public float AmmoBulletMassKilograms => Mathf.Max(0f, _ammoBulletMassGrams) * 0.001f;
     public float AmmoBulletDiameterMeters => Mathf.Max(0f, _ammoBulletDiameterMillimeters) * 0.001f;
     public float AmmoBulletDragCoefficient => Mathf.Max(0f, _ammoBulletDragCoefficient);

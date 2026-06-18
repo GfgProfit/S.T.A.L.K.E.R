@@ -41,6 +41,7 @@ public sealed class WeaponData : ScriptableObject
     [SerializeField] [Min(0f)] private float _recoilZ = 0.2f;
     [SerializeField] [Min(0f)] private float _recoilReturnSpeed = 8f;
     [SerializeField] [Min(0f)] private float _recoilSnappiness = 16f;
+    [SerializeField] [Range(0f, 100f)] private float _crouchRecoilReductionPercent = 25f;
 
     public int MagazineCapacity => Mathf.Max(1, _magazineCapacity);
     public int DurabilityShotsResource => Mathf.Max(1, _durabilityShotsResource);
@@ -71,6 +72,7 @@ public sealed class WeaponData : ScriptableObject
     public float RecoilZ => Mathf.Max(0f, _recoilZ);
     public float RecoilReturnSpeed => Mathf.Max(0f, _recoilReturnSpeed);
     public float RecoilSnappiness => Mathf.Max(0f, _recoilSnappiness);
+    public float CrouchRecoilReductionPercent => Mathf.Clamp(_crouchRecoilReductionPercent, 0f, 100f);
 
     private void OnValidate()
     {
@@ -95,6 +97,7 @@ public sealed class WeaponData : ScriptableObject
         _recoilZ = Mathf.Max(0f, _recoilZ);
         _recoilReturnSpeed = Mathf.Max(0f, _recoilReturnSpeed);
         _recoilSnappiness = Mathf.Max(0f, _recoilSnappiness);
+        _crouchRecoilReductionPercent = Mathf.Clamp(_crouchRecoilReductionPercent, 0f, 100f);
     }
 
     public int GetReloadAmmoApplyFrame(bool fullReload) => fullReload ? Mathf.Max(0, _reloadFullAmmoApplyFrame) : Mathf.Max(0, _reloadAmmoApplyFrame);

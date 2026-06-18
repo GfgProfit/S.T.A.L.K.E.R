@@ -14,10 +14,34 @@ public class ItemInfoPanel : MonoBehaviour, IView<ItemTooltipViewModel>
     [SerializeField] private LayoutElement _iconLayoutElement;
     [SerializeField] private TMP_Text _itemNameText;
     [SerializeField] private TMP_Text _typeText;
+    [SerializeField] private GameObject _typeTextParent;
     [SerializeField] private TMP_Text _weightText;
+    [SerializeField] private GameObject _weightTextParent;
     [SerializeField] private TMP_Text _durabilityText;
+    [SerializeField] private GameObject _durabilityTextParent;
     [SerializeField] private TMP_Text _descriptionText;
     [SerializeField] [Min(1)] private int _descriptionWordsPerLine;
+
+    [Header("Ammo Info")]
+    [SerializeField] private TMP_Text _ammoFleshDamageText;
+    [SerializeField] private GameObject _ammoFleshDamageParent;
+    [SerializeField] private TMP_Text _ammoArmorPenetrationText;
+    [SerializeField] private GameObject _ammoArmorPenetrationParent;
+    [SerializeField] private GameObject _ammoArmorClassRoot;
+    [SerializeField] private TMP_Text[] _ammoArmorClassTexts;
+    [SerializeField] private GameObject[] _ammoArmorClassTextParents;
+    [SerializeField] private TMP_Text _ammoBulletSpeedText;
+    [SerializeField] private GameObject _ammoBulletSpeedParent;
+    [SerializeField] private TMP_Text _ammoBulletMassText;
+    [SerializeField] private GameObject _ammoBulletMassParent;
+    [SerializeField] private TMP_Text _ammoBulletDiameterText;
+    [SerializeField] private GameObject _ammoBulletDiameterParent;
+    [SerializeField] private TMP_Text _ammoRicochetChanceText;
+    [SerializeField] private GameObject _ammoRicochetChanceParent;
+    [SerializeField] private TMP_Text _ammoRecoilModifierText;
+    [SerializeField] private GameObject _ammoRecoilModifierParent;
+    [SerializeField] private TMP_Text _ammoDurabilityLossModifierText;
+    [SerializeField] private GameObject _ammoDurabilityLossModifierParent;
 
     [Header("Stats Info")]
     [SerializeField] private CharacterStatsInfoPanel _statsInfoPanel;
@@ -80,6 +104,7 @@ public class ItemInfoPanel : MonoBehaviour, IView<ItemTooltipViewModel>
 
         GameProjectSettings settings = GameProjectSettings.LoadDefault();
         _viewModel.Show(item, _descriptionWordsPerLine, settings);
+        SetAmmoInfo(item.ItemData, settings);
         SetStatsInfo(item, settings);
         RebuildLayout();
         UpdatePosition();
@@ -161,6 +186,51 @@ public class ItemInfoPanel : MonoBehaviour, IView<ItemTooltipViewModel>
         _statsInfoPanel.RenderItemStats(item, settings.StatCurrentValueColor, settings.StatFullDurabilityValueColor, _hideStatsInfoWhenEmpty);
     }
 
+    private void SetAmmoInfo(ItemData itemData, GameProjectSettings settings)
+    {
+        AmmoTooltipTextData ammoInfo = ItemTooltipTextFormatter.FormatAmmoDetails(itemData, settings);
+        bool visible = ammoInfo != null;
+
+        SetAmmoText(_ammoFleshDamageText, _ammoFleshDamageParent, visible ? ammoInfo.FleshDamageText : string.Empty, visible);
+        SetAmmoText(_ammoArmorPenetrationText, _ammoArmorPenetrationParent, visible ? ammoInfo.ArmorPenetrationText : string.Empty, visible);
+        SetAmmoText(_ammoBulletSpeedText, _ammoBulletSpeedParent, visible ? ammoInfo.BulletSpeedText : string.Empty, visible);
+        SetAmmoText(_ammoBulletMassText, _ammoBulletMassParent, visible ? ammoInfo.BulletMassText : string.Empty, visible);
+        SetAmmoText(_ammoBulletDiameterText, _ammoBulletDiameterParent, visible ? ammoInfo.BulletDiameterText : string.Empty, visible);
+        SetAmmoText(_ammoRicochetChanceText, _ammoRicochetChanceParent, visible ? ammoInfo.RicochetChanceText : string.Empty, visible);
+        SetAmmoText(_ammoRecoilModifierText, _ammoRecoilModifierParent, visible ? ammoInfo.RecoilModifierText : string.Empty, visible);
+        SetAmmoText(_ammoDurabilityLossModifierText, _ammoDurabilityLossModifierParent, visible ? ammoInfo.DurabilityLossModifierText : string.Empty, visible);
+
+        if (_ammoArmorClassRoot != null)
+        {
+            _ammoArmorClassRoot.SetActive(visible);
+        }
+
+        if (_ammoArmorClassTexts == null)
+        {
+            return;
+        }
+
+        int count = visible ? Mathf.Min(_ammoArmorClassTexts.Length, ammoInfo.ArmorClassTexts.Length) : _ammoArmorClassTexts.Length;
+
+        for (int i = 0; i < count; i++)
+        {
+            GameObject parent = _ammoArmorClassTextParents != null && i < _ammoArmorClassTextParents.Length ? _ammoArmorClassTextParents[i] : null;
+            string value = visible ? ammoInfo.ArmorClassTexts[i] : string.Empty;
+            SetAmmoText(_ammoArmorClassTexts[i], parent, value, visible);
+        }
+    }
+
+    private static void SetAmmoText(TMP_Text text, GameObject parent, string value, bool visible)
+    {
+        if (text != null)
+        {
+            text.richText = true;
+            text.text = value;
+        }
+
+        parent?.SetActive(visible);
+    }
+
     private void SetVisible(bool visible) => gameObject.SetActive(visible);
 
     private void SetIconSize(Vector2 iconSize)
@@ -208,34 +278,25 @@ public class ItemInfoPanel : MonoBehaviour, IView<ItemTooltipViewModel>
 
     private void SetType(string typeText)
     {
-        if (_typeText == null)
+        if (_typeText != null)
         {
-            return;
+            _typeText.text = typeText;
         }
 
-        _typeText.text = typeText;
-        _typeText.gameObject.SetActive(true);
+        _typeTextParent?.SetActive(true);
     }
 
     private void SetWeight(string weightText)
     {
-        if (_weightText == null)
+        if (_weightText != null)
         {
-            return;
+            _weightText.text = weightText;
         }
 
-        _weightText.text = weightText;
+        _weightTextParent?.SetActive(true);
     }
 
-    private void SetDurabilityVisible(bool visible)
-    {
-        if (_durabilityText == null)
-        {
-            return;
-        }
-
-        _durabilityText.gameObject.SetActive(visible);
-    }
+    private void SetDurabilityVisible(bool visible) => _durabilityTextParent?.SetActive(visible);
 
     private void SetDurability(string durabilityText)
     {

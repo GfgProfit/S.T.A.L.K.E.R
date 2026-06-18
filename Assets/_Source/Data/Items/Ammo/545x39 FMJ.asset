@@ -37,8 +37,8 @@ MonoBehaviour:
   _useDurability: 0
   _defaultDurabilityPercent: 100
   _canEquipHelmet: 1
-  _ammoFleshDamage: 0
-  _ammoArmorPenetration: 0
+  _ammoFleshDamage: 40
+  _ammoArmorPenetration: 34
   _ammoBulletVelocityMetersPerSecondFallback: 735
   _ammoBulletMassGrams: 3.43
   _ammoBulletDiameterMillimeters: 5.62

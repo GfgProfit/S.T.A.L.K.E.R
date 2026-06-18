@@ -179,7 +179,7 @@ public sealed class FirstPersonWeaponRuntimeController : MonoBehaviour
         bool isLastRound = _loadedAmmoAmount == 1;
         _nextShootTime = Time.time + _weaponData.SecondsBetweenShots;
         _loadedAmmoAmount--;
-        ApplyDurabilityShotCost();
+        ApplyDurabilityShotCost(firedAmmoData);
 
         FirstPersonWeaponAnimationKey animationKey = _isAiming
             ? (isLastRound ? FirstPersonWeaponAnimationKey.AimShootLast : FirstPersonWeaponAnimationKey.AimShoot)
@@ -194,7 +194,8 @@ public sealed class FirstPersonWeaponRuntimeController : MonoBehaviour
             _animationController?.Shoot(isLastRound);
         }
 
-        _weaponRecoilService?.RecoilShoot(_weaponData.RecoilX, _weaponData.RecoilY, _weaponData.RecoilZ);
+        float recoilMultiplier = GetRecoilMultiplier(firedAmmoData);
+        _weaponRecoilService?.RecoilShoot(_weaponData.RecoilX * recoilMultiplier, _weaponData.RecoilY * recoilMultiplier, _weaponData.RecoilZ * recoilMultiplier);
         LockMovementAnimation(animationKey);
         _movementAnimationState = WeaponMovementAnimationState.None;
 
@@ -652,14 +653,16 @@ public sealed class FirstPersonWeaponRuntimeController : MonoBehaviour
                (_playerInput != null && _playerInput.IsWeaponAimHeld());
     }
 
-    private void ApplyDurabilityShotCost()
+    private void ApplyDurabilityShotCost(ItemData ammoData)
     {
         if (_weaponItem == null || _weaponItem.HasDurability == false || _weaponData == null)
         {
             return;
         }
 
-        float nextDurability = _weaponItem.CurrentDurabilityPercent - _weaponData.DurabilityPercentPerShot;
+        float durabilityLossMultiplier = GetPercentModifierMultiplier(ammoData == null ? 0f : ammoData.AmmoWeaponDurabilityLossPercentModifier);
+        float durabilityLoss = _weaponData.DurabilityPercentPerShot * durabilityLossMultiplier;
+        float nextDurability = _weaponItem.CurrentDurabilityPercent - durabilityLoss;
         _weaponItem.SetDurability(nextDurability);
     }
 
@@ -698,6 +701,21 @@ public sealed class FirstPersonWeaponRuntimeController : MonoBehaviour
 
         _weaponRecoilService?.Tick(_weaponData.RecoilReturnSpeed, _weaponData.RecoilSnappiness);
     }
+
+    private float GetRecoilMultiplier(ItemData ammoData)
+    {
+        float recoilMultiplier = GetPercentModifierMultiplier(ammoData == null ? 0f : ammoData.AmmoWeaponRecoilPercentModifier);
+
+        if (_playerController == null || _playerController.IsCrouching == false)
+        {
+            return recoilMultiplier;
+        }
+
+        float crouchMultiplier = GetPercentModifierMultiplier(-_weaponData.CrouchRecoilReductionPercent);
+        return recoilMultiplier * crouchMultiplier;
+    }
+
+    private static float GetPercentModifierMultiplier(float percentModifier) => Mathf.Max(0f, 1f + percentModifier * 0.01f);
 
     private Transform FindWeaponRecoilTransform()
     {

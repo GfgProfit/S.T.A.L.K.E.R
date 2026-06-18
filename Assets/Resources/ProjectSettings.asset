@@ -50,6 +50,13 @@ MonoBehaviour:
     _iconCellGridBorderColor: {r: 1, g: 0.6862745, b: 0, a: 0.24705882}
   _statCurrentValueColor: {r: 0, g: 1, b: 0.5568628, a: 1}
   _statFullDurabilityValueColor: {r: 1, g: 0.7019608, b: 0, a: 1}
+  _veryLowAmmoClassificationColor: {r: 1, g: 0, b: 0.25882354, a: 1}
+  _lowAmmoClassificationColor: {r: 1, g: 0.35, b: 0, a: 1}
+  _mediumAmmoClassificationColor: {r: 1, g: 0.7019608, b: 0, a: 1}
+  _highAmmoClassificationColor: {r: 0.6, g: 1, b: 0.2, a: 1}
+  _veryHighAmmoClassificationColor: {r: 0, g: 1, b: 0.5568628, a: 1}
+  _positiveAmmoModifierColor: {r: 0, g: 1, b: 0.5568628, a: 1}
+  _negativeAmmoModifierColor: {r: 1, g: 0, b: 0.25882354, a: 1}
   _normalWeightColor: {r: 1, g: 1, b: 1, a: 1}
   _overweightColor: {r: 1, g: 0.7019608, b: 0, a: 1}
   _movementBlockedWeightColor: {r: 1, g: 0, b: 0.25882354, a: 1}

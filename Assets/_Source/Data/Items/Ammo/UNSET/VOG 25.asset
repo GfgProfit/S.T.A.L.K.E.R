@@ -25,13 +25,35 @@ MonoBehaviour:
     \u043F\u043E\u0440\u0430\u0436\u0435\u043D\u0438\u044F \u043E\u0441\u043A\u043E\u043B\u043A\u0430\u043C\u0438
     \u0441\u043E\u0441\u0442\u0430\u0432\u043B\u044F\u0435\u0442 \u043E\u043A\u043E\u043B\u043E
     5 \u043C."
-  _itemType: 2
+  _itemType: 0
   _rarity: 0
   _weight: 0.08
   _stackable: 1
   _useDurability: 0
   _defaultDurabilityPercent: 100
   _canEquipHelmet: 1
+  _ammoFleshDamage: 0
+  _ammoArmorPenetration: 0
+  _ammoWeaponRecoilPercentModifier: 0
+  _ammoWeaponDurabilityLossPercentModifier: 0
+  _ammoBulletVelocityMetersPerSecondFallback: 0
+  _ammoBulletMassGrams: 0
+  _ammoBulletDiameterMillimeters: 0
+  _ammoBulletDragCoefficient: 0
+  _ammoRicochetChance: 0
+  _ammoTracerEnabled: 0
+  _ammoTracerMaterial: {fileID: 0}
+  _ammoTracerColor: {r: 1, g: 0.15, b: 0.02, a: 1}
+  _ammoTracerWidthMeters: 0.006
+  _ammoTracerTrailDurationSeconds: 0.02
+  _ammoTracerIgnitionDistanceMeters: 0
+  _ammoTracerBurnDurationSeconds: 3
+  _ammoTracerEmissionIntensity: 10
+  _firstPersonLegsMeshName: 
+  _firstPersonHandsMeshName: 
+  _firstPersonWeaponPrefab: {fileID: 0}
+  _firstPersonWeaponSpawnScale: {x: 1, y: 1, z: 1}
+  _weaponData: {fileID: 0}
   _statModifiers: []
   _worldItemPrefab: {fileID: 2406629827389215030, guid: d280634f36012ba46a1bdf1c62fcb20d, type: 3}
   _width: 1

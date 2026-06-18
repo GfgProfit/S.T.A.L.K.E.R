@@ -33,8 +33,8 @@ MonoBehaviour:
   _useDurability: 0
   _defaultDurabilityPercent: 100
   _canEquipHelmet: 1
-  _ammoFleshDamage: 0
-  _ammoArmorPenetration: 0
+  _ammoFleshDamage: 33
+  _ammoArmorPenetration: 45
   _ammoBulletVelocityMetersPerSecondFallback: 750
   _ammoBulletMassGrams: 3.69
   _ammoBulletDiameterMillimeters: 5.62
@@ -48,10 +48,10 @@ MonoBehaviour:
   _ammoTracerIgnitionDistanceMeters: 50
   _ammoTracerBurnDurationSeconds: 3
   _ammoTracerEmissionIntensity: 12
-  _ammoWeaponRecoilPercentModifier: 0
+  _ammoWeaponRecoilPercentModifier: 8
   _ammoWeaponAccuracyPercentModifier: 0
   _ammoWeaponAccuracyPenaltyPercentModifier: 0
-  _ammoWeaponDurabilityLossPercentModifier: 0
+  _ammoWeaponDurabilityLossPercentModifier: 16
   _firstPersonLegsMeshName: 
   _firstPersonHandsMeshName: 
   _firstPersonWeaponPrefab: {fileID: 0}
