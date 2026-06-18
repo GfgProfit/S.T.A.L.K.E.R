@@ -10,6 +10,8 @@ public sealed class WeaponData : ScriptableObject
     [SerializeField] private WeaponFireMode _fireMode = WeaponFireMode.Semi;
     [SerializeField] [Min(0)] private int _reloadAmmoApplyFrame;
     [SerializeField] [Min(0)] private int _reloadFullAmmoApplyFrame;
+    [Tooltip("Reload animation frame when the ammo visual material changes. Full reload applies it immediately.")]
+    [SerializeField] [Min(0)] private int _reloadAmmoMaterialApplyFrame;
     [SerializeField] private List<WeaponAmmoBallisticsData> _compatibleAmmo = new();
 
     [Header("Ballistics")]
@@ -81,6 +83,7 @@ public sealed class WeaponData : ScriptableObject
         _fireRateRoundsPerMinute = Mathf.Max(1, _fireRateRoundsPerMinute);
         _reloadAmmoApplyFrame = Mathf.Max(0, _reloadAmmoApplyFrame);
         _reloadFullAmmoApplyFrame = Mathf.Max(0, _reloadFullAmmoApplyFrame);
+        _reloadAmmoMaterialApplyFrame = Mathf.Max(0, _reloadAmmoMaterialApplyFrame);
         _ballisticCollisionRadiusMeters = Mathf.Max(0f, _ballisticCollisionRadiusMeters);
         _ballisticSimulationStepSeconds = Mathf.Max(0.0001f, _ballisticSimulationStepSeconds);
         _ballisticMaxSimulationStepsPerFrame = Mathf.Max(1, _ballisticMaxSimulationStepsPerFrame);
@@ -101,6 +104,7 @@ public sealed class WeaponData : ScriptableObject
     }
 
     public int GetReloadAmmoApplyFrame(bool fullReload) => fullReload ? Mathf.Max(0, _reloadFullAmmoApplyFrame) : Mathf.Max(0, _reloadAmmoApplyFrame);
+    public int GetReloadAmmoMaterialApplyFrame() => Mathf.Max(0, _reloadAmmoMaterialApplyFrame);
 
     public ItemData GetCompatibleAmmo(int index)
     {

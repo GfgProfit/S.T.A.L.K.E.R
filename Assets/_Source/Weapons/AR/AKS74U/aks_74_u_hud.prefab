@@ -9822,9 +9822,10 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 4e1c39b9f0e745d9bc9837c936a2de77, type: 3}
-  m_Name:
+  m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::WeaponShellEjector
   _shellPrefab: {fileID: 5096568820295910427, guid: e59c02eec580c234598dbb104b86d49e, type: 3}
+  _shellSpawnScale: {x: 0.6, y: 0.6, z: 0.6}
   _minimumLocalEjectionVelocity: {x: 1.75, y: 1.4, z: -0.4}
   _maximumLocalEjectionVelocity: {x: 2.6, y: 2.2, z: 0.4}
   _minimumLocalAngularVelocity: {x: -35, y: -35, z: -35}
@@ -14452,6 +14453,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::FirstPersonWeaponRuntimeController
   _muzzle: {fileID: 7793870008397231018}
   _shellEjector: {fileID: 7000000000000000001}
+  _ammoRenderer: {fileID: 6542415504223217665}
 --- !u!1 &7966500466355514695
 GameObject:
   m_ObjectHideFlags: 0

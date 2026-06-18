@@ -4,6 +4,7 @@ using UnityEngine;
 public sealed class WeaponShellEjector : MonoBehaviour
 {
     [SerializeField] private GameObject _shellPrefab;
+    [SerializeField] private Vector3 _shellSpawnScale = Vector3.one;
     [SerializeField] private Vector3 _minimumLocalEjectionVelocity = new(1.5f, 1.25f, -0.35f);
     [SerializeField] private Vector3 _maximumLocalEjectionVelocity = new(2.25f, 2f, 0.35f);
     [SerializeField] private Vector3 _minimumLocalAngularVelocity = new(-30f, -30f, -30f);
@@ -22,7 +23,7 @@ public sealed class WeaponShellEjector : MonoBehaviour
         CacheOwnerPhysics();
     }
 
-    public void Eject()
+    public void Eject(Material shellMaterial)
     {
         if (_shellPrefab == null)
         {
@@ -31,6 +32,8 @@ public sealed class WeaponShellEjector : MonoBehaviour
         }
 
         GameObject shellObject = Instantiate(_shellPrefab, transform.position, transform.rotation);
+        shellObject.transform.localScale = _shellSpawnScale;
+        ApplyShellMaterial(shellObject, shellMaterial);
         Rigidbody shellRigidbody = shellObject.GetComponent<Rigidbody>();
 
         if (shellRigidbody == null)
@@ -64,6 +67,21 @@ public sealed class WeaponShellEjector : MonoBehaviour
         }
 
         Destroy(shellObject, Mathf.Max(0.1f, _shellLifetimeSeconds));
+    }
+
+    private static void ApplyShellMaterial(GameObject shellObject, Material shellMaterial)
+    {
+        if (shellMaterial == null)
+        {
+            return;
+        }
+
+        Renderer[] shellRenderers = shellObject.GetComponentsInChildren<Renderer>(true);
+
+        for (int i = 0; i < shellRenderers.Length; i++)
+        {
+            shellRenderers[i].sharedMaterial = shellMaterial;
+        }
     }
 
     private void CacheOwnerPhysics()

@@ -44,6 +44,7 @@ MonoBehaviour:
   _ammoBulletDiameterMillimeters: 5.62
   _ammoBulletDragCoefficient: 0.3
   _ammoRicochetChance: 0.15
+  _ammoMaterial: {fileID: 2100000, guid: 0e3daaf57b93f354b8ab6306d0d83eb7, type: 2}
   _ammoTracerEnabled: 1
   _ammoTracerMaterial: {fileID: 2100000, guid: c3f23a18333449a688dfc526f601f118, type: 2}
   _ammoTracerColor: {r: 0.1, g: 1, b: 0.05, a: 1}

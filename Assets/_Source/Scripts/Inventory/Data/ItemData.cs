@@ -19,6 +19,7 @@ public class ItemData : ScriptableObject
     [SerializeField] [BoxGroup("Ammo")] [ShowIf(nameof(IsAmmo))] [Min(0f)] private float _ammoArmorPenetration;
     [SerializeField] [BoxGroup("Ammo")] [ShowIf(nameof(IsAmmo))] private float _ammoWeaponRecoilPercentModifier;
     [SerializeField] [BoxGroup("Ammo")] [ShowIf(nameof(IsAmmo))] private float _ammoWeaponDurabilityLossPercentModifier;
+    [SerializeField] [BoxGroup("Ammo/Visual")] [ShowIf(nameof(IsAmmo))] private Material _ammoMaterial;
     [SerializeField] [BoxGroup("Ammo/Ballistics")] [ShowIf(nameof(IsAmmo))] [Min(0f)] private float _ammoBulletVelocityMetersPerSecondFallback;
     [SerializeField] [BoxGroup("Ammo/Ballistics")] [ShowIf(nameof(IsAmmo))] [Min(0f)] private float _ammoBulletMassGrams;
     [SerializeField] [BoxGroup("Ammo/Ballistics")] [ShowIf(nameof(IsAmmo))] [Min(0f)] private float _ammoBulletDiameterMillimeters;
@@ -92,6 +93,7 @@ public class ItemData : ScriptableObject
     public float AmmoBulletDiameterMeters => Mathf.Max(0f, _ammoBulletDiameterMillimeters) * 0.001f;
     public float AmmoBulletDragCoefficient => Mathf.Max(0f, _ammoBulletDragCoefficient);
     public float AmmoRicochetChance => Mathf.Clamp01(_ammoRicochetChance);
+    public Material AmmoMaterial => _ammoMaterial;
     public bool AmmoTracerEnabled => _ammoTracerEnabled;
     public Material AmmoTracerMaterial => _ammoTracerMaterial;
     public Color AmmoTracerColor => _ammoTracerColor;

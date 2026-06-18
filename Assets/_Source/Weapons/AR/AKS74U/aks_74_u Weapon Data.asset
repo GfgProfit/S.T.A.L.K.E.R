@@ -18,6 +18,7 @@ MonoBehaviour:
   _fireMode: 1
   _reloadAmmoApplyFrame: 530
   _reloadFullAmmoApplyFrame: 700
+  _reloadAmmoMaterialApplyFrame: 300
   _compatibleAmmo:
   - _ammoData: {fileID: 11400000, guid: 0921ba32c21f58e479afd8ec656e6d4d, type: 2}
     _bulletVelocityMetersPerSecondOverride: 735
@@ -82,3 +83,4 @@ MonoBehaviour:
   _recoilZ: 0.3
   _recoilReturnSpeed: 10
   _recoilSnappiness: 20
+  _crouchRecoilReductionPercent: 25

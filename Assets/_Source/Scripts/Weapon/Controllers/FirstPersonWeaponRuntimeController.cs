@@ -14,6 +14,7 @@ public sealed class FirstPersonWeaponRuntimeController : MonoBehaviour
 
     [SerializeField] private Transform _muzzle;
     [SerializeField] private WeaponShellEjector _shellEjector;
+    [SerializeField] private Renderer _ammoRenderer;
 
     private InventoryItem _weaponItem;
     private ItemData _weaponItemData;
@@ -25,6 +26,7 @@ public sealed class FirstPersonWeaponRuntimeController : MonoBehaviour
     private FirstPersonWeaponAmmoHudViewModel _ammoHudViewModel;
     private PlayerController _playerController;
     private WeaponRecoilService _weaponRecoilService;
+    private Material _defaultAmmoMaterial;
     private CancellationTokenSource _reloadCancellation;
     private ItemData _requestedAmmoData;
     private ItemData _loadedAmmoData;
@@ -61,6 +63,7 @@ public sealed class FirstPersonWeaponRuntimeController : MonoBehaviour
         _ammoHudViewModel = ammoHudViewModel;
         _animationController = GetComponent<FirstPersonWeaponController>();
         _muzzle = FindMuzzleTransform();
+        _defaultAmmoMaterial ??= _ammoRenderer == null ? null : _ammoRenderer.sharedMaterial;
         _cameraAllAnimationController = FindCameraAllAnimationController();
         _cameraAllAnimationController?.SetAimActive(false);
         _animationController?.SetAimRootPositionOffsetActive(false, true);
@@ -68,6 +71,7 @@ public sealed class FirstPersonWeaponRuntimeController : MonoBehaviour
         _weaponRecoilService?.Reset();
         _weaponRecoilService = _weaponData == null ? null : new WeaponRecoilService(FindWeaponRecoilTransform());
         RestoreMagazineState();
+        ApplyAmmoMaterial(_loadedAmmoData);
         _reloadAmmoData = null;
         _movementAnimationState = WeaponMovementAnimationState.None;
         _movementAnimationLockUntilTime = 0f;
@@ -181,7 +185,7 @@ public sealed class FirstPersonWeaponRuntimeController : MonoBehaviour
         _nextShootTime = Time.time + _weaponData.SecondsBetweenShots;
         _loadedAmmoAmount--;
         ApplyDurabilityShotCost(firedAmmoData);
-        _shellEjector?.Eject();
+        _shellEjector?.Eject(firedAmmoData == null ? null : firedAmmoData.AmmoMaterial);
 
         FirstPersonWeaponAnimationKey animationKey = _isAiming
             ? (isLastRound ? FirstPersonWeaponAnimationKey.AimShootLast : FirstPersonWeaponAnimationKey.AimShoot)
@@ -403,7 +407,8 @@ public sealed class FirstPersonWeaponRuntimeController : MonoBehaviour
     private void PlayReloadAnimation(bool isFullReload, ItemData reloadAmmoData)
     {
         FirstPersonWeaponAnimationKey animationKey = isFullReload ? FirstPersonWeaponAnimationKey.ReloadFull : FirstPersonWeaponAnimationKey.Reload;
-        float applyDelay = GetReloadAmmoApplyDelay(isFullReload, animationKey);
+        float ammoApplyDelay = GetReloadAmmoApplyDelay(isFullReload, animationKey);
+        float materialApplyDelay = isFullReload ? 0f : GetReloadAmmoMaterialApplyDelay(animationKey);
         float animationLength = GetAnimationLength(animationKey);
 
         CancelReload();
@@ -411,25 +416,70 @@ public sealed class FirstPersonWeaponRuntimeController : MonoBehaviour
         _reloadAmmoApplied = false;
         _isReloading = true;
         _movementAnimationState = WeaponMovementAnimationState.None;
+
+        if (isFullReload)
+        {
+            ApplyReloadAmmoMaterial();
+        }
+
         _animationController?.Reload(isFullReload);
         LockMovementAnimation(animationKey);
 
         _reloadCancellation = CancellationTokenSource.CreateLinkedTokenSource(destroyCancellationToken);
-        PlayReloadAsync(isFullReload, applyDelay, animationLength, _reloadCancellation).Forget(Debug.LogException);
+        PlayReloadAsync(isFullReload, ammoApplyDelay, materialApplyDelay, animationLength, _reloadCancellation).Forget(Debug.LogException);
     }
 
-    private async UniTask PlayReloadAsync(bool isFullReload, float applyDelay, float animationLength, CancellationTokenSource reloadCancellation)
+    private async UniTask PlayReloadAsync(bool isFullReload, float ammoApplyDelay, float materialApplyDelay, float animationLength, CancellationTokenSource reloadCancellation)
     {
         CancellationToken cancellationToken = reloadCancellation.Token;
+        float lastEventDelay;
 
-        if (await DelaySecondsAsync(applyDelay, cancellationToken))
+        if (isFullReload)
         {
-            return;
+            if (await DelaySecondsAsync(ammoApplyDelay, cancellationToken))
+            {
+                return;
+            }
+
+            ApplyReloadAmmo();
+            lastEventDelay = ammoApplyDelay;
+        }
+        else if (materialApplyDelay <= ammoApplyDelay)
+        {
+            if (await DelaySecondsAsync(materialApplyDelay, cancellationToken))
+            {
+                return;
+            }
+
+            ApplyReloadAmmoMaterial();
+
+            if (await DelaySecondsAsync(ammoApplyDelay - materialApplyDelay, cancellationToken))
+            {
+                return;
+            }
+
+            ApplyReloadAmmo();
+            lastEventDelay = ammoApplyDelay;
+        }
+        else
+        {
+            if (await DelaySecondsAsync(ammoApplyDelay, cancellationToken))
+            {
+                return;
+            }
+
+            ApplyReloadAmmo();
+
+            if (await DelaySecondsAsync(materialApplyDelay - ammoApplyDelay, cancellationToken))
+            {
+                return;
+            }
+
+            ApplyReloadAmmoMaterial();
+            lastEventDelay = materialApplyDelay;
         }
 
-        ApplyReloadAmmo();
-
-        float remainingDelay = Mathf.Max(0f, animationLength - applyDelay);
+        float remainingDelay = Mathf.Max(0f, animationLength - lastEventDelay);
 
         if (await DelaySecondsAsync(remainingDelay, cancellationToken))
         {
@@ -510,6 +560,33 @@ public sealed class FirstPersonWeaponRuntimeController : MonoBehaviour
         RefreshInventoryWeightState();
 
         _inventoryController.TryReturnItemToInventoryOrDrop(loadedAmmoData, loadedAmmoAmount);
+    }
+
+    private void ApplyReloadAmmoMaterial()
+    {
+        if (_reloadAmmoData == null)
+        {
+            return;
+        }
+
+        if (_reloadAmmoApplied == false && (_inventoryController == null || _inventoryController.GetInventoryItemCount(_reloadAmmoData) <= 0))
+        {
+            return;
+        }
+
+        ApplyAmmoMaterial(_reloadAmmoData);
+    }
+
+    private void ApplyAmmoMaterial(ItemData ammoData)
+    {
+        Material ammoMaterial = ammoData == null || ammoData.AmmoMaterial == null ? _defaultAmmoMaterial : ammoData.AmmoMaterial;
+
+        if (_ammoRenderer == null || _ammoRenderer.sharedMaterial == ammoMaterial)
+        {
+            return;
+        }
+
+        _ammoRenderer.sharedMaterial = ammoMaterial;
     }
 
     private void RestoreMagazineState()
@@ -682,6 +759,16 @@ public sealed class FirstPersonWeaponRuntimeController : MonoBehaviour
 
         int applyFrame = _weaponData.GetReloadAmmoApplyFrame(isFullReload);
         return _animationController.GetNextAnimationFrameTime(animationKey, applyFrame);
+    }
+
+    private float GetReloadAmmoMaterialApplyDelay(FirstPersonWeaponAnimationKey animationKey)
+    {
+        if (_weaponData == null || _animationController == null)
+        {
+            return 0f;
+        }
+
+        return _animationController.GetNextAnimationFrameTime(animationKey, _weaponData.GetReloadAmmoMaterialApplyFrame());
     }
 
     private float GetAnimationLength(FirstPersonWeaponAnimationKey animationKey)
