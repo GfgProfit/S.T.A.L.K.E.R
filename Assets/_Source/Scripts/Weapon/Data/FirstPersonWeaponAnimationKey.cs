@@ -23,5 +23,9 @@ public enum FirstPersonWeaponAnimationKey
     AimShoot = 20,
     AimWalk = 21,
     AimShootLast = 22,
-    DryEmpty = 23
+    DryEmpty = 23,
+    AimDry = 24,
+    AimWalkBackward = 25,
+    AimWalkLeft = 26,
+    AimWalkRight = 27
 }

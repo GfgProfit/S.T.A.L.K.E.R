@@ -1,0 +1,93 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 737e751cd05516846acf43daad139c9e, type: 3}
+  m_Name: aks_74_u
+  m_EditorClassIdentifier: 
+  _itemName: "\u0410\u0432\u0442\u043E\u043C\u0430\u0442 \u041A\u0430\u043B\u0430\u0448\u043D\u0438\u043A\u043E\u0432\u0430
+    \u0410\u041A\u0421-74\u0423 5.45x39"
+  _shortName: "\u0410\u041A\u0421-74\u0423"
+  _description: "\u0410\u041A\u0421-74\u0423 \u2014 \u0443\u043A\u043E\u0440\u043E\u0447\u0435\u043D\u043D\u0430\u044F
+    \u0432\u0435\u0440\u0441\u0438\u044F \u0430\u0432\u0442\u043E\u043C\u0430\u0442\u0430
+    \u041A\u0430\u043B\u0430\u0448\u043D\u0438\u043A\u043E\u0432\u0430 \u043F\u043E\u0434
+    \u043F\u0430\u0442\u0440\u043E\u043D 5.45\xD739 \u043C\u043C. \u041A\u043E\u043C\u043F\u0430\u043A\u0442\u043D\u044B\u0439,
+    \u043B\u0451\u0433\u043A\u0438\u0439 \u0438 \u0443\u0434\u043E\u0431\u043D\u044B\u0439
+    \u0432 \u0442\u0435\u0441\u043D\u044B\u0445 \u043F\u043E\u043C\u0435\u0449\u0435\u043D\u0438\u044F\u0445,
+    \u043E\u043D \u0447\u0430\u0441\u0442\u043E \u043F\u043E\u043F\u0430\u0434\u0430\u0435\u0442\u0441\u044F
+    \u0443 \u0432\u043E\u0435\u043D\u043D\u044B\u0445, \u0431\u0430\u043D\u0434\u0438\u0442\u043E\u0432
+    \u0438 \u0441\u0442\u0430\u043B\u043A\u0435\u0440\u043E\u0432, \u043A\u043E\u0442\u043E\u0440\u044B\u043C
+    \u043D\u0443\u0436\u043D\u043E \u043E\u0440\u0443\u0436\u0438\u0435 \u043F\u043E\u043F\u0440\u043E\u0449\u0435
+    \u0438 \u043F\u043E\u043A\u043E\u0440\u043E\u0447\u0435. \u041D\u0430 \u0431\u043B\u0438\u0436\u043D\u0435\u0439
+    \u0434\u0438\u0441\u0442\u0430\u043D\u0446\u0438\u0438 \u0440\u0430\u0431\u043E\u0442\u0430\u0435\u0442
+    \u0443\u0432\u0435\u0440\u0435\u043D\u043D\u043E, \u043D\u043E \u0438\u0437-\u0437\u0430
+    \u043A\u043E\u0440\u043E\u0442\u043A\u043E\u0433\u043E \u0441\u0442\u0432\u043E\u043B\u0430
+    \u0431\u044B\u0441\u0442\u0440\u043E \u0442\u0435\u0440\u044F\u0435\u0442 \u0442\u043E\u0447\u043D\u043E\u0441\u0442\u044C
+    \u0438 \u044D\u0444\u0444\u0435\u043A\u0442\u0438\u0432\u043D\u043E\u0441\u0442\u044C
+    \u043D\u0430 \u0440\u0430\u0441\u0441\u0442\u043E\u044F\u043D\u0438\u0438. \u0425\u043E\u0440\u043E\u0448\u0438\u0439
+    \u0432\u044B\u0431\u043E\u0440 \u0434\u043B\u044F \u043F\u043E\u0434\u0437\u0435\u043C\u0435\u043B\u0438\u0439,
+    \u0437\u0430\u0431\u0440\u043E\u0448\u0435\u043D\u043D\u044B\u0445 \u0437\u0434\u0430\u043D\u0438\u0439
+    \u0438 \u0432\u043D\u0435\u0437\u0430\u043F\u043D\u044B\u0445 \u0441\u0442\u044B\u0447\u0435\u043A,
+    \u043D\u043E \u0432 \u043E\u0442\u043A\u0440\u044B\u0442\u043E\u0439 \u043F\u0435\u0440\u0435\u0441\u0442\u0440\u0435\u043B\u043A\u0435
+    \u043B\u0443\u0447\u0448\u0435 \u043F\u043E\u0438\u0441\u043A\u0430\u0442\u044C
+    \u0447\u0442\u043E-\u043D\u0438\u0431\u0443\u0434\u044C \u0441\u0435\u0440\u044C\u0451\u0437\u043D\u0435\u0435."
+  _itemType: 1
+  _rarity: 0
+  _weight: 2.5
+  _stackable: 0
+  _useDurability: 1
+  _defaultDurabilityPercent: 100
+  _canEquipHelmet: 1
+  _ammoFleshDamage: 0
+  _ammoArmorPenetration: 0
+  _ammoBulletVelocityMetersPerSecond: 0
+  _ammoWeaponRecoilPercentModifier: 0
+  _ammoWeaponAccuracyPercentModifier: 0
+  _ammoWeaponAccuracyPenaltyPercentModifier: 0
+  _ammoWeaponDurabilityLossPercentModifier: 0
+  _firstPersonLegsMeshName: 
+  _firstPersonHandsMeshName: 
+  _firstPersonWeaponPrefab: {fileID: 7896559202053645435, guid: 3c5e8b976f7806b4ba94937efe6c1112, type: 3}
+  _firstPersonWeaponSpawnScale: {x: 0.6, y: 0.6, z: 0.6}
+  _weaponData: {fileID: 11400000, guid: 3d7250701e90f384684c73a8ca81bc3a, type: 2}
+  _statModifiers: []
+  _worldItemPrefab: {fileID: 5621424911309646573, guid: e5ea3e1362bad3441aa5581342f31c45, type: 3}
+  _width: 3
+  _height: 2
+  _itemIcon: {fileID: 0}
+  _generateIconAtRuntime: 1
+  _iconPrefab: {fileID: 3159486526241393684, guid: f5defca8540bc4f49958f8d9e121b839, type: 3}
+  _iconParts: []
+  _iconPixelsPerCell: 64
+  _iconRenderScale: 2
+  _iconPadding: 1.15
+  _iconAntiAliasing: 8
+  _iconUseOutline: 1
+  _iconOutlineWidth: 2
+  _iconUseShadow: 1
+  _iconShadowOffset: {x: 2, y: -2}
+  _iconShadowBlur: 2
+  _iconModelEulerAngles: {x: 0, y: 180, z: 0}
+  _iconModelScale: {x: 1, y: 1, z: 1}
+  _iconCameraEulerAngles: {x: 0, y: -90, z: 90}
+  _slotIconModelEulerAngles: {x: 0, y: 0, z: 180}
+  _slotIconModelScale: {x: 1, y: 1, z: 1}
+  _slotIconCameraEulerAngles: {x: 0, y: -90, z: 0}
+  _slotIconPadding: 1.15
+  _iconShowCellGrid: 1
+  _iconShowCellGridBorder: 1
+  _iconCellGridBorderLineThickness: 2
+  _iconUseDirectionalLight: 1
+  _iconLightEulerAngles: {x: 50, y: -30, z: 0}
+  _iconLightIntensity: 100000
+  _slotIconUseDirectionalLight: 1
+  _slotIconLightEulerAngles: {x: 50, y: -30, z: 0}
+  _slotIconLightIntensity: 100000
+  _slotIconSettingsInitialized: 1

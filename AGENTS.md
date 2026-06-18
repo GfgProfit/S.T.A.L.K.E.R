@@ -232,6 +232,15 @@ Before finishing, review the diff for:
 * Subscription or async lifetime leaks
 * Editor/runtime assembly separation issues
 
+## Response Policy
+
+Only provide a response after the entire task is fully completed.
+
+Do not write progress updates, intermediate messages, partial summaries, or status reports while working.
+
+The final response should include only the completed result.
+
+
 ## Response Format
 
 After completing a task, respond with:

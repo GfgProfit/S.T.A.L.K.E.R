@@ -8,6 +8,7 @@ public sealed class FirstPersonWeaponHolderController : MonoBehaviour
     [SerializeField] private Transform _weaponHolder;
     [SerializeField] private InventoryController _inventoryController;
     [SerializeField] private FirstPersonWeaponAmmoHudView _ammoHudView;
+    [SerializeField] private FirstPersonWeaponAimPointView _aimPointView;
     [SerializeField] private bool _clearExistingHolderChildrenOnAwake = true;
 
     [Inject] private IPlayerInput _playerInput = null;
@@ -18,6 +19,7 @@ public sealed class FirstPersonWeaponHolderController : MonoBehaviour
     private ItemData _currentWeaponItemData;
     private ItemData _equippedArmorItemData;
     private GameObject _spawnedWeapon;
+    private FirstPersonWeaponRuntimeController _spawnedWeaponRuntimeController;
     private CancellationTokenSource _switchCancellation;
     private bool _isSwitchingWeapon;
 
@@ -45,6 +47,7 @@ public sealed class FirstPersonWeaponHolderController : MonoBehaviour
         _ammoHudViewModel = new FirstPersonWeaponAmmoHudViewModel();
         _ammoHudView?.Bind(_ammoHudViewModel);
         _ammoHudViewModel.Clear();
+        _aimPointView?.SetAimActive(false, true);
 
         if (_clearExistingHolderChildrenOnAwake)
         {
@@ -58,6 +61,11 @@ public sealed class FirstPersonWeaponHolderController : MonoBehaviour
         ClearSpawnedWeapon();
         _ammoHudView?.Unbind();
         _ammoHudViewModel?.Dispose();
+    }
+
+    private void Update()
+    {
+        _aimPointView?.SetAimActive(_spawnedWeaponRuntimeController != null && _spawnedWeaponRuntimeController.IsAiming);
     }
 
     public bool SetWeapon(InventoryItem weaponItem)
@@ -125,6 +133,7 @@ public sealed class FirstPersonWeaponHolderController : MonoBehaviour
         spawnedTransform.localScale = _currentWeaponItemData == null ? Vector3.one : _currentWeaponItemData.FirstPersonWeaponSpawnScale;
 
         FirstPersonWeaponRuntimeController runtimeController = _spawnedWeapon.GetComponent<FirstPersonWeaponRuntimeController>();
+        _spawnedWeaponRuntimeController = runtimeController;
         runtimeController?.Initialize(_currentWeaponItem, _inventoryController, PlayerInput, _ammoHudViewModel);
         ApplyEquippedArmorToSpawnedWeapon();
     }
@@ -236,6 +245,8 @@ public sealed class FirstPersonWeaponHolderController : MonoBehaviour
         }
 
         _spawnedWeapon = null;
+        _spawnedWeaponRuntimeController = null;
+        _aimPointView?.SetAimActive(false);
     }
 
     private void ClearSpawnedWeapon()
@@ -247,6 +258,8 @@ public sealed class FirstPersonWeaponHolderController : MonoBehaviour
 
         Destroy(_spawnedWeapon);
         _spawnedWeapon = null;
+        _spawnedWeaponRuntimeController = null;
+        _aimPointView?.SetAimActive(false);
     }
 
     private void CancelWeaponSwitch()

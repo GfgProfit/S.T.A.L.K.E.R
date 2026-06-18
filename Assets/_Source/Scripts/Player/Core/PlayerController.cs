@@ -109,6 +109,16 @@ public class PlayerController : MonoBehaviour
         }
     }
 
+    public void SetCanSprinting(bool canSprinting)
+    {
+        CanSprinting = canSprinting;
+
+        if (canSprinting == false && IsSprinting)
+        {
+            _movementController.SetInput(_playerInput, false);
+        }
+    }
+
     public void SetCanCrouching(bool canCrouching) => _canCrouching = canCrouching;
     public bool TryGetCameraLocalRotation(out Quaternion localRotation) => _lookController.TryGetCameraLocalRotation(out localRotation);
     public void RestoreCameraLocalRotation(Quaternion localRotation) => _lookController.RestoreCameraLocalRotation(localRotation, _cameraClampLimit);

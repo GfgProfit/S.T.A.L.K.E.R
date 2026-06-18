@@ -117,7 +117,7 @@ internal sealed class InventoryItemView : IView<InventoryItemViewModel>, IDispos
         Unbind();
     }
 
-    public void ApplySerializedSettings() => InventoryItemOverlayPresenter.ApplySerializedSettings(_cellBackgroundImage, _itemImage, _countText, _countTextRectTransform, _shortNameText, _shortNameTextRectTransform, _durabilityBackgroundGraphic, _durabilityFillGraphic, _statusIconImage, _statusIconRectTransform);
+    public void ApplySerializedSettings() => InventoryItemOverlayPresenter.ApplySerializedSettings(_cellBackgroundImage, _itemImage, _countText, _countTextRectTransform, _shortNameText, _shortNameTextRectTransform, _durabilityBackgroundRectTransform, _durabilityBackgroundGraphic, _durabilityFillGraphic, _statusIconImage, _statusIconRectTransform);
 
     public void ApplyRootSize()
     {
@@ -170,7 +170,7 @@ internal sealed class InventoryItemView : IView<InventoryItemViewModel>, IDispos
     public void ApplyDurabilityLayout()
     {
         ApplyDurabilityVisualSettings();
-        InventoryItemOverlayLayout.ApplyDurabilityLayout(_durabilityBackgroundRectTransform, _durabilityFillRectTransform, _durabilityFillGraphic, _isVisuallyRotated(), _getCurrentDurabilityPercent());
+        InventoryItemOverlayLayout.ApplyDurabilityLayout(_durabilityBackgroundRectTransform, _durabilityFillRectTransform, _durabilityFillGraphic, _isVisuallyRotated(), _getVisualWidth(), _getVisualHeight(), _getCurrentDurabilityPercent());
     }
 
     public void ApplyCountTextLayout()
@@ -195,12 +195,12 @@ internal sealed class InventoryItemView : IView<InventoryItemViewModel>, IDispos
         InventoryItemOverlayLayout.ApplyStatusIconLayout(_statusIconRectTransform, _isVisuallyRotated());
     }
 
-    public void BringOverlayTextsToFront() => InventoryItemOverlayPresenter.BringOverlayTextsToFront(_shortNameTextRectTransform, _countTextRectTransform, _statusIconRectTransform);
+    public void BringOverlayTextsToFront() => InventoryItemOverlayPresenter.BringOverlayTextsToFront(_shortNameTextRectTransform, _countTextRectTransform, _statusIconRectTransform, _durabilityBackgroundRectTransform);
 
     private void ApplyDurabilityFill()
     {
         ApplyDurabilityVisualSettings();
-        InventoryItemOverlayLayout.ApplyDurabilityFill(_durabilityFillRectTransform, _durabilityFillGraphic, _isVisuallyRotated(), _getCurrentDurabilityPercent());
+        InventoryItemOverlayLayout.ApplyDurabilityFill(_durabilityFillRectTransform, _durabilityFillGraphic, _getCurrentDurabilityPercent());
     }
 
     private void SetItemIcon(Sprite icon)

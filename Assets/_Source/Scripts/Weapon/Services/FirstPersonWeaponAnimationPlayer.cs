@@ -6,14 +6,18 @@ internal sealed class FirstPersonWeaponAnimationPlayer : IDisposable
 {
     private readonly Animator _weaponAnimator;
     private readonly Animator _handsAnimator;
+    private readonly Animator _cameraAnimator;
     private readonly float _defaultCrossFadeDuration;
 
     private AnimancerComponent _weaponAnimancer;
     private AnimancerComponent _handsAnimancer;
+    private AnimancerComponent _cameraAnimancer;
     private AnimancerState _activeWeaponState;
     private AnimancerState _activeHandsState;
+    private AnimancerState _activeCameraState;
     private AnimancerState _fadingWeaponState;
     private AnimancerState _fadingHandsState;
+    private AnimancerState _fadingCameraState;
     private FirstPersonWeaponAnimationClipPair _activePair;
     private FirstPersonWeaponAnimationClipPair _fadingPair;
     private FirstPersonWeaponAnimationClipPair _currentPair;
@@ -26,10 +30,11 @@ internal sealed class FirstPersonWeaponAnimationPlayer : IDisposable
     private bool _hasActivePair;
     private bool _isFading;
 
-    public FirstPersonWeaponAnimationPlayer(Animator weaponAnimator, Animator handsAnimator, float crossFadeDuration)
+    public FirstPersonWeaponAnimationPlayer(Animator weaponAnimator, Animator handsAnimator, Animator cameraAnimator, float crossFadeDuration)
     {
         _weaponAnimator = weaponAnimator;
         _handsAnimator = handsAnimator;
+        _cameraAnimator = cameraAnimator;
         _defaultCrossFadeDuration = Mathf.Max(0f, crossFadeDuration);
     }
 
@@ -48,7 +53,7 @@ internal sealed class FirstPersonWeaponAnimationPlayer : IDisposable
 
     public void Play(FirstPersonWeaponAnimationKey key, FirstPersonWeaponAnimationClipPair pair, bool restartIfSame, float crossFadeDuration)
     {
-        if ((_weaponAnimator == null && _handsAnimator == null) || pair.HasAnyClip == false)
+        if ((_weaponAnimator == null && _handsAnimator == null && _cameraAnimator == null) || pair.HasAnyClip == false)
         {
             return;
         }
@@ -62,15 +67,17 @@ internal sealed class FirstPersonWeaponAnimationPlayer : IDisposable
 
         float resolvedCrossFadeDuration = Mathf.Max(0f, crossFadeDuration);
         float animancerFadeDuration = _hasActivePair ? resolvedCrossFadeDuration : 0f;
-        double weaponStartTime = GetStartTime(key, pair.WeaponClip, false);
-        double handsStartTime = GetStartTime(key, pair.HandsClip, true);
+        double weaponStartTime = GetStartTime(key, pair.WeaponClip, FirstPersonWeaponAnimationChannel.Weapon);
+        double handsStartTime = GetStartTime(key, pair.HandsClip, FirstPersonWeaponAnimationChannel.Hands);
+        double cameraStartTime = GetStartTime(key, pair.CameraClip, FirstPersonWeaponAnimationChannel.Camera);
         bool delayClipStart = _hasActivePair && resolvedCrossFadeDuration > 0f && ShouldDelayClipStart(key);
         AnimancerState weaponState = PlayClip(_weaponAnimancer, pair.WeaponClip, key, weaponStartTime, restartIfSame, animancerFadeDuration, delayClipStart);
         AnimancerState handsState = PlayClip(_handsAnimancer, pair.HandsClip, key, handsStartTime, restartIfSame, animancerFadeDuration, delayClipStart);
+        AnimancerState cameraState = PlayClip(_cameraAnimancer, pair.CameraClip, key, cameraStartTime, restartIfSame, animancerFadeDuration, delayClipStart);
 
         if (_hasActivePair == false || resolvedCrossFadeDuration <= 0f)
         {
-            CompleteImmediate(key, pair, weaponState, handsState);
+            CompleteImmediate(key, pair, weaponState, handsState, cameraState);
             return;
         }
 
@@ -78,6 +85,7 @@ internal sealed class FirstPersonWeaponAnimationPlayer : IDisposable
         _fadingKey = key;
         _fadingWeaponState = weaponState;
         _fadingHandsState = handsState;
+        _fadingCameraState = cameraState;
         _fadeElapsed = 0f;
         _fadeDuration = resolvedCrossFadeDuration;
         _currentPair = pair;
@@ -105,19 +113,23 @@ internal sealed class FirstPersonWeaponAnimationPlayer : IDisposable
     {
         DestroyGraph(_weaponAnimancer);
         DestroyGraph(_handsAnimancer);
+        DestroyGraph(_cameraAnimancer);
 
         _hasActivePair = false;
         _isFading = false;
         _activeWeaponState = null;
         _activeHandsState = null;
+        _activeCameraState = null;
         _fadingWeaponState = null;
         _fadingHandsState = null;
+        _fadingCameraState = null;
     }
 
     private void EnsureAnimancers()
     {
         _weaponAnimancer ??= GetOrCreateAnimancer(_weaponAnimator);
         _handsAnimancer ??= GetOrCreateAnimancer(_handsAnimator);
+        _cameraAnimancer ??= GetOrCreateAnimancer(_cameraAnimator);
     }
 
     private AnimancerState PlayClip(AnimancerComponent animancer, AnimationClip clip, FirstPersonWeaponAnimationKey key, double startTime, bool restartIfSame, float crossFadeDuration, bool delayClipStart)
@@ -137,7 +149,7 @@ internal sealed class FirstPersonWeaponAnimationPlayer : IDisposable
         return state;
     }
 
-    private double GetStartTime(FirstPersonWeaponAnimationKey nextKey, AnimationClip nextClip, bool hands)
+    private double GetStartTime(FirstPersonWeaponAnimationKey nextKey, AnimationClip nextClip, FirstPersonWeaponAnimationChannel channel)
     {
         if (_hasActivePair == false)
         {
@@ -152,8 +164,8 @@ internal sealed class FirstPersonWeaponAnimationPlayer : IDisposable
         }
 
         FirstPersonWeaponAnimationClipPair sourcePair = GetDominantPair();
-        AnimationClip sourceClip = hands ? sourcePair.HandsClip : sourcePair.WeaponClip;
-        AnimancerState sourceState = hands ? GetDominantHandsState() : GetDominantWeaponState();
+        AnimationClip sourceClip = GetClip(sourcePair, channel);
+        AnimancerState sourceState = GetDominantState(channel);
 
         if (sourceClip == null || nextClip == null || sourceClip.length <= 0f || nextClip.length <= 0f || sourceState == null)
         {
@@ -206,22 +218,45 @@ internal sealed class FirstPersonWeaponAnimationPlayer : IDisposable
         return GetFadeWeight() > 0.5f ? _fadingHandsState : _activeHandsState;
     }
 
+    private AnimancerState GetDominantCameraState()
+    {
+        if (_isFading == false)
+        {
+            return _activeCameraState;
+        }
+
+        return GetFadeWeight() > 0.5f ? _fadingCameraState : _activeCameraState;
+    }
+
+    private AnimancerState GetDominantState(FirstPersonWeaponAnimationChannel channel)
+    {
+        return channel switch
+        {
+            FirstPersonWeaponAnimationChannel.Hands => GetDominantHandsState(),
+            FirstPersonWeaponAnimationChannel.Camera => GetDominantCameraState(),
+            _ => GetDominantWeaponState()
+        };
+    }
+
     private float GetFadeWeight() => _fadeDuration <= 0f ? 1f : Mathf.Clamp01(_fadeElapsed / _fadeDuration);
 
-    private void CompleteImmediate(FirstPersonWeaponAnimationKey key, FirstPersonWeaponAnimationClipPair pair, AnimancerState weaponState, AnimancerState handsState)
+    private void CompleteImmediate(FirstPersonWeaponAnimationKey key, FirstPersonWeaponAnimationClipPair pair, AnimancerState weaponState, AnimancerState handsState, AnimancerState cameraState)
     {
         _activePair = pair;
         _activeKey = key;
         _activeWeaponState = weaponState;
         _activeHandsState = handsState;
+        _activeCameraState = cameraState;
         _currentPair = pair;
         _currentKey = key;
         _hasActivePair = true;
         _isFading = false;
         _fadingWeaponState = null;
         _fadingHandsState = null;
+        _fadingCameraState = null;
         SetStateSpeed(_activeWeaponState, GetPlaybackSpeed(key));
         SetStateSpeed(_activeHandsState, GetPlaybackSpeed(key));
+        SetStateSpeed(_activeCameraState, GetPlaybackSpeed(key));
     }
 
     private void CompleteFade()
@@ -230,14 +265,17 @@ internal sealed class FirstPersonWeaponAnimationPlayer : IDisposable
         _activeKey = _fadingKey;
         _activeWeaponState = _fadingWeaponState;
         _activeHandsState = _fadingHandsState;
+        _activeCameraState = _fadingCameraState;
         _currentPair = _activePair;
         _currentKey = _activeKey;
         _hasActivePair = true;
         _isFading = false;
         _fadingWeaponState = null;
         _fadingHandsState = null;
+        _fadingCameraState = null;
         SetStateSpeed(_activeWeaponState, GetPlaybackSpeed(_activeKey));
         SetStateSpeed(_activeHandsState, GetPlaybackSpeed(_activeKey));
+        SetStateSpeed(_activeCameraState, GetPlaybackSpeed(_activeKey));
     }
 
     private void ApplyLoopPlaybackSpeed()
@@ -251,12 +289,14 @@ internal sealed class FirstPersonWeaponAnimationPlayer : IDisposable
         {
             SetStateSpeed(_activeWeaponState, _loopPlaybackSpeed);
             SetStateSpeed(_activeHandsState, _loopPlaybackSpeed);
+            SetStateSpeed(_activeCameraState, _loopPlaybackSpeed);
         }
 
         if (_isFading && _fadingKey == _currentKey)
         {
             SetStateSpeed(_fadingWeaponState, _loopPlaybackSpeed);
             SetStateSpeed(_fadingHandsState, _loopPlaybackSpeed);
+            SetStateSpeed(_fadingCameraState, _loopPlaybackSpeed);
         }
     }
 
@@ -307,6 +347,26 @@ internal sealed class FirstPersonWeaponAnimationPlayer : IDisposable
                key == FirstPersonWeaponAnimationKey.Walk ||
                key == FirstPersonWeaponAnimationKey.Sprint ||
                key == FirstPersonWeaponAnimationKey.AimIdle ||
-               key == FirstPersonWeaponAnimationKey.AimWalk;
+               key == FirstPersonWeaponAnimationKey.AimWalk ||
+               key == FirstPersonWeaponAnimationKey.AimWalkBackward ||
+               key == FirstPersonWeaponAnimationKey.AimWalkLeft ||
+               key == FirstPersonWeaponAnimationKey.AimWalkRight;
+    }
+
+    private static AnimationClip GetClip(FirstPersonWeaponAnimationClipPair pair, FirstPersonWeaponAnimationChannel channel)
+    {
+        return channel switch
+        {
+            FirstPersonWeaponAnimationChannel.Hands => pair.HandsClip,
+            FirstPersonWeaponAnimationChannel.Camera => pair.CameraClip,
+            _ => pair.WeaponClip
+        };
+    }
+
+    private enum FirstPersonWeaponAnimationChannel
+    {
+        Weapon = 0,
+        Hands = 1,
+        Camera = 2
     }
 }

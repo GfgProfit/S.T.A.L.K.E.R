@@ -4,17 +4,25 @@ public sealed class FirstPersonWeaponController : MonoBehaviour
 {
     private const float STARTUP_CROSS_FADE_DURATION = 0f;
     private const float ROOT_POSITION_OFFSET_EPSILON = 0.000001f;
+    private const float ROOT_ROTATION_OFFSET_EPSILON = 0.01f;
+    private const string CAMERA_BONE_SOURCE_NAME = "camera_bone";
+    private const string CAMERA_ALL_BONE_OBJECT_NAME = "Camera All Bone";
+    private const string CAMERA_BONE_TARGET_OBJECT_NAME = "Camera Bone";
 
     [SerializeField] private Animator _handsAnimator;
     [SerializeField] private Animator _weaponAnimator;
+    [SerializeField] private Animator _cameraAnimator;
     [SerializeField] private Transform _handsMeshRoot;
     [SerializeField] private string _defaultHandsMeshName = "default";
     [SerializeField] private Transform _weaponFollowSource;
     [SerializeField] private Transform _weaponFollowTarget;
+    [SerializeField] private Transform _cameraBoneSource;
+    [SerializeField] private Transform _cameraBoneTarget;
     [SerializeField] private bool _followHands = true;
     [SerializeField] private bool _forceAim;
     [SerializeField] private Vector3 _rootPositionOffset;
     [SerializeField] private Vector3 _aimRootPositionOffset;
+    [SerializeField] private Vector3 _aimRootRotationOffset;
     [SerializeField] [Min(0f)] private float _rootPositionOffsetLerpSpeed = 12f;
     [SerializeField] private Vector3 _weaponFollowPositionOffset;
     [SerializeField] private Vector3 _weaponFollowRotationOffset;
@@ -35,6 +43,10 @@ public sealed class FirstPersonWeaponController : MonoBehaviour
     private float _lastAnimationStartDelay;
     private bool _hasPendingReturn;
     private bool _useAimRootPositionOffset;
+    private Quaternion _rootBaseRotation;
+    private Vector3 _cameraBoneTargetBasePosition;
+    private Quaternion _cameraBoneTargetBaseRotation;
+    private bool _hasCameraBoneTargetBasePose;
 
     public WeaponCondition Condition => _weaponCondition;
     public FirstPersonWeaponAnimationKey CurrentAnimationKey => _currentAnimationKey;
@@ -42,6 +54,7 @@ public sealed class FirstPersonWeaponController : MonoBehaviour
 
     private void Awake()
     {
+        _rootBaseRotation = transform.localRotation;
         SnapRootPositionOffset();
         EnsureInitialized();
     }
@@ -81,6 +94,7 @@ public sealed class FirstPersonWeaponController : MonoBehaviour
         _weaponFollower?.SetEnabled(_followHands);
         _weaponFollower?.SetAdditionalOffset(_weaponFollowPositionOffset, _weaponFollowRotationOffset);
         _weaponFollower?.Tick();
+        UpdateCameraBoneFollow();
     }
 
     private void OnDisable() => DisposeAnimationPlayer();
@@ -127,6 +141,7 @@ public sealed class FirstPersonWeaponController : MonoBehaviour
     public void PlaySprint() => PlayContinuous(FirstPersonWeaponAnimationKey.Sprint);
     public void PlayAimIdle() => PlayContinuous(FirstPersonWeaponAnimationKey.AimIdle);
     public void PlayAimWalk() => PlayContinuous(FirstPersonWeaponAnimationKey.AimWalk);
+    public void PlayAimWalk(FirstPersonWeaponAnimationKey key) => PlayContinuous(IsAimWalkKey(key) ? key : FirstPersonWeaponAnimationKey.AimWalk);
     public void PlayAimShoot(bool lastRound = false)
     {
         Play(lastRound ? FirstPersonWeaponAnimationKey.AimShootLast : FirstPersonWeaponAnimationKey.AimShoot);
@@ -152,8 +167,9 @@ public sealed class FirstPersonWeaponController : MonoBehaviour
     public void Shoot(bool lastRound = false) => Play(lastRound ? FirstPersonWeaponAnimationKey.ShootLast : FirstPersonWeaponAnimationKey.Shoot);
     public float PlayDryEmpty(bool returnToAim = false)
     {
-        PlayTransient(FirstPersonWeaponAnimationKey.DryEmpty, returnToAim ? FirstPersonWeaponAnimationKey.AimIdle : FirstPersonWeaponAnimationKey.Idle);
-        return GetCurrentAnimationLength(FirstPersonWeaponAnimationKey.DryEmpty);
+        FirstPersonWeaponAnimationKey key = returnToAim ? FirstPersonWeaponAnimationKey.AimDry : FirstPersonWeaponAnimationKey.DryEmpty;
+        PlayTransient(key, returnToAim ? FirstPersonWeaponAnimationKey.AimIdle : FirstPersonWeaponAnimationKey.Idle);
+        return GetCurrentAnimationLength(key);
     }
 
     public void Reload(bool full = false) => Play(full ? FirstPersonWeaponAnimationKey.ReloadFull : FirstPersonWeaponAnimationKey.Reload);
@@ -225,6 +241,8 @@ public sealed class FirstPersonWeaponController : MonoBehaviour
 
     private void EnsureInitialized()
     {
+        ResolveCameraBoneTransforms();
+
         if (_weaponFollower == null && _weaponFollowSource != null && _weaponFollowTarget != null)
         {
             _weaponFollower = new FirstPersonWeaponFollower(_weaponFollowSource, _weaponFollowTarget);
@@ -241,15 +259,16 @@ public sealed class FirstPersonWeaponController : MonoBehaviour
             ApplyEquippedArmorHandsMesh();
         }
 
-        if (_animationPlayer == null && (_handsAnimator != null || _weaponAnimator != null))
+        if (_animationPlayer == null && (_handsAnimator != null || _weaponAnimator != null || _cameraAnimator != null))
         {
-            _animationPlayer = new FirstPersonWeaponAnimationPlayer(_weaponAnimator, _handsAnimator, _crossFadeDuration);
+            _animationPlayer = new FirstPersonWeaponAnimationPlayer(_weaponAnimator, _handsAnimator, _cameraAnimator, _crossFadeDuration);
         }
     }
 
     private void DisposeAnimationPlayer()
     {
         _weaponFollower?.SetEnabled(false);
+        RestoreCameraBoneTargetPose();
         _animationPlayer?.Dispose();
         _animationPlayer = null;
     }
@@ -257,21 +276,95 @@ public sealed class FirstPersonWeaponController : MonoBehaviour
     private void UpdateRootPositionOffset(float deltaTime)
     {
         Vector3 targetPosition = GetActiveRootPositionOffset();
+        Quaternion targetRotation = GetActiveRootRotationOffset();
 
         if (_rootPositionOffsetLerpSpeed <= 0f || deltaTime <= 0f)
         {
-            transform.localPosition = targetPosition;
+            transform.SetLocalPositionAndRotation(targetPosition, targetRotation);
             return;
         }
 
         float t = 1f - Mathf.Exp(-_rootPositionOffsetLerpSpeed * deltaTime);
         Vector3 nextPosition = Vector3.Lerp(transform.localPosition, targetPosition, t);
-        transform.localPosition = (nextPosition - targetPosition).sqrMagnitude <= ROOT_POSITION_OFFSET_EPSILON ? targetPosition : nextPosition;
+        Quaternion nextRotation = Quaternion.Slerp(transform.localRotation, targetRotation, t);
+
+        if ((nextPosition - targetPosition).sqrMagnitude <= ROOT_POSITION_OFFSET_EPSILON)
+        {
+            nextPosition = targetPosition;
+        }
+
+        if (Quaternion.Angle(nextRotation, targetRotation) <= ROOT_ROTATION_OFFSET_EPSILON)
+        {
+            nextRotation = targetRotation;
+        }
+
+        transform.SetLocalPositionAndRotation(nextPosition, nextRotation);
     }
 
-    private void SnapRootPositionOffset() => transform.localPosition = GetActiveRootPositionOffset();
+    private void SnapRootPositionOffset() => transform.SetLocalPositionAndRotation(GetActiveRootPositionOffset(), GetActiveRootRotationOffset());
 
     private Vector3 GetActiveRootPositionOffset() => _useAimRootPositionOffset ? _aimRootPositionOffset : _rootPositionOffset;
+    private Quaternion GetActiveRootRotationOffset() => _rootBaseRotation * Quaternion.Euler(_useAimRootPositionOffset ? _aimRootRotationOffset : Vector3.zero);
+
+    private void UpdateCameraBoneFollow()
+    {
+        if (_cameraBoneSource == null || _cameraBoneTarget == null)
+        {
+            return;
+        }
+
+        CacheCameraBoneTargetBasePose();
+        _cameraBoneTarget.SetLocalPositionAndRotation(_cameraBoneSource.localPosition, _cameraBoneSource.localRotation);
+    }
+
+    private void ResolveCameraBoneTransforms()
+    {
+        if (_cameraBoneSource == null)
+        {
+            _cameraBoneSource = FindChildRecursive(transform, CAMERA_BONE_SOURCE_NAME);
+        }
+
+        if (_cameraBoneTarget == null)
+        {
+            Transform root = GetRootTransform(transform);
+            Transform cameraAllBone = FindChildRecursive(root, CAMERA_ALL_BONE_OBJECT_NAME);
+            _cameraBoneTarget = cameraAllBone == null ? FindChildRecursive(root, CAMERA_BONE_TARGET_OBJECT_NAME) : FindChildRecursive(cameraAllBone, CAMERA_BONE_TARGET_OBJECT_NAME);
+        }
+
+        if (_cameraAnimator == null && _cameraBoneSource != null)
+        {
+            _cameraAnimator = _cameraBoneSource.GetComponent<Animator>();
+        }
+
+        if (_cameraAnimator == null && _cameraBoneTarget != null)
+        {
+            _cameraAnimator = _cameraBoneTarget.GetComponent<Animator>();
+        }
+
+        CacheCameraBoneTargetBasePose();
+    }
+
+    private void CacheCameraBoneTargetBasePose()
+    {
+        if (_cameraBoneTarget == null || _hasCameraBoneTargetBasePose)
+        {
+            return;
+        }
+
+        _cameraBoneTargetBasePosition = _cameraBoneTarget.localPosition;
+        _cameraBoneTargetBaseRotation = _cameraBoneTarget.localRotation;
+        _hasCameraBoneTargetBasePose = true;
+    }
+
+    private void RestoreCameraBoneTargetPose()
+    {
+        if (_cameraBoneTarget == null || _hasCameraBoneTargetBasePose == false)
+        {
+            return;
+        }
+
+        _cameraBoneTarget.SetLocalPositionAndRotation(_cameraBoneTargetBasePosition, _cameraBoneTargetBaseRotation);
+    }
 
     private static FirstPersonWeaponAnimationKey GetDefaultReturnKey(FirstPersonWeaponAnimationKey key)
     {
@@ -281,6 +374,7 @@ public sealed class FirstPersonWeaponController : MonoBehaviour
             FirstPersonWeaponAnimationKey.AimIn => FirstPersonWeaponAnimationKey.AimIdle,
             FirstPersonWeaponAnimationKey.AimShoot => FirstPersonWeaponAnimationKey.AimIdle,
             FirstPersonWeaponAnimationKey.AimShootLast => FirstPersonWeaponAnimationKey.AimIdle,
+            FirstPersonWeaponAnimationKey.AimDry => FirstPersonWeaponAnimationKey.AimIdle,
             _ => FirstPersonWeaponAnimationKey.Idle
         };
     }
@@ -291,7 +385,7 @@ public sealed class FirstPersonWeaponController : MonoBehaviour
                key == FirstPersonWeaponAnimationKey.Walk ||
                key == FirstPersonWeaponAnimationKey.Sprint ||
                key == FirstPersonWeaponAnimationKey.AimIdle ||
-               key == FirstPersonWeaponAnimationKey.AimWalk;
+               IsAimWalkKey(key);
     }
 
     private static bool IsConditionSensitive(FirstPersonWeaponAnimationKey key)
@@ -300,15 +394,60 @@ public sealed class FirstPersonWeaponController : MonoBehaviour
                key == FirstPersonWeaponAnimationKey.Walk ||
                key == FirstPersonWeaponAnimationKey.Sprint ||
                key == FirstPersonWeaponAnimationKey.AimIdle ||
-               key == FirstPersonWeaponAnimationKey.AimWalk;
+               IsAimWalkKey(key);
     }
 
     private void ApplyEquippedArmorHandsMesh() => _handsMeshSwitcher?.SetMesh(_equippedArmor == null ? string.Empty : _equippedArmor.FirstPersonHandsMeshName);
-    private float GetCrossFadeDuration(FirstPersonWeaponAnimationKey key) => key == FirstPersonWeaponAnimationKey.Walk || key == FirstPersonWeaponAnimationKey.AimWalk ? _walkCrossFadeDuration : _crossFadeDuration;
+    private float GetCrossFadeDuration(FirstPersonWeaponAnimationKey key) => key == FirstPersonWeaponAnimationKey.Walk || IsAimWalkKey(key) ? _walkCrossFadeDuration : _crossFadeDuration;
     private float GetNextAnimationStartDelay(FirstPersonWeaponAnimationKey key) => GetNextAnimationStartDelay(key, GetCrossFadeDuration(key));
     private float GetNextAnimationStartDelay(FirstPersonWeaponAnimationKey key, float crossFadeDuration) => _animationPlayer != null && _animationPlayer.HasActivePair && ShouldDelayAnimationStart(key) ? Mathf.Max(0f, crossFadeDuration) : 0f;
     private bool IsRuntimeControlled => TryGetComponent(out FirstPersonWeaponRuntimeController _);
     private static bool ShouldDelayAnimationStart(FirstPersonWeaponAnimationKey key) => IsContinuous(key) == false;
+
+    private static bool IsAimWalkKey(FirstPersonWeaponAnimationKey key)
+    {
+        return key == FirstPersonWeaponAnimationKey.AimWalk ||
+               key == FirstPersonWeaponAnimationKey.AimWalkBackward ||
+               key == FirstPersonWeaponAnimationKey.AimWalkLeft ||
+               key == FirstPersonWeaponAnimationKey.AimWalkRight;
+    }
+
+    private static Transform GetRootTransform(Transform target)
+    {
+        Transform current = target;
+
+        while (current.parent != null)
+        {
+            current = current.parent;
+        }
+
+        return current;
+    }
+
+    private static Transform FindChildRecursive(Transform root, string childName)
+    {
+        if (root == null)
+        {
+            return null;
+        }
+
+        if (root.name == childName)
+        {
+            return root;
+        }
+
+        for (int i = 0; i < root.childCount; i++)
+        {
+            Transform child = FindChildRecursive(root.GetChild(i), childName);
+
+            if (child != null)
+            {
+                return child;
+            }
+        }
+
+        return null;
+    }
 
     private float PlayTransitionAndGetDuration(FirstPersonWeaponAnimationKey key)
     {

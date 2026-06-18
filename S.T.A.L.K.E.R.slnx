@@ -1,7 +1,7 @@
 ﻿<Solution>
   <Project Path="Kybernetik.Animancer.csproj" />
-  <Project Path="Kybernetik.Animancer.Editor.csproj" />
   <Project Path="UniTask.csproj" />
+  <Project Path="Kybernetik.Animancer.Editor.csproj" />
   <Project Path="UniTask.Linq.csproj" />
   <Project Path="Assembly-CSharp.csproj" />
   <Project Path="Kybernetik.Animancer.Samples.csproj" />

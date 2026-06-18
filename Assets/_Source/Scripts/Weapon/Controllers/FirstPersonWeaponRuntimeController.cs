@@ -17,7 +17,9 @@ public sealed class FirstPersonWeaponRuntimeController : MonoBehaviour
     private InventoryController _inventoryController;
     private IPlayerInput _playerInput;
     private FirstPersonWeaponController _animationController;
+    private FirstPersonCameraAllAnimationController _cameraAllAnimationController;
     private FirstPersonWeaponAmmoHudViewModel _ammoHudViewModel;
+    private PlayerController _playerController;
     private WeaponRecoilService _weaponRecoilService;
     private CancellationTokenSource _reloadCancellation;
     private ItemData _requestedAmmoData;
@@ -32,16 +34,19 @@ public sealed class FirstPersonWeaponRuntimeController : MonoBehaviour
     private bool _initialized;
     private bool _isReloading;
     private bool _isAiming;
+    private bool _sprintBlockedByAim;
     private bool _reloadAmmoApplied;
 
     public ItemData RequestedAmmoData => _requestedAmmoData;
     public ItemData LoadedAmmoData => _loadedAmmoData;
     public int LoadedAmmoAmount => _loadedAmmoAmount;
     public bool IsReloading => _isReloading;
+    public bool IsAiming => _isAiming;
 
     public void Initialize(InventoryItem weaponItem, InventoryController inventoryController, IPlayerInput playerInput, FirstPersonWeaponAmmoHudViewModel ammoHudViewModel)
     {
         CancelReload();
+        SetSprintBlockedByAim(false);
 
         _weaponItem = weaponItem;
         _weaponItemData = weaponItem == null ? null : weaponItem.ItemData;
@@ -50,7 +55,10 @@ public sealed class FirstPersonWeaponRuntimeController : MonoBehaviour
         _playerInput = playerInput;
         _ammoHudViewModel = ammoHudViewModel;
         _animationController = GetComponent<FirstPersonWeaponController>();
+        _cameraAllAnimationController = FindCameraAllAnimationController();
+        _cameraAllAnimationController?.SetAimActive(false);
         _animationController?.SetAimRootPositionOffsetActive(false, true);
+        _playerController = GetComponentInParent<PlayerController>();
         _weaponRecoilService?.Reset();
         _weaponRecoilService = _weaponData == null ? null : new WeaponRecoilService(FindWeaponRecoilTransform());
         RestoreMagazineState();
@@ -71,6 +79,8 @@ public sealed class FirstPersonWeaponRuntimeController : MonoBehaviour
 
     private void OnDestroy()
     {
+        SetSprintBlockedByAim(false);
+        _cameraAllAnimationController?.SetAimActive(false);
         _animationController?.SetAimRootPositionOffsetActive(false, true);
         CancelReload();
         ResetWeaponRecoil();
@@ -78,6 +88,8 @@ public sealed class FirstPersonWeaponRuntimeController : MonoBehaviour
 
     private void OnDisable()
     {
+        SetSprintBlockedByAim(false);
+        _cameraAllAnimationController?.SetAimActive(false);
         _animationController?.SetAimRootPositionOffsetActive(false, true);
         CancelReload();
         ResetWeaponRecoil();
@@ -282,9 +294,11 @@ public sealed class FirstPersonWeaponRuntimeController : MonoBehaviour
         {
             if (hasMovement)
             {
-                if (_animationController.CurrentAnimationKey != FirstPersonWeaponAnimationKey.AimWalk)
+                FirstPersonWeaponAnimationKey aimWalkKey = ResolveAimWalkAnimationKey(movementInput);
+
+                if (_animationController.CurrentAnimationKey != aimWalkKey)
                 {
-                    _animationController.PlayAimWalk();
+                    _animationController.PlayAimWalk(aimWalkKey);
                 }
 
                 _animationController.SetLoopPlaybackSpeed(isCrouching ? CROUCH_WALK_ANIMATION_SPEED : DEFAULT_LOOP_ANIMATION_SPEED);
@@ -549,6 +563,16 @@ public sealed class FirstPersonWeaponRuntimeController : MonoBehaviour
         return _weaponData.FireMode == WeaponFireMode.Auto ? _playerInput.IsWeaponShootHeld() : _playerInput.IsWeaponShootPressed();
     }
 
+    private static FirstPersonWeaponAnimationKey ResolveAimWalkAnimationKey(Vector2 movementInput)
+    {
+        if (Mathf.Abs(movementInput.x) > Mathf.Abs(movementInput.y))
+        {
+            return movementInput.x < 0f ? FirstPersonWeaponAnimationKey.AimWalkLeft : FirstPersonWeaponAnimationKey.AimWalkRight;
+        }
+
+        return movementInput.y < 0f ? FirstPersonWeaponAnimationKey.AimWalkBackward : FirstPersonWeaponAnimationKey.AimWalk;
+    }
+
     private void UpdateAimState(bool isSprintInputActive)
     {
         if (_animationController == null || IsMovementAnimationLocked)
@@ -556,14 +580,15 @@ public sealed class FirstPersonWeaponRuntimeController : MonoBehaviour
             return;
         }
 
-        bool isAimInputActive = _playerInput != null && _playerInput.IsWeaponAimHeld();
-        bool shouldAim = isSprintInputActive == false && (_animationController.ForceAim || isAimInputActive);
+        bool shouldAim = isSprintInputActive == false && IsAimInputActive();
 
         if (shouldAim)
         {
             if (_isAiming == false)
             {
                 _isAiming = true;
+                SetSprintBlockedByAim(true);
+                _cameraAllAnimationController?.SetAimActive(true);
                 _animationController.SetAimRootPositionOffsetActive(true);
                 _movementAnimationState = WeaponMovementAnimationState.None;
                 _animationController.Play(FirstPersonWeaponAnimationKey.AimIn);
@@ -579,6 +604,8 @@ public sealed class FirstPersonWeaponRuntimeController : MonoBehaviour
         }
 
         _isAiming = false;
+        SetSprintBlockedByAim(false);
+        _cameraAllAnimationController?.SetAimActive(false);
         _animationController.SetAimRootPositionOffsetActive(false);
         _movementAnimationState = WeaponMovementAnimationState.None;
         _animationController.Play(FirstPersonWeaponAnimationKey.AimOut);
@@ -598,10 +625,18 @@ public sealed class FirstPersonWeaponRuntimeController : MonoBehaviour
     private bool IsSprintInputActive(Vector2 movementInput)
     {
         return _playerInput != null &&
+               IsAimInputActive() == false &&
+               _isAiming == false &&
                _playerInput.IsCrouchingHold() == false &&
                _playerInput.IsSprintHeld() &&
                movementInput.y > MOVEMENT_INPUT_THRESHOLD &&
                movementInput.sqrMagnitude > MOVEMENT_INPUT_THRESHOLD;
+    }
+
+    private bool IsAimInputActive()
+    {
+        return (_animationController != null && _animationController.ForceAim) ||
+               (_playerInput != null && _playerInput.IsWeaponAimHeld());
     }
 
     private void ApplyDurabilityShotCost()
@@ -668,10 +703,33 @@ public sealed class FirstPersonWeaponRuntimeController : MonoBehaviour
         return null;
     }
 
+    private FirstPersonCameraAllAnimationController FindCameraAllAnimationController()
+    {
+        Transform current = transform;
+
+        while (current.parent != null)
+        {
+            current = current.parent;
+        }
+
+        return current.GetComponentInChildren<FirstPersonCameraAllAnimationController>(true);
+    }
+
     private void ResetWeaponRecoil()
     {
         _weaponRecoilService?.Reset();
         _weaponRecoilService = null;
+    }
+
+    private void SetSprintBlockedByAim(bool blocked)
+    {
+        if (_sprintBlockedByAim == blocked)
+        {
+            return;
+        }
+
+        _sprintBlockedByAim = blocked;
+        _playerController?.SetCanSprinting(blocked == false);
     }
 
     private void CancelReload()

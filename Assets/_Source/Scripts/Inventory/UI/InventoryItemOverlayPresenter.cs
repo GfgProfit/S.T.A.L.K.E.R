@@ -4,7 +4,7 @@ using UnityEngine.UI;
 
 internal static class InventoryItemOverlayPresenter
 {
-    public static void ApplySerializedSettings(Image cellBackgroundImage, Image itemImage, TMP_Text countText, RectTransform countTextRectTransform, TMP_Text shortNameText, RectTransform shortNameTextRectTransform, Graphic durabilityBackgroundGraphic, Graphic durabilityFillGraphic, Image statusIconImage, RectTransform statusIconRectTransform)
+    public static void ApplySerializedSettings(Image cellBackgroundImage, Image itemImage, TMP_Text countText, RectTransform countTextRectTransform, TMP_Text shortNameText, RectTransform shortNameTextRectTransform, RectTransform durabilityBackgroundRectTransform, Graphic durabilityBackgroundGraphic, Graphic durabilityFillGraphic, Image statusIconImage, RectTransform statusIconRectTransform)
     {
         ApplyOverlayTextSettings(countText, shortNameText);
         ApplyDurabilityVisualSettings(durabilityBackgroundGraphic, durabilityFillGraphic);
@@ -20,8 +20,9 @@ internal static class InventoryItemOverlayPresenter
             itemImage.color = Color.white;
             itemImage.raycastTarget = false;
             itemImage.preserveAspect = false;
-            BringOverlayTextsToFront(shortNameTextRectTransform, countTextRectTransform, statusIconRectTransform);
         }
+
+        BringOverlayTextsToFront(shortNameTextRectTransform, countTextRectTransform, statusIconRectTransform, durabilityBackgroundRectTransform);
     }
 
     public static void ApplyOverlayTextSettings(TMP_Text countText, TMP_Text shortNameText)
@@ -63,8 +64,13 @@ internal static class InventoryItemOverlayPresenter
         statusIconImage.preserveAspect = true;
     }
 
-    public static void BringOverlayTextsToFront(RectTransform shortNameTextRectTransform, RectTransform countTextRectTransform, RectTransform statusIconRectTransform)
+    public static void BringOverlayTextsToFront(RectTransform shortNameTextRectTransform, RectTransform countTextRectTransform, RectTransform statusIconRectTransform, RectTransform durabilityBackgroundRectTransform = null)
     {
+        if (durabilityBackgroundRectTransform != null)
+        {
+            durabilityBackgroundRectTransform.SetAsLastSibling();
+        }
+
         if (shortNameTextRectTransform != null)
         {
             shortNameTextRectTransform.SetAsLastSibling();

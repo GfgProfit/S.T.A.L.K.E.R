@@ -15,7 +15,7 @@ internal static class InventoryItemOverlayLayout
     private static readonly Vector2 _statusIconMargin = new(5f, 5f);
     private static readonly Vector2 _shortNameTextMargin = new(4f, 4f);
 
-    public static void ApplyDurabilityLayout(RectTransform backgroundRectTransform, RectTransform fillRectTransform, Graphic fillGraphic, bool isVisuallyRotated, float currentDurabilityPercent)
+    public static void ApplyDurabilityLayout(RectTransform backgroundRectTransform, RectTransform fillRectTransform, Graphic fillGraphic, bool isVisuallyRotated, int visualWidth, int visualHeight, float currentDurabilityPercent)
     {
         if (backgroundRectTransform == null)
         {
@@ -24,11 +24,12 @@ internal static class InventoryItemOverlayLayout
 
         if (isVisuallyRotated)
         {
-            backgroundRectTransform.anchorMin = new(1f, 0f);
-            backgroundRectTransform.anchorMax = new(1f, 1f);
-            backgroundRectTransform.pivot = new(1f, 0.5f);
+            backgroundRectTransform.anchorMin = new(1f, 0.5f);
+            backgroundRectTransform.anchorMax = new(1f, 0.5f);
+            backgroundRectTransform.pivot = new(0.5f, 0f);
             backgroundRectTransform.anchoredPosition = new(-DURABILITY_BAR_OFFSET, 0f);
-            backgroundRectTransform.sizeDelta = new(DURABILITY_BAR_THICKNESS, -DURABILITY_BAR_INSET * 2f);
+            backgroundRectTransform.sizeDelta = new(GetDurabilityBarLength(visualHeight), DURABILITY_BAR_THICKNESS);
+            backgroundRectTransform.localRotation = Quaternion.Euler(0f, 0f, 90f);
         }
         else
         {
@@ -36,15 +37,15 @@ internal static class InventoryItemOverlayLayout
             backgroundRectTransform.anchorMax = new(1f, 0f);
             backgroundRectTransform.pivot = new(0.5f, 0f);
             backgroundRectTransform.anchoredPosition = new(0f, DURABILITY_BAR_OFFSET);
-            backgroundRectTransform.sizeDelta = new(-DURABILITY_BAR_INSET * 2f, DURABILITY_BAR_THICKNESS);
+            backgroundRectTransform.sizeDelta = new(-GetDurabilityBarInset(visualWidth), DURABILITY_BAR_THICKNESS);
+            backgroundRectTransform.localRotation = Quaternion.identity;
         }
 
-        backgroundRectTransform.localRotation = Quaternion.identity;
         backgroundRectTransform.localScale = Vector3.one;
-        ApplyDurabilityFill(fillRectTransform, fillGraphic, isVisuallyRotated, currentDurabilityPercent);
+        ApplyDurabilityFill(fillRectTransform, fillGraphic, currentDurabilityPercent);
     }
 
-    public static void ApplyDurabilityFill(RectTransform fillRectTransform, Graphic fillGraphic, bool isVisuallyRotated, float currentDurabilityPercent)
+    public static void ApplyDurabilityFill(RectTransform fillRectTransform, Graphic fillGraphic, float currentDurabilityPercent)
     {
         if (fillRectTransform == null)
         {
@@ -66,7 +67,7 @@ internal static class InventoryItemOverlayLayout
         }
 
         fillRectTransform.anchorMin = Vector2.zero;
-        fillRectTransform.anchorMax = isVisuallyRotated ? new(1f, normalizedDurability) : new(normalizedDurability, 1f);
+        fillRectTransform.anchorMax = new(normalizedDurability, 1f);
         fillRectTransform.offsetMin = Vector2.one;
         fillRectTransform.offsetMax = -Vector2.one;
         fillRectTransform.localRotation = Quaternion.identity;
@@ -125,5 +126,17 @@ internal static class InventoryItemOverlayLayout
     {
         float width = visualWidth * ItemGrid.TILE_SIZE_WIDTH;
         return Mathf.Max(SHORT_NAME_MIN_WIDTH, width - _shortNameTextMargin.x * 2f);
+    }
+
+    private static float GetDurabilityBarInset(int visualCells)
+    {
+        float availableSize = Mathf.Max(0f, visualCells * ItemGrid.TILE_SIZE_WIDTH);
+        return Mathf.Min(DURABILITY_BAR_INSET * 2f, availableSize);
+    }
+
+    private static float GetDurabilityBarLength(int visualCells)
+    {
+        float availableSize = Mathf.Max(0f, visualCells * ItemGrid.TILE_SIZE_WIDTH);
+        return Mathf.Max(0f, availableSize - GetDurabilityBarInset(visualCells));
     }
 }

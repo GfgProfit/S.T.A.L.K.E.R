@@ -15,6 +15,13 @@ public class ItemData : ScriptableObject
     [SerializeField] [BoxGroup("Durability")] private bool _useDurability;
     [SerializeField] [BoxGroup("Durability")] [ShowIf(nameof(UsesDurability))] [Range(0f, 100f)] private float _defaultDurabilityPercent = 100f;
     [SerializeField] [BoxGroup("Equipment")] [ShowIf(nameof(IsArmor))] private bool _canEquipHelmet = true;
+    [SerializeField] [BoxGroup("Ammo")] [ShowIf(nameof(IsAmmo))] [Min(0f)] private float _ammoFleshDamage;
+    [SerializeField] [BoxGroup("Ammo")] [ShowIf(nameof(IsAmmo))] [Min(0f)] private float _ammoArmorPenetration;
+    [SerializeField] [BoxGroup("Ammo")] [ShowIf(nameof(IsAmmo))] [Min(0f)] private float _ammoBulletVelocityMetersPerSecond;
+    [SerializeField] [BoxGroup("Ammo")] [ShowIf(nameof(IsAmmo))] private float _ammoWeaponRecoilPercentModifier;
+    [SerializeField] [BoxGroup("Ammo")] [ShowIf(nameof(IsAmmo))] private float _ammoWeaponAccuracyPercentModifier;
+    [SerializeField] [BoxGroup("Ammo")] [ShowIf(nameof(IsAmmo))] private float _ammoWeaponAccuracyPenaltyPercentModifier;
+    [SerializeField] [BoxGroup("Ammo")] [ShowIf(nameof(IsAmmo))] private float _ammoWeaponDurabilityLossPercentModifier;
     [SerializeField] [BoxGroup("First Person")] [ShowIf(nameof(IsArmor))] private string _firstPersonLegsMeshName;
     [SerializeField] [BoxGroup("First Person")] [ShowIf(nameof(IsArmor))] private string _firstPersonHandsMeshName;
     [SerializeField] [BoxGroup("First Person")] [ShowIf(nameof(UsesFirstPersonWeapon))] private GameObject _firstPersonWeaponPrefab;
@@ -66,6 +73,13 @@ public class ItemData : ScriptableObject
     public bool HasDurability => _useDurability;
     public float DefaultDurabilityPercent => NormalizeDurability(_defaultDurabilityPercent);
     public bool CanEquipHelmet => _canEquipHelmet;
+    public float AmmoFleshDamage => Mathf.Max(0f, _ammoFleshDamage);
+    public float AmmoArmorPenetration => Mathf.Max(0f, _ammoArmorPenetration);
+    public float AmmoBulletVelocityMetersPerSecond => Mathf.Max(0f, _ammoBulletVelocityMetersPerSecond);
+    public float AmmoWeaponRecoilPercentModifier => _ammoWeaponRecoilPercentModifier;
+    public float AmmoWeaponAccuracyPercentModifier => _ammoWeaponAccuracyPercentModifier;
+    public float AmmoWeaponAccuracyPenaltyPercentModifier => _ammoWeaponAccuracyPenaltyPercentModifier;
+    public float AmmoWeaponDurabilityLossPercentModifier => _ammoWeaponDurabilityLossPercentModifier;
     public string FirstPersonLegsMeshName => string.IsNullOrWhiteSpace(_firstPersonLegsMeshName) ? string.Empty : _firstPersonLegsMeshName;
     public string FirstPersonHandsMeshName => string.IsNullOrWhiteSpace(_firstPersonHandsMeshName) ? string.Empty : _firstPersonHandsMeshName;
     public GameObject FirstPersonWeaponPrefab => _firstPersonWeaponPrefab;
@@ -174,6 +188,7 @@ public class ItemData : ScriptableObject
     private GameProjectSettings Settings => GameProjectSettings.LoadDefault();
     private bool UsesDurability() => _useDurability;
     private bool IsArmor() => _itemType == ItemType.Armor;
+    private bool IsAmmo() => _itemType == ItemType.Ammo;
     private bool UsesFirstPersonWeapon() => _itemType == ItemType.Weapon || _itemType == ItemType.Pistol || _itemType == ItemType.Knife;
     private bool UsesWeaponData() => _itemType == ItemType.Weapon || _itemType == ItemType.Pistol;
     private bool CanHaveStats() => _itemType == ItemType.Armor || _itemType == ItemType.Helmet || _itemType == ItemType.Artifact;
@@ -194,6 +209,9 @@ public class ItemData : ScriptableObject
         _height = Mathf.Max(1, _height);
         _defaultDurabilityPercent = NormalizeDurability(_defaultDurabilityPercent);
         _firstPersonWeaponSpawnScale = _firstPersonWeaponSpawnScale == Vector3.zero ? Vector3.one : _firstPersonWeaponSpawnScale;
+        _ammoFleshDamage = Mathf.Max(0f, _ammoFleshDamage);
+        _ammoArmorPenetration = Mathf.Max(0f, _ammoArmorPenetration);
+        _ammoBulletVelocityMetersPerSecond = Mathf.Max(0f, _ammoBulletVelocityMetersPerSecond);
     }
 
     public Sprite GetIcon(IReadOnlyList<ItemIconPart> runtimeIconParts = null)
