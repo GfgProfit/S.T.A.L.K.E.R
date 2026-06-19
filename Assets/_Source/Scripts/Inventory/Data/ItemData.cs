@@ -45,6 +45,7 @@ public class ItemData : ScriptableObject
     [SerializeField] [BoxGroup("Module")] [ShowIf(nameof(IsModule))] private Vector2Int _moduleInventorySizeDelta;
     [SerializeField] [BoxGroup("Module/Weapon Stats")] [ShowIf(nameof(IsModule))] private float _moduleWeaponRecoilPercentModifier;
     [SerializeField] [BoxGroup("Module/Weapon Stats")] [ShowIf(nameof(IsModule))] private float _moduleWeaponDurabilityLossPercentModifier;
+    [SerializeField] [BoxGroup("Module/Weapon Stats")] [ShowIf(nameof(IsModule))] private float _moduleAccuracyMinutesOfAngleModifier;
     [SerializeField] [BoxGroup("Module/Magazine")] [ShowIf(nameof(IsMagazineModule))] [Min(0)] private int _moduleMagazineCapacity;
     [SerializeField] [BoxGroup("Stats")] [ShowIf(nameof(CanHaveStats))] private List<CharacterStatModifier> _statModifiers = new();
     [SerializeField] [BoxGroup("World")] private WorldItem _worldItemPrefab;
@@ -122,6 +123,7 @@ public class ItemData : ScriptableObject
     public Vector2Int ModuleInventorySizeDelta => new(Mathf.Max(0, _moduleInventorySizeDelta.x), Mathf.Max(0, _moduleInventorySizeDelta.y));
     public float ModuleWeaponRecoilPercentModifier => _itemType == ItemType.Module ? _moduleWeaponRecoilPercentModifier : 0f;
     public float ModuleWeaponDurabilityLossPercentModifier => _itemType == ItemType.Module ? _moduleWeaponDurabilityLossPercentModifier : 0f;
+    public float ModuleAccuracyMinutesOfAngleModifier => _itemType == ItemType.Module ? _moduleAccuracyMinutesOfAngleModifier : 0f;
     public int ModuleMagazineCapacity => IsMagazineModule() ? Mathf.Max(0, _moduleMagazineCapacity) : 0;
     public IReadOnlyList<CharacterStatModifier> StatModifiers => _statModifiers;
     public bool HasStatModifiers => CharacterStatUtility.HasAnyModifier(_statModifiers);

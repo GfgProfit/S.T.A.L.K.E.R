@@ -67,10 +67,10 @@ internal static class ItemTooltipTextFormatter
         if (itemData.ItemType == ItemType.Module)
         {
             return new ModuleTooltipTextData(
-                itemData.ModuleWeaponRecoilPercentModifier,
-                itemData.ModuleWeaponDurabilityLossPercentModifier,
-                itemData.ModuleMagazineCapacity,
-                settings);
+                FormatAmmoModifier("Отдача", itemData.ModuleWeaponRecoilPercentModifier, settings),
+                FormatAmmoModifier("Износ", itemData.ModuleWeaponDurabilityLossPercentModifier, settings),
+                FormatMagazineSize(itemData.ModuleMagazineCapacity, itemData.ModuleMagazineCapacity, settings),
+                FormatAccuracy(itemData.ModuleAccuracyMinutesOfAngleModifier, itemData.ModuleAccuracyMinutesOfAngleModifier, true, settings));
         }
 
         if (itemData.WeaponData == null)
@@ -78,11 +78,15 @@ internal static class ItemTooltipTextFormatter
             return null;
         }
 
+        int magazineCapacity = WeaponModuleSupport.GetInstalledMagazineCapacity(item.InstalledModules);
+        float baseAccuracy = itemData.WeaponData.AccuracyMinutesOfAngle;
+        float effectiveAccuracy = WeaponModuleSupport.GetAccuracyMinutesOfAngle(itemData.WeaponData, item.InstalledModules);
+
         return new ModuleTooltipTextData(
-            WeaponModuleSupport.GetRecoilPercentModifier(item.InstalledModules),
-            WeaponModuleSupport.GetDurabilityLossPercentModifier(item.InstalledModules),
-            WeaponModuleSupport.GetInstalledMagazineCapacity(item.InstalledModules),
-            settings);
+            FormatAmmoModifier("Отдача", WeaponModuleSupport.GetRecoilPercentModifier(item.InstalledModules), settings),
+            FormatAmmoModifier("Износ", WeaponModuleSupport.GetDurabilityLossPercentModifier(item.InstalledModules), settings),
+            FormatMagazineSize(magazineCapacity, magazineCapacity > 0 ? magazineCapacity - itemData.WeaponData.MagazineCapacity : 0f, settings),
+            FormatAccuracy(effectiveAccuracy, effectiveAccuracy - baseAccuracy, false, settings));
     }
 
     internal static string FormatArmorPenetrationClassification(float armorPenetration, int armorClass, GameProjectSettings settings)
@@ -151,17 +155,48 @@ internal static class ItemTooltipTextFormatter
             return string.Empty;
         }
 
-        string text = $"{label}: {FormatSignedPercent(value)}";
+        return $"{label}: {FormatColoredValue(FormatSignedPercent(value), value, true, settings)}";
+    }
 
-        Color color = settings == null
-            ? Color.white
-            : value > 0f
-                ? settings.NegativeAmmoModifierColor
-                : settings.PositiveAmmoModifierColor;
-        return $"<color=#{ColorUtility.ToHtmlStringRGBA(color)}>{text}</color>";
+    internal static string FormatMagazineSize(int magazineCapacity, float capacityModifier, GameProjectSettings settings)
+    {
+        return magazineCapacity > 0
+            ? $"Размер магазина: {FormatColoredValue(magazineCapacity.ToString(), capacityModifier, false, settings)}"
+            : string.Empty;
+    }
+
+    internal static string FormatAccuracy(float accuracyMinutesOfAngle, float accuracyModifier, bool signed, GameProjectSettings settings)
+    {
+        if (signed && Mathf.Approximately(accuracyMinutesOfAngle, 0f))
+        {
+            return string.Empty;
+        }
+
+        string value = signed ? FormatSignedNumber(accuracyMinutesOfAngle) : FormatNumber(accuracyMinutesOfAngle);
+        string valueWithUnit = $"{value} МОА";
+        return $"Точность: {FormatColoredValue(valueWithUnit, accuracyModifier, true, settings)}";
     }
 
     internal static string FormatNumber(float value) => value.ToString("0.##");
+
+    private static string FormatSignedNumber(float value)
+    {
+        string sign = value >= 0f ? "+" : string.Empty;
+        return $"{sign}{FormatNumber(value)}";
+    }
+
+    private static string FormatColoredValue(string value, float modifier, bool lowerIsBetter, GameProjectSettings settings)
+    {
+        Color color = Color.white;
+
+        if (settings != null && Mathf.Approximately(modifier, 0f) == false)
+        {
+            bool isBeneficial = lowerIsBetter ? modifier < 0f : modifier > 0f;
+            color = isBeneficial ? settings.PositiveAmmoModifierColor : settings.NegativeAmmoModifierColor;
+        }
+
+        return $"<color=#{ColorUtility.ToHtmlStringRGBA(color)}>{value}</color>";
+    }
 
     private static string FormatClassification(AmmoClassification classification, GameProjectSettings settings)
     {
@@ -252,16 +287,16 @@ internal sealed class AmmoTooltipTextData
 
 internal sealed class ModuleTooltipTextData
 {
-    public ModuleTooltipTextData(float recoilModifier, float durabilityLossModifier, int magazineCapacity, GameProjectSettings settings)
+    public ModuleTooltipTextData(string recoilModifierText, string durabilityLossModifierText, string magazineSizeText, string accuracyText)
     {
-        RecoilModifierText = ItemTooltipTextFormatter.FormatAmmoModifier("Отдача", recoilModifier, settings);
-        DurabilityLossModifierText = ItemTooltipTextFormatter.FormatAmmoModifier("Износ", durabilityLossModifier, settings);
-        MagazineSizeText = magazineCapacity > 0
-            ? $"Размер магазина: {magazineCapacity}"
-            : string.Empty;
+        RecoilModifierText = recoilModifierText;
+        DurabilityLossModifierText = durabilityLossModifierText;
+        MagazineSizeText = magazineSizeText;
+        AccuracyText = accuracyText;
     }
 
     public string RecoilModifierText { get; }
     public string DurabilityLossModifierText { get; }
     public string MagazineSizeText { get; }
+    public string AccuracyText { get; }
 }

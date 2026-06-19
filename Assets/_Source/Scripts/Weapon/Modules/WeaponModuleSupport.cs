@@ -95,6 +95,38 @@ internal static class WeaponModuleSupport
         return modifier;
     }
 
+    public static float GetAccuracyMinutesOfAngleModifier(IReadOnlyList<ItemData> installedModules)
+    {
+        float modifier = 0f;
+
+        if (installedModules == null)
+        {
+            return modifier;
+        }
+
+        for (int i = 0; i < installedModules.Count; i++)
+        {
+            ItemData module = installedModules[i];
+
+            if (module != null)
+            {
+                modifier += module.ModuleAccuracyMinutesOfAngleModifier;
+            }
+        }
+
+        return modifier;
+    }
+
+    public static float GetAccuracyMinutesOfAngle(WeaponData weaponData, IReadOnlyList<ItemData> installedModules)
+    {
+        if (weaponData == null)
+        {
+            return 0f;
+        }
+
+        return Mathf.Max(0f, weaponData.AccuracyMinutesOfAngle + GetAccuracyMinutesOfAngleModifier(installedModules));
+    }
+
     public static int GetMagazineCapacity(int baseCapacity, IReadOnlyList<ItemData> installedModules)
     {
         int capacity = Mathf.Max(1, baseCapacity);

@@ -4,10 +4,12 @@ using UnityEngine;
 internal sealed class InventoryWeaponModuleService
 {
     private readonly Func<ItemData, int, bool> _returnModuleToInventoryOrDrop;
+    private readonly Func<InventoryGrid, InventoryItem, bool> _unloadWeapon;
 
-    public InventoryWeaponModuleService(Func<ItemData, int, bool> returnModuleToInventoryOrDrop)
+    public InventoryWeaponModuleService(Func<ItemData, int, bool> returnModuleToInventoryOrDrop, Func<InventoryGrid, InventoryItem, bool> unloadWeapon)
     {
         _returnModuleToInventoryOrDrop = returnModuleToInventoryOrDrop;
+        _unloadWeapon = unloadWeapon;
     }
 
     public bool CanInstall(InventoryItem weaponItem, ItemData moduleItemData) => WeaponModuleSupport.CanInstall(weaponItem, moduleItemData);
@@ -19,7 +21,25 @@ internal sealed class InventoryWeaponModuleService
             return false;
         }
 
-        return TryChangeModules(grid, weaponItem, () => weaponItem.AddInstalledModule(moduleItemData), () => weaponItem.RemoveInstalledModule(moduleItemData));
+        bool unloadMagazine = moduleItemData.ModuleSlot == WeaponModuleSlot.Magazine && weaponItem.WeaponMagazineState.LoadedAmmoAmount > 0;
+
+        if (unloadMagazine && weaponItem.WeaponMagazineState.IsJammed)
+        {
+            return false;
+        }
+
+        if (TryChangeModules(grid, weaponItem, () => weaponItem.AddInstalledModule(moduleItemData), () => weaponItem.RemoveInstalledModule(moduleItemData)) == false)
+        {
+            return false;
+        }
+
+        if (unloadMagazine == false || (_unloadWeapon != null && _unloadWeapon(grid, weaponItem)))
+        {
+            return true;
+        }
+
+        TryChangeModules(grid, weaponItem, () => weaponItem.RemoveInstalledModule(moduleItemData), () => weaponItem.AddInstalledModule(moduleItemData));
+        return false;
     }
 
     public bool TryDetach(InventoryGrid grid, InventoryItem weaponItem, ItemData moduleItemData)

@@ -8,6 +8,7 @@ public sealed class FirstPersonWeaponRuntimeController : MonoBehaviour
     private const float MOVEMENT_INPUT_THRESHOLD = 0.01f;
     private const float DEFAULT_LOOP_ANIMATION_SPEED = 1f;
     private const float CROUCH_WALK_ANIMATION_SPEED = 0.5f;
+    private const float MINUTES_PER_DEGREE = 60f;
     private const string WEAPON_RECOIL_OBJECT_NAME = "Weapon Recoil";
     private const string WEAPON_RECOIL_OBJECT_NAME_COMPACT = "WeaponRecoil";
     private const string MUZZLE_OBJECT_NAME = "Muzzle";
@@ -1058,6 +1059,7 @@ public sealed class FirstPersonWeaponRuntimeController : MonoBehaviour
             return ReportBallisticConfigurationError($"{ammoData?.name ?? "Loaded ammo"} has no bullet velocity for {_weaponData.name}.");
         }
 
+        Vector3 launchDirection = GetBallisticLaunchDirection();
         GameObject projectileObject = Instantiate(_weaponData.BulletPrefab, _muzzle.position, _muzzle.rotation);
         BallisticProjectile projectile = projectileObject.GetComponent<BallisticProjectile>();
 
@@ -1071,11 +1073,27 @@ public sealed class FirstPersonWeaponRuntimeController : MonoBehaviour
             _weaponData,
             ammoData,
             _muzzle.position,
-            _muzzle.forward,
+            launchDirection,
             bulletVelocity,
             ResolveBallisticOwnerRoot(),
             transform);
         return true;
+    }
+
+    private Vector3 GetBallisticLaunchDirection()
+    {
+        float dispersionDiameterMinutes = WeaponModuleSupport.GetAccuracyMinutesOfAngle(_weaponData, _weaponItem == null ? null : _weaponItem.InstalledModules);
+
+        if (dispersionDiameterMinutes <= 0f)
+        {
+            return _muzzle.forward;
+        }
+
+        float dispersionRadiusRadians = dispersionDiameterMinutes * 0.5f / MINUTES_PER_DEGREE * Mathf.Deg2Rad;
+        float dispersionRadiusTangent = Mathf.Tan(dispersionRadiusRadians);
+        Vector2 dispersion = UnityEngine.Random.insideUnitCircle * dispersionRadiusTangent;
+
+        return (_muzzle.forward + _muzzle.right * dispersion.x + _muzzle.up * dispersion.y).normalized;
     }
 
     private bool ReportBallisticConfigurationError(string message)

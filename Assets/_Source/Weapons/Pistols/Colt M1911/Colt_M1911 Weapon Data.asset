@@ -40,6 +40,7 @@ MonoBehaviour:
   _ballisticGravityScale: 1
   _useAirResistance: 1
   _airDensityKilogramsPerCubicMeter: 1.225
+  _accuracyMinutesOfAngle: 9
   _enableRicochet: 1
   _ricochetMinimumIncidenceAngleDegrees: 77
   _ricochetSpeedRetention: 0.35

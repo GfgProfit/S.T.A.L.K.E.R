@@ -46,6 +46,8 @@ public class ItemInfoPanel : MonoBehaviour, IView<ItemTooltipViewModel>
     [Header("Module Info")]
     [SerializeField] private TMP_Text _moduleMagazineSizeText;
     [SerializeField] private GameObject _moduleMagazineSizeParent;
+    [SerializeField] private TMP_Text _moduleAccuracyText;
+    [SerializeField] private GameObject _moduleAccuracyParent;
 
     [Header("Stats Info")]
     [SerializeField] private CharacterStatsInfoPanel _statsInfoPanel;
@@ -241,6 +243,8 @@ public class ItemInfoPanel : MonoBehaviour, IView<ItemTooltipViewModel>
 
         bool showMagazineSize = moduleInfo != null && string.IsNullOrEmpty(moduleInfo.MagazineSizeText) == false;
         SetAmmoText(_moduleMagazineSizeText, _moduleMagazineSizeParent, showMagazineSize ? moduleInfo.MagazineSizeText : string.Empty, showMagazineSize);
+        bool showAccuracy = moduleInfo != null && string.IsNullOrEmpty(moduleInfo.AccuracyText) == false;
+        SetAmmoText(_moduleAccuracyText, _moduleAccuracyParent, showAccuracy ? moduleInfo.AccuracyText : string.Empty, showAccuracy);
     }
 
     private static void SetAmmoText(TMP_Text text, GameObject parent, string value, bool visible)

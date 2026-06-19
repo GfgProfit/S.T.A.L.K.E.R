@@ -32,6 +32,8 @@ public sealed class WeaponData : ScriptableObject
     [SerializeField] [Min(0f)] private float _ballisticGravityScale = 1f;
     [SerializeField] private bool _useAirResistance;
     [SerializeField] [Min(0f)] private float _airDensityKilogramsPerCubicMeter = 1.225f;
+    [Tooltip("Mechanical accuracy as the full angular diameter of the dispersion circle. 1 MOA is approximately 2.91 cm at 100 m.")]
+    [SerializeField] [Min(0f)] private float _accuracyMinutesOfAngle = 1f;
 
     [Header("Ballistics/Ricochet")]
     [SerializeField] private bool _enableRicochet;
@@ -70,6 +72,7 @@ public sealed class WeaponData : ScriptableObject
     public float BallisticGravityScale => Mathf.Max(0f, _ballisticGravityScale);
     public bool UseAirResistance => _useAirResistance;
     public float AirDensityKilogramsPerCubicMeter => Mathf.Max(0f, _airDensityKilogramsPerCubicMeter);
+    public float AccuracyMinutesOfAngle => Mathf.Max(0f, _accuracyMinutesOfAngle);
     public bool EnableRicochet => _enableRicochet;
     public float RicochetMinimumIncidenceAngleDegrees => Mathf.Clamp(_ricochetMinimumIncidenceAngleDegrees, 0f, 90f);
     public float RicochetSpeedRetention => Mathf.Clamp01(_ricochetSpeedRetention);
@@ -105,6 +108,7 @@ public sealed class WeaponData : ScriptableObject
         _ballisticMaxDistanceMeters = Mathf.Max(0.01f, _ballisticMaxDistanceMeters);
         _ballisticGravityScale = Mathf.Max(0f, _ballisticGravityScale);
         _airDensityKilogramsPerCubicMeter = Mathf.Max(0f, _airDensityKilogramsPerCubicMeter);
+        _accuracyMinutesOfAngle = Mathf.Max(0f, _accuracyMinutesOfAngle);
         _ricochetMinimumIncidenceAngleDegrees = Mathf.Clamp(_ricochetMinimumIncidenceAngleDegrees, 0f, 90f);
         _ricochetSpeedRetention = Mathf.Clamp01(_ricochetSpeedRetention);
         _ricochetSurfaceOffsetMeters = Mathf.Max(0f, _ricochetSurfaceOffsetMeters);
