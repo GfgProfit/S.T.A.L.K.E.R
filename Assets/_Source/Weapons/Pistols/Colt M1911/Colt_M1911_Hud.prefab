@@ -76,7 +76,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::WeaponShellEjector
   _shellPrefab: {fileID: 1479859614106749825, guid: efb4041f00300f24fb57de4b654ea4bb, type: 3}
-  _shellSpawnScale: {x: 0.6, y: 0.6, z: 0.6}
+  _shellSpawnScale: {x: 1, y: 1, z: 1}
   _minimumLocalEjectionVelocity: {x: 1.25, y: 1.1, z: -0.3}
   _maximumLocalEjectionVelocity: {x: 2, y: 1.8, z: 0.3}
   _minimumLocalAngularVelocity: {x: -30, y: -30, z: -30}

@@ -60,7 +60,7 @@ MonoBehaviour:
     _bulletVelocityMetersPerSecondOverride: 0
   - _ammoData: {fileID: 11400000, guid: 98f6f965a3d618f4a80dafd449c6f3b2, type: 2}
     _bulletVelocityMetersPerSecondOverride: 0
-  _jammingDurabilityThreshold: 90
+  _jammingDurabilityThreshold: 70
   _baseJammedChance: 10
   _maximumJammedChance: 50
   _jammedAmmoRemovalFrame: 150
