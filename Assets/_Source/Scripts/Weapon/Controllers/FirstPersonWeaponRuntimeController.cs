@@ -56,6 +56,7 @@ public sealed class FirstPersonWeaponRuntimeController : MonoBehaviour
     public bool IsJammed => _isJammed;
     public bool IsClearingJam => _isClearingJam;
     public bool IsAiming => _isAiming;
+    private int MagazineCapacity => WeaponModuleSupport.GetMagazineCapacity(_weaponData == null ? 1 : _weaponData.MagazineCapacity, _weaponItem == null ? null : _weaponItem.InstalledModules);
 
     public void Initialize(InventoryItem weaponItem, InventoryController inventoryController, IPlayerInput playerInput, FirstPersonWeaponAmmoHudViewModel ammoHudViewModel)
     {
@@ -344,7 +345,7 @@ public sealed class FirstPersonWeaponRuntimeController : MonoBehaviour
             return false;
         }
 
-        if (_loadedAmmoData == _requestedAmmoData && _loadedAmmoAmount >= _weaponData.MagazineCapacity)
+        if (_loadedAmmoData == _requestedAmmoData && _loadedAmmoAmount >= MagazineCapacity)
         {
             return false;
         }
@@ -688,7 +689,7 @@ public sealed class FirstPersonWeaponRuntimeController : MonoBehaviour
         ReturnLoadedAmmo();
 
         int availableAmmoAmount = _inventoryController.GetInventoryItemCount(_reloadAmmoData);
-        int targetAmmoAmount = Mathf.Min(_weaponData.MagazineCapacity, availableAmmoAmount);
+        int targetAmmoAmount = Mathf.Min(MagazineCapacity, availableAmmoAmount);
         int consumedAmmoAmount = _inventoryController.ConsumeInventoryItem(_reloadAmmoData, targetAmmoAmount);
 
         if (consumedAmmoAmount <= 0)
@@ -799,7 +800,7 @@ public sealed class FirstPersonWeaponRuntimeController : MonoBehaviour
             return;
         }
 
-        _loadedAmmoAmount = Mathf.Clamp(magazineState.LoadedAmmoAmount, 0, _weaponData.MagazineCapacity);
+        _loadedAmmoAmount = Mathf.Clamp(magazineState.LoadedAmmoAmount, 0, MagazineCapacity);
 
         if (_loadedAmmoAmount <= 0)
         {
@@ -920,7 +921,9 @@ public sealed class FirstPersonWeaponRuntimeController : MonoBehaviour
             return;
         }
 
-        float durabilityLossMultiplier = GetPercentModifierMultiplier(ammoData == null ? 0f : ammoData.AmmoWeaponDurabilityLossPercentModifier);
+        float durabilityLossPercentModifier = ammoData == null ? 0f : ammoData.AmmoWeaponDurabilityLossPercentModifier;
+        durabilityLossPercentModifier += WeaponModuleSupport.GetDurabilityLossPercentModifier(_weaponItem.InstalledModules);
+        float durabilityLossMultiplier = GetPercentModifierMultiplier(durabilityLossPercentModifier);
         float durabilityLoss = _weaponData.DurabilityPercentPerShot * durabilityLossMultiplier;
         float nextDurability = _weaponItem.CurrentDurabilityPercent - durabilityLoss;
         _weaponItem.SetDurability(nextDurability);
@@ -984,15 +987,15 @@ public sealed class FirstPersonWeaponRuntimeController : MonoBehaviour
 
     private float GetRecoilMultiplier(ItemData ammoData)
     {
-        float recoilMultiplier = GetPercentModifierMultiplier(ammoData == null ? 0f : ammoData.AmmoWeaponRecoilPercentModifier);
+        float recoilPercentModifier = ammoData == null ? 0f : ammoData.AmmoWeaponRecoilPercentModifier;
+        recoilPercentModifier += WeaponModuleSupport.GetRecoilPercentModifier(_weaponItem == null ? null : _weaponItem.InstalledModules);
 
-        if (_playerController == null || _playerController.IsCrouching == false)
+        if (_playerController != null && _playerController.IsCrouching)
         {
-            return recoilMultiplier;
+            recoilPercentModifier -= _weaponData.CrouchRecoilReductionPercent;
         }
 
-        float crouchMultiplier = GetPercentModifierMultiplier(-_weaponData.CrouchRecoilReductionPercent);
-        return recoilMultiplier * crouchMultiplier;
+        return GetPercentModifierMultiplier(recoilPercentModifier);
     }
 
     private static float GetPercentModifierMultiplier(float percentModifier) => Mathf.Max(0f, 1f + percentModifier * 0.01f);

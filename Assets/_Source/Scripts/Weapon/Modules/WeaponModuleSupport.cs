@@ -23,6 +23,11 @@ internal static class WeaponModuleSupport
             return false;
         }
 
+        if (moduleItemData.ModuleSlot == WeaponModuleSlot.Magazine && weaponItem.WeaponMagazineState.IsJammed)
+        {
+            return false;
+        }
+
         IReadOnlyList<ItemData> installedModules = weaponItem.InstalledModules;
         FirstPersonWeaponModule[] definitions = GetDefinitions(weaponItem.ItemData.FirstPersonWeaponPrefab);
         List<ItemData> modulesAfterDetach = new(installedModules.Count - 1);
@@ -44,6 +49,78 @@ internal static class WeaponModuleSupport
         }
 
         return true;
+    }
+
+    public static float GetRecoilPercentModifier(IReadOnlyList<ItemData> installedModules)
+    {
+        float modifier = 0f;
+
+        if (installedModules == null)
+        {
+            return modifier;
+        }
+
+        for (int i = 0; i < installedModules.Count; i++)
+        {
+            ItemData module = installedModules[i];
+
+            if (module != null)
+            {
+                modifier += module.ModuleWeaponRecoilPercentModifier;
+            }
+        }
+
+        return modifier;
+    }
+
+    public static float GetDurabilityLossPercentModifier(IReadOnlyList<ItemData> installedModules)
+    {
+        float modifier = 0f;
+
+        if (installedModules == null)
+        {
+            return modifier;
+        }
+
+        for (int i = 0; i < installedModules.Count; i++)
+        {
+            ItemData module = installedModules[i];
+
+            if (module != null)
+            {
+                modifier += module.ModuleWeaponDurabilityLossPercentModifier;
+            }
+        }
+
+        return modifier;
+    }
+
+    public static int GetMagazineCapacity(int baseCapacity, IReadOnlyList<ItemData> installedModules)
+    {
+        int capacity = Mathf.Max(1, baseCapacity);
+        int installedMagazineCapacity = GetInstalledMagazineCapacity(installedModules);
+
+        return installedMagazineCapacity > 0 ? installedMagazineCapacity : capacity;
+    }
+
+    public static int GetInstalledMagazineCapacity(IReadOnlyList<ItemData> installedModules)
+    {
+        if (installedModules == null)
+        {
+            return 0;
+        }
+
+        for (int i = 0; i < installedModules.Count; i++)
+        {
+            ItemData module = installedModules[i];
+
+            if (module != null && module.ModuleSlot == WeaponModuleSlot.Magazine && module.ModuleMagazineCapacity > 0)
+            {
+                return module.ModuleMagazineCapacity;
+            }
+        }
+
+        return 0;
     }
 
     public static void CollectInstallableModules(InventoryItem weaponItem, ISet<ItemData> compatibleItemData)

@@ -52,7 +52,11 @@ MonoBehaviour:
   _firstPersonWeaponSpawnScale: {x: 1, y: 1, z: 1}
   _weaponData: {fileID: 0}
   _moduleSlot: 2
+  _moduleType: 0
   _moduleInventorySizeDelta: {x: 1, y: 0}
+  _moduleWeaponRecoilPercentModifier: -10
+  _moduleWeaponDurabilityLossPercentModifier: 8
+  _moduleMagazineCapacity: 0
   _statModifiers: []
   _worldItemPrefab: {fileID: 9179094549916919475, guid: c933bd86bc579c04086428522d5b8ed4, type: 3}
   _width: 2
@@ -60,6 +64,7 @@ MonoBehaviour:
   _itemIcon: {fileID: 0}
   _generateIconAtRuntime: 1
   _iconPrefab: {fileID: 160463450488940501, guid: a030856579b2195409aafca2622c55c5, type: 3}
+  _defaultIconModules: []
   _iconPixelsPerCell: 64
   _iconRenderScale: 2
   _iconPadding: 1.1
@@ -80,7 +85,7 @@ MonoBehaviour:
   _iconShowCellGridBorder: 1
   _iconCellGridBorderLineThickness: 2
   _iconUseDirectionalLight: 1
-  _iconLightEulerAngles: {x: 45, y: 45, z: 0}
+  _iconLightEulerAngles: {x: 50, y: -130, z: 0}
   _iconLightIntensity: 100000
   _slotIconUseDirectionalLight: 0
   _slotIconLightEulerAngles: {x: 50, y: -130, z: 0}

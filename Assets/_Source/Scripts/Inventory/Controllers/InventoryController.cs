@@ -838,7 +838,19 @@ public class InventoryController : MonoBehaviour
 
     private bool TryDetachWeaponModule(InventoryGrid grid, InventoryItem weaponItem, ItemData moduleItemData)
     {
-        if (_weaponModuleService == null || _weaponModuleService.TryDetach(grid, weaponItem, moduleItemData) == false)
+        if (_weaponModuleService == null || WeaponModuleSupport.CanDetach(weaponItem, moduleItemData) == false)
+        {
+            return false;
+        }
+
+        if (moduleItemData.ModuleSlot == WeaponModuleSlot.Magazine &&
+            weaponItem.WeaponMagazineState.LoadedAmmoAmount > 0 &&
+            TryUnloadContextMenuWeapon(grid, weaponItem) == false)
+        {
+            return false;
+        }
+
+        if (_weaponModuleService.TryDetach(grid, weaponItem, moduleItemData) == false)
         {
             return false;
         }

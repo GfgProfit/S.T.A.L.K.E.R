@@ -55,6 +55,36 @@ internal static class ItemTooltipTextFormatter
 
     public static AmmoTooltipTextData FormatAmmoDetails(ItemData itemData, GameProjectSettings settings) => itemData != null && itemData.ItemType == ItemType.Ammo ? new(itemData, settings) : null;
 
+    public static ModuleTooltipTextData FormatModuleDetails(ItemTooltipData item, GameProjectSettings settings)
+    {
+        ItemData itemData = item.ItemData;
+
+        if (itemData == null)
+        {
+            return null;
+        }
+
+        if (itemData.ItemType == ItemType.Module)
+        {
+            return new ModuleTooltipTextData(
+                itemData.ModuleWeaponRecoilPercentModifier,
+                itemData.ModuleWeaponDurabilityLossPercentModifier,
+                itemData.ModuleMagazineCapacity,
+                settings);
+        }
+
+        if (itemData.WeaponData == null)
+        {
+            return null;
+        }
+
+        return new ModuleTooltipTextData(
+            WeaponModuleSupport.GetRecoilPercentModifier(item.InstalledModules),
+            WeaponModuleSupport.GetDurabilityLossPercentModifier(item.InstalledModules),
+            WeaponModuleSupport.GetInstalledMagazineCapacity(item.InstalledModules),
+            settings);
+    }
+
     internal static string FormatArmorPenetrationClassification(float armorPenetration, int armorClass, GameProjectSettings settings)
     {
         float classMinimum = (armorClass - 1) * 10f + 1f;
@@ -116,9 +146,14 @@ internal static class ItemTooltipTextFormatter
 
     internal static string FormatAmmoModifier(string label, float value, GameProjectSettings settings)
     {
+        if (Mathf.Approximately(value, 0f))
+        {
+            return string.Empty;
+        }
+
         string text = $"{label}: {FormatSignedPercent(value)}";
 
-        Color color = Mathf.Approximately(value, 0f) || settings == null
+        Color color = settings == null
             ? Color.white
             : value > 0f
                 ? settings.NegativeAmmoModifierColor
@@ -213,4 +248,20 @@ internal sealed class AmmoTooltipTextData
     public string RecoilModifierText { get; }
     public string DurabilityLossModifierText { get; }
     public string[] ArmorClassTexts { get; }
+}
+
+internal sealed class ModuleTooltipTextData
+{
+    public ModuleTooltipTextData(float recoilModifier, float durabilityLossModifier, int magazineCapacity, GameProjectSettings settings)
+    {
+        RecoilModifierText = ItemTooltipTextFormatter.FormatAmmoModifier("Отдача", recoilModifier, settings);
+        DurabilityLossModifierText = ItemTooltipTextFormatter.FormatAmmoModifier("Износ", durabilityLossModifier, settings);
+        MagazineSizeText = magazineCapacity > 0
+            ? $"Размер магазина: {magazineCapacity}"
+            : string.Empty;
+    }
+
+    public string RecoilModifierText { get; }
+    public string DurabilityLossModifierText { get; }
+    public string MagazineSizeText { get; }
 }

@@ -43,6 +43,10 @@ public class ItemInfoPanel : MonoBehaviour, IView<ItemTooltipViewModel>
     [SerializeField] private TMP_Text _ammoDurabilityLossModifierText;
     [SerializeField] private GameObject _ammoDurabilityLossModifierParent;
 
+    [Header("Module Info")]
+    [SerializeField] private TMP_Text _moduleMagazineSizeText;
+    [SerializeField] private GameObject _moduleMagazineSizeParent;
+
     [Header("Stats Info")]
     [SerializeField] private CharacterStatsInfoPanel _statsInfoPanel;
     [SerializeField] private bool _hideStatsInfoWhenEmpty = true;
@@ -105,6 +109,7 @@ public class ItemInfoPanel : MonoBehaviour, IView<ItemTooltipViewModel>
         GameProjectSettings settings = GameProjectSettings.LoadDefault();
         _viewModel.Show(item, _descriptionWordsPerLine, settings);
         SetAmmoInfo(item.ItemData, settings);
+        SetModuleInfo(item, settings);
         SetStatsInfo(item, settings);
         RebuildLayout();
         UpdatePosition();
@@ -197,8 +202,10 @@ public class ItemInfoPanel : MonoBehaviour, IView<ItemTooltipViewModel>
         SetAmmoText(_ammoBulletMassText, _ammoBulletMassParent, visible ? ammoInfo.BulletMassText : string.Empty, visible);
         SetAmmoText(_ammoBulletDiameterText, _ammoBulletDiameterParent, visible ? ammoInfo.BulletDiameterText : string.Empty, visible);
         SetAmmoText(_ammoRicochetChanceText, _ammoRicochetChanceParent, visible ? ammoInfo.RicochetChanceText : string.Empty, visible);
-        SetAmmoText(_ammoRecoilModifierText, _ammoRecoilModifierParent, visible ? ammoInfo.RecoilModifierText : string.Empty, visible);
-        SetAmmoText(_ammoDurabilityLossModifierText, _ammoDurabilityLossModifierParent, visible ? ammoInfo.DurabilityLossModifierText : string.Empty, visible);
+        bool showRecoilModifier = visible && string.IsNullOrEmpty(ammoInfo.RecoilModifierText) == false;
+        bool showDurabilityModifier = visible && string.IsNullOrEmpty(ammoInfo.DurabilityLossModifierText) == false;
+        SetAmmoText(_ammoRecoilModifierText, _ammoRecoilModifierParent, showRecoilModifier ? ammoInfo.RecoilModifierText : string.Empty, showRecoilModifier);
+        SetAmmoText(_ammoDurabilityLossModifierText, _ammoDurabilityLossModifierParent, showDurabilityModifier ? ammoInfo.DurabilityLossModifierText : string.Empty, showDurabilityModifier);
 
         if (_ammoArmorClassRoot != null)
         {
@@ -218,6 +225,22 @@ public class ItemInfoPanel : MonoBehaviour, IView<ItemTooltipViewModel>
             string value = visible ? ammoInfo.ArmorClassTexts[i] : string.Empty;
             SetAmmoText(_ammoArmorClassTexts[i], parent, value, visible);
         }
+    }
+
+    private void SetModuleInfo(ItemTooltipData item, GameProjectSettings settings)
+    {
+        ModuleTooltipTextData moduleInfo = ItemTooltipTextFormatter.FormatModuleDetails(item, settings);
+
+        if (moduleInfo != null)
+        {
+            bool showRecoilModifier = string.IsNullOrEmpty(moduleInfo.RecoilModifierText) == false;
+            bool showDurabilityModifier = string.IsNullOrEmpty(moduleInfo.DurabilityLossModifierText) == false;
+            SetAmmoText(_ammoRecoilModifierText, _ammoRecoilModifierParent, moduleInfo.RecoilModifierText, showRecoilModifier);
+            SetAmmoText(_ammoDurabilityLossModifierText, _ammoDurabilityLossModifierParent, moduleInfo.DurabilityLossModifierText, showDurabilityModifier);
+        }
+
+        bool showMagazineSize = moduleInfo != null && string.IsNullOrEmpty(moduleInfo.MagazineSizeText) == false;
+        SetAmmoText(_moduleMagazineSizeText, _moduleMagazineSizeParent, showMagazineSize ? moduleInfo.MagazineSizeText : string.Empty, showMagazineSize);
     }
 
     private static void SetAmmoText(TMP_Text text, GameObject parent, string value, bool visible)

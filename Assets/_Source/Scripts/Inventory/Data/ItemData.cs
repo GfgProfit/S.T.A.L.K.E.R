@@ -43,6 +43,9 @@ public class ItemData : ScriptableObject
     [SerializeField] [BoxGroup("Module")] [ShowIf(nameof(IsModule))] private WeaponModuleSlot _moduleSlot;
     [SerializeField] [BoxGroup("Module")] [ShowIf(nameof(IsModule))] private WeaponModuleType _moduleType;
     [SerializeField] [BoxGroup("Module")] [ShowIf(nameof(IsModule))] private Vector2Int _moduleInventorySizeDelta;
+    [SerializeField] [BoxGroup("Module/Weapon Stats")] [ShowIf(nameof(IsModule))] private float _moduleWeaponRecoilPercentModifier;
+    [SerializeField] [BoxGroup("Module/Weapon Stats")] [ShowIf(nameof(IsModule))] private float _moduleWeaponDurabilityLossPercentModifier;
+    [SerializeField] [BoxGroup("Module/Magazine")] [ShowIf(nameof(IsMagazineModule))] [Min(0)] private int _moduleMagazineCapacity;
     [SerializeField] [BoxGroup("Stats")] [ShowIf(nameof(CanHaveStats))] private List<CharacterStatModifier> _statModifiers = new();
     [SerializeField] [BoxGroup("World")] private WorldItem _worldItemPrefab;
     [SerializeField] [BoxGroup("Grid Size")] [Min(1)] private int _width = 1;
@@ -117,6 +120,9 @@ public class ItemData : ScriptableObject
     public WeaponModuleSlot ModuleSlot => _itemType == ItemType.Module ? _moduleSlot : WeaponModuleSlot.None;
     public WeaponModuleType ModuleType => _itemType == ItemType.Module ? _moduleType : WeaponModuleType.None;
     public Vector2Int ModuleInventorySizeDelta => new(Mathf.Max(0, _moduleInventorySizeDelta.x), Mathf.Max(0, _moduleInventorySizeDelta.y));
+    public float ModuleWeaponRecoilPercentModifier => _itemType == ItemType.Module ? _moduleWeaponRecoilPercentModifier : 0f;
+    public float ModuleWeaponDurabilityLossPercentModifier => _itemType == ItemType.Module ? _moduleWeaponDurabilityLossPercentModifier : 0f;
+    public int ModuleMagazineCapacity => IsMagazineModule() ? Mathf.Max(0, _moduleMagazineCapacity) : 0;
     public IReadOnlyList<CharacterStatModifier> StatModifiers => _statModifiers;
     public bool HasStatModifiers => CharacterStatUtility.HasAnyModifier(_statModifiers);
     public WorldItem WorldItemPrefab => _worldItemPrefab;
@@ -222,6 +228,7 @@ public class ItemData : ScriptableObject
     private bool IsArmor() => _itemType == ItemType.Armor;
     private bool IsAmmo() => _itemType == ItemType.Ammo;
     private bool IsModule() => _itemType == ItemType.Module;
+    private bool IsMagazineModule() => _itemType == ItemType.Module && _moduleSlot == WeaponModuleSlot.Magazine;
     private bool UsesFirstPersonWeapon() => _itemType == ItemType.Weapon || _itemType == ItemType.Pistol || _itemType == ItemType.Knife;
     private bool UsesWeaponData() => _itemType == ItemType.Weapon || _itemType == ItemType.Pistol;
     private bool CanHaveStats() => _itemType == ItemType.Armor || _itemType == ItemType.Helmet || _itemType == ItemType.Artifact;
@@ -255,6 +262,7 @@ public class ItemData : ScriptableObject
         _ammoTracerBurnDurationSeconds = Mathf.Max(0f, _ammoTracerBurnDurationSeconds);
         _ammoTracerEmissionIntensity = Mathf.Max(0f, _ammoTracerEmissionIntensity);
         _moduleInventorySizeDelta = new Vector2Int(Mathf.Max(0, _moduleInventorySizeDelta.x), Mathf.Max(0, _moduleInventorySizeDelta.y));
+        _moduleMagazineCapacity = Mathf.Max(0, _moduleMagazineCapacity);
     }
 
     public Sprite GetIcon(IReadOnlyList<ItemData> installedModules = null)

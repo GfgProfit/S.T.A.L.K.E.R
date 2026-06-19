@@ -102,7 +102,7 @@ MonoBehaviour:
   _iconShowCellGridBorder: 1
   _iconCellGridBorderLineThickness: 2
   _iconUseDirectionalLight: 1
-  _iconLightEulerAngles: {x: 90, y: 90, z: 0}
+  _iconLightEulerAngles: {x: 50, y: -130, z: 0}
   _iconLightIntensity: 100000
   _slotIconUseDirectionalLight: 0
   _slotIconLightEulerAngles: {x: 50, y: -130, z: 0}
