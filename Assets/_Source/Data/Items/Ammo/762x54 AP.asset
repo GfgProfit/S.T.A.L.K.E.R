@@ -32,6 +32,9 @@ MonoBehaviour:
   _canEquipHelmet: 1
   _ammoFleshDamage: 66
   _ammoArmorPenetration: 86
+  _ammoWeaponRecoilPercentModifier: 12
+  _ammoWeaponDurabilityLossPercentModifier: 24
+  _ammoMaterial: {fileID: 0}
   _ammoBulletVelocityMetersPerSecondFallback: 828
   _ammoBulletMassGrams: 9.4
   _ammoBulletDiameterMillimeters: 7.92
@@ -45,15 +48,13 @@ MonoBehaviour:
   _ammoTracerIgnitionDistanceMeters: 50
   _ammoTracerBurnDurationSeconds: 3.5
   _ammoTracerEmissionIntensity: 14
-  _ammoWeaponRecoilPercentModifier: 12
-  _ammoWeaponAccuracyPercentModifier: 0
-  _ammoWeaponAccuracyPenaltyPercentModifier: 0
-  _ammoWeaponDurabilityLossPercentModifier: 24
   _firstPersonLegsMeshName: 
   _firstPersonHandsMeshName: 
   _firstPersonWeaponPrefab: {fileID: 0}
   _firstPersonWeaponSpawnScale: {x: 1, y: 1, z: 1}
   _weaponData: {fileID: 0}
+  _moduleSlot: 0
+  _moduleInventorySizeDelta: {x: 0, y: 0}
   _statModifiers: []
   _worldItemPrefab: {fileID: 1715054691536542497, guid: a5529d8dc1d9db04eadbb285f75877a8, type: 3}
   _width: 2
@@ -64,7 +65,7 @@ MonoBehaviour:
   _iconPixelsPerCell: 64
   _iconRenderScale: 2
   _iconPadding: 1.15
-  _iconAntiAliasing: 8
+  _iconAntiAliasing: 1
   _iconUseOutline: 1
   _iconOutlineWidth: 2
   _iconUseShadow: 1

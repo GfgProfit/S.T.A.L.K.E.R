@@ -1,4 +1,6 @@
 using System.Collections.Generic;
+using System.Threading;
+using Cysharp.Threading.Tasks;
 using NaughtyAttributes;
 using UnityEngine;
 
@@ -47,6 +49,7 @@ public class ItemData : ScriptableObject
     [SerializeField] [BoxGroup("Icon/Base")] private Sprite _itemIcon;
     [SerializeField] [BoxGroup("Icon/Runtime")] private bool _generateIconAtRuntime = true;
     [SerializeField] [BoxGroup("Icon/Runtime")] [EnableIf(nameof(GeneratesIconAtRuntime))] private GameObject _iconPrefab;
+    [SerializeField] [BoxGroup("Icon/Weapon Variants")] [ShowIf(nameof(UsesFirstPersonWeapon))] private ItemData[] _defaultIconModules = System.Array.Empty<ItemData>();
     [SerializeField] [BoxGroup("Icon/Texture")] [Min(16)] private int _iconPixelsPerCell = 64;
     [SerializeField] [BoxGroup("Icon/Texture")] [Range(1, 4)] private int _iconRenderScale = 2;
     [SerializeField] [BoxGroup("Icon/Texture")] [Range(1f, 2f)] private float _iconPadding = 1.15f;
@@ -120,6 +123,7 @@ public class ItemData : ScriptableObject
 
     public Sprite FallbackIcon => _itemIcon;
     public GameObject IconPrefab => _iconPrefab;
+    public IReadOnlyList<ItemData> DefaultIconModules => _defaultIconModules ?? System.Array.Empty<ItemData>();
     public int IconPixelsPerCell => Mathf.Max(16, _iconPixelsPerCell);
     public int IconRenderScale => Mathf.Clamp(_iconRenderScale, 1, 4);
     public int IconAntiAliasing => GetSupportedAntiAliasing(_iconAntiAliasing);
@@ -276,6 +280,27 @@ public class ItemData : ScriptableObject
         }
 
         return _itemIcon;
+    }
+
+    public UniTask<Sprite> GetIconAsync(IReadOnlyList<ItemData> installedModules = null, CancellationToken cancellationToken = default)
+    {
+        return GetIconAsync(Width, Height, installedModules, cancellationToken);
+    }
+
+    public UniTask<Sprite> GetIconAsync(int width, int height, IReadOnlyList<ItemData> installedModules = null, CancellationToken cancellationToken = default)
+    {
+        return HasRuntimeIconSource()
+            ? ItemIconCache.GetOrCreateAsync(this, width, height, installedModules, cancellationToken)
+            : UniTask.FromResult(_itemIcon);
+    }
+
+    public UniTask<Sprite> GetSlotIconAsync(int slotWidth, int slotHeight, IReadOnlyList<ItemData> installedModules = null, CancellationToken cancellationToken = default)
+    {
+        EnsureSlotIconSettingsInitialized();
+
+        return HasRuntimeIconSource()
+            ? ItemIconCache.GetOrCreateSlotIconAsync(this, slotWidth, slotHeight, installedModules, cancellationToken)
+            : UniTask.FromResult(_itemIcon);
     }
 
     internal bool HasRuntimeIconSource() => ItemIconHashBuilder.HasRuntimeIconSource(_generateIconAtRuntime, _iconPrefab);

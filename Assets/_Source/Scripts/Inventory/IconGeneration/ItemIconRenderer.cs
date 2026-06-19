@@ -1,108 +1,189 @@
+using System;
 using System.Collections.Generic;
+using System.Threading;
+using Cysharp.Threading.Tasks;
 using UnityEngine;
 using UnityEngine.Rendering;
 using UnityEngine.Rendering.HighDefinition;
 
 internal static class ItemIconRenderer
 {
-    public static Texture2D RenderPreviewTexture(ItemData itemData, ItemIconGeneratorSettings settings = null)
+    public static ItemIconRenderSession CreateSession(ItemIconGeneratorSettings settings)
+    {
+        return new ItemIconRenderSession(settings ?? ItemIconGeneratorSettings.LoadDefault());
+    }
+
+    public static async UniTask<Texture2D> RenderPreviewTextureAsync(
+        ItemData itemData,
+        ItemIconGeneratorSettings settings = null,
+        CancellationToken cancellationToken = default)
     {
         if (itemData == null || itemData.HasRuntimeIconSource() == false)
         {
             return null;
         }
 
-        return RenderIconTexture(itemData, null, settings ?? ItemIconGeneratorSettings.LoadDefault(), IconRenderProfile.CreateDefault(itemData));
+        await UniTask.SwitchToMainThread(cancellationToken);
+
+        ItemIconGeneratorSettings resolvedSettings = settings ?? ItemIconGeneratorSettings.LoadDefault();
+        using ItemIconRenderSession renderSession = CreateSession(resolvedSettings);
+
+        return await RenderIconTextureAsync(
+            itemData,
+            Array.Empty<ItemData>(),
+            IconRenderProfile.CreateDefault(itemData),
+            renderSession,
+            cancellationToken);
     }
 
-    public static Sprite RenderIcon(ItemData itemData, IReadOnlyList<ItemData> installedModules, ItemIconGeneratorSettings settings, out Texture2D texture)
+    public static async UniTask<Texture2D> RenderIconTextureAsync(
+        ItemData itemData,
+        IReadOnlyList<ItemData> installedModules,
+        IconRenderProfile renderProfile,
+        ItemIconRenderSession renderSession,
+        CancellationToken cancellationToken)
     {
-        texture = RenderIconTexture(itemData, installedModules, settings, IconRenderProfile.CreateDefault(itemData));
+        cancellationToken.ThrowIfCancellationRequested();
+        await UniTask.SwitchToMainThread(cancellationToken);
 
-        if (texture == null)
+        RawIconRenderResult rawResult = renderSession.RenderRawIcon(itemData, installedModules, renderProfile);
+
+        if (rawResult == null)
         {
             return null;
         }
-
-        return ItemIconTextureProcessor.CreateSprite(itemData, texture);
-    }
-
-    public static Sprite RenderIcon(ItemData itemData, IReadOnlyList<ItemData> installedModules, ItemIconGeneratorSettings settings, IconRenderProfile renderProfile, out Texture2D texture)
-    {
-        texture = RenderIconTexture(itemData, installedModules, settings, renderProfile);
-
-        if (texture == null)
-        {
-            return null;
-        }
-
-        return ItemIconTextureProcessor.CreateSprite(itemData, texture);
-    }
-
-    public static RawIconRenderResult RenderRawIcon(ItemData itemData, IReadOnlyList<ItemData> installedModules, ItemIconGeneratorSettings settings, IconRenderProfile renderProfile)
-    {
-        GameObject rootObject = null;
-        GameObject cameraObject = null;
-        List<GameObject> lightObjects = null;
-        GameObject volumeObject = null;
-        VolumeProfile volumeProfile = null;
-        RenderTexture renderTexture = null;
-        RenderTexture previousActiveTexture = RenderTexture.active;
-        Light[] sceneLights = null;
-        int[] sceneLightCullingMasks = null;
 
         try
         {
-            if (settings.ExcludeIconLayerFromSceneLights)
+            ItemIconPostProcessSettings postProcessSettings = ItemIconTextureProcessor.CreatePostProcessSettings(itemData);
+            Color32[] processedPixels = await UniTask.RunOnThreadPool(
+                () => ItemIconTextureProcessor.CreateProcessedPixels(rawResult.ItemPixels, rawResult.Width, rawResult.Height, postProcessSettings),
+                true,
+                cancellationToken);
+
+            cancellationToken.ThrowIfCancellationRequested();
+            rawResult.Texture.SetPixels32(processedPixels);
+            rawResult.Texture.Apply(false, true);
+            return rawResult.Texture;
+        }
+        catch
+        {
+            await UniTask.SwitchToMainThread();
+            DestroyObject(rawResult.Texture);
+            throw;
+        }
+    }
+
+    public static void DestroyObject(UnityEngine.Object target)
+    {
+        if (target == null)
+        {
+            return;
+        }
+
+        if (target is GameObject gameObject)
+        {
+            gameObject.SetActive(false);
+        }
+
+        if (Application.isPlaying)
+        {
+            UnityEngine.Object.Destroy(target);
+        }
+        else
+        {
+            UnityEngine.Object.DestroyImmediate(target);
+        }
+    }
+}
+
+internal sealed class ItemIconRenderSession : IDisposable
+{
+    private readonly ItemIconGeneratorSettings _settings;
+    private readonly GameObject _cameraObject;
+    private readonly Camera _renderCamera;
+    private readonly GameObject _volumeObject;
+    private readonly VolumeProfile _volumeProfile;
+    private readonly Light[] _lights;
+    private readonly Light[] _sceneLights;
+    private readonly int[] _sceneLightCullingMasks;
+
+    private ItemData _currentItemData;
+    private GameObject _rootObject;
+    private FirstPersonWeaponModule[] _moduleDefinitions = Array.Empty<FirstPersonWeaponModule>();
+    private Renderer[] _renderers = Array.Empty<Renderer>();
+    private readonly List<ItemData> _effectiveModules = new();
+    private bool _requiresExposureWarmup;
+    private bool _disposed;
+
+    public ItemIconRenderSession(ItemIconGeneratorSettings settings)
+    {
+        _settings = settings;
+
+        _volumeObject = ItemIconVolumeFactory.Create("Shared Runtime Item Icons", settings, out _volumeProfile);
+        _cameraObject = new GameObject("Shared Runtime Item Icon Camera", typeof(Camera))
+        {
+            hideFlags = HideFlags.HideAndDontSave
+        };
+
+        _renderCamera = _cameraObject.GetComponent<Camera>();
+        HDAdditionalCameraData hdCameraData = _cameraObject.AddComponent<HDAdditionalCameraData>();
+        ItemIconCameraConfigurator.ConfigureHdCamera(hdCameraData, settings);
+        _sceneLights = ItemIconSceneLightIsolation.CaptureSceneLights();
+        _sceneLightCullingMasks = new int[_sceneLights.Length];
+        _lights = ItemIconLightFactory.CreateReusable(settings);
+    }
+
+    public RawIconRenderResult RenderRawIcon(ItemData itemData, IReadOnlyList<ItemData> installedModules, IconRenderProfile renderProfile)
+    {
+        if (_disposed || itemData == null || itemData.HasRuntimeIconSource() == false)
+        {
+            return null;
+        }
+
+        EnsureItemVisual(itemData);
+
+        if (_rootObject == null)
+        {
+            return null;
+        }
+
+        _rootObject.transform.SetPositionAndRotation(_settings.RenderOrigin, Quaternion.Euler(renderProfile.ModelEulerAngles));
+        _rootObject.transform.localScale = renderProfile.ModelScale;
+        BuildEffectiveModules(itemData, installedModules);
+        WeaponModuleSupport.ApplyToVisual(_moduleDefinitions, _effectiveModules);
+
+        if (ItemIconSceneBuilder.TryCalculateBounds(_renderers, _rootObject.transform.position, out Bounds bounds) == false)
+        {
+            return null;
+        }
+
+        RenderTexture previousActiveTexture = RenderTexture.active;
+        RenderTexture renderTexture = null;
+        bool sceneLightsExcluded = false;
+
+        try
+        {
+            if (_settings.ExcludeIconLayerFromSceneLights)
             {
-                sceneLightCullingMasks = ItemIconSceneLightIsolation.ExcludeIconLayerFromSceneLights(settings, out sceneLights);
+                ItemIconSceneLightIsolation.ExcludeIconLayerFromSceneLights(_settings, _sceneLights, _sceneLightCullingMasks);
+                sceneLightsExcluded = true;
             }
-
-            rootObject = new($"Runtime Icon Root - {itemData.name}")
-            {
-                hideFlags = HideFlags.HideAndDontSave
-            };
-
-            rootObject.transform.SetPositionAndRotation(settings.RenderOrigin, Quaternion.Euler(renderProfile.ModelEulerAngles));
-            rootObject.transform.localScale = renderProfile.ModelScale;
-
-            GameObject iconInstance = ItemIconSceneBuilder.InstantiateSource(itemData.IconPrefab, rootObject.transform);
-            WeaponModuleSupport.ApplyToVisual(iconInstance, installedModules);
-
-            if (iconInstance == null || ItemIconSceneBuilder.TryCalculateBounds(rootObject, out Bounds bounds) == false)
-            {
-                return null;
-            }
-
-            ItemIconSceneBuilder.SetLayerRecursively(rootObject, settings.RenderLayer);
-            ItemIconSceneBuilder.SetRendererIsolation(rootObject, settings);
 
             int textureWidth = renderProfile.TextureWidth;
             int textureHeight = renderProfile.TextureHeight;
 
-            renderTexture = RenderTexture.GetTemporary(textureWidth, textureHeight, 24, settings.RenderTextureFormat, RenderTextureReadWrite.Default, itemData.IconAntiAliasing);
+            renderTexture = RenderTexture.GetTemporary(textureWidth, textureHeight, 24, _settings.RenderTextureFormat, RenderTextureReadWrite.Default, itemData.IconAntiAliasing);
             renderTexture.filterMode = FilterMode.Bilinear;
 
-            volumeObject = ItemIconVolumeFactory.Create(itemData.name, settings, out volumeProfile);
-
-            cameraObject = new($"Runtime Icon Camera - {itemData.name}", typeof(Camera))
-            {
-                hideFlags = HideFlags.HideAndDontSave
-            };
-
-            Camera renderCamera = cameraObject.GetComponent<Camera>();
-
-            HDAdditionalCameraData hdCameraData = renderCamera.gameObject.AddComponent<HDAdditionalCameraData>();
-            ItemIconCameraConfigurator.ConfigureHdCamera(hdCameraData, settings);
-            ItemIconCameraConfigurator.ConfigureRenderCamera(renderCamera, bounds, renderTexture, settings, renderProfile, itemData.IconAntiAliasing);
+            ItemIconCameraConfigurator.ConfigureRenderCamera(_renderCamera, bounds, renderTexture, _settings, renderProfile, itemData.IconAntiAliasing);
 
             if (renderProfile.UseDirectionalLight)
             {
-                lightObjects = ItemIconLightFactory.Create(itemData, renderCamera.transform, settings, renderProfile);
+                ItemIconLightFactory.Configure(_lights, itemData, _renderCamera.transform, _settings, renderProfile);
             }
 
-            RenderCamera(renderCamera, settings);
-
+            RenderCamera();
             RenderTexture.active = renderTexture;
 
             Texture2D texture = new(textureWidth, textureHeight, TextureFormat.RGBA32, false)
@@ -119,7 +200,7 @@ internal static class ItemIconRenderer
 
             if (ItemIconTextureProcessor.HasVisiblePixels(itemPixels) == false)
             {
-                DestroyObject(texture);
+                ItemIconRenderer.DestroyObject(texture);
                 return null;
             }
 
@@ -128,84 +209,132 @@ internal static class ItemIconRenderer
         finally
         {
             RenderTexture.active = previousActiveTexture;
-            ItemIconSceneLightIsolation.RestoreSceneLightCullingMasks(sceneLights, sceneLightCullingMasks);
+
+            if (sceneLightsExcluded)
+            {
+                ItemIconSceneLightIsolation.RestoreSceneLightCullingMasks(_sceneLights, _sceneLightCullingMasks);
+            }
 
             if (renderTexture != null)
             {
+                _renderCamera.targetTexture = null;
                 RenderTexture.ReleaseTemporary(renderTexture);
             }
 
-            DestroyObjects(lightObjects);
-            DestroyObject(cameraObject);
-            DestroyObject(volumeObject);
-            DestroyObject(volumeProfile);
-            DestroyObject(rootObject);
+            ItemIconLightFactory.Disable(_lights);
         }
     }
 
-    public static void DestroyObject(Object target)
+    public void Dispose()
     {
-        if (target == null)
+        if (_disposed)
         {
             return;
         }
 
-        if (Application.isPlaying)
+        _disposed = true;
+        ReleaseCurrentItemVisual();
+
+        for (int i = 0; i < _lights.Length; i++)
         {
-            Object.Destroy(target);
+            if (_lights[i] != null)
+            {
+                ItemIconRenderer.DestroyObject(_lights[i].gameObject);
+            }
         }
-        else
-        {
-            Object.DestroyImmediate(target);
-        }
+
+        ItemIconRenderer.DestroyObject(_cameraObject);
+        ItemIconRenderer.DestroyObject(_volumeObject);
+        ItemIconRenderer.DestroyObject(_volumeProfile);
     }
 
-    private static Texture2D RenderIconTexture(ItemData itemData, IReadOnlyList<ItemData> installedModules, ItemIconGeneratorSettings settings, IconRenderProfile renderProfile)
+    private void EnsureItemVisual(ItemData itemData)
     {
-        RawIconRenderResult rawResult = RenderRawIcon(itemData, installedModules, settings, renderProfile);
-        if (rawResult == null)
-        {
-            return null;
-        }
-
-        try
-        {
-            Color32[] pixels = ItemIconTextureProcessor.CreateProcessedPixels(rawResult.ItemPixels, rawResult.Width, rawResult.Height, ItemIconTextureProcessor.CreatePostProcessSettings(itemData));
-
-            rawResult.Texture.SetPixels32(pixels);
-            rawResult.Texture.Apply(false, false);
-
-            return rawResult.Texture;
-        }
-        catch
-        {
-            DestroyObject(rawResult.Texture);
-            throw;
-        }
-    }
-
-    private static void RenderCamera(Camera renderCamera, ItemIconGeneratorSettings settings)
-    {
-        if (RequiresExposureWarmup(settings))
-        {
-            renderCamera.Render();
-        }
-
-        renderCamera.Render();
-    }
-
-    private static bool RequiresExposureWarmup(ItemIconGeneratorSettings settings) => settings.EnableExposureControl && (settings.ExposureMode == ExposureMode.Automatic || settings.ExposureMode == ExposureMode.AutomaticHistogram || settings.ExposureMode == ExposureMode.CurveMapping);
-
-    private static void DestroyObjects(IReadOnlyList<GameObject> targets)
-    {
-        if (targets == null)
+        if (_currentItemData == itemData && _rootObject != null)
         {
             return;
         }
 
-        for (int i = 0; i < targets.Count; i++)
+        ReleaseCurrentItemVisual();
+
+        _currentItemData = itemData;
+        _requiresExposureWarmup = RequiresExposureWarmup();
+        _rootObject = new GameObject($"Runtime Icon Root - {itemData.name}")
         {
-            DestroyObject(targets[i]);
+            hideFlags = HideFlags.HideAndDontSave
+        };
+
+        GameObject iconInstance = ItemIconSceneBuilder.InstantiateSource(itemData.IconPrefab, _rootObject.transform);
+
+        if (iconInstance == null)
+        {
+            ReleaseCurrentItemVisual();
+            return;
+        }
+
+        _moduleDefinitions = iconInstance.GetComponentsInChildren<FirstPersonWeaponModule>(true);
+        _renderers = _rootObject.GetComponentsInChildren<Renderer>(true);
+        ItemIconSceneBuilder.SetLayerRecursively(_rootObject, _settings.RenderLayer);
+        ItemIconSceneBuilder.SetRendererIsolation(_renderers, _settings);
+    }
+
+    private void ReleaseCurrentItemVisual()
+    {
+        _currentItemData = null;
+        _moduleDefinitions = Array.Empty<FirstPersonWeaponModule>();
+        _renderers = Array.Empty<Renderer>();
+
+        if (_rootObject == null)
+        {
+            return;
+        }
+
+        ItemIconRenderer.DestroyObject(_rootObject);
+        _rootObject = null;
+    }
+
+    private void BuildEffectiveModules(ItemData itemData, IReadOnlyList<ItemData> installedModules)
+    {
+        _effectiveModules.Clear();
+        AddUniqueModules(itemData.DefaultIconModules);
+        AddUniqueModules(installedModules);
+    }
+
+    private void AddUniqueModules(IReadOnlyList<ItemData> modules)
+    {
+        if (modules == null)
+        {
+            return;
+        }
+
+        for (int i = 0; i < modules.Count; i++)
+        {
+            ItemData module = modules[i];
+
+            if (module != null && module.ItemType == ItemType.Module && _effectiveModules.Contains(module) == false)
+            {
+                _effectiveModules.Add(module);
+            }
         }
     }
+
+    private void RenderCamera()
+    {
+        if (_requiresExposureWarmup)
+        {
+            _renderCamera.Render();
+            _requiresExposureWarmup = false;
+        }
+
+        _renderCamera.Render();
+    }
+
+    private bool RequiresExposureWarmup()
+    {
+        return _settings.EnableExposureControl &&
+               (_settings.ExposureMode == ExposureMode.Automatic ||
+                _settings.ExposureMode == ExposureMode.AutomaticHistogram ||
+                _settings.ExposureMode == ExposureMode.CurveMapping);
+    }
+
 }

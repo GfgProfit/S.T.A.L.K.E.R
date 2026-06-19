@@ -1,0 +1,52 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: a657d0e2334e4f7ca6b9eaf4776f4209, type: 3}
+  m_Name: scar_h Weapon Data
+  m_EditorClassIdentifier: Assembly-CSharp::WeaponData
+  _magazineCapacity: 20
+  _durabilityShotsResource: 2000
+  _fireRateRoundsPerMinute: 625
+  _fireMode: 1
+  _reloadAmmoApplyFrame: 530
+  _reloadFullAmmoApplyFrame: 700
+  _reloadAmmoMaterialApplyFrame: 300
+  _compatibleAmmo:
+  - _ammoData: {fileID: 11400000, guid: 0921ba32c21f58e479afd8ec656e6d4d, type: 2}
+    _bulletVelocityMetersPerSecondOverride: 800
+  _jammingDurabilityThreshold: 80
+  _baseJammedChance: 5
+  _maximumJammedChance: 50
+  _jammedAmmoRemovalFrame: 150
+  _bulletPrefab: {fileID: 9140050282074990077, guid: 675c1b0c73b6e5f4bbaec433b5278638, type: 3}
+  _ballisticHitMask:
+    serializedVersion: 2
+    m_Bits: 4294967227
+  _ballisticCollisionRadiusMeters: 0
+  _ballisticSimulationStepSeconds: 0.004166667
+  _ballisticMaxSimulationStepsPerFrame: 64
+  _ballisticMaxLifetimeSeconds: 10
+  _ballisticMaxDistanceMeters: 2000
+  _ballisticGravityScale: 1
+  _useAirResistance: 1
+  _airDensityKilogramsPerCubicMeter: 1.225
+  _enableRicochet: 1
+  _ricochetMinimumIncidenceAngleDegrees: 65
+  _ricochetSpeedRetention: 0.5
+  _ricochetSurfaceOffsetMeters: 0.002
+  _drawBallisticDebug: 1
+  _ballisticDebugDurationSeconds: 5
+  _recoilX: 5
+  _recoilY: 4
+  _recoilZ: 0.4
+  _recoilReturnSpeed: 12
+  _recoilSnappiness: 21
+  _crouchRecoilReductionPercent: 25

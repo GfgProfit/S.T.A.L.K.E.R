@@ -9,9 +9,20 @@ public class PlayerCameraFieldOfViewController
         _camera = camera;
     }
 
-    public void Update(bool isSprinting, bool isCrouching, float defaultFieldOfView, float sprintFieldOfView, float smooth)
+    public void Update(
+        bool isSprinting,
+        bool isCrouching,
+        bool isUnarmedAiming,
+        float defaultFieldOfView,
+        float sprintFieldOfView,
+        float unarmedAimFieldOfView,
+        float smooth)
     {
-        float targetFieldOfView = isSprinting && !isCrouching ? sprintFieldOfView : defaultFieldOfView;
+        float targetFieldOfView = isUnarmedAiming
+            ? unarmedAimFieldOfView
+            : isSprinting && !isCrouching
+                ? sprintFieldOfView
+                : defaultFieldOfView;
 
         _camera.fieldOfView = Mathf.Lerp(_camera.fieldOfView, targetFieldOfView, smooth * Time.deltaTime);
     }

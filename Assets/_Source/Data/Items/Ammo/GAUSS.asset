@@ -34,6 +34,7 @@ MonoBehaviour:
   _ammoArmorPenetration: 100
   _ammoWeaponRecoilPercentModifier: 0
   _ammoWeaponDurabilityLossPercentModifier: 10
+  _ammoMaterial: {fileID: 0}
   _ammoBulletVelocityMetersPerSecondFallback: 3000
   _ammoBulletMassGrams: 5
   _ammoBulletDiameterMillimeters: 3
@@ -52,6 +53,8 @@ MonoBehaviour:
   _firstPersonWeaponPrefab: {fileID: 0}
   _firstPersonWeaponSpawnScale: {x: 1, y: 1, z: 1}
   _weaponData: {fileID: 0}
+  _moduleSlot: 0
+  _moduleInventorySizeDelta: {x: 0, y: 0}
   _statModifiers: []
   _worldItemPrefab: {fileID: 1685857697219593072, guid: 99a6c83491416a6489b956d2adbc58bb, type: 3}
   _width: 1
@@ -62,7 +65,7 @@ MonoBehaviour:
   _iconPixelsPerCell: 64
   _iconRenderScale: 2
   _iconPadding: 1.15
-  _iconAntiAliasing: 8
+  _iconAntiAliasing: 1
   _iconUseOutline: 1
   _iconOutlineWidth: 2
   _iconUseShadow: 1

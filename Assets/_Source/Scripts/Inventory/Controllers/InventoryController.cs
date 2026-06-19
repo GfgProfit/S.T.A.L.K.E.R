@@ -1,5 +1,4 @@
 using System;
-using System.Collections;
 using System.Collections.Generic;
 using System.Threading;
 using Cysharp.Threading.Tasks;
@@ -9,7 +8,6 @@ using UnityEngine;
 
 public class InventoryController : MonoBehaviour
 {
-    [SerializeField] [BoxGroup("Items")] private List<ItemData> _items;
     [SerializeField] [BoxGroup("Items")] private InventoryItem _itemPrefab;
     [SerializeField] [BoxGroup("UI")] private Transform _canvasTransform;
     [SerializeField] [BoxGroup("UI")] private GameObject _inventoryRoot;
@@ -285,7 +283,7 @@ public class InventoryController : MonoBehaviour
     private InventoryHoveredItemActionController CreateHoveredItemActionController() => new(PlayerInput, _dragState, () => _selectedItemGrid, DragController.GetTileGridPosition, IsContextMenuOpen, QuickActionService, TryDropItem, HoverInfoController, HideItemInfoPanel, HideContextMenu);
     private InventoryQuickUseService CreateQuickUseService() => new(_quickUseSlotBindings, TryDetachItemFromGrid, DestroyInventoryItem, RefreshWeightState);
     private InventoryUpdateController CreateUpdateController() => new(PlayerInput, () => IsOpen, () => IconPrewarmController.IconsReady, () => _selectedItemGrid, HoverInfoController, ContextMenuController, ToggleInventory, HideItemInfoPanel, HideContextMenu, DragController.ItemIconDrag, DragController.ReleaseDraggedItem, DragController.RotateSelectedItem, TryHandleHoveredItemDropInput, HandleHighlight, TryHandleQuickItemAction, DragController.BeginDrag);
-    private InventoryIconPrewarmController CreateIconPrewarmController() => new(_items, _prewarmItemIconsOnStart, _logIconPrewarmProgress, this);
+    private InventoryIconPrewarmController CreateIconPrewarmController() => new(_prewarmItemIconsOnStart, _logIconPrewarmProgress, this, _equipmentSlotGrids);
 
     private void Awake()
     {
@@ -324,10 +322,10 @@ public class InventoryController : MonoBehaviour
         RefreshWeightState();
     }
 
-    private IEnumerator Start()
+    private void Start()
     {
         RefreshWeightState();
-        yield return IconPrewarmController.Prewarm();
+        IconPrewarmController.PrewarmAsync(destroyCancellationToken).Forget(Debug.LogException);
     }
 
     private void Update()

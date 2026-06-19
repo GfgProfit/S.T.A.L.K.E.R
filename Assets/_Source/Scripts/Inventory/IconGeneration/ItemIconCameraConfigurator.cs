@@ -111,44 +111,15 @@ internal static class ItemIconCameraConfigurator
 
     private static float CalculateOrthographicSize(Bounds bounds, Quaternion cameraRotation, float aspect, float padding)
     {
-        Vector3[] corners = GetBoundsCorners(bounds);
         Quaternion inverseCameraRotation = Quaternion.Inverse(cameraRotation);
-
-        float minX = float.PositiveInfinity;
-        float maxX = float.NegativeInfinity;
-        float minY = float.PositiveInfinity;
-        float maxY = float.NegativeInfinity;
-
-        for (int i = 0; i < corners.Length; i++)
-        {
-            Vector3 cameraLocalPoint = inverseCameraRotation * (corners[i] - bounds.center);
-            minX = Mathf.Min(minX, cameraLocalPoint.x);
-            maxX = Mathf.Max(maxX, cameraLocalPoint.x);
-            minY = Mathf.Min(minY, cameraLocalPoint.y);
-            maxY = Mathf.Max(maxY, cameraLocalPoint.y);
-        }
-
-        float halfWidth = (maxX - minX) / 2f;
-        float halfHeight = (maxY - minY) / 2f;
-
-        return Mathf.Max(MIN_ORTHOGRAPHIC_SIZE, halfHeight, halfWidth / Mathf.Max(MIN_ORTHOGRAPHIC_SIZE, aspect)) * padding;
-    }
-
-    private static Vector3[] GetBoundsCorners(Bounds bounds)
-    {
-        Vector3 center = bounds.center;
+        Vector3 cameraLocalWorldX = inverseCameraRotation * Vector3.right;
+        Vector3 cameraLocalWorldY = inverseCameraRotation * Vector3.up;
+        Vector3 cameraLocalWorldZ = inverseCameraRotation * Vector3.forward;
         Vector3 extents = bounds.extents;
 
-        return new[]
-        {
-            center + new Vector3(-extents.x, -extents.y, -extents.z),
-            center + new Vector3(-extents.x, -extents.y, extents.z),
-            center + new Vector3(-extents.x, extents.y, -extents.z),
-            center + new Vector3(-extents.x, extents.y, extents.z),
-            center + new Vector3(extents.x, -extents.y, -extents.z),
-            center + new Vector3(extents.x, -extents.y, extents.z),
-            center + new Vector3(extents.x, extents.y, -extents.z),
-            center + new Vector3(extents.x, extents.y, extents.z),
-        };
+        float halfWidth = Mathf.Abs(cameraLocalWorldX.x) * extents.x + Mathf.Abs(cameraLocalWorldY.x) * extents.y + Mathf.Abs(cameraLocalWorldZ.x) * extents.z;
+        float halfHeight = Mathf.Abs(cameraLocalWorldX.y) * extents.x + Mathf.Abs(cameraLocalWorldY.y) * extents.y + Mathf.Abs(cameraLocalWorldZ.y) * extents.z;
+
+        return Mathf.Max(MIN_ORTHOGRAPHIC_SIZE, halfHeight, halfWidth / Mathf.Max(MIN_ORTHOGRAPHIC_SIZE, aspect)) * padding;
     }
 }

@@ -5,6 +5,7 @@ public sealed class FirstPersonWeaponModule : MonoBehaviour
 {
     [SerializeField] private ItemData _moduleItemData;
     [SerializeField] private ItemData[] _requiredModules = System.Array.Empty<ItemData>();
+    [SerializeField] private ItemData[] _incompatibleModules = System.Array.Empty<ItemData>();
     [SerializeField] private Transform _attachPoint;
     [SerializeField] private GameObject[] _enabledWhenInstalled = System.Array.Empty<GameObject>();
     [SerializeField] private GameObject[] _disabledWhenInstalled = System.Array.Empty<GameObject>();
@@ -20,14 +21,21 @@ public sealed class FirstPersonWeaponModule : MonoBehaviour
             return false;
         }
 
-        return RequirementsSatisfied(installedModules);
+        return ConfigurationSatisfied(installedModules);
+    }
+
+    internal bool ConfigurationSatisfied(IReadOnlyList<ItemData> installedModules)
+    {
+        return RequirementsSatisfied(installedModules) && IncompatibilitiesSatisfied(installedModules);
     }
 
     public bool RequirementsSatisfied(IReadOnlyList<ItemData> installedModules)
     {
         bool hasRequirement = false;
 
-        for (int i = 0; i < _requiredModules.Length; i++)
+        int requiredModuleCount = _requiredModules?.Length ?? 0;
+
+        for (int i = 0; i < requiredModuleCount; i++)
         {
             ItemData requiredModule = _requiredModules[i];
 
@@ -45,6 +53,28 @@ public sealed class FirstPersonWeaponModule : MonoBehaviour
         }
 
         return hasRequirement == false;
+    }
+
+    internal bool IncompatibilitiesSatisfied(IReadOnlyList<ItemData> installedModules)
+    {
+        int incompatibleModuleCount = _incompatibleModules?.Length ?? 0;
+
+        for (int i = 0; i < incompatibleModuleCount; i++)
+        {
+            ItemData incompatibleModule = _incompatibleModules[i];
+
+            if (incompatibleModule != null && Contains(installedModules, incompatibleModule))
+            {
+                return false;
+            }
+        }
+
+        return true;
+    }
+
+    internal bool IsIncompatibleWith(ItemData moduleItemData)
+    {
+        return Contains(_incompatibleModules, moduleItemData);
     }
 
     internal bool IsInstalled(IReadOnlyList<ItemData> installedModules)

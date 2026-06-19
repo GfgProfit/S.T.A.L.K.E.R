@@ -1,3 +1,7 @@
+using System;
+using System.Collections.Generic;
+using System.Threading;
+using Cysharp.Threading.Tasks;
 using R3;
 using UnityEngine;
 
@@ -14,6 +18,8 @@ public sealed class QuickUseHudSlotViewModel : ViewModelBase
     private readonly ReactiveProperty<bool> _countVisible = new();
     private readonly ReactiveProperty<Color> _backgroundColor = new(Color.clear);
     private readonly ReactiveProperty<Color> _borderColor = new(Color.clear);
+    private readonly CancellationTokenSource _disposeCancellation = new();
+    private int _iconRequestVersion;
 
     public ReadOnlyReactiveProperty<bool> Enabled => _enabled;
     public ReadOnlyReactiveProperty<string> KeyText => _keyText;
@@ -39,20 +45,23 @@ public sealed class QuickUseHudSlotViewModel : ViewModelBase
             return;
         }
 
-        Sprite icon = item.ItemData.GetSlotIcon(HUD_SLOT_ICON_WIDTH, HUD_SLOT_ICON_HEIGHT, item.InstalledModules);
         bool showCount = item.IsStackable && item.CurrentAmount > 1;
 
         _backgroundColor.Value = item.ItemData.IconBackgroundColor;
         _borderColor.Value = item.ItemData.IconCellGridBorderColor;
         _enabled.Value = true;
-        _icon.Value = icon;
-        _iconVisible.Value = icon != null;
+        _icon.Value = item.ItemData.GetSlotIcon(HUD_SLOT_ICON_WIDTH, HUD_SLOT_ICON_HEIGHT, item.InstalledModules);
+        _iconVisible.Value = _icon.Value != null;
         _countText.Value = showCount ? $"x{item.CurrentAmount}" : string.Empty;
         _countVisible.Value = showCount;
+
+        int requestVersion = ++_iconRequestVersion;
+        UpdateIconAsync(item.ItemData, CopyModules(item.InstalledModules), requestVersion).Forget(Debug.LogException);
     }
 
     private void Clear()
     {
+        _iconRequestVersion++;
         _enabled.Value = false;
         _icon.Value = null;
         _iconVisible.Value = false;
@@ -64,6 +73,9 @@ public sealed class QuickUseHudSlotViewModel : ViewModelBase
 
     protected override void DisposeManaged()
     {
+        _iconRequestVersion++;
+        _disposeCancellation.Cancel();
+        _disposeCancellation.Dispose();
         _enabled.Dispose();
         _keyText.Dispose();
         _icon.Dispose();
@@ -72,5 +84,37 @@ public sealed class QuickUseHudSlotViewModel : ViewModelBase
         _countVisible.Dispose();
         _backgroundColor.Dispose();
         _borderColor.Dispose();
+    }
+
+    private async UniTask UpdateIconAsync(ItemData itemData, ItemData[] installedModules, int requestVersion)
+    {
+        (bool isCanceled, Sprite icon) = await itemData
+            .GetSlotIconAsync(HUD_SLOT_ICON_WIDTH, HUD_SLOT_ICON_HEIGHT, installedModules, _disposeCancellation.Token)
+            .SuppressCancellationThrow();
+
+        if (isCanceled || requestVersion != _iconRequestVersion)
+        {
+            return;
+        }
+
+        _icon.Value = icon;
+        _iconVisible.Value = icon != null;
+    }
+
+    private static ItemData[] CopyModules(IReadOnlyList<ItemData> installedModules)
+    {
+        if (installedModules == null || installedModules.Count == 0)
+        {
+            return Array.Empty<ItemData>();
+        }
+
+        ItemData[] modules = new ItemData[installedModules.Count];
+
+        for (int i = 0; i < installedModules.Count; i++)
+        {
+            modules[i] = installedModules[i];
+        }
+
+        return modules;
     }
 }

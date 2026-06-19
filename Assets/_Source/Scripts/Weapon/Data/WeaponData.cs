@@ -132,7 +132,8 @@ public sealed class WeaponData : ScriptableObject
         }
 
         float wearBelowThreshold = threshold <= 0f ? 1f : Mathf.InverseLerp(threshold, 0f, durability);
-        return Mathf.Lerp(BaseJammedChance, MaximumJammedChance, wearBelowThreshold);
+        float easedWear = wearBelowThreshold * wearBelowThreshold * wearBelowThreshold;
+        return Mathf.Lerp(BaseJammedChance, MaximumJammedChance, easedWear);
     }
 
     public ItemData GetCompatibleAmmo(int index)

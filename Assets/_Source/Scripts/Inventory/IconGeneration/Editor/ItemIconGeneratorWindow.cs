@@ -1,4 +1,10 @@
+using System;
+using System.Collections.Generic;
+using System.Threading;
+using Cysharp.Threading.Tasks;
 using UnityEditor;
+using UnityEditor.Build;
+using UnityEditor.Build.Reporting;
 using UnityEngine;
 
 public sealed class ItemIconGeneratorWindow : EditorWindow
@@ -13,6 +19,7 @@ public sealed class ItemIconGeneratorWindow : EditorWindow
     private Vector2 _settingsScroll;
     private bool _autoRefresh = true;
     private bool _previewRenderScheduled;
+    private CancellationTokenSource _previewRenderCancellation;
 
     [MenuItem("Tools/Inventory/Item Icon Generator")]
     private static void Open()
@@ -34,6 +41,7 @@ public sealed class ItemIconGeneratorWindow : EditorWindow
     private void OnDisable()
     {
         EditorApplication.playModeStateChanged -= HandlePlayModeStateChanged;
+        CancelPreviewRender();
         DestroyPreviewTexture();
     }
 
@@ -171,7 +179,7 @@ public sealed class ItemIconGeneratorWindow : EditorWindow
         }
     }
 
-    private void RenderPreview()
+    private async UniTask RenderPreviewAsync()
     {
         DestroyPreviewTexture();
 
@@ -181,26 +189,54 @@ public sealed class ItemIconGeneratorWindow : EditorWindow
             return;
         }
 
+        CancellationTokenSource cancellation = new();
+        _previewRenderCancellation = cancellation;
+
         try
         {
-            _previewTexture = ItemIconCache.RenderPreviewTexture(_previewItem, _settings);
+            Texture2D previewTexture = await ItemIconCache.RenderPreviewTextureAsync(_previewItem, _settings, cancellation.Token);
+
+            if (cancellation.IsCancellationRequested || this == null)
+            {
+                DestroyImmediate(previewTexture);
+                return;
+            }
+
+            _previewTexture = previewTexture;
 
             if (_previewTexture != null)
             {
                 _previewTexture.hideFlags = HideFlags.HideAndDontSave;
             }
         }
-        catch (System.Exception exception)
+        catch (OperationCanceledException)
+        {
+        }
+        catch (Exception exception)
         {
             Debug.LogException(exception);
             _previewTexture = null;
         }
+        finally
+        {
+            if (ReferenceEquals(_previewRenderCancellation, cancellation))
+            {
+                _previewRenderCancellation = null;
+            }
 
-        Repaint();
+            cancellation.Dispose();
+        }
+
+        if (this != null)
+        {
+            Repaint();
+        }
     }
 
     private void RequestPreviewRender()
     {
+        CancelPreviewRender();
+
         if (_previewRenderScheduled)
         {
             return;
@@ -219,7 +255,7 @@ public sealed class ItemIconGeneratorWindow : EditorWindow
             return;
         }
 
-        RenderPreview();
+        RenderPreviewAsync().Forget(Debug.LogException);
     }
 
     private bool CanRenderPreview()
@@ -236,6 +272,7 @@ public sealed class ItemIconGeneratorWindow : EditorWindow
     {
         if (state == PlayModeStateChange.ExitingEditMode || state == PlayModeStateChange.EnteredPlayMode)
         {
+            CancelPreviewRender();
             DestroyPreviewTexture();
             Repaint();
             return;
@@ -278,12 +315,23 @@ public sealed class ItemIconGeneratorWindow : EditorWindow
         _previewTexture = null;
     }
 
+    private void CancelPreviewRender()
+    {
+        if (_previewRenderCancellation == null)
+        {
+            return;
+        }
+
+        _previewRenderCancellation.Cancel();
+        _previewRenderCancellation = null;
+    }
+
     private void RebuildSerializedSettings()
     {
         _settingsObject = _settings == null ? null : new SerializedObject(_settings);
     }
 
-    private static ItemIconGeneratorSettings LoadOrCreateDefaultSettings()
+    internal static ItemIconGeneratorSettings LoadOrCreateDefaultSettings()
     {
         ItemIconGeneratorSettings loadedSettings = AssetDatabase.LoadAssetAtPath<ItemIconGeneratorSettings>(DEFAULT_ASSET_PATH);
 
@@ -327,5 +375,154 @@ public sealed class ItemIconGeneratorWindow : EditorWindow
 
             return _centeredLabelStyle;
         }
+    }
+}
+
+[InitializeOnLoad]
+internal static class ItemIconPrewarmCatalogSynchronizer
+{
+    private const string ITEM_DATA_FILTER = "t:ItemData";
+    private const string PREWARM_ITEMS_PROPERTY = "_prewarmItems";
+
+    private static bool _refreshScheduled;
+
+    static ItemIconPrewarmCatalogSynchronizer()
+    {
+        ScheduleRefresh();
+    }
+
+    public static void ScheduleRefresh()
+    {
+        if (_refreshScheduled)
+        {
+            return;
+        }
+
+        _refreshScheduled = true;
+        EditorApplication.delayCall += RefreshScheduled;
+    }
+
+    public static void SynchronizeNow()
+    {
+        ItemIconGeneratorSettings settings = ItemIconGeneratorWindow.LoadOrCreateDefaultSettings();
+        string[] itemGuids = AssetDatabase.FindAssets(ITEM_DATA_FILTER, new[] { "Assets" });
+        List<(string Path, ItemData Item)> items = new(itemGuids.Length);
+
+        for (int i = 0; i < itemGuids.Length; i++)
+        {
+            string path = AssetDatabase.GUIDToAssetPath(itemGuids[i]);
+            ItemData itemData = AssetDatabase.LoadAssetAtPath<ItemData>(path);
+
+            if (itemData != null)
+            {
+                items.Add((path, itemData));
+            }
+        }
+
+        items.Sort((left, right) => string.Compare(left.Path, right.Path, StringComparison.Ordinal));
+
+        SerializedObject settingsObject = new(settings);
+        settingsObject.Update();
+        SerializedProperty prewarmItemsProperty = settingsObject.FindProperty(PREWARM_ITEMS_PROPERTY);
+
+        if (prewarmItemsProperty == null || MatchesCurrentCatalog(prewarmItemsProperty, items))
+        {
+            return;
+        }
+
+        prewarmItemsProperty.arraySize = items.Count;
+
+        for (int i = 0; i < items.Count; i++)
+        {
+            prewarmItemsProperty.GetArrayElementAtIndex(i).objectReferenceValue = items[i].Item;
+        }
+
+        settingsObject.ApplyModifiedPropertiesWithoutUndo();
+        EditorUtility.SetDirty(settings);
+        AssetDatabase.SaveAssetIfDirty(settings);
+        ItemIconGeneratorSettings.ResetDefaultCache();
+    }
+
+    private static void RefreshScheduled()
+    {
+        _refreshScheduled = false;
+
+        if (EditorApplication.isCompiling || EditorApplication.isUpdating)
+        {
+            ScheduleRefresh();
+            return;
+        }
+
+        SynchronizeNow();
+    }
+
+    private static bool MatchesCurrentCatalog(SerializedProperty catalogProperty, IReadOnlyList<(string Path, ItemData Item)> items)
+    {
+        if (catalogProperty.arraySize != items.Count)
+        {
+            return false;
+        }
+
+        for (int i = 0; i < items.Count; i++)
+        {
+            if (catalogProperty.GetArrayElementAtIndex(i).objectReferenceValue != items[i].Item)
+            {
+                return false;
+            }
+        }
+
+        return true;
+    }
+}
+
+internal sealed class ItemIconPrewarmCatalogPostprocessor : AssetPostprocessor
+{
+    private static void OnPostprocessAllAssets(string[] importedAssets, string[] deletedAssets, string[] movedAssets, string[] movedFromAssetPaths)
+    {
+        if (ContainsItemData(importedAssets) ||
+            ContainsAssetPath(deletedAssets) ||
+            ContainsItemData(movedAssets) ||
+            ContainsAssetPath(movedFromAssetPaths))
+        {
+            ItemIconPrewarmCatalogSynchronizer.ScheduleRefresh();
+        }
+    }
+
+    private static bool ContainsItemData(IReadOnlyList<string> assetPaths)
+    {
+        for (int i = 0; i < assetPaths.Count; i++)
+        {
+            Type assetType = AssetDatabase.GetMainAssetTypeAtPath(assetPaths[i]);
+
+            if (assetType != null && typeof(ItemData).IsAssignableFrom(assetType))
+            {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    private static bool ContainsAssetPath(IReadOnlyList<string> assetPaths)
+    {
+        for (int i = 0; i < assetPaths.Count; i++)
+        {
+            if (assetPaths[i].EndsWith(".asset", StringComparison.OrdinalIgnoreCase))
+            {
+                return true;
+            }
+        }
+
+        return false;
+    }
+}
+
+internal sealed class ItemIconPrewarmCatalogBuildProcessor : IPreprocessBuildWithReport
+{
+    public int callbackOrder => 0;
+
+    public void OnPreprocessBuild(BuildReport report)
+    {
+        ItemIconPrewarmCatalogSynchronizer.SynchronizeNow();
     }
 }

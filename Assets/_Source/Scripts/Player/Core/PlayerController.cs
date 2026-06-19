@@ -12,6 +12,7 @@ public class PlayerController : MonoBehaviour
     [Space]
     [SerializeField] private float _defaultCameraFieldOfView = 60.0f;
     [SerializeField] private float _sprintCameraFieldOfView = 70.0f;
+    [SerializeField] private float _unarmedAimCameraFieldOfView = 45.0f;
     [SerializeField] private float _fieldOfViewSmooth = 5.0f;
 
     [Space]
@@ -33,6 +34,7 @@ public class PlayerController : MonoBehaviour
     [SerializeField] private Camera _mainCamera;
     [SerializeField] private Transform _cameraTransform;
     [SerializeField] private VignetteController _vignetteController;
+    [SerializeField] private FirstPersonWeaponHolderController _firstPersonWeaponHolderController;
 
     [Inject] private IPlayerInput _playerInput = null;
 
@@ -65,13 +67,19 @@ public class PlayerController : MonoBehaviour
 
     private void Update()
     {
+        bool isUnarmedAimRequested = _controlsEnabled
+            && _firstPersonWeaponHolderController != null
+            && !_firstPersonWeaponHolderController.HasWeaponInHands
+            && _playerInput.IsWeaponAimHeld();
+        bool isSprintBlockedByUnarmedAim = isUnarmedAimRequested && !IsSprinting;
+
         if (_controlsEnabled)
         {
             _lookController.Look(_playerInput, _mouseSensitivity, _cameraClampLimit);
 
             if (_movementEnabled)
             {
-                _movementController.SetInput(_playerInput, CanSprinting);
+                _movementController.SetInput(_playerInput, CanSprinting && !isSprintBlockedByUnarmedAim);
                 _crouchController.Tick(_playerInput, _canCrouching, _crouchTransitionSpeed);
             }
             else
@@ -86,7 +94,16 @@ public class PlayerController : MonoBehaviour
 
         _movementController.Move(_playerInput, _controlsEnabled && _movementEnabled && CanJumping, IsCrouching, CreateMovementSettings());
 
-        _cameraFieldOfViewController.Update(IsSprinting, IsCrouching, _defaultCameraFieldOfView, _sprintCameraFieldOfView, _fieldOfViewSmooth);
+        bool isUnarmedAiming = isUnarmedAimRequested && !IsSprinting;
+
+        _cameraFieldOfViewController.Update(
+            IsSprinting,
+            IsCrouching,
+            isUnarmedAiming,
+            _defaultCameraFieldOfView,
+            _sprintCameraFieldOfView,
+            _unarmedAimCameraFieldOfView,
+            _fieldOfViewSmooth);
     }
 
     public void SetControlsEnabled(bool controlsEnabled)

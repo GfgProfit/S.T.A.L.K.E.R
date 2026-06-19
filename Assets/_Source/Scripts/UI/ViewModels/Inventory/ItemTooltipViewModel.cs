@@ -1,3 +1,7 @@
+using System;
+using System.Collections.Generic;
+using System.Threading;
+using Cysharp.Threading.Tasks;
 using R3;
 using UnityEngine;
 
@@ -12,6 +16,8 @@ public sealed class ItemTooltipViewModel : ViewModelBase
     private readonly ReactiveProperty<string> _durabilityText = new(string.Empty);
     private readonly ReactiveProperty<bool> _showDurability = new();
     private readonly ReactiveProperty<string> _descriptionText = new(string.Empty);
+    private readonly CancellationTokenSource _disposeCancellation = new();
+    private int _iconRequestVersion;
 
     public ReadOnlyReactiveProperty<bool> IsVisible => _isVisible;
     public ReadOnlyReactiveProperty<Sprite> Icon => _icon;
@@ -40,15 +46,22 @@ public sealed class ItemTooltipViewModel : ViewModelBase
         _durabilityText.Value = item.HasDurability ? ItemTooltipTextFormatter.FormatDurability(item.DurabilityPercent, settings.GetDurabilityColor(item.DurabilityPercent)) : string.Empty;
         _descriptionText.Value = ItemTooltipTextFormatter.WrapDescription(item.ItemData.Description, descriptionWordsPerLine);
         _isVisible.Value = true;
+
+        int requestVersion = ++_iconRequestVersion;
+        UpdateIconAsync(item.ItemData, item.BaseWidth, item.BaseHeight, CopyModules(item.InstalledModules), requestVersion).Forget(Debug.LogException);
     }
 
     public void Hide()
     {
+        _iconRequestVersion++;
         _isVisible.Value = false;
     }
 
     protected override void DisposeManaged()
     {
+        _iconRequestVersion++;
+        _disposeCancellation.Cancel();
+        _disposeCancellation.Dispose();
         _isVisible.Dispose();
         _icon.Dispose();
         _iconSize.Dispose();
@@ -58,5 +71,36 @@ public sealed class ItemTooltipViewModel : ViewModelBase
         _durabilityText.Dispose();
         _showDurability.Dispose();
         _descriptionText.Dispose();
+    }
+
+    private async UniTask UpdateIconAsync(ItemData itemData, int width, int height, ItemData[] installedModules, int requestVersion)
+    {
+        (bool isCanceled, Sprite icon) = await itemData
+            .GetIconAsync(width, height, installedModules, _disposeCancellation.Token)
+            .SuppressCancellationThrow();
+
+        if (isCanceled || requestVersion != _iconRequestVersion)
+        {
+            return;
+        }
+
+        _icon.Value = icon;
+    }
+
+    private static ItemData[] CopyModules(IReadOnlyList<ItemData> installedModules)
+    {
+        if (installedModules == null || installedModules.Count == 0)
+        {
+            return Array.Empty<ItemData>();
+        }
+
+        ItemData[] modules = new ItemData[installedModules.Count];
+
+        for (int i = 0; i < installedModules.Count; i++)
+        {
+            modules[i] = installedModules[i];
+        }
+
+        return modules;
     }
 }

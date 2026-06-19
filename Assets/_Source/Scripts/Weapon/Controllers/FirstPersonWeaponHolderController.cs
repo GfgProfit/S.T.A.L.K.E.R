@@ -25,6 +25,7 @@ public sealed class FirstPersonWeaponHolderController : MonoBehaviour
 
     public ItemData CurrentWeaponItemData => _currentWeaponItemData;
     public InventoryItem CurrentWeaponItem => _currentWeaponItem;
+    public bool HasWeaponInHands => _spawnedWeapon != null;
     public bool IsSwitchingWeapon => _isSwitchingWeapon;
     public bool IsWeaponChangeLocked => _isSwitchingWeapon || IsCurrentWeaponBusy;
 

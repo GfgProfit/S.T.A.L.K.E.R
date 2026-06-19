@@ -1,3 +1,5 @@
+using System;
+using System.Buffers;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -39,6 +41,7 @@ internal static class ItemIconHashBuilder
             hash = hash * 31 + HashVector(useSlotIconSettings ? itemData.SlotIconLightEulerAngles : itemData.IconLightEulerAngles);
             hash = hash * 31 + Quantize(useSlotIconSettings ? itemData.SlotIconLightIntensity : itemData.IconLightIntensity);
             hash = hash * 31 + (itemData.IconPrefab == null ? 0 : itemData.IconPrefab.GetInstanceID());
+            hash = hash * 31 + HashInstalledModules(itemData.DefaultIconModules);
             hash = hash * 31 + HashInstalledModules(installedModules);
             return hash;
         }
@@ -46,7 +49,7 @@ internal static class ItemIconHashBuilder
 
     private static int HashInstalledModules(IReadOnlyList<ItemData> installedModules)
     {
-        if (installedModules == null)
+        if (installedModules == null || installedModules.Count == 0)
         {
             return 0;
         }
@@ -54,10 +57,25 @@ internal static class ItemIconHashBuilder
         unchecked
         {
             int hash = 17;
+            int[] moduleIds = ArrayPool<int>.Shared.Rent(installedModules.Count);
 
-            for (int i = 0; i < installedModules.Count; i++)
+            try
             {
-                hash = hash * 31 + (installedModules[i] == null ? 0 : installedModules[i].GetInstanceID());
+                for (int i = 0; i < installedModules.Count; i++)
+                {
+                    moduleIds[i] = installedModules[i] == null ? 0 : installedModules[i].GetInstanceID();
+                }
+
+                Array.Sort(moduleIds, 0, installedModules.Count);
+
+                for (int i = 0; i < installedModules.Count; i++)
+                {
+                    hash = hash * 31 + moduleIds[i];
+                }
+            }
+            finally
+            {
+                ArrayPool<int>.Shared.Return(moduleIds);
             }
 
             return hash;

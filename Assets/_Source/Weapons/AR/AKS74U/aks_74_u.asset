@@ -68,6 +68,7 @@ MonoBehaviour:
   _firstPersonWeaponPrefab: {fileID: 7896559202053645435, guid: 3c5e8b976f7806b4ba94937efe6c1112, type: 3}
   _firstPersonWeaponSpawnScale: {x: 0.6, y: 0.6, z: 0.6}
   _weaponData: {fileID: 11400000, guid: 3d7250701e90f384684c73a8ca81bc3a, type: 2}
+  _moduleSlot: 0
   _moduleInventorySizeDelta: {x: 0, y: 0}
   _statModifiers: []
   _worldItemPrefab: {fileID: 5621424911309646573, guid: e5ea3e1362bad3441aa5581342f31c45, type: 3}
@@ -76,10 +77,11 @@ MonoBehaviour:
   _itemIcon: {fileID: 0}
   _generateIconAtRuntime: 1
   _iconPrefab: {fileID: 3159486526241393684, guid: f5defca8540bc4f49958f8d9e121b839, type: 3}
+  _defaultIconModules: []
   _iconPixelsPerCell: 64
   _iconRenderScale: 2
-  _iconPadding: 1.15
-  _iconAntiAliasing: 8
+  _iconPadding: 1.053
+  _iconAntiAliasing: 1
   _iconUseOutline: 1
   _iconOutlineWidth: 2
   _iconUseShadow: 1

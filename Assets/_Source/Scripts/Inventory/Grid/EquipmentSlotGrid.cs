@@ -18,6 +18,9 @@ public class EquipmentSlotGrid : InventoryGrid
 
     public InventoryItem EquippedItem => _equippedItem;
     public ItemType AcceptedItemType => _acceptedItemType;
+    internal bool RestrictsItemType => _restrictItemType;
+    internal int GridWidth => Mathf.Max(1, _gridSizeWidth);
+    internal int GridHeight => Mathf.Max(1, _gridSizeHeight);
     public bool IsClosed { get; private set; }
     public override RectTransform RectTransform => _rectTransform;
 

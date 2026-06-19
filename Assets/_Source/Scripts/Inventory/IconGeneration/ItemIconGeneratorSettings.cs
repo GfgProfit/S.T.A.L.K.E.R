@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Rendering;
 using UnityEngine.Rendering.HighDefinition;
@@ -9,6 +10,11 @@ public class ItemIconGeneratorSettings : ScriptableObject
 
     private static ItemIconGeneratorSettings _defaultSettings;
     private static bool _defaultSettingsLoaded;
+
+    [SerializeField] [HideInInspector] private List<ItemData> _prewarmItems = new();
+
+    [Header("Prewarm")]
+    [SerializeField] [Min(0.5f)] private float _prewarmFrameBudgetMilliseconds = 6f;
 
     [Header("Render Isolation")]
     [SerializeField] [Range(0, 31)] private int _renderLayer = 31;
@@ -84,6 +90,8 @@ public class ItemIconGeneratorSettings : ScriptableObject
     [SerializeField] private TonemappingMode _tonemappingMode = TonemappingMode.Neutral;
 
     public int RenderLayer => Mathf.Clamp(_renderLayer, 0, 31);
+    public IReadOnlyList<ItemData> PrewarmItems => _prewarmItems;
+    public float PrewarmFrameBudgetMilliseconds => Mathf.Max(0.5f, _prewarmFrameBudgetMilliseconds);
     public int RenderLayerMask => 1 << RenderLayer;
     public int RenderingLayer => Mathf.Clamp(_renderingLayer, 0, 15);
     public uint RenderingLayerMask => 1u << RenderingLayer;

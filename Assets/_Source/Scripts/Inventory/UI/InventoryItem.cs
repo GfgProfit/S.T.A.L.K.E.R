@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using Cysharp.Threading.Tasks;
 using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
@@ -35,6 +36,7 @@ public class InventoryItem : MonoBehaviour, IView<InventoryItemViewModel>
 
     private readonly InventoryItemState _state = new();
     private readonly FirstPersonWeaponMagazineState _weaponMagazineState = new();
+    private int _iconRequestVersion;
     private readonly InventoryItemVisualState _visualState = new InventoryItemVisualState();
     private InventoryItemView _itemView;
     private InventoryItemViewModel _viewModel;
@@ -74,6 +76,7 @@ public class InventoryItem : MonoBehaviour, IView<InventoryItemViewModel>
 
     private void OnDestroy()
     {
+        _iconRequestVersion++;
         Unbind();
         _itemView?.Dispose();
         _viewModel?.Dispose();
@@ -161,14 +164,17 @@ public class InventoryItem : MonoBehaviour, IView<InventoryItemViewModel>
     {
         EnsureViewModel();
         ApplySerializedVisualSettings();
-        _viewModel.SetIcon(_visualState.GetIcon(ItemData, BaseWidth, BaseHeight, InstalledModules));
+        ItemData[] installedModules = CopyInstalledModules();
+        _viewModel.SetIcon(_visualState.GetCachedIcon(ItemData, BaseWidth, BaseHeight, installedModules));
+        int requestVersion = ++_iconRequestVersion;
+        RefreshIconAsync(ItemData, BaseWidth, BaseHeight, installedModules, requestVersion).Forget(Debug.LogException);
     }
 
     internal void ApplySlotVisual(int slotWidth, int slotHeight, bool useGeneratedSlotIcon)
     {
         ApplySerializedVisualSettings();
 
-        _visualState.ApplySlotVisual(ItemData, slotWidth, slotHeight, useGeneratedSlotIcon, InstalledModules);
+        _visualState.ApplySlotVisual(slotWidth, slotHeight, useGeneratedSlotIcon);
 
         ApplyVisualSize();
         RefreshIcon();
@@ -384,6 +390,37 @@ public class InventoryItem : MonoBehaviour, IView<InventoryItemViewModel>
         RebuildCellVisuals();
         ApplyRotation();
         SetCellVisualsVisible(_visualState.CellVisualsVisible);
+    }
+
+    private async UniTask RefreshIconAsync(ItemData itemData, int width, int height, ItemData[] installedModules, int requestVersion)
+    {
+        (bool isCanceled, Sprite icon) = await _visualState
+            .GetIconAsync(itemData, width, height, installedModules, destroyCancellationToken)
+            .SuppressCancellationThrow();
+
+        if (isCanceled || requestVersion != _iconRequestVersion || _viewModel == null)
+        {
+            return;
+        }
+
+        _viewModel.SetIcon(icon);
+    }
+
+    private ItemData[] CopyInstalledModules()
+    {
+        if (InstalledModules.Count == 0)
+        {
+            return Array.Empty<ItemData>();
+        }
+
+        ItemData[] modules = new ItemData[InstalledModules.Count];
+
+        for (int i = 0; i < InstalledModules.Count; i++)
+        {
+            modules[i] = InstalledModules[i];
+        }
+
+        return modules;
     }
 
     private int VisualWidth => _visualState.GetVisualWidth(BaseWidth);

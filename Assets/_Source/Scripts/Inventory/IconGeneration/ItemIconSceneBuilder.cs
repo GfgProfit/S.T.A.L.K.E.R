@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using UnityEngine;
 
 internal static class ItemIconSceneBuilder
@@ -19,14 +20,19 @@ internal static class ItemIconSceneBuilder
     public static bool TryCalculateBounds(GameObject rootObject, out Bounds bounds)
     {
         Renderer[] renderers = rootObject.GetComponentsInChildren<Renderer>();
-        bounds = new Bounds(rootObject.transform.position, Vector3.zero);
+        return TryCalculateBounds(renderers, rootObject.transform.position, out bounds);
+    }
+
+    public static bool TryCalculateBounds(IReadOnlyList<Renderer> renderers, Vector3 fallbackPosition, out Bounds bounds)
+    {
+        bounds = new Bounds(fallbackPosition, Vector3.zero);
         bool hasBounds = false;
 
-        for (int i = 0; i < renderers.Length; i++)
+        for (int i = 0; i < renderers.Count; i++)
         {
             Renderer renderer = renderers[i];
 
-            if (renderer.enabled == false)
+            if (renderer == null || renderer.enabled == false || renderer.gameObject.activeInHierarchy == false)
             {
                 continue;
             }
@@ -58,8 +64,17 @@ internal static class ItemIconSceneBuilder
     public static void SetRendererIsolation(GameObject rootObject, ItemIconGeneratorSettings settings)
     {
         Renderer[] renderers = rootObject.GetComponentsInChildren<Renderer>(true);
+        SetRendererIsolation(renderers, settings);
+    }
 
-        for (int i = 0; i < renderers.Length; i++)
+    public static void SetRendererIsolation(IReadOnlyList<Renderer> renderers, ItemIconGeneratorSettings settings)
+    {
+        if (renderers == null)
+        {
+            return;
+        }
+
+        for (int i = 0; i < renderers.Count; i++)
         {
             Renderer renderer = renderers[i];
             renderer.renderingLayerMask = settings.RenderingLayerMask;

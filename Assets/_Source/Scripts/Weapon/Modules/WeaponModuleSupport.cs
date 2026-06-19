@@ -7,20 +7,24 @@ internal static class WeaponModuleSupport
 
     public static bool CanInstall(InventoryItem weaponItem, ItemData moduleItemData)
     {
-        return weaponItem != null &&
-               HasOccupiedModuleSlot(weaponItem.InstalledModules, moduleItemData) == false &&
-               TryGetDefinition(weaponItem, moduleItemData, out FirstPersonWeaponModule definition) &&
-               definition.CanInstall(weaponItem.InstalledModules);
+        if (weaponItem == null || weaponItem.ItemData == null)
+        {
+            return false;
+        }
+
+        FirstPersonWeaponModule[] definitions = GetDefinitions(weaponItem.ItemData.FirstPersonWeaponPrefab);
+        return CanInstall(definitions, weaponItem.InstalledModules, moduleItemData);
     }
 
     public static bool CanDetach(InventoryItem weaponItem, ItemData moduleItemData)
     {
-        if (weaponItem == null || weaponItem.HasInstalledModule(moduleItemData) == false)
+        if (weaponItem == null || weaponItem.ItemData == null || weaponItem.HasInstalledModule(moduleItemData) == false)
         {
             return false;
         }
 
         IReadOnlyList<ItemData> installedModules = weaponItem.InstalledModules;
+        FirstPersonWeaponModule[] definitions = GetDefinitions(weaponItem.ItemData.FirstPersonWeaponPrefab);
         List<ItemData> modulesAfterDetach = new(installedModules.Count - 1);
 
         for (int i = 0; i < installedModules.Count; i++)
@@ -33,7 +37,7 @@ internal static class WeaponModuleSupport
 
         for (int i = 0; i < modulesAfterDetach.Count; i++)
         {
-            if (TryGetDefinition(weaponItem, modulesAfterDetach[i], out FirstPersonWeaponModule definition) == false || definition.RequirementsSatisfied(modulesAfterDetach) == false)
+            if (TryGetDefinition(definitions, modulesAfterDetach[i], out FirstPersonWeaponModule definition) == false || definition.ConfigurationSatisfied(modulesAfterDetach) == false)
             {
                 return false;
             }
@@ -55,9 +59,7 @@ internal static class WeaponModuleSupport
         {
             FirstPersonWeaponModule definition = definitions[i];
 
-            if (definition != null &&
-                HasOccupiedModuleSlot(weaponItem.InstalledModules, definition.ModuleItemData) == false &&
-                definition.CanInstall(weaponItem.InstalledModules))
+            if (definition != null && CanInstall(definitions, weaponItem.InstalledModules, definition))
             {
                 compatibleItemData.Add(definition.ModuleItemData);
             }
@@ -72,13 +74,22 @@ internal static class WeaponModuleSupport
         }
 
         FirstPersonWeaponModule[] definitions = weaponVisual.GetComponentsInChildren<FirstPersonWeaponModule>(true);
+        ApplyToVisual(definitions, installedModules);
+    }
 
-        for (int i = 0; i < definitions.Length; i++)
+    internal static void ApplyToVisual(IReadOnlyList<FirstPersonWeaponModule> definitions, IReadOnlyList<ItemData> installedModules)
+    {
+        if (definitions == null)
+        {
+            return;
+        }
+
+        for (int i = 0; i < definitions.Count; i++)
         {
             definitions[i]?.ApplyDefaultVisualState();
         }
 
-        for (int i = 0; i < definitions.Length; i++)
+        for (int i = 0; i < definitions.Count; i++)
         {
             FirstPersonWeaponModule definition = definitions[i];
 
@@ -119,18 +130,16 @@ internal static class WeaponModuleSupport
         return null;
     }
 
-    private static bool TryGetDefinition(InventoryItem weaponItem, ItemData moduleItemData, out FirstPersonWeaponModule definition)
+    private static bool TryGetDefinition(IReadOnlyList<FirstPersonWeaponModule> definitions, ItemData moduleItemData, out FirstPersonWeaponModule definition)
     {
         definition = null;
 
-        if (weaponItem == null || moduleItemData == null || moduleItemData.ItemType != ItemType.Module || weaponItem.ItemData == null || weaponItem.ItemData.FirstPersonWeaponPrefab == null)
+        if (definitions == null || moduleItemData == null)
         {
             return false;
         }
 
-        FirstPersonWeaponModule[] definitions = GetDefinitions(weaponItem.ItemData.FirstPersonWeaponPrefab);
-
-        for (int i = 0; i < definitions.Length; i++)
+        for (int i = 0; i < definitions.Count; i++)
         {
             FirstPersonWeaponModule candidate = definitions[i];
 
@@ -142,6 +151,49 @@ internal static class WeaponModuleSupport
         }
 
         return false;
+    }
+
+    private static bool CanInstall(IReadOnlyList<FirstPersonWeaponModule> definitions, IReadOnlyList<ItemData> installedModules, ItemData moduleItemData)
+    {
+        if (moduleItemData == null ||
+            moduleItemData.ItemType != ItemType.Module ||
+            TryGetDefinition(definitions, moduleItemData, out FirstPersonWeaponModule definition) == false)
+        {
+            return false;
+        }
+
+        return CanInstall(definitions, installedModules, definition);
+    }
+
+    private static bool CanInstall(
+        IReadOnlyList<FirstPersonWeaponModule> definitions,
+        IReadOnlyList<ItemData> installedModules,
+        FirstPersonWeaponModule definition)
+    {
+        ItemData moduleItemData = definition.ModuleItemData;
+
+        if (moduleItemData == null ||
+            moduleItemData.ItemType != ItemType.Module ||
+            HasOccupiedModuleSlot(installedModules, moduleItemData) ||
+            definition.CanInstall(installedModules) == false)
+        {
+            return false;
+        }
+
+        if (installedModules == null)
+        {
+            return true;
+        }
+
+        for (int i = 0; i < installedModules.Count; i++)
+        {
+            if (TryGetDefinition(definitions, installedModules[i], out FirstPersonWeaponModule installedDefinition) && installedDefinition.IsIncompatibleWith(moduleItemData))
+            {
+                return false;
+            }
+        }
+
+        return true;
     }
 
     private static FirstPersonWeaponModule[] GetDefinitions(GameObject weaponPrefab)

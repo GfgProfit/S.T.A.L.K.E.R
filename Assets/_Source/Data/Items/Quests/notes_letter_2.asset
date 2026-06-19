@@ -34,6 +34,31 @@ MonoBehaviour:
   _useDurability: 0
   _defaultDurabilityPercent: 100
   _canEquipHelmet: 1
+  _ammoFleshDamage: 0
+  _ammoArmorPenetration: 0
+  _ammoWeaponRecoilPercentModifier: 0
+  _ammoWeaponDurabilityLossPercentModifier: 0
+  _ammoMaterial: {fileID: 0}
+  _ammoBulletVelocityMetersPerSecondFallback: 0
+  _ammoBulletMassGrams: 0
+  _ammoBulletDiameterMillimeters: 0
+  _ammoBulletDragCoefficient: 0
+  _ammoRicochetChance: 0
+  _ammoTracerEnabled: 0
+  _ammoTracerMaterial: {fileID: 0}
+  _ammoTracerColor: {r: 1, g: 0.15, b: 0.02, a: 1}
+  _ammoTracerWidthMeters: 0.006
+  _ammoTracerTrailDurationSeconds: 0.02
+  _ammoTracerIgnitionDistanceMeters: 0
+  _ammoTracerBurnDurationSeconds: 3
+  _ammoTracerEmissionIntensity: 10
+  _firstPersonLegsMeshName: 
+  _firstPersonHandsMeshName: 
+  _firstPersonWeaponPrefab: {fileID: 0}
+  _firstPersonWeaponSpawnScale: {x: 1, y: 1, z: 1}
+  _weaponData: {fileID: 0}
+  _moduleSlot: 0
+  _moduleInventorySizeDelta: {x: 0, y: 0}
   _statModifiers: []
   _worldItemPrefab: {fileID: -2420876335078155028, guid: 77ba4dcbf5b2a784192aa90156bd4e92, type: 3}
   _width: 2
@@ -44,7 +69,7 @@ MonoBehaviour:
   _iconPixelsPerCell: 64
   _iconRenderScale: 2
   _iconPadding: 1.1
-  _iconAntiAliasing: 8
+  _iconAntiAliasing: 1
   _iconUseOutline: 1
   _iconOutlineWidth: 2
   _iconUseShadow: 1

@@ -2,12 +2,21 @@ using UnityEngine;
 
 internal static class ItemIconSceneLightIsolation
 {
-    public static int[] ExcludeIconLayerFromSceneLights(ItemIconGeneratorSettings settings, out Light[] sceneLights)
+    public static Light[] CaptureSceneLights()
     {
-        sceneLights = Object.FindObjectsByType<Light>(FindObjectsInactive.Exclude, FindObjectsSortMode.None);
-        int[] previousCullingMasks = new int[sceneLights.Length];
+        return Object.FindObjectsByType<Light>(FindObjectsInactive.Exclude, FindObjectsSortMode.None);
+    }
 
-        for (int i = 0; i < sceneLights.Length; i++)
+    public static void ExcludeIconLayerFromSceneLights(ItemIconGeneratorSettings settings, Light[] sceneLights, int[] previousCullingMasks)
+    {
+        if (sceneLights == null || previousCullingMasks == null)
+        {
+            return;
+        }
+
+        int count = Mathf.Min(sceneLights.Length, previousCullingMasks.Length);
+
+        for (int i = 0; i < count; i++)
         {
             Light sceneLight = sceneLights[i];
 
@@ -19,8 +28,6 @@ internal static class ItemIconSceneLightIsolation
             previousCullingMasks[i] = sceneLight.cullingMask;
             sceneLight.cullingMask &= ~settings.RenderLayerMask;
         }
-
-        return previousCullingMasks;
     }
 
     public static void RestoreSceneLightCullingMasks(Light[] sceneLights, int[] previousCullingMasks)

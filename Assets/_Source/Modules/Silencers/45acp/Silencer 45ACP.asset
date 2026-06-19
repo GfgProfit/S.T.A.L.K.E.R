@@ -1,0 +1,82 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 737e751cd05516846acf43daad139c9e, type: 3}
+  m_Name: Silencer 45ACP
+  m_EditorClassIdentifier: 
+  _itemName: "\u0413\u043B\u0443\u0448\u0438\u0442\u0435\u043B\u044C .45ACP"
+  _shortName: 
+  _description: "\u0413\u043B\u0443\u0448\u0438\u0442\u0435\u043B\u044C .45ACP"
+  _itemType: 11
+  _rarity: 0
+  _weight: 0.4
+  _stackable: 0
+  _useDurability: 0
+  _defaultDurabilityPercent: 100
+  _canEquipHelmet: 1
+  _ammoFleshDamage: 0
+  _ammoArmorPenetration: 0
+  _ammoWeaponRecoilPercentModifier: 0
+  _ammoWeaponDurabilityLossPercentModifier: 0
+  _ammoMaterial: {fileID: 0}
+  _ammoBulletVelocityMetersPerSecondFallback: 0
+  _ammoBulletMassGrams: 0
+  _ammoBulletDiameterMillimeters: 0
+  _ammoBulletDragCoefficient: 0
+  _ammoRicochetChance: 0
+  _ammoTracerEnabled: 0
+  _ammoTracerMaterial: {fileID: 0}
+  _ammoTracerColor: {r: 1, g: 0.15, b: 0.02, a: 1}
+  _ammoTracerWidthMeters: 0.006
+  _ammoTracerTrailDurationSeconds: 0.02
+  _ammoTracerIgnitionDistanceMeters: 0
+  _ammoTracerBurnDurationSeconds: 3
+  _ammoTracerEmissionIntensity: 10
+  _firstPersonLegsMeshName: 
+  _firstPersonHandsMeshName: 
+  _firstPersonWeaponPrefab: {fileID: 0}
+  _firstPersonWeaponSpawnScale: {x: 1, y: 1, z: 1}
+  _weaponData: {fileID: 0}
+  _moduleSlot: 2
+  _moduleInventorySizeDelta: {x: 1, y: 0}
+  _statModifiers: []
+  _worldItemPrefab: {fileID: 7235208428658940705, guid: 7da60ef7b6e1dca46b679a2c9a3f5da6, type: 3}
+  _width: 2
+  _height: 1
+  _itemIcon: {fileID: 0}
+  _generateIconAtRuntime: 1
+  _iconPrefab: {fileID: 8862596068985868021, guid: f670428011748b84fb3309bbc589926c, type: 3}
+  _iconPixelsPerCell: 64
+  _iconRenderScale: 2
+  _iconPadding: 1.1
+  _iconAntiAliasing: 1
+  _iconUseOutline: 1
+  _iconOutlineWidth: 2
+  _iconUseShadow: 1
+  _iconShadowOffset: {x: 2, y: -2}
+  _iconShadowBlur: 2
+  _iconModelEulerAngles: {x: 0, y: 0, z: 0}
+  _iconModelScale: {x: 1, y: 1, z: 1}
+  _iconCameraEulerAngles: {x: 0, y: 90, z: 0}
+  _slotIconModelEulerAngles: {x: 0, y: 0, z: 0}
+  _slotIconModelScale: {x: 1, y: 1, z: 1}
+  _slotIconCameraEulerAngles: {x: 50, y: -135, z: 0}
+  _slotIconPadding: 1.15
+  _iconShowCellGrid: 1
+  _iconShowCellGridBorder: 1
+  _iconCellGridBorderLineThickness: 2
+  _iconUseDirectionalLight: 1
+  _iconLightEulerAngles: {x: 45, y: 45, z: 0}
+  _iconLightIntensity: 100000
+  _slotIconUseDirectionalLight: 0
+  _slotIconLightEulerAngles: {x: 50, y: -130, z: 0}
+  _slotIconLightIntensity: 100000
+  _slotIconSettingsInitialized: 1

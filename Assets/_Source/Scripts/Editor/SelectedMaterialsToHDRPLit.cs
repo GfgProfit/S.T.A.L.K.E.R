@@ -1,6 +1,7 @@
 using System.Collections.Generic;
 using UnityEditor;
 using UnityEngine;
+using UnityEngine.Rendering;
 
 public static class SelectedMaterialsToHDRPLit
 {
@@ -97,16 +98,16 @@ public static class SelectedMaterialsToHDRPLit
             return null;
         }
 
-        int propertyCount = ShaderUtil.GetPropertyCount(shader);
+        int propertyCount = shader.GetPropertyCount();
 
         for (int i = 0; i < propertyCount; i++)
         {
-            if (ShaderUtil.GetPropertyType(shader, i) != ShaderUtil.ShaderPropertyType.TexEnv)
+            if (shader.GetPropertyType(i) != ShaderPropertyType.Texture)
             {
                 continue;
             }
 
-            string propertyName = ShaderUtil.GetPropertyName(shader, i);
+            string propertyName = shader.GetPropertyName(i);
 
             if (!material.HasProperty(propertyName))
             {
