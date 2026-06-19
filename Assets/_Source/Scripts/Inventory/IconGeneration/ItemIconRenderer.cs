@@ -105,8 +105,7 @@ internal sealed class ItemIconRenderSession : IDisposable
     private readonly GameObject _volumeObject;
     private readonly VolumeProfile _volumeProfile;
     private readonly Light[] _lights;
-    private readonly Light[] _sceneLights;
-    private readonly int[] _sceneLightCullingMasks;
+    private readonly ItemIconSceneIsolationScope _sceneIsolation;
 
     private ItemData _currentItemData;
     private GameObject _rootObject;
@@ -119,6 +118,7 @@ internal sealed class ItemIconRenderSession : IDisposable
     public ItemIconRenderSession(ItemIconGeneratorSettings settings)
     {
         _settings = settings;
+        _sceneIsolation = new ItemIconSceneIsolationScope();
 
         _volumeObject = ItemIconVolumeFactory.Create("Shared Runtime Item Icons", settings, out _volumeProfile);
         _cameraObject = new GameObject("Shared Runtime Item Icon Camera", typeof(Camera))
@@ -129,8 +129,6 @@ internal sealed class ItemIconRenderSession : IDisposable
         _renderCamera = _cameraObject.GetComponent<Camera>();
         HDAdditionalCameraData hdCameraData = _cameraObject.AddComponent<HDAdditionalCameraData>();
         ItemIconCameraConfigurator.ConfigureHdCamera(hdCameraData, settings);
-        _sceneLights = ItemIconSceneLightIsolation.CaptureSceneLights();
-        _sceneLightCullingMasks = new int[_sceneLights.Length];
         _lights = ItemIconLightFactory.CreateReusable(settings);
     }
 
@@ -160,15 +158,12 @@ internal sealed class ItemIconRenderSession : IDisposable
 
         RenderTexture previousActiveTexture = RenderTexture.active;
         RenderTexture renderTexture = null;
-        bool sceneLightsExcluded = false;
+        bool sceneEnvironmentIsolated = false;
 
         try
         {
-            if (_settings.ExcludeIconLayerFromSceneLights)
-            {
-                ItemIconSceneLightIsolation.ExcludeIconLayerFromSceneLights(_settings, _sceneLights, _sceneLightCullingMasks);
-                sceneLightsExcluded = true;
-            }
+            _sceneIsolation.Apply(_settings.ExcludeIconLayerFromSceneLights);
+            sceneEnvironmentIsolated = true;
 
             int textureWidth = renderProfile.TextureWidth;
             int textureHeight = renderProfile.TextureHeight;
@@ -210,9 +205,9 @@ internal sealed class ItemIconRenderSession : IDisposable
         {
             RenderTexture.active = previousActiveTexture;
 
-            if (sceneLightsExcluded)
+            if (sceneEnvironmentIsolated)
             {
-                ItemIconSceneLightIsolation.RestoreSceneLightCullingMasks(_sceneLights, _sceneLightCullingMasks);
+                _sceneIsolation.Restore();
             }
 
             if (renderTexture != null)

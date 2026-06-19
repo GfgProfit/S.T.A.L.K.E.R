@@ -123,7 +123,7 @@ MonoBehaviour:
   _prewarmFrameBudgetMilliseconds: 6
   _renderLayer: 31
   _renderingLayer: 7
-  _renderOrigin: {x: 0, y: 0, z: 0}
+  _renderOrigin: {x: 8192, y: 0, z: 8192}
   _excludeIconLayerFromSceneLights: 1
   _rendererLightProbeUsage: 0
   _rendererReflectionProbeUsage: 2

@@ -1,50 +1,94 @@
 using UnityEngine;
+using UnityEngine.Rendering;
 
-internal static class ItemIconSceneLightIsolation
+internal sealed class ItemIconSceneIsolationScope
 {
-    public static Light[] CaptureSceneLights()
+    private readonly Light[] _lights;
+    private readonly bool[] _lightEnabledStates;
+    private readonly Volume[] _volumes;
+    private readonly bool[] _volumeEnabledStates;
+    private readonly ReflectionProbe[] _reflectionProbes;
+    private readonly bool[] _reflectionProbeEnabledStates;
+    private bool _lightsDisabled;
+    private bool _applied;
+
+    public ItemIconSceneIsolationScope()
     {
-        return Object.FindObjectsByType<Light>(FindObjectsInactive.Exclude, FindObjectsSortMode.None);
+        _lights = Object.FindObjectsByType<Light>(FindObjectsInactive.Include, FindObjectsSortMode.None);
+        _lightEnabledStates = new bool[_lights.Length];
+        _volumes = Object.FindObjectsByType<Volume>(FindObjectsInactive.Include, FindObjectsSortMode.None);
+        _volumeEnabledStates = new bool[_volumes.Length];
+        _reflectionProbes = Object.FindObjectsByType<ReflectionProbe>(FindObjectsInactive.Include, FindObjectsSortMode.None);
+        _reflectionProbeEnabledStates = new bool[_reflectionProbes.Length];
     }
 
-    public static void ExcludeIconLayerFromSceneLights(ItemIconGeneratorSettings settings, Light[] sceneLights, int[] previousCullingMasks)
+    public void Apply(bool disableSceneLights)
     {
-        if (sceneLights == null || previousCullingMasks == null)
+        if (_applied)
         {
             return;
         }
 
-        int count = Mathf.Min(sceneLights.Length, previousCullingMasks.Length);
+        _applied = true;
+        _lightsDisabled = disableSceneLights;
+
+        if (_lightsDisabled)
+        {
+            DisableBehaviours(_lights, _lightEnabledStates);
+        }
+
+        DisableBehaviours(_volumes, _volumeEnabledStates);
+        DisableBehaviours(_reflectionProbes, _reflectionProbeEnabledStates);
+    }
+
+    public void Restore()
+    {
+        if (_applied == false)
+        {
+            return;
+        }
+
+        RestoreBehaviours(_reflectionProbes, _reflectionProbeEnabledStates);
+        RestoreBehaviours(_volumes, _volumeEnabledStates);
+
+        if (_lightsDisabled)
+        {
+            RestoreBehaviours(_lights, _lightEnabledStates);
+        }
+
+        _lightsDisabled = false;
+        _applied = false;
+    }
+
+    private static void DisableBehaviours<T>(T[] behaviours, bool[] enabledStates) where T : Behaviour
+    {
+        int count = Mathf.Min(behaviours.Length, enabledStates.Length);
 
         for (int i = 0; i < count; i++)
         {
-            Light sceneLight = sceneLights[i];
+            T behaviour = behaviours[i];
 
-            if (sceneLight == null)
+            if (behaviour == null)
             {
                 continue;
             }
 
-            previousCullingMasks[i] = sceneLight.cullingMask;
-            sceneLight.cullingMask &= ~settings.RenderLayerMask;
+            enabledStates[i] = behaviour.enabled;
+            behaviour.enabled = false;
         }
     }
 
-    public static void RestoreSceneLightCullingMasks(Light[] sceneLights, int[] previousCullingMasks)
+    private static void RestoreBehaviours<T>(T[] behaviours, bool[] enabledStates) where T : Behaviour
     {
-        if (sceneLights == null || previousCullingMasks == null)
-        {
-            return;
-        }
-
-        int count = Mathf.Min(sceneLights.Length, previousCullingMasks.Length);
+        int count = Mathf.Min(behaviours.Length, enabledStates.Length);
 
         for (int i = 0; i < count; i++)
         {
-            Light sceneLight = sceneLights[i];
-            if (sceneLight != null)
+            T behaviour = behaviours[i];
+
+            if (behaviour != null)
             {
-                sceneLight.cullingMask = previousCullingMasks[i];
+                behaviour.enabled = enabledStates[i];
             }
         }
     }

@@ -5,6 +5,7 @@ using UnityEngine.Rendering.HighDefinition;
 internal static class ItemIconVolumeFactory
 {
     private const float VOLUME_PRIORITY = 10000f;
+    private const float VOLUME_RADIUS = 128f;
 
     public static GameObject Create(string itemName, ItemIconGeneratorSettings settings, out VolumeProfile volumeProfile)
     {
@@ -13,6 +14,7 @@ internal static class ItemIconVolumeFactory
             hideFlags = HideFlags.HideAndDontSave,
             layer = settings.RenderLayer
         };
+        volumeObject.transform.position = settings.RenderOrigin;
 
         volumeProfile = ScriptableObject.CreateInstance<VolumeProfile>();
         volumeProfile.hideFlags = HideFlags.HideAndDontSave;
@@ -20,7 +22,12 @@ internal static class ItemIconVolumeFactory
         ConfigureProfile(volumeProfile, settings);
 
         Volume volume = volumeObject.AddComponent<Volume>();
-        volume.isGlobal = true;
+        SphereCollider volumeCollider = volumeObject.AddComponent<SphereCollider>();
+        volumeCollider.isTrigger = true;
+        volumeCollider.radius = VOLUME_RADIUS;
+
+        volume.isGlobal = false;
+        volume.blendDistance = 0f;
         volume.priority = VOLUME_PRIORITY;
         volume.weight = 1f;
         volume.sharedProfile = volumeProfile;

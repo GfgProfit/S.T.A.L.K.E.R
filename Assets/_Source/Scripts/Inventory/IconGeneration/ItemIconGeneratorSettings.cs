@@ -19,7 +19,7 @@ public class ItemIconGeneratorSettings : ScriptableObject
     [Header("Render Isolation")]
     [SerializeField] [Range(0, 31)] private int _renderLayer = 31;
     [SerializeField] [Range(0, 15)] private int _renderingLayer = 7;
-    [SerializeField] private Vector3 _renderOrigin = Vector3.zero;
+    [SerializeField] private Vector3 _renderOrigin = new(8192f, 0f, 8192f);
     [SerializeField] private bool _excludeIconLayerFromSceneLights = true;
     [SerializeField] private LightProbeUsage _rendererLightProbeUsage = LightProbeUsage.Off;
     [SerializeField] private ReflectionProbeUsage _rendererReflectionProbeUsage = ReflectionProbeUsage.BlendProbesAndSkybox;
