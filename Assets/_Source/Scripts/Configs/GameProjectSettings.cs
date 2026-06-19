@@ -18,6 +18,9 @@ public class GameProjectSettings : ScriptableObject
     [SerializeField] private Color _cellGridBorderColor = new Color(0.745283f, 0.745283f, 0.745283f, 0.11764706f);
     [SerializeField] private float _cellGridBorderLineThickness = 2f;
 
+    [Header("Inventory Compatibility Visual Settings")]
+    [SerializeField] private Color _compatibleItemHighlightColor = new Color(0f, 1f, 0.35f, 0.55f);
+
     [Header("Item Durability Visual Settings")]
     [SerializeField] private Color _highDurabilityColor = new Color(0.3f, 1f, 0.3f, 1f);
     [SerializeField] private Color _mediumDurabilityColor = new Color(1f, 0.75f, 0.2f, 1f);
@@ -55,6 +58,7 @@ public class GameProjectSettings : ScriptableObject
     public bool ShowCellGridBorder => _showCellGridBorder;
     public Color IconOutlineColor => _iconOutlineColor;
     public Color IconShadowColor => _iconShadowColor;
+    public Color CompatibleItemHighlightColor => _compatibleItemHighlightColor;
     public Color StatCurrentValueColor => _statCurrentValueColor;
     public Color StatFullDurabilityValueColor => _statFullDurabilityValueColor;
     public Color VeryLowAmmoClassificationColor => _veryLowAmmoClassificationColor;

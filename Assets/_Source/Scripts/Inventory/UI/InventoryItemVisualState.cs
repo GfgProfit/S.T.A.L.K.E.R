@@ -10,6 +10,8 @@ internal sealed class InventoryItemVisualState
 
     public bool OverlayTextsVisible { get; private set; } = true;
     public bool CellVisualsVisible { get; private set; } = true;
+    public bool IsCompatibilityHighlighted { get; private set; }
+    public Color CompatibilityHighlightColor { get; private set; } = Color.clear;
     public IReadOnlyList<ItemIconPart> RuntimeIconParts { get; private set; }
     public bool HasVisualSizeOverride => _hasVisualSizeOverride;
 
@@ -33,6 +35,19 @@ internal sealed class InventoryItemVisualState
 
     public void SetCellVisualsVisible(bool visible) => CellVisualsVisible = visible;
     public void SetOverlayTextsVisible(bool visible) => OverlayTextsVisible = visible;
+
+    public bool SetCompatibilityHighlight(bool highlighted, Color color)
+    {
+        if (IsCompatibilityHighlighted == highlighted && (highlighted == false || CompatibilityHighlightColor == color))
+        {
+            return false;
+        }
+
+        IsCompatibilityHighlighted = highlighted;
+        CompatibilityHighlightColor = color;
+        return true;
+    }
+
     public Sprite GetIcon(ItemData itemData) => _iconOverride != null ? _iconOverride : itemData == null ? null : itemData.GetIcon(RuntimeIconParts);
     public int GetVisualWidth(int baseWidth) => _hasVisualSizeOverride ? _visualWidthOverride : baseWidth;
     public int GetVisualHeight(int baseHeight) => _hasVisualSizeOverride ? _visualHeightOverride : baseHeight;

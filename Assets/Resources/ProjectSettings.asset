@@ -18,6 +18,7 @@ MonoBehaviour:
   _cellGridLineThickness: 1
   _cellGridBorderColor: {r: 0.34509805, g: 0.3647059, b: 0.3764706, a: 1}
   _cellGridBorderLineThickness: 2
+  _compatibleItemHighlightColor: {r: 0, g: 1, b: 0.35, a: 0.14901961}
   _highDurabilityColor: {r: 0, g: 1, b: 0.5568628, a: 1}
   _mediumDurabilityColor: {r: 1, g: 0.7019608, b: 0, a: 1}
   _lowDurabilityColor: {r: 1, g: 0, b: 0.25882354, a: 1}

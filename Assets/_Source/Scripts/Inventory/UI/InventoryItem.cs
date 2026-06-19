@@ -113,6 +113,7 @@ public class InventoryItem : MonoBehaviour, IView<InventoryItemViewModel>
         if (previousItemData != itemData)
         {
             _weaponMagazineState.Clear();
+            _visualState.SetCompatibilityHighlight(false, Color.clear);
         }
 
         SyncSerializedStateFromState();
@@ -217,6 +218,16 @@ public class InventoryItem : MonoBehaviour, IView<InventoryItemViewModel>
         RefreshShortNameText();
     }
 
+    internal void SetCompatibilityHighlight(bool highlighted, Color color)
+    {
+        if (_visualState.SetCompatibilityHighlight(highlighted, color) == false)
+        {
+            return;
+        }
+
+        RefreshCellBackground();
+    }
+
     public void Rotate()
     {
         if (CanRotate == false)
@@ -277,7 +288,7 @@ public class InventoryItem : MonoBehaviour, IView<InventoryItemViewModel>
     private void RefreshCellBackground()
     {
         EnsureViewModel();
-        _viewModel.SetCellBackground(ItemData, _visualState.CellVisualsVisible);
+        _viewModel.SetCellBackground(ItemData, _visualState.CellVisualsVisible, _visualState.IsCompatibilityHighlighted, _visualState.CompatibilityHighlightColor);
     }
 
     private void RefreshCountText()

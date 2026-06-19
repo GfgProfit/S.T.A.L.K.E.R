@@ -34,9 +34,11 @@ public sealed class InventoryItemViewModel : ViewModelBase
         _icon.Value = icon;
     }
 
-    public void SetCellBackground(ItemData itemData, bool cellVisualsVisible)
+    public void SetCellBackground(ItemData itemData, bool cellVisualsVisible, bool compatibilityHighlighted, Color compatibilityHighlightColor)
     {
-        Color backgroundColor = itemData == null ? Color.clear : itemData.IconBackgroundColor;
+        Color backgroundColor = itemData == null
+            ? Color.clear
+            : compatibilityHighlighted ? compatibilityHighlightColor : itemData.IconBackgroundColor;
         _cellBackgroundColor.Value = backgroundColor;
         _cellBackgroundVisible.Value = cellVisualsVisible && itemData != null && backgroundColor.a > 0f;
     }

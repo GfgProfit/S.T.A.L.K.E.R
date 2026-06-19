@@ -6,12 +6,14 @@ internal sealed class InventoryHoverInfoController
     private readonly InventoryHighlight _inventoryHighlight;
     private readonly ItemInfoPanel _itemInfoPanel;
     private readonly Func<bool> _isContextMenuOpen;
+    private readonly InventoryItemCompatibilityService _compatibilityService;
 
-    public InventoryHoverInfoController(InventoryHighlight inventoryHighlight, ItemInfoPanel itemInfoPanel, Func<bool> isContextMenuOpen)
+    public InventoryHoverInfoController(InventoryHighlight inventoryHighlight, ItemInfoPanel itemInfoPanel, Func<bool> isContextMenuOpen, InventoryItemCompatibilityService compatibilityService)
     {
         _inventoryHighlight = inventoryHighlight;
         _itemInfoPanel = itemInfoPanel;
         _isContextMenuOpen = isContextMenuOpen;
+        _compatibilityService = compatibilityService;
     }
 
     public InventoryItem HighlightedItem { get; private set; }
@@ -29,6 +31,7 @@ internal sealed class InventoryHoverInfoController
         if (selectedItem == null)
         {
             HighlightedItem = selectedItemGrid.GetItem(positionOnGrid.x, positionOnGrid.y);
+            _compatibilityService.ShowCompatibleItems(HighlightedItem == null ? null : HighlightedItem.ItemData);
 
             if (HighlightedItem != null)
             {
@@ -45,6 +48,7 @@ internal sealed class InventoryHoverInfoController
             return;
         }
 
+        _compatibilityService.Clear();
         HideItemInfoPanel();
 
         bool canMergeStack = tryGetStackMergeTarget(selectedItemGrid, positionOnGrid, out InventoryItem stackMergeTarget);
@@ -74,6 +78,7 @@ internal sealed class InventoryHoverInfoController
     {
         _inventoryHighlight.Show(false);
         HighlightedItem = null;
+        _compatibilityService.Clear();
     }
 
     public void HideItemInfoPanel()

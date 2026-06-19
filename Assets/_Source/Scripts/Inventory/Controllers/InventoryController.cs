@@ -73,6 +73,7 @@ public class InventoryController : MonoBehaviour
     private InventoryItemDropProcessor _dropProcessor;
     private InventoryWeightStateController _weightStateController;
     private InventoryHoverInfoController _hoverInfoController;
+    private InventoryItemCompatibilityService _itemCompatibilityService;
     private InventoryDragPlacementService _dragPlacementService;
     private InventoryDragController _dragController;
     private InventoryOpenStateController _openStateController;
@@ -273,7 +274,8 @@ public class InventoryController : MonoBehaviour
     private InventoryContextMenuController CreateContextMenuController() => new(_itemContextMenu, PlayerInput, () => _selectedItemGrid, () => _dragState.SelectedItem, DragController.GetTileGridPosition, HideItemInfoPanel, TryUseContextMenuItem, TryUnloadContextMenuWeapon, CanEquipPrimaryContextMenuWeapon, TryEquipPrimaryContextMenuWeapon, CanEquipSecondaryContextMenuWeapon, TryEquipSecondaryContextMenuWeapon, CanEquipContextMenuItem, TryEquipContextMenuItem, CanUnequipContextMenuItem, TryUnequipContextMenuItem, TryDropItem);
     private InventoryItemDropProcessor CreateDropProcessor() => new(TrySpawnDroppedWorldItem, TryDetachItemFromGrid, DestroyInventoryItem, RefreshWeightState);
     private InventoryWeightStateController CreateWeightStateController() => new(_itemRegistry, _equipmentSlotGrids, EquipmentSlotService, SetWeightViewModelState, RenderCharacterStatsInfo, _playerController, _playerStats, _hidePlayerStatsInfoWhenEmpty, _maxCarryWeight, _movementBlockExtraWeight);
-    private InventoryHoverInfoController CreateHoverInfoController() => new(_inventoryHighlight, _itemInfoPanel, IsContextMenuOpen);
+    private InventoryHoverInfoController CreateHoverInfoController() => new(_inventoryHighlight, _itemInfoPanel, IsContextMenuOpen, _itemCompatibilityService);
+    private InventoryItemCompatibilityService CreateItemCompatibilityService() => new(_itemRegistry, new IInventoryItemCompatibilityProvider[] { new WeaponAmmoInventoryCompatibilityProvider() }, _settings.CompatibleItemHighlightColor);
     private InventoryDragPlacementService CreateDragPlacementService() => new(_dragState, ItemFactory, _itemRegistry, CanDetachItemWithSlotRestrictions, TryPrepareSlotRestrictionsForPlacement, RefreshWeightState);
     private InventoryDragController CreateDragController() => new(_dragState, DragPlacementService, PlayerInput, _canvasTransform, () => _selectedItemGrid, CanDetachItemWithSlotRestrictions, HideContextMenu, HideItemInfoPanel, RefreshWeightState);
     private InventoryOpenStateController CreateOpenStateController() => new(_playerController, _unlockCursorWhileOpen, _disablePlayerControlsWhileOpen, TryStashSelectedItem, ApplyWeightMovementState, HandleInventoryClosed);
@@ -298,6 +300,7 @@ public class InventoryController : MonoBehaviour
         _contextMenuController = CreateContextMenuController();
         _dropProcessor = CreateDropProcessor();
         _weightStateController = CreateWeightStateController();
+        _itemCompatibilityService = CreateItemCompatibilityService();
         _hoverInfoController = CreateHoverInfoController();
         _dragPlacementService = CreateDragPlacementService();
         _dragController = CreateDragController();
