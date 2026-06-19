@@ -18,15 +18,16 @@ internal sealed class InventoryIconPrewarmController
         _logProgress = logProgress;
         _logContext = logContext;
         _equipmentSlotGrids = equipmentSlotGrids;
-        IconsReady = prewarmOnStart == false;
+        IconsReady = prewarmOnStart == false || ItemIconCache.IsPrewarmed;
     }
 
     public bool IconsReady { get; private set; }
 
     public async UniTask PrewarmAsync(CancellationToken cancellationToken)
     {
-        if (_prewarmOnStart == false)
+        if (_prewarmOnStart == false || ItemIconCache.IsPrewarmed)
         {
+            IconsReady = true;
             return;
         }
 

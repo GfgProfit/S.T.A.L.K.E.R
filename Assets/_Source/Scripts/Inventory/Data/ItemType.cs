@@ -23,6 +23,13 @@ public enum WeaponModuleSlot
     Handguard = 4,
     Stock = 5,
     Grip = 6,
-    Tactical = 7,
+    TacticalBlock = 7,
     Underbarrel = 8
+}
+
+public enum WeaponModuleType
+{
+    None = 0,
+    TacticalGripVertical = 1,
+    TacticalGripHorizontal = 2
 }

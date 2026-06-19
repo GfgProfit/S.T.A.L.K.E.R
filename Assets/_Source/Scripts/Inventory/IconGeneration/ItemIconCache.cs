@@ -13,6 +13,8 @@ public static class ItemIconCache
     private static CancellationTokenSource _generationCancellation = new();
     private static bool _standaloneWorkerRunning;
 
+    internal static bool IsPrewarmed { get; private set; }
+
     public static Sprite GetOrCreate(ItemData itemData, IReadOnlyList<ItemData> installedModules = null)
     {
         return itemData == null ? null : GetOrCreate(itemData, itemData.Width, itemData.Height, installedModules);
@@ -104,8 +106,11 @@ public static class ItemIconCache
         int budgetFrame = -1;
         Stopwatch frameTimer = new();
 
+        progressCallback?.Invoke(0, total, null);
+
         if (total == 0)
         {
+            IsPrewarmed = true;
             return;
         }
 
@@ -153,10 +158,13 @@ public static class ItemIconCache
                 frameTimer.Restart();
             }
         }
+
+        IsPrewarmed = true;
     }
 
     public static void Clear()
     {
+        IsPrewarmed = false;
         CancellationToken canceledGenerationToken = _generationCancellation.Token;
         _generationCancellation.Cancel();
         _generationCancellation.Dispose();
@@ -763,21 +771,24 @@ public static class ItemIconCache
     }
 }
 
-internal readonly struct ItemIconSlotProfile : IEquatable<ItemIconSlotProfile>
+[Serializable]
+internal struct ItemIconSlotProfile : IEquatable<ItemIconSlotProfile>
 {
-    private readonly bool _restrictItemType;
-    private readonly ItemType _acceptedItemType;
+    [SerializeField] private bool _restrictItemType;
+    [SerializeField] private ItemType _acceptedItemType;
+    [SerializeField] private int _width;
+    [SerializeField] private int _height;
 
     public ItemIconSlotProfile(bool restrictItemType, ItemType acceptedItemType, int width, int height)
     {
         _restrictItemType = restrictItemType;
         _acceptedItemType = restrictItemType ? acceptedItemType : ItemType.Misc;
-        Width = Mathf.Max(1, width);
-        Height = Mathf.Max(1, height);
+        _width = Mathf.Max(1, width);
+        _height = Mathf.Max(1, height);
     }
 
-    public int Width { get; }
-    public int Height { get; }
+    public int Width => Mathf.Max(1, _width);
+    public int Height => Mathf.Max(1, _height);
 
     public bool Accepts(ItemData itemData) => itemData != null && (_restrictItemType == false || itemData.ItemType == _acceptedItemType);
     public bool Equals(ItemIconSlotProfile other) => _restrictItemType == other._restrictItemType && _acceptedItemType == other._acceptedItemType && Width == other.Width && Height == other.Height;

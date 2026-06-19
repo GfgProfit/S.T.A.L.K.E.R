@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using UnityEngine;
 
 public sealed class FirstPersonWeaponController : MonoBehaviour
@@ -47,6 +48,7 @@ public sealed class FirstPersonWeaponController : MonoBehaviour
     private Vector3 _cameraBoneTargetBasePosition;
     private Quaternion _cameraBoneTargetBaseRotation;
     private bool _hasCameraBoneTargetBasePose;
+    private bool _useTacticalGripAnimations;
 
     public WeaponCondition Condition => _weaponCondition;
     public FirstPersonWeaponAnimationKey CurrentAnimationKey => _currentAnimationKey;
@@ -185,8 +187,8 @@ public sealed class FirstPersonWeaponController : MonoBehaviour
     public void Reload(bool full = false) => Play(full ? FirstPersonWeaponAnimationKey.ReloadFull : FirstPersonWeaponAnimationKey.Reload);
     public void PlayMisfire() => Play(FirstPersonWeaponAnimationKey.Misfire);
     public void PlayRevival(bool lastRound = false) => Play(lastRound ? FirstPersonWeaponAnimationKey.RevivalLast : FirstPersonWeaponAnimationKey.Revival);
-    public float GetAnimationLength(FirstPersonWeaponAnimationKey key) => _clips == null ? 0f : _clips.GetLength(key, _weaponCondition);
-    public float GetAnimationFrameTime(FirstPersonWeaponAnimationKey key, int frame) => _clips == null ? 0f : _clips.GetFrameTime(key, _weaponCondition, frame);
+    public float GetAnimationLength(FirstPersonWeaponAnimationKey key) => _clips == null ? 0f : _clips.GetLength(key, _weaponCondition, _useTacticalGripAnimations);
+    public float GetAnimationFrameTime(FirstPersonWeaponAnimationKey key, int frame) => _clips == null ? 0f : _clips.GetFrameTime(key, _weaponCondition, frame, _useTacticalGripAnimations);
     public float GetNextAnimationLength(FirstPersonWeaponAnimationKey key) => GetNextAnimationStartDelay(key) + GetAnimationLength(key);
     public float GetNextAnimationFrameTime(FirstPersonWeaponAnimationKey key, int frame) => GetNextAnimationStartDelay(key) + GetAnimationFrameTime(key, frame);
     public float GetCurrentAnimationLength(FirstPersonWeaponAnimationKey key) => _lastAnimationStartDelay + GetAnimationLength(key);
@@ -196,6 +198,25 @@ public sealed class FirstPersonWeaponController : MonoBehaviour
         _equippedArmor = armorItemData != null && armorItemData.ItemType == ItemType.Armor ? armorItemData : null;
         EnsureInitialized();
         ApplyEquippedArmorHandsMesh();
+    }
+
+    public void SetInstalledModules(IReadOnlyList<ItemData> installedModules)
+    {
+        bool hasHorizontalGrip = WeaponModuleSupport.HasInstalledModuleType(installedModules, WeaponModuleType.TacticalGripHorizontal);
+        bool useTacticalGripAnimations = hasHorizontalGrip == false &&
+                                           WeaponModuleSupport.HasInstalledModuleType(installedModules, WeaponModuleType.TacticalGripVertical);
+
+        if (_useTacticalGripAnimations == useTacticalGripAnimations)
+        {
+            return;
+        }
+
+        _useTacticalGripAnimations = useTacticalGripAnimations;
+
+        if (_animationPlayer != null)
+        {
+            PlayInternal(_currentAnimationKey, false, GetCrossFadeDuration(_currentAnimationKey));
+        }
     }
 
     public void PlayTransient(FirstPersonWeaponAnimationKey key, FirstPersonWeaponAnimationKey returnKey)
@@ -235,7 +256,7 @@ public sealed class FirstPersonWeaponController : MonoBehaviour
             return false;
         }
 
-        FirstPersonWeaponAnimationClipPair pair = _clips.GetPair(key, _weaponCondition);
+        FirstPersonWeaponAnimationClipPair pair = _clips.GetPair(key, _weaponCondition, _useTacticalGripAnimations);
 
         if (pair.HasAnyClip == false)
         {

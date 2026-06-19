@@ -12,6 +12,7 @@ public class ItemIconGeneratorSettings : ScriptableObject
     private static bool _defaultSettingsLoaded;
 
     [SerializeField] [HideInInspector] private List<ItemData> _prewarmItems = new();
+    [SerializeField] private List<ItemIconSlotProfile> _prewarmSlotProfiles = new();
 
     [Header("Prewarm")]
     [SerializeField] [Min(0.5f)] private float _prewarmFrameBudgetMilliseconds = 6f;
@@ -91,6 +92,7 @@ public class ItemIconGeneratorSettings : ScriptableObject
 
     public int RenderLayer => Mathf.Clamp(_renderLayer, 0, 31);
     public IReadOnlyList<ItemData> PrewarmItems => _prewarmItems;
+    internal IReadOnlyList<ItemIconSlotProfile> PrewarmSlotProfiles => _prewarmSlotProfiles;
     public float PrewarmFrameBudgetMilliseconds => Mathf.Max(0.5f, _prewarmFrameBudgetMilliseconds);
     public int RenderLayerMask => 1 << RenderLayer;
     public int RenderingLayer => Mathf.Clamp(_renderingLayer, 0, 15);

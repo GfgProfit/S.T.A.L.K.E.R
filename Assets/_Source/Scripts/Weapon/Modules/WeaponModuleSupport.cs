@@ -77,6 +77,26 @@ internal static class WeaponModuleSupport
         ApplyToVisual(definitions, installedModules);
     }
 
+    public static bool HasInstalledModuleType(IReadOnlyList<ItemData> installedModules, WeaponModuleType moduleType)
+    {
+        if (installedModules == null || moduleType == WeaponModuleType.None)
+        {
+            return false;
+        }
+
+        for (int i = 0; i < installedModules.Count; i++)
+        {
+            ItemData installedModule = installedModules[i];
+
+            if (installedModule != null && installedModule.ModuleType == moduleType)
+            {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
     internal static void ApplyToVisual(IReadOnlyList<FirstPersonWeaponModule> definitions, IReadOnlyList<ItemData> installedModules)
     {
         if (definitions == null)

@@ -41,6 +41,7 @@ public class ItemData : ScriptableObject
     [SerializeField] [BoxGroup("First Person")] [ShowIf(nameof(UsesFirstPersonWeapon))] private Vector3 _firstPersonWeaponSpawnScale = Vector3.one;
     [SerializeField] [BoxGroup("Weapon")] [ShowIf(nameof(UsesWeaponData))] private WeaponData _weaponData;
     [SerializeField] [BoxGroup("Module")] [ShowIf(nameof(IsModule))] private WeaponModuleSlot _moduleSlot;
+    [SerializeField] [BoxGroup("Module")] [ShowIf(nameof(IsModule))] private WeaponModuleType _moduleType;
     [SerializeField] [BoxGroup("Module")] [ShowIf(nameof(IsModule))] private Vector2Int _moduleInventorySizeDelta;
     [SerializeField] [BoxGroup("Stats")] [ShowIf(nameof(CanHaveStats))] private List<CharacterStatModifier> _statModifiers = new();
     [SerializeField] [BoxGroup("World")] private WorldItem _worldItemPrefab;
@@ -114,6 +115,7 @@ public class ItemData : ScriptableObject
     public Vector3 FirstPersonWeaponSpawnScale => _firstPersonWeaponSpawnScale == Vector3.zero ? Vector3.one : _firstPersonWeaponSpawnScale;
     public WeaponData WeaponData => _weaponData;
     public WeaponModuleSlot ModuleSlot => _itemType == ItemType.Module ? _moduleSlot : WeaponModuleSlot.None;
+    public WeaponModuleType ModuleType => _itemType == ItemType.Module ? _moduleType : WeaponModuleType.None;
     public Vector2Int ModuleInventorySizeDelta => new(Mathf.Max(0, _moduleInventorySizeDelta.x), Mathf.Max(0, _moduleInventorySizeDelta.y));
     public IReadOnlyList<CharacterStatModifier> StatModifiers => _statModifiers;
     public bool HasStatModifiers => CharacterStatUtility.HasAnyModifier(_statModifiers);

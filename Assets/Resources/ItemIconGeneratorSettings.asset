@@ -115,11 +115,43 @@ MonoBehaviour:
   - {fileID: 11400000, guid: a9dacb96ee208d244844f3d46a199e5a, type: 2}
   - {fileID: 11400000, guid: 7dbf85449c258aa4d8a026d595c8ad02, type: 2}
   - {fileID: 11400000, guid: 993cf0ead34cedb45938608322ed9e57, type: 2}
+  - {fileID: 11400000, guid: c67ed2716aa977b4c906caddde9e4795, type: 2}
   - {fileID: 11400000, guid: 4d17b9c7aed1a444aad32e518f903938, type: 2}
   - {fileID: 11400000, guid: b8209b5a48f1612498cf837c7c557c80, type: 2}
+  - {fileID: 11400000, guid: b7fbcee20c377bf46b5d1a9473ca37ca, type: 2}
+  - {fileID: 11400000, guid: 08884db88e7d52545b1c070bc9966dc0, type: 2}
   - {fileID: 11400000, guid: e1023743dec9c3d47b0530790b4f55f5, type: 2}
   - {fileID: 11400000, guid: b39aaa6505a42684783cf794a9a86532, type: 2}
   - {fileID: 11400000, guid: 3a0177090c63f0040a540fea0ce3767f, type: 2}
+  _prewarmSlotProfiles:
+  - _restrictItemType: 1
+    _acceptedItemType: 7
+    _width: 1
+    _height: 1
+  - _restrictItemType: 1
+    _acceptedItemType: 1
+    _width: 2
+    _height: 5
+  - _restrictItemType: 1
+    _acceptedItemType: 9
+    _width: 2
+    _height: 2
+  - _restrictItemType: 1
+    _acceptedItemType: 8
+    _width: 2
+    _height: 2
+  - _restrictItemType: 1
+    _acceptedItemType: 4
+    _width: 2
+    _height: 2
+  - _restrictItemType: 1
+    _acceptedItemType: 5
+    _width: 2
+    _height: 1
+  - _restrictItemType: 1
+    _acceptedItemType: 3
+    _width: 2
+    _height: 3
   _prewarmFrameBudgetMilliseconds: 6
   _renderLayer: 31
   _renderingLayer: 7

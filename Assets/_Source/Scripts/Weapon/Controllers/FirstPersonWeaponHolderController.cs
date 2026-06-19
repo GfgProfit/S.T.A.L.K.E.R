@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.Threading;
 using Cysharp.Threading.Tasks;
 using UnityEngine;
@@ -291,7 +292,10 @@ public sealed class FirstPersonWeaponHolderController : MonoBehaviour
 
     private void ApplyInstalledModulesToSpawnedWeapon()
     {
-        WeaponModuleSupport.ApplyToVisual(_spawnedWeapon, _currentWeaponItem == null ? null : _currentWeaponItem.InstalledModules);
+        IReadOnlyList<ItemData> installedModules = _currentWeaponItem == null ? null : _currentWeaponItem.InstalledModules;
+        FirstPersonWeaponController weaponController = _spawnedWeapon == null ? null : _spawnedWeapon.GetComponent<FirstPersonWeaponController>();
+        weaponController?.SetInstalledModules(installedModules);
+        WeaponModuleSupport.ApplyToVisual(_spawnedWeapon, installedModules);
     }
 
     private bool IsCurrentWeaponBusy
