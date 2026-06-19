@@ -53,7 +53,6 @@ MonoBehaviour:
   _itemIcon: {fileID: 0}
   _generateIconAtRuntime: 1
   _iconPrefab: {fileID: 7816289071637658287, guid: 2abf3e3ca18b2464fba9032dbca39395, type: 3}
-  _iconParts: []
   _iconPixelsPerCell: 64
   _iconRenderScale: 2
   _iconPadding: 1.15

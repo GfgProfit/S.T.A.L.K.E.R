@@ -1,14 +1,15 @@
 using System;
+using System.Collections.Generic;
 using UnityEngine;
 
 internal sealed class InventoryItemDropProcessor
 {
-    private readonly Func<ItemData, int, float, bool> _spawnWorldItem;
+    private readonly Func<ItemData, int, float, IReadOnlyList<ItemData>, bool> _spawnWorldItem;
     private readonly Func<InventoryGrid, InventoryItem, bool> _detachItemFromGrid;
     private readonly Action<InventoryItem> _destroyInventoryItem;
     private readonly Action _refreshWeightState;
 
-    public InventoryItemDropProcessor(Func<ItemData, int, float, bool> spawnWorldItem, Func<InventoryGrid, InventoryItem, bool> detachItemFromGrid, Action<InventoryItem> destroyInventoryItem, Action refreshWeightState)
+    public InventoryItemDropProcessor(Func<ItemData, int, float, IReadOnlyList<ItemData>, bool> spawnWorldItem, Func<InventoryGrid, InventoryItem, bool> detachItemFromGrid, Action<InventoryItem> destroyInventoryItem, Action refreshWeightState)
     {
         _spawnWorldItem = spawnWorldItem;
         _detachItemFromGrid = detachItemFromGrid;
@@ -30,7 +31,7 @@ internal sealed class InventoryItemDropProcessor
 
         if (removeWholeItem == false)
         {
-            if (_spawnWorldItem(itemData, amountToDrop, durabilityPercent) == false)
+            if (_spawnWorldItem(itemData, amountToDrop, durabilityPercent, null) == false)
             {
                 return false;
             }
@@ -47,7 +48,7 @@ internal sealed class InventoryItemDropProcessor
             return false;
         }
 
-        if (_spawnWorldItem(itemData, amountToDrop, durabilityPercent) == false)
+        if (_spawnWorldItem(itemData, amountToDrop, durabilityPercent, item.InstalledModules) == false)
         {
             grid.PlaceItem(item, restorePosition.x, restorePosition.y);
             return false;

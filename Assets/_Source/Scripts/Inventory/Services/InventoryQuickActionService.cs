@@ -8,12 +8,12 @@ internal sealed class InventoryQuickActionService
     private readonly IReadOnlyList<InventoryGrid> _quickActionGridReferences;
     private readonly InventoryGrid _defaultItemGrid;
     private readonly Func<InventoryGrid, InventoryItem, InventoryGrid, bool, bool> _tryMoveItemToGrid;
-    private readonly Func<ItemData, int, IReadOnlyList<ItemIconPart>, InventoryItem> _createItem;
+    private readonly Func<ItemData, int, InventoryItem> _createItem;
     private readonly Action<InventoryItem> _registerInventoryItem;
     private readonly Action _refreshWeightState;
     private readonly List<InventoryGrid> _quickActionGrids = new();
 
-    public InventoryQuickActionService(IReadOnlyList<InventoryGrid> quickActionGridReferences, InventoryGrid defaultItemGrid, Func<InventoryGrid, InventoryItem, InventoryGrid, bool, bool> tryMoveItemToGrid, Func<ItemData, int, IReadOnlyList<ItemIconPart>, InventoryItem> createItem, Action<InventoryItem> registerInventoryItem, Action refreshWeightState)
+    public InventoryQuickActionService(IReadOnlyList<InventoryGrid> quickActionGridReferences, InventoryGrid defaultItemGrid, Func<InventoryGrid, InventoryItem, InventoryGrid, bool, bool> tryMoveItemToGrid, Func<ItemData, int, InventoryItem> createItem, Action<InventoryItem> registerInventoryItem, Action refreshWeightState)
     {
         _quickActionGridReferences = quickActionGridReferences;
         _defaultItemGrid = defaultItemGrid;
@@ -79,7 +79,7 @@ internal sealed class InventoryQuickActionService
             return false;
         }
 
-        InventoryItem singleItem = _createItem(item.ItemData, 1, item.RuntimeIconParts);
+        InventoryItem singleItem = _createItem(item.ItemData, 1);
 
         if (targetGrid.CanPlaceItem(singleItem, targetPosition.Value.x, targetPosition.Value.y) == false)
         {

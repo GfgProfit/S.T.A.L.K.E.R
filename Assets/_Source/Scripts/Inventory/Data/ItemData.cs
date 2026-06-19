@@ -38,6 +38,7 @@ public class ItemData : ScriptableObject
     [SerializeField] [BoxGroup("First Person")] [ShowIf(nameof(UsesFirstPersonWeapon))] private GameObject _firstPersonWeaponPrefab;
     [SerializeField] [BoxGroup("First Person")] [ShowIf(nameof(UsesFirstPersonWeapon))] private Vector3 _firstPersonWeaponSpawnScale = Vector3.one;
     [SerializeField] [BoxGroup("Weapon")] [ShowIf(nameof(UsesWeaponData))] private WeaponData _weaponData;
+    [SerializeField] [BoxGroup("Module")] [ShowIf(nameof(IsModule))] private Vector2Int _moduleInventorySizeDelta;
     [SerializeField] [BoxGroup("Stats")] [ShowIf(nameof(CanHaveStats))] private List<CharacterStatModifier> _statModifiers = new();
     [SerializeField] [BoxGroup("World")] private WorldItem _worldItemPrefab;
     [SerializeField] [BoxGroup("Grid Size")] [Min(1)] private int _width = 1;
@@ -45,7 +46,6 @@ public class ItemData : ScriptableObject
     [SerializeField] [BoxGroup("Icon/Base")] private Sprite _itemIcon;
     [SerializeField] [BoxGroup("Icon/Runtime")] private bool _generateIconAtRuntime = true;
     [SerializeField] [BoxGroup("Icon/Runtime")] [EnableIf(nameof(GeneratesIconAtRuntime))] private GameObject _iconPrefab;
-    [SerializeField] [BoxGroup("Icon/Runtime")] [EnableIf(nameof(GeneratesIconAtRuntime))] private List<ItemIconPart> _iconParts = new List<ItemIconPart>();
     [SerializeField] [BoxGroup("Icon/Texture")] [Min(16)] private int _iconPixelsPerCell = 64;
     [SerializeField] [BoxGroup("Icon/Texture")] [Range(1, 4)] private int _iconRenderScale = 2;
     [SerializeField] [BoxGroup("Icon/Texture")] [Range(1f, 2f)] private float _iconPadding = 1.15f;
@@ -80,7 +80,7 @@ public class ItemData : ScriptableObject
     public ItemRarity Rarity => _rarity;
     public Color ShortNameColor => Settings.GetShortNameColor(_rarity);
     public float Weight => Mathf.Max(0f, _weight);
-    public bool IsStackable => _stackable && HasDurability == false;
+    public bool IsStackable => _stackable && HasDurability == false && _itemType != ItemType.Module;
     public bool HasDurability => _useDurability;
     public float DefaultDurabilityPercent => NormalizeDurability(_defaultDurabilityPercent);
     public bool CanEquipHelmet => _canEquipHelmet;
@@ -109,6 +109,7 @@ public class ItemData : ScriptableObject
     public GameObject FirstPersonWeaponPrefab => _firstPersonWeaponPrefab;
     public Vector3 FirstPersonWeaponSpawnScale => _firstPersonWeaponSpawnScale == Vector3.zero ? Vector3.one : _firstPersonWeaponSpawnScale;
     public WeaponData WeaponData => _weaponData;
+    public Vector2Int ModuleInventorySizeDelta => new(Mathf.Max(0, _moduleInventorySizeDelta.x), Mathf.Max(0, _moduleInventorySizeDelta.y));
     public IReadOnlyList<CharacterStatModifier> StatModifiers => _statModifiers;
     public bool HasStatModifiers => CharacterStatUtility.HasAnyModifier(_statModifiers);
     public WorldItem WorldItemPrefab => _worldItemPrefab;
@@ -117,7 +118,6 @@ public class ItemData : ScriptableObject
 
     public Sprite FallbackIcon => _itemIcon;
     public GameObject IconPrefab => _iconPrefab;
-    public IReadOnlyList<ItemIconPart> IconParts => _iconParts;
     public int IconPixelsPerCell => Mathf.Max(16, _iconPixelsPerCell);
     public int IconRenderScale => Mathf.Clamp(_iconRenderScale, 1, 4);
     public int IconAntiAliasing => GetSupportedAntiAliasing(_iconAntiAliasing);
@@ -213,6 +213,7 @@ public class ItemData : ScriptableObject
     private bool UsesDurability() => _useDurability;
     private bool IsArmor() => _itemType == ItemType.Armor;
     private bool IsAmmo() => _itemType == ItemType.Ammo;
+    private bool IsModule() => _itemType == ItemType.Module;
     private bool UsesFirstPersonWeapon() => _itemType == ItemType.Weapon || _itemType == ItemType.Pistol || _itemType == ItemType.Knife;
     private bool UsesWeaponData() => _itemType == ItemType.Weapon || _itemType == ItemType.Pistol;
     private bool CanHaveStats() => _itemType == ItemType.Armor || _itemType == ItemType.Helmet || _itemType == ItemType.Artifact;
@@ -245,33 +246,40 @@ public class ItemData : ScriptableObject
         _ammoTracerIgnitionDistanceMeters = Mathf.Max(0f, _ammoTracerIgnitionDistanceMeters);
         _ammoTracerBurnDurationSeconds = Mathf.Max(0f, _ammoTracerBurnDurationSeconds);
         _ammoTracerEmissionIntensity = Mathf.Max(0f, _ammoTracerEmissionIntensity);
+        _moduleInventorySizeDelta = new Vector2Int(Mathf.Max(0, _moduleInventorySizeDelta.x), Mathf.Max(0, _moduleInventorySizeDelta.y));
     }
 
-    public Sprite GetIcon(IReadOnlyList<ItemIconPart> runtimeIconParts = null)
+    public Sprite GetIcon(IReadOnlyList<ItemData> installedModules = null)
     {
-        if (HasRuntimeIconSource(runtimeIconParts))
+        return GetIcon(Width, Height, installedModules);
+    }
+
+    public Sprite GetIcon(int width, int height, IReadOnlyList<ItemData> installedModules = null)
+    {
+        if (HasRuntimeIconSource())
         {
-            return ItemIconCache.GetOrCreate(this, runtimeIconParts);
+            return ItemIconCache.GetOrCreate(this, width, height, installedModules);
         }
 
         return _itemIcon;
     }
 
-    public Sprite GetSlotIcon(int slotWidth, int slotHeight, IReadOnlyList<ItemIconPart> runtimeIconParts = null)
+    public Sprite GetSlotIcon(int slotWidth, int slotHeight, IReadOnlyList<ItemData> installedModules = null)
     {
         EnsureSlotIconSettingsInitialized();
 
-        if (HasRuntimeIconSource(runtimeIconParts))
+        if (HasRuntimeIconSource())
         {
-            return ItemIconCache.GetOrCreateSlotIcon(this, slotWidth, slotHeight, runtimeIconParts);
+            return ItemIconCache.GetOrCreateSlotIcon(this, slotWidth, slotHeight, installedModules);
         }
 
         return _itemIcon;
     }
 
-    internal bool HasRuntimeIconSource(IReadOnlyList<ItemIconPart> runtimeIconParts = null) => ItemIconHashBuilder.HasRuntimeIconSource(_generateIconAtRuntime, _iconPrefab, _iconParts, runtimeIconParts);
-    internal int BuildIconHash(IReadOnlyList<ItemIconPart> runtimeIconParts = null) => ItemIconHashBuilder.BuildHash(this, runtimeIconParts, Width, Height, false);
-    internal int BuildSlotIconHash(int slotWidth, int slotHeight, IReadOnlyList<ItemIconPart> runtimeIconParts = null) => ItemIconHashBuilder.BuildHash(this, runtimeIconParts, Mathf.Max(1, slotWidth), Mathf.Max(1, slotHeight), true);
+    internal bool HasRuntimeIconSource() => ItemIconHashBuilder.HasRuntimeIconSource(_generateIconAtRuntime, _iconPrefab);
+    internal int BuildIconHash(IReadOnlyList<ItemData> installedModules = null) => BuildIconHash(Width, Height, installedModules);
+    internal int BuildIconHash(int width, int height, IReadOnlyList<ItemData> installedModules = null) => ItemIconHashBuilder.BuildHash(this, installedModules, Mathf.Max(1, width), Mathf.Max(1, height), false);
+    internal int BuildSlotIconHash(int slotWidth, int slotHeight, IReadOnlyList<ItemData> installedModules = null) => ItemIconHashBuilder.BuildHash(this, installedModules, Mathf.Max(1, slotWidth), Mathf.Max(1, slotHeight), true);
     public void SetWorldPrefab(WorldItem worldItem) => _worldItemPrefab = worldItem;
     public static float NormalizeDurability(float durabilityPercent) => Mathf.Clamp(durabilityPercent, 0f, 100f);
 

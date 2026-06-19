@@ -74,6 +74,7 @@ public class InventoryController : MonoBehaviour
     private InventoryWeightStateController _weightStateController;
     private InventoryHoverInfoController _hoverInfoController;
     private InventoryItemCompatibilityService _itemCompatibilityService;
+    private InventoryWeaponModuleService _weaponModuleService;
     private InventoryDragPlacementService _dragPlacementService;
     private InventoryDragController _dragController;
     private InventoryOpenStateController _openStateController;
@@ -271,12 +272,13 @@ public class InventoryController : MonoBehaviour
     private InventoryEquipmentSlotService CreateEquipmentSlotService() => new(_equipmentSlotGrids, _slottedItemGrids, _defaultItemGrid, InsertItem, TryDetachItemFromGrid, RegisterInventoryItem, RefreshWeightState, () => _closedSlotPrefab);
     private InventoryEquipmentActionService CreateEquipmentActionService() => new(_equipmentSlotGrids, _defaultItemGrid, InsertItem, TryDetachItemFromGrid, TryPrepareSlotRestrictionsForPlacement, RegisterInventoryItem, RefreshWeightState);
     private InventoryQuickActionService CreateQuickActionService() => new(_quickActionGridReferences, _defaultItemGrid, TryMoveItemToGrid, CreateItem, RegisterInventoryItem, RefreshWeightState);
-    private InventoryContextMenuController CreateContextMenuController() => new(_itemContextMenu, PlayerInput, () => _selectedItemGrid, () => _dragState.SelectedItem, DragController.GetTileGridPosition, HideItemInfoPanel, TryUseContextMenuItem, TryUnloadContextMenuWeapon, CanEquipPrimaryContextMenuWeapon, TryEquipPrimaryContextMenuWeapon, CanEquipSecondaryContextMenuWeapon, TryEquipSecondaryContextMenuWeapon, CanEquipContextMenuItem, TryEquipContextMenuItem, CanUnequipContextMenuItem, TryUnequipContextMenuItem, TryDropItem);
+    private InventoryContextMenuController CreateContextMenuController() => new(_itemContextMenu, PlayerInput, () => _selectedItemGrid, () => _dragState.SelectedItem, DragController.GetTileGridPosition, HideItemInfoPanel, TryUseContextMenuItem, TryUnloadContextMenuWeapon, CanEquipPrimaryContextMenuWeapon, TryEquipPrimaryContextMenuWeapon, CanEquipSecondaryContextMenuWeapon, TryEquipSecondaryContextMenuWeapon, CanEquipContextMenuItem, TryEquipContextMenuItem, CanUnequipContextMenuItem, TryUnequipContextMenuItem, TryDetachWeaponModule, TryDropItem);
     private InventoryItemDropProcessor CreateDropProcessor() => new(TrySpawnDroppedWorldItem, TryDetachItemFromGrid, DestroyInventoryItem, RefreshWeightState);
     private InventoryWeightStateController CreateWeightStateController() => new(_itemRegistry, _equipmentSlotGrids, EquipmentSlotService, SetWeightViewModelState, RenderCharacterStatsInfo, _playerController, _playerStats, _hidePlayerStatsInfoWhenEmpty, _maxCarryWeight, _movementBlockExtraWeight);
     private InventoryHoverInfoController CreateHoverInfoController() => new(_inventoryHighlight, _itemInfoPanel, IsContextMenuOpen, _itemCompatibilityService);
-    private InventoryItemCompatibilityService CreateItemCompatibilityService() => new(_itemRegistry, new IInventoryItemCompatibilityProvider[] { new WeaponAmmoInventoryCompatibilityProvider() }, _settings.CompatibleItemHighlightColor);
-    private InventoryDragPlacementService CreateDragPlacementService() => new(_dragState, ItemFactory, _itemRegistry, CanDetachItemWithSlotRestrictions, TryPrepareSlotRestrictionsForPlacement, RefreshWeightState);
+    private InventoryItemCompatibilityService CreateItemCompatibilityService() => new(_itemRegistry, new IInventoryItemCompatibilityProvider[] { new WeaponAmmoInventoryCompatibilityProvider(), new WeaponModuleInventoryCompatibilityProvider() }, _settings.CompatibleItemHighlightColor);
+    private InventoryWeaponModuleService CreateWeaponModuleService() => new(TryReturnItemToInventoryOrDrop);
+    private InventoryDragPlacementService CreateDragPlacementService() => new(_dragState, ItemFactory, _itemRegistry, CanDetachItemWithSlotRestrictions, TryPrepareSlotRestrictionsForPlacement, TryInstallWeaponModule, HandleWeaponModulesChanged, RefreshWeightState);
     private InventoryDragController CreateDragController() => new(_dragState, DragPlacementService, PlayerInput, _canvasTransform, () => _selectedItemGrid, CanDetachItemWithSlotRestrictions, HideContextMenu, HideItemInfoPanel, RefreshWeightState);
     private InventoryOpenStateController CreateOpenStateController() => new(_playerController, _unlockCursorWhileOpen, _disablePlayerControlsWhileOpen, TryStashSelectedItem, ApplyWeightMovementState, HandleInventoryClosed);
     private InventoryItemPlacementService CreateItemPlacementService() => new(ItemFactory, _itemRegistry, TryPrepareSlotRestrictionsForPlacement, TryDetachItemFromGrid, DestroyInventoryItem, RefreshWeightState);
@@ -297,6 +299,7 @@ public class InventoryController : MonoBehaviour
         _equipmentSlotService = CreateEquipmentSlotService();
         _equipmentActionService = CreateEquipmentActionService();
         _quickActionService = CreateQuickActionService();
+        _weaponModuleService = CreateWeaponModuleService();
         _contextMenuController = CreateContextMenuController();
         _dropProcessor = CreateDropProcessor();
         _weightStateController = CreateWeightStateController();
@@ -348,7 +351,8 @@ public class InventoryController : MonoBehaviour
 
     public bool TryInsertItem(ItemData itemData) => TryInsertItem(itemData, 1);
     public bool TryInsertItem(ItemData itemData, int amount) => TryInsertItem(itemData, amount, null);
-    public bool TryInsertItem(ItemData itemData, int amount, float? durabilityPercent) => ItemPlacementService.TryInsertItem(itemData, amount, durabilityPercent, IconPrewarmController.IconsReady, GetInsertionGrid(), _defaultItemGrid);
+    public bool TryInsertItem(ItemData itemData, int amount, float? durabilityPercent) => TryInsertItem(itemData, amount, durabilityPercent, null);
+    public bool TryInsertItem(ItemData itemData, int amount, float? durabilityPercent, IReadOnlyList<ItemData> installedModules) => ItemPlacementService.TryInsertItem(itemData, amount, durabilityPercent, installedModules, IconPrewarmController.IconsReady, GetInsertionGrid(), _defaultItemGrid);
 
     public int GetInventoryItemCount(ItemData itemData)
     {
@@ -444,8 +448,7 @@ public class InventoryController : MonoBehaviour
 
     private void HandleHighlight() => HoverInfoController.HandleHighlight(_selectedItemGrid, _dragState.SelectedItem, DragController.GetTileGridPosition(), DragController.TryGetStackMergeTarget);
 
-    private InventoryItem CreateItem(ItemData itemData, int amount, IReadOnlyList<ItemIconPart> runtimeIconParts) => CreateItem(itemData, amount, runtimeIconParts, null);
-    private InventoryItem CreateItem(ItemData itemData, int amount, IReadOnlyList<ItemIconPart> runtimeIconParts, float? durabilityPercent) => ItemFactory.Create(itemData, amount, runtimeIconParts, durabilityPercent);
+    private InventoryItem CreateItem(ItemData itemData, int amount) => ItemFactory.Create(itemData, amount, null);
 
     private void RegisterInventoryItem(InventoryItem item) => _itemRegistry.Register(item);
 
@@ -461,6 +464,14 @@ public class InventoryController : MonoBehaviour
     {
         RefreshWeightState();
         HoverInfoController.RefreshHighlightedItemInfo(item);
+    }
+
+    private bool TryInstallWeaponModule(InventoryGrid grid, InventoryItem weaponItem, ItemData moduleItemData) => _weaponModuleService != null && _weaponModuleService.TryInstall(grid, weaponItem, moduleItemData);
+
+    private void HandleWeaponModulesChanged(InventoryItem weaponItem)
+    {
+        RefreshWeightState();
+        HoverInfoController.RefreshHighlightedItemInfo(weaponItem);
     }
 
     private void RefreshWeightState()
@@ -773,6 +784,17 @@ public class InventoryController : MonoBehaviour
         return returnedAmmo;
     }
 
+    private bool TryDetachWeaponModule(InventoryGrid grid, InventoryItem weaponItem, ItemData moduleItemData)
+    {
+        if (_weaponModuleService == null || _weaponModuleService.TryDetach(grid, weaponItem, moduleItemData) == false)
+        {
+            return false;
+        }
+
+        HandleWeaponModulesChanged(weaponItem);
+        return true;
+    }
+
     private bool CanEquipPrimaryContextMenuWeapon(InventoryGrid grid, InventoryItem item)
     {
         return IsContextMenuWeaponItem(item) && EquipmentActionService.CanEquipToSlot(grid, item, ItemType.Weapon, 0);
@@ -814,7 +836,8 @@ public class InventoryController : MonoBehaviour
     }
 
     private bool TryDropItem(InventoryGrid grid, InventoryItem item, bool wholeStack) => DropProcessor.TryDropItem(grid, item, wholeStack);
-    private bool TrySpawnDroppedWorldItem(ItemData itemData, int amount, float durabilityPercent) => _dropService.TrySpawnDroppedWorldItem(itemData, amount, durabilityPercent, CreateDropContext());
+    private bool TrySpawnDroppedWorldItem(ItemData itemData, int amount, float durabilityPercent) => TrySpawnDroppedWorldItem(itemData, amount, durabilityPercent, null);
+    private bool TrySpawnDroppedWorldItem(ItemData itemData, int amount, float durabilityPercent, IReadOnlyList<ItemData> installedModules) => _dropService.TrySpawnDroppedWorldItem(itemData, amount, durabilityPercent, installedModules, CreateDropContext());
     private InventoryDropContext CreateDropContext() => new(_dropOrigin, _playerController, transform, _dropCamera, _dropForwardDistance, _dropUpOffset, _dropGroundProbeHeight, _dropGroundProbeDistance, _dropGroundOffset, _dropObstacleClearance, _dropImpulse, _dropGroundLayers, _dropObstacleLayers);
 
     private bool TryDetachItemFromGrid(InventoryGrid grid, InventoryItem item) => DragController.TryDetachItemFromGrid(grid, item);

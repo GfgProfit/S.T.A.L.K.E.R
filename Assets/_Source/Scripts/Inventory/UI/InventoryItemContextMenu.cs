@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.Threading;
 using Cysharp.Threading.Tasks;
 using R3;
@@ -31,11 +32,11 @@ public class InventoryItemContextMenu : MonoBehaviour, IView<InventoryItemContex
     [SerializeField] private TMP_Text _equipButtonText;
     [SerializeField] private Button _unequipButton;
     [SerializeField] private TMP_Text _unequipButtonText;
-    [SerializeField] private string _unloadButtonLabel = "\u0420\u0430\u0437\u0440\u044f\u0434\u0438\u0442\u044c";
-    [SerializeField] private string _equipPrimaryWeaponButtonLabel = "\u042d\u043a\u0438\u043f\u0438\u0440\u043e\u0432\u0430\u0442\u044c \u0432 \u043e\u0441\u043d\u043e\u0432\u043d\u043e\u0439 \u0441\u043b\u043e\u0442";
-    [SerializeField] private string _equipSecondaryWeaponButtonLabel = "\u042d\u043a\u0438\u043f\u0438\u0440\u043e\u0432\u0430\u0442\u044c \u0432\u043e \u0432\u0442\u043e\u0440\u0438\u0447\u043d\u044b\u0439 \u0441\u043b\u043e\u0442";
-    [SerializeField] private string _equipButtonLabel = "\u042d\u043a\u0438\u043f\u0438\u0440\u043e\u0432\u0430\u0442\u044c";
-    [SerializeField] private string _unequipButtonLabel = "\u0421\u043d\u044f\u0442\u044c";
+    [SerializeField] private string _unloadButtonLabel = "Разрядить";
+    [SerializeField] private string _equipPrimaryWeaponButtonLabel = "Экипировать в основной слот";
+    [SerializeField] private string _equipSecondaryWeaponButtonLabel = "Экипировать во вторичный слот";
+    [SerializeField] private string _equipButtonLabel = "Экипировать";
+    [SerializeField] private string _unequipButtonLabel = "Снять";
     [SerializeField] private Button _dropOneButton;
     [SerializeField] private Button _dropStackButton;
     [SerializeField] private TMP_Text _dropStackButtonText;
@@ -62,6 +63,7 @@ public class InventoryItemContextMenu : MonoBehaviour, IView<InventoryItemContex
     private IDisposable _canEquipSubscription;
     private IDisposable _canUnequipSubscription;
     private IDisposable _canDropStackSubscription;
+    private readonly List<Button> _moduleActionButtons = new();
 
     public bool IsOpen => gameObject.activeSelf;
 
@@ -144,7 +146,7 @@ public class InventoryItemContextMenu : MonoBehaviour, IView<InventoryItemContex
         }
     }
 
-    public void Show(bool canUse, bool showUnload, bool canUnload, bool canEquipPrimaryWeapon, bool canEquipSecondaryWeapon, bool canEquip, bool canUnequip, bool canDropStack, Vector2 screenPosition)
+    public void Show(bool canUse, bool showUnload, bool canUnload, bool canEquipPrimaryWeapon, bool canEquipSecondaryWeapon, bool canEquip, bool canUnequip, bool canDropStack, IReadOnlyList<InventoryContextMenuAction> moduleActions, Vector2 screenPosition)
     {
         if (_viewModel == null)
         {
@@ -152,6 +154,7 @@ public class InventoryItemContextMenu : MonoBehaviour, IView<InventoryItemContex
             return;
         }
 
+        RebuildModuleActionButtons(moduleActions);
         _viewModel.Show(canUse, showUnload, canUnload, canEquipPrimaryWeapon, canEquipSecondaryWeapon, canEquip, canUnequip, canDropStack);
         transform.SetAsLastSibling();
 
@@ -161,6 +164,8 @@ public class InventoryItemContextMenu : MonoBehaviour, IView<InventoryItemContex
 
     public void Hide()
     {
+        ClearModuleActionButtons();
+
         if (_viewModel == null)
         {
             SetVisible(false);
@@ -228,6 +233,7 @@ public class InventoryItemContextMenu : MonoBehaviour, IView<InventoryItemContex
 
     private void OnDestroy()
     {
+        ClearModuleActionButtons();
         UnsubscribeButtons();
         Unbind();
         _viewModel?.Dispose();
@@ -379,6 +385,69 @@ public class InventoryItemContextMenu : MonoBehaviour, IView<InventoryItemContex
         }
 
         LayoutRebuilder.ForceRebuildLayoutImmediate(_panelRectTransform);
+    }
+
+    private void RebuildModuleActionButtons(IReadOnlyList<InventoryContextMenuAction> actions)
+    {
+        ClearModuleActionButtons();
+
+        if (actions == null || actions.Count == 0)
+        {
+            return;
+        }
+
+        Button template = _useButton != null ? _useButton : _dropOneButton;
+
+        if (template == null || template.transform.parent == null)
+        {
+            return;
+        }
+
+        int siblingIndex = _dropOneButton == null ? template.transform.parent.childCount : _dropOneButton.transform.GetSiblingIndex();
+
+        for (int i = 0; i < actions.Count; i++)
+        {
+            InventoryContextMenuAction action = actions[i];
+            GameObject buttonObject = Instantiate(template.gameObject, template.transform.parent);
+            buttonObject.name = $"Detach Module Button {i + 1}";
+            buttonObject.transform.SetSiblingIndex(Mathf.Clamp(siblingIndex + i, 0, template.transform.parent.childCount - 1));
+
+            Button button = buttonObject.GetComponent<Button>();
+            TMP_Text buttonText = buttonObject.GetComponentInChildren<TMP_Text>(true);
+
+            if (button != null)
+            {
+                button.onClick.RemoveAllListeners();
+                button.onClick.AddListener(() => action.Execute?.Invoke());
+                button.interactable = action.Interactable;
+                _moduleActionButtons.Add(button);
+            }
+
+            SetButtonText(buttonText, action.Label);
+
+            if (buttonText != null)
+            {
+                buttonText.color = action.Interactable ? _textColor : _disabledTextColor;
+            }
+
+            buttonObject.SetActive(true);
+        }
+    }
+
+    private void ClearModuleActionButtons()
+    {
+        for (int i = 0; i < _moduleActionButtons.Count; i++)
+        {
+            Button button = _moduleActionButtons[i];
+
+            if (button != null)
+            {
+                button.gameObject.SetActive(false);
+                Destroy(button.gameObject);
+            }
+        }
+
+        _moduleActionButtons.Clear();
     }
 
 #if UNITY_EDITOR

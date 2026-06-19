@@ -39,7 +39,7 @@ public sealed class QuickUseHudSlotViewModel : ViewModelBase
             return;
         }
 
-        Sprite icon = item.ItemData.GetSlotIcon(HUD_SLOT_ICON_WIDTH, HUD_SLOT_ICON_HEIGHT, item.RuntimeIconParts);
+        Sprite icon = item.ItemData.GetSlotIcon(HUD_SLOT_ICON_WIDTH, HUD_SLOT_ICON_HEIGHT, item.InstalledModules);
         bool showCount = item.IsStackable && item.CurrentAmount > 1;
 
         _backgroundColor.Value = item.ItemData.IconBackgroundColor;

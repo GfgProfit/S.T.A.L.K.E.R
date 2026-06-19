@@ -72,6 +72,7 @@ public sealed class FirstPersonWeaponHolderController : MonoBehaviour
     {
         if (_currentWeaponItem == weaponItem)
         {
+            ApplyInstalledModulesToSpawnedWeapon();
             return true;
         }
 
@@ -135,6 +136,7 @@ public sealed class FirstPersonWeaponHolderController : MonoBehaviour
         FirstPersonWeaponRuntimeController runtimeController = _spawnedWeapon.GetComponent<FirstPersonWeaponRuntimeController>();
         _spawnedWeaponRuntimeController = runtimeController;
         runtimeController?.Initialize(_currentWeaponItem, _inventoryController, PlayerInput, _ammoHudViewModel);
+        ApplyInstalledModulesToSpawnedWeapon();
         ApplyEquippedArmorToSpawnedWeapon();
     }
 
@@ -284,6 +286,11 @@ public sealed class FirstPersonWeaponHolderController : MonoBehaviour
 
         FirstPersonWeaponController weaponController = _spawnedWeapon.GetComponent<FirstPersonWeaponController>();
         weaponController?.SetEquippedArmor(_equippedArmorItemData);
+    }
+
+    private void ApplyInstalledModulesToSpawnedWeapon()
+    {
+        WeaponModuleSupport.ApplyToVisual(_spawnedWeapon, _currentWeaponItem == null ? null : _currentWeaponItem.InstalledModules);
     }
 
     private bool IsCurrentWeaponBusy

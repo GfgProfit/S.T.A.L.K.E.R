@@ -8,27 +8,33 @@ public static class ItemIconCache
 {
     private static Dictionary<IconCacheKey, IconCacheEntry> _cache = new();
 
-    public static Sprite GetOrCreate(ItemData itemData, IReadOnlyList<ItemIconPart> runtimeIconParts = null)
+    public static Sprite GetOrCreate(ItemData itemData, IReadOnlyList<ItemData> installedModules = null)
+    {
+        return itemData == null ? null : GetOrCreate(itemData, itemData.Width, itemData.Height, installedModules);
+    }
+
+    public static Sprite GetOrCreate(ItemData itemData, int width, int height, IReadOnlyList<ItemData> installedModules = null)
     {
         if (itemData == null)
         {
             return null;
         }
 
-        if (itemData.HasRuntimeIconSource(runtimeIconParts) == false)
+        if (itemData.HasRuntimeIconSource() == false)
         {
             return itemData.FallbackIcon;
         }
 
         ItemIconGeneratorSettings settings = ItemIconGeneratorSettings.LoadDefault();
-        IconCacheKey key = BuildCacheKey(itemData, runtimeIconParts, settings);
+        IconRenderProfile renderProfile = IconRenderProfile.CreateDefault(itemData, width, height);
+        IconCacheKey key = BuildCacheKey(itemData, installedModules, settings, renderProfile);
 
         if (TryGetCachedSprite(key, out Sprite cachedSprite))
         {
             return cachedSprite;
         }
 
-        Sprite generatedSprite = ItemIconRenderer.RenderIcon(itemData, runtimeIconParts, settings, out Texture2D generatedTexture);
+        Sprite generatedSprite = ItemIconRenderer.RenderIcon(itemData, installedModules, settings, renderProfile, out Texture2D generatedTexture);
 
         if (generatedSprite == null)
         {
@@ -41,28 +47,28 @@ public static class ItemIconCache
         return generatedSprite;
     }
 
-    public static Sprite GetOrCreateSlotIcon(ItemData itemData, int slotWidth, int slotHeight, IReadOnlyList<ItemIconPart> runtimeIconParts = null)
+    public static Sprite GetOrCreateSlotIcon(ItemData itemData, int slotWidth, int slotHeight, IReadOnlyList<ItemData> installedModules = null)
     {
         if (itemData == null)
         {
             return null;
         }
 
-        if (itemData.HasRuntimeIconSource(runtimeIconParts) == false)
+        if (itemData.HasRuntimeIconSource() == false)
         {
             return itemData.FallbackIcon;
         }
 
         ItemIconGeneratorSettings settings = ItemIconGeneratorSettings.LoadDefault();
         IconRenderProfile renderProfile = IconRenderProfile.CreateSlot(itemData, slotWidth, slotHeight);
-        IconCacheKey key = BuildCacheKey(itemData, runtimeIconParts, settings, renderProfile);
+        IconCacheKey key = BuildCacheKey(itemData, installedModules, settings, renderProfile);
 
         if (TryGetCachedSprite(key, out Sprite cachedSprite))
         {
             return cachedSprite;
         }
 
-        Sprite generatedSprite = ItemIconRenderer.RenderIcon(itemData, runtimeIconParts, settings, renderProfile, out Texture2D generatedTexture);
+        Sprite generatedSprite = ItemIconRenderer.RenderIcon(itemData, installedModules, settings, renderProfile, out Texture2D generatedTexture);
 
         if (generatedSprite == null)
         {
@@ -122,7 +128,7 @@ public static class ItemIconCache
         _cache.Clear();
     }
 
-    private static IEnumerator GetOrCreateCoroutine(ItemData itemData, IReadOnlyList<ItemIconPart> runtimeIconParts, Action<Sprite> completedCallback)
+    private static IEnumerator GetOrCreateCoroutine(ItemData itemData, IReadOnlyList<ItemData> installedModules, Action<Sprite> completedCallback)
     {
         if (itemData == null)
         {
@@ -130,14 +136,14 @@ public static class ItemIconCache
             yield break;
         }
 
-        if (itemData.HasRuntimeIconSource(runtimeIconParts) == false)
+        if (itemData.HasRuntimeIconSource() == false)
         {
             completedCallback?.Invoke(itemData.FallbackIcon);
             yield break;
         }
 
         ItemIconGeneratorSettings settings = ItemIconGeneratorSettings.LoadDefault();
-        IconCacheKey key = BuildCacheKey(itemData, runtimeIconParts, settings);
+        IconCacheKey key = BuildCacheKey(itemData, installedModules, settings);
 
         if (TryGetCachedSprite(key, out Sprite cachedSprite))
         {
@@ -145,7 +151,7 @@ public static class ItemIconCache
             yield break;
         }
 
-        RawIconRenderResult rawResult = ItemIconRenderer.RenderRawIcon(itemData, runtimeIconParts, settings, IconRenderProfile.CreateDefault(itemData));
+        RawIconRenderResult rawResult = ItemIconRenderer.RenderRawIcon(itemData, installedModules, settings, IconRenderProfile.CreateDefault(itemData));
 
         if (rawResult == null)
         {
@@ -209,11 +215,13 @@ public static class ItemIconCache
     }
 
     public static Texture2D RenderPreviewTexture(ItemData itemData, ItemIconGeneratorSettings settings = null) => ItemIconRenderer.RenderPreviewTexture(itemData, settings);
-    private static IconCacheKey BuildCacheKey(ItemData itemData, IReadOnlyList<ItemIconPart> runtimeIconParts, ItemIconGeneratorSettings settings) => new(itemData.GetInstanceID(), itemData.BuildIconHash(runtimeIconParts), settings.BuildHash());
+    private static IconCacheKey BuildCacheKey(ItemData itemData, IReadOnlyList<ItemData> installedModules, ItemIconGeneratorSettings settings) => new(itemData.GetInstanceID(), itemData.BuildIconHash(installedModules), settings.BuildHash());
 
-    private static IconCacheKey BuildCacheKey(ItemData itemData, IReadOnlyList<ItemIconPart> runtimeIconParts, ItemIconGeneratorSettings settings, IconRenderProfile renderProfile)
+    private static IconCacheKey BuildCacheKey(ItemData itemData, IReadOnlyList<ItemData> installedModules, ItemIconGeneratorSettings settings, IconRenderProfile renderProfile)
     {
-        int iconHash = renderProfile.UseSlotSettings ? itemData.BuildSlotIconHash(renderProfile.CellWidth, renderProfile.CellHeight, runtimeIconParts) : itemData.BuildIconHash(runtimeIconParts);
+        int iconHash = renderProfile.UseSlotSettings
+            ? itemData.BuildSlotIconHash(renderProfile.CellWidth, renderProfile.CellHeight, installedModules)
+            : itemData.BuildIconHash(renderProfile.CellWidth, renderProfile.CellHeight, installedModules);
 
         return new IconCacheKey(itemData.GetInstanceID(), iconHash, settings.BuildHash());
     }

@@ -1,52 +1,19 @@
-using System.Collections.Generic;
 using UnityEngine;
 
 internal static class ItemIconSceneBuilder
 {
-    public static bool InstantiateParts(IReadOnlyList<ItemIconPart> parts, Transform parent)
-    {
-        if (parts == null)
-        {
-            return false;
-        }
-
-        bool hasRenderablePart = false;
-
-        for (int i = 0; i < parts.Count; i++)
-        {
-            ItemIconPart part = parts[i];
-            if (part == null)
-            {
-                continue;
-            }
-
-            hasRenderablePart |= InstantiateSource(part.Prefab, parent, part);
-        }
-
-        return hasRenderablePart;
-    }
-
-    public static bool InstantiateSource(GameObject source, Transform parent, ItemIconPart transformOverride)
+    public static GameObject InstantiateSource(GameObject source, Transform parent)
     {
         if (source == null)
         {
-            return false;
+            return null;
         }
 
         GameObject instance = Object.Instantiate(source, parent);
         instance.hideFlags = HideFlags.HideAndDontSave;
-
-        if (transformOverride == null)
-        {
-            instance.transform.SetLocalPositionAndRotation(Vector3.zero, Quaternion.identity);
-            instance.transform.localScale = Vector3.one;
-        }
-        else
-        {
-            transformOverride.ApplyTo(instance.transform);
-        }
-
-        return true;
+        instance.transform.SetLocalPositionAndRotation(Vector3.zero, Quaternion.identity);
+        instance.transform.localScale = Vector3.one;
+        return instance;
     }
 
     public static bool TryCalculateBounds(GameObject rootObject, out Bounds bounds)

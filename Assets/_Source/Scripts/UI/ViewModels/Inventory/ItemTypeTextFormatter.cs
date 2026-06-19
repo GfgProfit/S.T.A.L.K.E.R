@@ -14,6 +14,7 @@ internal static class ItemTypeTextFormatter
             ItemType.Knife => "Нож",
             ItemType.Pistol => "Пистолет",
             ItemType.Quest => "Квестовый предмет",
+            ItemType.Module => "Модуль",
             ItemType.Misc => "Разное",
             _ => itemType.ToString(),
         };

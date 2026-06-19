@@ -3,13 +3,14 @@ using UnityEngine;
 
 internal interface IInventoryItemCompatibilityProvider
 {
-    void CollectCompatibleItemData(ItemData sourceItemData, ISet<ItemData> compatibleItemData);
+    void CollectCompatibleItemData(InventoryItem sourceItem, ISet<ItemData> compatibleItemData);
 }
 
 internal sealed class WeaponAmmoInventoryCompatibilityProvider : IInventoryItemCompatibilityProvider
 {
-    public void CollectCompatibleItemData(ItemData sourceItemData, ISet<ItemData> compatibleItemData)
+    public void CollectCompatibleItemData(InventoryItem sourceItem, ISet<ItemData> compatibleItemData)
     {
+        ItemData sourceItemData = sourceItem == null ? null : sourceItem.ItemData;
         WeaponData weaponData = sourceItemData == null ? null : sourceItemData.WeaponData;
 
         if (weaponData == null || compatibleItemData == null)
@@ -29,6 +30,14 @@ internal sealed class WeaponAmmoInventoryCompatibilityProvider : IInventoryItemC
     }
 }
 
+internal sealed class WeaponModuleInventoryCompatibilityProvider : IInventoryItemCompatibilityProvider
+{
+    public void CollectCompatibleItemData(InventoryItem sourceItem, ISet<ItemData> compatibleItemData)
+    {
+        WeaponModuleSupport.CollectInstallableModules(sourceItem, compatibleItemData);
+    }
+}
+
 internal sealed class InventoryItemCompatibilityService
 {
     private readonly InventoryItemRegistry _itemRegistry;
@@ -43,15 +52,15 @@ internal sealed class InventoryItemCompatibilityService
         _highlightColor = highlightColor;
     }
 
-    public void ShowCompatibleItems(ItemData sourceItemData)
+    public void ShowCompatibleItems(InventoryItem sourceItem)
     {
         _compatibleItemData.Clear();
 
-        if (sourceItemData != null && _providers != null)
+        if (sourceItem != null && _providers != null)
         {
             for (int i = 0; i < _providers.Count; i++)
             {
-                _providers[i]?.CollectCompatibleItemData(sourceItemData, _compatibleItemData);
+                _providers[i]?.CollectCompatibleItemData(sourceItem, _compatibleItemData);
             }
         }
 

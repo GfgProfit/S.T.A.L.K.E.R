@@ -3,12 +3,9 @@ using UnityEngine;
 
 internal static class ItemIconHashBuilder
 {
-    public static bool HasRuntimeIconSource(bool generateIconAtRuntime, GameObject iconPrefab, IReadOnlyList<ItemIconPart> iconParts, IReadOnlyList<ItemIconPart> runtimeIconParts)
-    {
-        return generateIconAtRuntime && (iconPrefab != null || HasValidPart(iconParts) || HasValidPart(runtimeIconParts));
-    }
+    public static bool HasRuntimeIconSource(bool generateIconAtRuntime, GameObject iconPrefab) => generateIconAtRuntime && iconPrefab != null;
 
-    public static int BuildHash(ItemData itemData, IReadOnlyList<ItemIconPart> runtimeIconParts, int targetWidth, int targetHeight, bool useSlotIconSettings)
+    public static int BuildHash(ItemData itemData, IReadOnlyList<ItemData> installedModules, int targetWidth, int targetHeight, bool useSlotIconSettings)
     {
         if (itemData == null)
         {
@@ -42,33 +39,14 @@ internal static class ItemIconHashBuilder
             hash = hash * 31 + HashVector(useSlotIconSettings ? itemData.SlotIconLightEulerAngles : itemData.IconLightEulerAngles);
             hash = hash * 31 + Quantize(useSlotIconSettings ? itemData.SlotIconLightIntensity : itemData.IconLightIntensity);
             hash = hash * 31 + (itemData.IconPrefab == null ? 0 : itemData.IconPrefab.GetInstanceID());
-            hash = hash * 31 + HashParts(itemData.IconParts);
-            hash = hash * 31 + HashParts(runtimeIconParts);
+            hash = hash * 31 + HashInstalledModules(installedModules);
             return hash;
         }
     }
 
-    private static bool HasValidPart(IReadOnlyList<ItemIconPart> parts)
+    private static int HashInstalledModules(IReadOnlyList<ItemData> installedModules)
     {
-        if (parts == null)
-        {
-            return false;
-        }
-
-        for (int i = 0; i < parts.Count; i++)
-        {
-            if (parts[i] != null && parts[i].Prefab != null)
-            {
-                return true;
-            }
-        }
-
-        return false;
-    }
-
-    private static int HashParts(IReadOnlyList<ItemIconPart> parts)
-    {
-        if (parts == null)
+        if (installedModules == null)
         {
             return 0;
         }
@@ -77,9 +55,9 @@ internal static class ItemIconHashBuilder
         {
             int hash = 17;
 
-            for (int i = 0; i < parts.Count; i++)
+            for (int i = 0; i < installedModules.Count; i++)
             {
-                hash = hash * 31 + (parts[i] == null ? 0 : parts[i].BuildHash());
+                hash = hash * 31 + (installedModules[i] == null ? 0 : installedModules[i].GetInstanceID());
             }
 
             return hash;

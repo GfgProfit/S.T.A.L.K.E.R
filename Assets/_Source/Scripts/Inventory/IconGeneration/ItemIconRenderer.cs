@@ -15,9 +15,9 @@ internal static class ItemIconRenderer
         return RenderIconTexture(itemData, null, settings ?? ItemIconGeneratorSettings.LoadDefault(), IconRenderProfile.CreateDefault(itemData));
     }
 
-    public static Sprite RenderIcon(ItemData itemData, IReadOnlyList<ItemIconPart> runtimeIconParts, ItemIconGeneratorSettings settings, out Texture2D texture)
+    public static Sprite RenderIcon(ItemData itemData, IReadOnlyList<ItemData> installedModules, ItemIconGeneratorSettings settings, out Texture2D texture)
     {
-        texture = RenderIconTexture(itemData, runtimeIconParts, settings, IconRenderProfile.CreateDefault(itemData));
+        texture = RenderIconTexture(itemData, installedModules, settings, IconRenderProfile.CreateDefault(itemData));
 
         if (texture == null)
         {
@@ -27,9 +27,9 @@ internal static class ItemIconRenderer
         return ItemIconTextureProcessor.CreateSprite(itemData, texture);
     }
 
-    public static Sprite RenderIcon(ItemData itemData, IReadOnlyList<ItemIconPart> runtimeIconParts, ItemIconGeneratorSettings settings, IconRenderProfile renderProfile, out Texture2D texture)
+    public static Sprite RenderIcon(ItemData itemData, IReadOnlyList<ItemData> installedModules, ItemIconGeneratorSettings settings, IconRenderProfile renderProfile, out Texture2D texture)
     {
-        texture = RenderIconTexture(itemData, runtimeIconParts, settings, renderProfile);
+        texture = RenderIconTexture(itemData, installedModules, settings, renderProfile);
 
         if (texture == null)
         {
@@ -39,7 +39,7 @@ internal static class ItemIconRenderer
         return ItemIconTextureProcessor.CreateSprite(itemData, texture);
     }
 
-    public static RawIconRenderResult RenderRawIcon(ItemData itemData, IReadOnlyList<ItemIconPart> runtimeIconParts, ItemIconGeneratorSettings settings, IconRenderProfile renderProfile)
+    public static RawIconRenderResult RenderRawIcon(ItemData itemData, IReadOnlyList<ItemData> installedModules, ItemIconGeneratorSettings settings, IconRenderProfile renderProfile)
     {
         GameObject rootObject = null;
         GameObject cameraObject = null;
@@ -66,11 +66,10 @@ internal static class ItemIconRenderer
             rootObject.transform.SetPositionAndRotation(settings.RenderOrigin, Quaternion.Euler(renderProfile.ModelEulerAngles));
             rootObject.transform.localScale = renderProfile.ModelScale;
 
-            bool hasRenderablePart = ItemIconSceneBuilder.InstantiateSource(itemData.IconPrefab, rootObject.transform, null);
-            hasRenderablePart |= ItemIconSceneBuilder.InstantiateParts(itemData.IconParts, rootObject.transform);
-            hasRenderablePart |= ItemIconSceneBuilder.InstantiateParts(runtimeIconParts, rootObject.transform);
+            GameObject iconInstance = ItemIconSceneBuilder.InstantiateSource(itemData.IconPrefab, rootObject.transform);
+            WeaponModuleSupport.ApplyToVisual(iconInstance, installedModules);
 
-            if (hasRenderablePart == false || ItemIconSceneBuilder.TryCalculateBounds(rootObject, out Bounds bounds) == false)
+            if (iconInstance == null || ItemIconSceneBuilder.TryCalculateBounds(rootObject, out Bounds bounds) == false)
             {
                 return null;
             }
@@ -161,9 +160,9 @@ internal static class ItemIconRenderer
         }
     }
 
-    private static Texture2D RenderIconTexture(ItemData itemData, IReadOnlyList<ItemIconPart> runtimeIconParts, ItemIconGeneratorSettings settings, IconRenderProfile renderProfile)
+    private static Texture2D RenderIconTexture(ItemData itemData, IReadOnlyList<ItemData> installedModules, ItemIconGeneratorSettings settings, IconRenderProfile renderProfile)
     {
-        RawIconRenderResult rawResult = RenderRawIcon(itemData, runtimeIconParts, settings, renderProfile);
+        RawIconRenderResult rawResult = RenderRawIcon(itemData, installedModules, settings, renderProfile);
         if (rawResult == null)
         {
             return null;

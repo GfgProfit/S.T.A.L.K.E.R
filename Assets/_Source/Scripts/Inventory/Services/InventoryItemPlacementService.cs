@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using UnityEngine;
 
 internal sealed class InventoryItemPlacementService
@@ -20,7 +21,7 @@ internal sealed class InventoryItemPlacementService
         _refreshWeightState = refreshWeightState;
     }
 
-    public bool TryInsertItem(ItemData itemData, int amount, float? durabilityPercent, bool iconsReady, InventoryGrid insertionGrid, InventoryGrid defaultItemGrid)
+    public bool TryInsertItem(ItemData itemData, int amount, float? durabilityPercent, IReadOnlyList<ItemData> installedModules, bool iconsReady, InventoryGrid insertionGrid, InventoryGrid defaultItemGrid)
     {
         if (iconsReady == false)
         {
@@ -45,7 +46,7 @@ internal sealed class InventoryItemPlacementService
             return true;
         }
 
-        InventoryItem itemToInsert = _itemFactory.Create(itemData, normalizedAmount, null, durabilityPercent);
+        InventoryItem itemToInsert = _itemFactory.Create(itemData, normalizedAmount, durabilityPercent, installedModules);
 
         if (InsertItem(itemToInsert, insertionGrid) || (insertionGrid != defaultItemGrid && InsertItem(itemToInsert, defaultItemGrid)))
         {

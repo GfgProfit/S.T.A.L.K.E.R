@@ -31,7 +31,7 @@ internal sealed class InventoryHoverInfoController
         if (selectedItem == null)
         {
             HighlightedItem = selectedItemGrid.GetItem(positionOnGrid.x, positionOnGrid.y);
-            _compatibilityService.ShowCompatibleItems(HighlightedItem == null ? null : HighlightedItem.ItemData);
+            _compatibilityService.ShowCompatibleItems(HighlightedItem);
 
             if (HighlightedItem != null)
             {
@@ -121,6 +121,6 @@ internal sealed class InventoryHoverInfoController
             return default;
         }
 
-        return new(item.ItemData, item.CurrentAmount, item.UnitWeight, item.TotalWeight, item.HasDurability, item.CurrentDurabilityPercent, item.BaseWidth, item.BaseHeight, item.RuntimeIconParts);
+        return new(item.ItemData, item.CurrentAmount, item.UnitWeight, item.TotalWeight, item.HasDurability, item.CurrentDurabilityPercent, item.BaseWidth, item.BaseHeight, item.InstalledModules);
     }
 }

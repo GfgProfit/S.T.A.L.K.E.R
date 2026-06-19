@@ -1,4 +1,3 @@
-using System.Collections.Generic;
 using UnityEngine;
 
 internal sealed class InventoryItemVisualState
@@ -12,17 +11,15 @@ internal sealed class InventoryItemVisualState
     public bool CellVisualsVisible { get; private set; } = true;
     public bool IsCompatibilityHighlighted { get; private set; }
     public Color CompatibilityHighlightColor { get; private set; } = Color.clear;
-    public IReadOnlyList<ItemIconPart> RuntimeIconParts { get; private set; }
+
     public bool HasVisualSizeOverride => _hasVisualSizeOverride;
 
-    public void SetRuntimeIconParts(IReadOnlyList<ItemIconPart> runtimeIconParts) => RuntimeIconParts = runtimeIconParts;
-
-    public void ApplySlotVisual(ItemData itemData, int slotWidth, int slotHeight, bool useGeneratedSlotIcon)
+    public void ApplySlotVisual(ItemData itemData, int slotWidth, int slotHeight, bool useGeneratedSlotIcon, System.Collections.Generic.IReadOnlyList<ItemData> installedModules)
     {
         _hasVisualSizeOverride = true;
         _visualWidthOverride = Mathf.Max(1, slotWidth);
         _visualHeightOverride = Mathf.Max(1, slotHeight);
-        _iconOverride = itemData == null ? null : useGeneratedSlotIcon ? itemData.GetSlotIcon(_visualWidthOverride, _visualHeightOverride, RuntimeIconParts) : itemData.GetIcon(RuntimeIconParts);
+        _iconOverride = itemData == null ? null : useGeneratedSlotIcon ? itemData.GetSlotIcon(_visualWidthOverride, _visualHeightOverride, installedModules) : itemData.GetIcon(installedModules);
     }
 
     public void RestoreDefaultVisual()
@@ -48,7 +45,7 @@ internal sealed class InventoryItemVisualState
         return true;
     }
 
-    public Sprite GetIcon(ItemData itemData) => _iconOverride != null ? _iconOverride : itemData == null ? null : itemData.GetIcon(RuntimeIconParts);
+    public Sprite GetIcon(ItemData itemData, int width, int height, System.Collections.Generic.IReadOnlyList<ItemData> installedModules) => _iconOverride != null ? _iconOverride : itemData == null ? null : itemData.GetIcon(width, height, installedModules);
     public int GetVisualWidth(int baseWidth) => _hasVisualSizeOverride ? _visualWidthOverride : baseWidth;
     public int GetVisualHeight(int baseHeight) => _hasVisualSizeOverride ? _visualHeightOverride : baseHeight;
 }

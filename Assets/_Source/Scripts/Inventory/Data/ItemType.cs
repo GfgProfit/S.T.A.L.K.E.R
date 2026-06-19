@@ -10,5 +10,6 @@ public enum ItemType
     Consumable = 7,
     Knife = 8,
     Pistol = 9,
-    Quest = 10
+    Quest = 10,
+    Module = 11
 }

@@ -7,10 +7,10 @@ internal sealed class InventoryItemFactory
 
     public InventoryItemFactory(InventoryItem itemPrefab) => _itemPrefab = itemPrefab;
 
-    public InventoryItem Create(ItemData itemData, int amount, IReadOnlyList<ItemIconPart> runtimeIconParts, float? durabilityPercent)
+    public InventoryItem Create(ItemData itemData, int amount, float? durabilityPercent, IReadOnlyList<ItemData> installedModules = null)
     {
         InventoryItem inventoryItem = Object.Instantiate(_itemPrefab);
-        inventoryItem.Set(itemData, amount, runtimeIconParts, durabilityPercent);
+        inventoryItem.Set(itemData, amount, durabilityPercent, installedModules);
         return inventoryItem;
     }
 }

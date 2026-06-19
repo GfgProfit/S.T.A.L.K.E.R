@@ -23,6 +23,7 @@ public class InventoryItem : MonoBehaviour, IView<InventoryItemViewModel>
     [SerializeField] private Sprite _questStatusIcon;
     [SerializeField] private Image _statusIconImage;
     [SerializeField] private RectTransform _statusIconRectTransform;
+    [SerializeField] private List<ItemData> _installedModules = new();
 
     public int GridPositionX { get; internal set; }
     public int GridPositionY { get; internal set; }
@@ -48,17 +49,17 @@ public class InventoryItem : MonoBehaviour, IView<InventoryItemViewModel>
     public bool HasDurability => _state.HasDurability;
     public float CurrentDurabilityPercent => _state.CurrentDurabilityPercent;
     public float UnitWeight => _state.UnitWeight;
-    public float TotalWeight => _state.TotalWeight + LoadedMagazineWeight;
+    public float TotalWeight => _state.TotalWeight + LoadedMagazineWeight + InstalledModulesWeight;
     public int BaseWidth => _state.BaseWidth;
     public int BaseHeight => _state.BaseHeight;
     public bool CanRotate => _state.CanRotate;
     public RectTransform RectTransform => _rectTransform;
     public FirstPersonWeaponMagazineState WeaponMagazineState => _weaponMagazineState;
-    internal IReadOnlyList<ItemIconPart> RuntimeIconParts => _visualState.RuntimeIconParts;
+    public IReadOnlyList<ItemData> InstalledModules => _state.InstalledModules;
 
     private void Awake()
     {
-        _state.Initialize(_itemData, _currentAmount, _currentDurabilityPercent, false);
+        _state.Initialize(_itemData, _currentAmount, _currentDurabilityPercent, false, _installedModules);
         SyncSerializedStateFromState();
         EnsureItemView();
         EnsureViewModel();
@@ -100,15 +101,13 @@ public class InventoryItem : MonoBehaviour, IView<InventoryItemViewModel>
 
     internal void Set(ItemData itemData) => Set(itemData, 1, null, null);
     internal void Set(ItemData itemData, int amount) => Set(itemData, amount, null, null);
-    internal void Set(ItemData itemData, IReadOnlyList<ItemIconPart> runtimeIconParts) => Set(itemData, 1, runtimeIconParts, null);
-    internal void Set(ItemData itemData, int amount, IReadOnlyList<ItemIconPart> runtimeIconParts) => Set(itemData, amount, runtimeIconParts, null);
 
-    internal void Set(ItemData itemData, int amount, IReadOnlyList<ItemIconPart> runtimeIconParts, float? durabilityPercent)
+    internal void Set(ItemData itemData, int amount, float? durabilityPercent, IReadOnlyList<ItemData> installedModules)
     {
         ApplySerializedVisualSettings();
 
         ItemData previousItemData = ItemData;
-        _state.SetItem(itemData, amount, durabilityPercent ?? InventoryItemState.GetDefaultDurabilityPercent(itemData));
+        _state.Initialize(itemData, amount, durabilityPercent ?? InventoryItemState.GetDefaultDurabilityPercent(itemData), false, installedModules);
 
         if (previousItemData != itemData)
         {
@@ -117,7 +116,6 @@ public class InventoryItem : MonoBehaviour, IView<InventoryItemViewModel>
         }
 
         SyncSerializedStateFromState();
-        _visualState.SetRuntimeIconParts(runtimeIconParts);
         _visualState.RestoreDefaultVisual();
         RefreshCountText();
         RefreshDurabilityVisual(true);
@@ -159,24 +157,18 @@ public class InventoryItem : MonoBehaviour, IView<InventoryItemViewModel>
 
     public void SetDurability(float durabilityPercent) => SetDurabilityInternal(durabilityPercent);
 
-    internal void RefreshIcon(IReadOnlyList<ItemIconPart> runtimeIconParts = null)
+    internal void RefreshIcon()
     {
         EnsureViewModel();
         ApplySerializedVisualSettings();
-
-        if (runtimeIconParts != null)
-        {
-            _visualState.SetRuntimeIconParts(runtimeIconParts);
-        }
-
-        _viewModel.SetIcon(_visualState.GetIcon(ItemData));
+        _viewModel.SetIcon(_visualState.GetIcon(ItemData, BaseWidth, BaseHeight, InstalledModules));
     }
 
     internal void ApplySlotVisual(int slotWidth, int slotHeight, bool useGeneratedSlotIcon)
     {
         ApplySerializedVisualSettings();
 
-        _visualState.ApplySlotVisual(ItemData, slotWidth, slotHeight, useGeneratedSlotIcon);
+        _visualState.ApplySlotVisual(ItemData, slotWidth, slotHeight, useGeneratedSlotIcon, InstalledModules);
 
         ApplyVisualSize();
         RefreshIcon();
@@ -226,6 +218,30 @@ public class InventoryItem : MonoBehaviour, IView<InventoryItemViewModel>
         }
 
         RefreshCellBackground();
+    }
+
+    internal bool HasInstalledModule(ItemData moduleItemData) => _state.HasInstalledModule(moduleItemData);
+
+    internal bool AddInstalledModule(ItemData moduleItemData)
+    {
+        if (_state.AddInstalledModule(moduleItemData) == false)
+        {
+            return false;
+        }
+
+        RefreshAfterModulesChanged();
+        return true;
+    }
+
+    internal bool RemoveInstalledModule(ItemData moduleItemData)
+    {
+        if (_state.RemoveInstalledModule(moduleItemData) == false)
+        {
+            return false;
+        }
+
+        RefreshAfterModulesChanged();
+        return true;
     }
 
     public void Rotate()
@@ -352,11 +368,46 @@ public class InventoryItem : MonoBehaviour, IView<InventoryItemViewModel>
         _itemData = ItemData;
         _currentAmount = CurrentAmount;
         _currentDurabilityPercent = _state.DurabilityPercent;
+        _installedModules.Clear();
+
+        for (int i = 0; i < InstalledModules.Count; i++)
+        {
+            _installedModules.Add(InstalledModules[i]);
+        }
+    }
+
+    private void RefreshAfterModulesChanged()
+    {
+        SyncSerializedStateFromState();
+        ApplyVisualSize();
+        RefreshIcon();
+        RebuildCellVisuals();
+        ApplyRotation();
+        SetCellVisualsVisible(_visualState.CellVisualsVisible);
     }
 
     private int VisualWidth => _visualState.GetVisualWidth(BaseWidth);
     private int VisualHeight => _visualState.GetVisualHeight(BaseHeight);
     private bool IsVisuallyRotated => _visualState.HasVisualSizeOverride == false && IsRotated;
     private float LoadedMagazineWeight => _weaponMagazineState.LoadedAmmoData == null || _weaponMagazineState.LoadedAmmoAmount <= 0 ? 0f : _weaponMagazineState.LoadedAmmoData.Weight * _weaponMagazineState.LoadedAmmoAmount;
+    private float InstalledModulesWeight
+    {
+        get
+        {
+            float weight = 0f;
+
+            for (int i = 0; i < InstalledModules.Count; i++)
+            {
+                ItemData module = InstalledModules[i];
+
+                if (module != null)
+                {
+                    weight += module.Weight;
+                }
+            }
+
+            return weight;
+        }
+    }
 
 }

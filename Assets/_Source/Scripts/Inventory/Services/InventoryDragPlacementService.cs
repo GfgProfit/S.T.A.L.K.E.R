@@ -8,15 +8,19 @@ internal sealed class InventoryDragPlacementService
     private readonly InventoryItemRegistry _itemRegistry;
     private readonly Func<InventoryGrid, InventoryItem, bool> _canDetachItemWithSlotRestrictions;
     private readonly Func<InventoryGrid, InventoryItem, bool> _tryPrepareSlotRestrictionsForPlacement;
+    private readonly Func<InventoryGrid, InventoryItem, ItemData, bool> _tryInstallWeaponModule;
+    private readonly Action<InventoryItem> _weaponModulesChanged;
     private readonly Action _refreshWeightState;
 
-    public InventoryDragPlacementService(InventoryDragState dragState, InventoryItemFactory itemFactory, InventoryItemRegistry itemRegistry, Func<InventoryGrid, InventoryItem, bool> canDetachItemWithSlotRestrictions, Func<InventoryGrid, InventoryItem, bool> tryPrepareSlotRestrictionsForPlacement, Action refreshWeightState)
+    public InventoryDragPlacementService(InventoryDragState dragState, InventoryItemFactory itemFactory, InventoryItemRegistry itemRegistry, Func<InventoryGrid, InventoryItem, bool> canDetachItemWithSlotRestrictions, Func<InventoryGrid, InventoryItem, bool> tryPrepareSlotRestrictionsForPlacement, Func<InventoryGrid, InventoryItem, ItemData, bool> tryInstallWeaponModule, Action<InventoryItem> weaponModulesChanged, Action refreshWeightState)
     {
         _dragState = dragState;
         _itemFactory = itemFactory;
         _itemRegistry = itemRegistry;
         _canDetachItemWithSlotRestrictions = canDetachItemWithSlotRestrictions;
         _tryPrepareSlotRestrictionsForPlacement = tryPrepareSlotRestrictionsForPlacement;
+        _tryInstallWeaponModule = tryInstallWeaponModule;
+        _weaponModulesChanged = weaponModulesChanged;
         _refreshWeightState = refreshWeightState;
     }
 
@@ -30,6 +34,11 @@ internal sealed class InventoryDragPlacementService
         }
 
         SlottedItemGrid slottedGrid = targetGrid as SlottedItemGrid;
+
+        if (TryInstallDraggedWeaponModule(targetGrid, tileGridPosition))
+        {
+            return true;
+        }
 
         if (TryMergeDraggedItemIntoStack(targetGrid, tileGridPosition))
         {
@@ -146,6 +155,37 @@ internal sealed class InventoryDragPlacementService
         return true;
     }
 
+    private bool TryInstallDraggedWeaponModule(InventoryGrid targetGrid, Vector2Int tileGridPosition)
+    {
+        InventoryItem moduleItem = _dragState.SelectedItem;
+
+        if (moduleItem == null || moduleItem.ItemData == null || moduleItem.ItemData.ItemType != ItemType.Module || _tryInstallWeaponModule == null)
+        {
+            return false;
+        }
+
+        InventoryItem weaponItem = targetGrid.GetItem(tileGridPosition.x, tileGridPosition.y);
+
+        if (weaponItem == null || weaponItem == moduleItem || _tryInstallWeaponModule(targetGrid, weaponItem, moduleItem.ItemData) == false)
+        {
+            return false;
+        }
+
+        DestroyInventoryItem(moduleItem);
+        FinishDraggingItem();
+
+        if (_weaponModulesChanged != null)
+        {
+            _weaponModulesChanged(weaponItem);
+        }
+        else
+        {
+            _refreshWeightState();
+        }
+
+        return true;
+    }
+
     private bool TryPlaceSingleItemFromStack(SlottedItemGrid slottedGrid, Vector2Int tileGridPosition)
     {
         if (slottedGrid == null || _dragState.SelectedItem == null || _dragState.OriginGrid == null)
@@ -178,7 +218,7 @@ internal sealed class InventoryDragPlacementService
             return false;
         }
 
-        InventoryItem singleItem = _itemFactory.Create(selectedItem.ItemData, 1, selectedItem.RuntimeIconParts, null);
+        InventoryItem singleItem = _itemFactory.Create(selectedItem.ItemData, 1, null);
 
         if (slottedGrid.CanPlaceItem(singleItem, tileGridPosition.x, tileGridPosition.y) == false)
         {

@@ -31,7 +31,14 @@ internal readonly struct IconRenderProfile
         LightIntensity = Mathf.Max(0f, lightIntensity);
     }
 
-    public static IconRenderProfile CreateDefault(ItemData itemData) => new(false, itemData.Width, itemData.Height, itemData.IconTextureWidth, itemData.IconTextureHeight, itemData.IconModelEulerAngles, itemData.IconModelScale, itemData.IconCameraEulerAngles, itemData.IconPadding, itemData.IconUseDirectionalLight, itemData.IconLightEulerAngles, itemData.IconLightIntensity);
+    public static IconRenderProfile CreateDefault(ItemData itemData) => CreateDefault(itemData, itemData.Width, itemData.Height);
+    public static IconRenderProfile CreateDefault(ItemData itemData, int width, int height)
+    {
+        int cellWidth = Mathf.Max(1, width);
+        int cellHeight = Mathf.Max(1, height);
+
+        return new(false, cellWidth, cellHeight, cellWidth * itemData.IconPixelsPerCell * itemData.IconRenderScale, cellHeight * itemData.IconPixelsPerCell * itemData.IconRenderScale, itemData.IconModelEulerAngles, itemData.IconModelScale, itemData.IconCameraEulerAngles, itemData.IconPadding, itemData.IconUseDirectionalLight, itemData.IconLightEulerAngles, itemData.IconLightIntensity);
+    }
     public static IconRenderProfile CreateSlot(ItemData itemData, int slotWidth, int slotHeight)
     {
         int cellWidth = Mathf.Max(1, slotWidth);

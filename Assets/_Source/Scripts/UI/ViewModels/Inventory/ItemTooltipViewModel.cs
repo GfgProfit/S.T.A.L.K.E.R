@@ -31,7 +31,7 @@ public sealed class ItemTooltipViewModel : ViewModelBase
             return;
         }
 
-        _icon.Value = item.ItemData.GetIcon(item.RuntimeIconParts);
+        _icon.Value = item.ItemData.GetIcon(item.InstalledModules);
         _iconSize.Value = new(item.BaseWidth * ItemGrid.TILE_SIZE_WIDTH, item.BaseHeight * ItemGrid.TILE_SIZE_HEIGHT);
         _itemNameText.Value = item.ItemData.ItemName;
         _typeText.Value = ItemTooltipTextFormatter.FormatType(item.ItemData);
