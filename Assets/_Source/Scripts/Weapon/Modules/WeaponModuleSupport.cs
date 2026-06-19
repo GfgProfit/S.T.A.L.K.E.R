@@ -7,7 +7,10 @@ internal static class WeaponModuleSupport
 
     public static bool CanInstall(InventoryItem weaponItem, ItemData moduleItemData)
     {
-        return TryGetDefinition(weaponItem, moduleItemData, out FirstPersonWeaponModule definition) && definition.CanInstall(weaponItem.InstalledModules);
+        return weaponItem != null &&
+               HasOccupiedModuleSlot(weaponItem.InstalledModules, moduleItemData) == false &&
+               TryGetDefinition(weaponItem, moduleItemData, out FirstPersonWeaponModule definition) &&
+               definition.CanInstall(weaponItem.InstalledModules);
     }
 
     public static bool CanDetach(InventoryItem weaponItem, ItemData moduleItemData)
@@ -52,7 +55,9 @@ internal static class WeaponModuleSupport
         {
             FirstPersonWeaponModule definition = definitions[i];
 
-            if (definition != null && definition.CanInstall(weaponItem.InstalledModules))
+            if (definition != null &&
+                HasOccupiedModuleSlot(weaponItem.InstalledModules, definition.ModuleItemData) == false &&
+                definition.CanInstall(weaponItem.InstalledModules))
             {
                 compatibleItemData.Add(definition.ModuleItemData);
             }
@@ -70,8 +75,48 @@ internal static class WeaponModuleSupport
 
         for (int i = 0; i < definitions.Length; i++)
         {
-            definitions[i]?.Apply(installedModules);
+            definitions[i]?.ApplyDefaultVisualState();
         }
+
+        for (int i = 0; i < definitions.Length; i++)
+        {
+            FirstPersonWeaponModule definition = definitions[i];
+
+            if (definition == null || definition.IsInstalled(installedModules) == false)
+            {
+                continue;
+            }
+
+            Transform attachPoint = FindAttachPoint(definition, definitions, installedModules);
+            definition.ApplyInstalledVisualState(attachPoint);
+        }
+    }
+
+    private static Transform FindAttachPoint(FirstPersonWeaponModule module, IReadOnlyList<FirstPersonWeaponModule> definitions, IReadOnlyList<ItemData> installedModules)
+    {
+        IReadOnlyList<ItemData> requiredModules = module.RequiredModules;
+
+        for (int requiredIndex = 0; requiredIndex < requiredModules.Count; requiredIndex++)
+        {
+            ItemData requiredModule = requiredModules[requiredIndex];
+
+            if (requiredModule == null || Contains(installedModules, requiredModule) == false)
+            {
+                continue;
+            }
+
+            for (int definitionIndex = 0; definitionIndex < definitions.Count; definitionIndex++)
+            {
+                FirstPersonWeaponModule definition = definitions[definitionIndex];
+
+                if (definition != null && definition.ModuleItemData == requiredModule && definition.AttachPoint != null)
+                {
+                    return definition.AttachPoint;
+                }
+            }
+        }
+
+        return null;
     }
 
     private static bool TryGetDefinition(InventoryItem weaponItem, ItemData moduleItemData, out FirstPersonWeaponModule definition)
@@ -114,6 +159,46 @@ internal static class WeaponModuleSupport
         definitions = weaponPrefab.GetComponentsInChildren<FirstPersonWeaponModule>(true);
         _definitionCache.Add(weaponPrefab, definitions);
         return definitions;
+    }
+
+    private static bool Contains(IReadOnlyList<ItemData> modules, ItemData module)
+    {
+        if (modules == null || module == null)
+        {
+            return false;
+        }
+
+        for (int i = 0; i < modules.Count; i++)
+        {
+            if (modules[i] == module)
+            {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    private static bool HasOccupiedModuleSlot(IReadOnlyList<ItemData> installedModules, ItemData moduleItemData)
+    {
+        WeaponModuleSlot moduleSlot = moduleItemData == null ? WeaponModuleSlot.None : moduleItemData.ModuleSlot;
+
+        if (moduleSlot == WeaponModuleSlot.None || installedModules == null)
+        {
+            return false;
+        }
+
+        for (int i = 0; i < installedModules.Count; i++)
+        {
+            ItemData installedModule = installedModules[i];
+
+            if (installedModule != null && installedModule.ModuleSlot == moduleSlot)
+            {
+                return true;
+            }
+        }
+
+        return false;
     }
 
     [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.SubsystemRegistration)]

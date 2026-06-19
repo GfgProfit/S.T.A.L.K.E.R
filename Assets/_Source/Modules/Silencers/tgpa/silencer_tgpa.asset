@@ -51,6 +51,7 @@ MonoBehaviour:
   _firstPersonWeaponPrefab: {fileID: 0}
   _firstPersonWeaponSpawnScale: {x: 1, y: 1, z: 1}
   _weaponData: {fileID: 0}
+  _moduleSlot: 2
   _moduleInventorySizeDelta: {x: 1, y: 0}
   _statModifiers: []
   _worldItemPrefab: {fileID: 9179094549916919475, guid: c933bd86bc579c04086428522d5b8ed4, type: 3}

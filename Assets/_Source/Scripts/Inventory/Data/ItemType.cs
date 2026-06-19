@@ -13,3 +13,16 @@ public enum ItemType
     Quest = 10,
     Module = 11
 }
+
+public enum WeaponModuleSlot
+{
+    None = 0,
+    Magazine = 1,
+    Muzzle = 2,
+    Optic = 3,
+    Handguard = 4,
+    Stock = 5,
+    Grip = 6,
+    Tactical = 7,
+    Underbarrel = 8
+}

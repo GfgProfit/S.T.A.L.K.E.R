@@ -272,7 +272,7 @@ public class InventoryController : MonoBehaviour
     private InventoryEquipmentSlotService CreateEquipmentSlotService() => new(_equipmentSlotGrids, _slottedItemGrids, _defaultItemGrid, InsertItem, TryDetachItemFromGrid, RegisterInventoryItem, RefreshWeightState, () => _closedSlotPrefab);
     private InventoryEquipmentActionService CreateEquipmentActionService() => new(_equipmentSlotGrids, _defaultItemGrid, InsertItem, TryDetachItemFromGrid, TryPrepareSlotRestrictionsForPlacement, RegisterInventoryItem, RefreshWeightState);
     private InventoryQuickActionService CreateQuickActionService() => new(_quickActionGridReferences, _defaultItemGrid, TryMoveItemToGrid, CreateItem, RegisterInventoryItem, RefreshWeightState);
-    private InventoryContextMenuController CreateContextMenuController() => new(_itemContextMenu, PlayerInput, () => _selectedItemGrid, () => _dragState.SelectedItem, DragController.GetTileGridPosition, HideItemInfoPanel, TryUseContextMenuItem, TryUnloadContextMenuWeapon, CanEquipPrimaryContextMenuWeapon, TryEquipPrimaryContextMenuWeapon, CanEquipSecondaryContextMenuWeapon, TryEquipSecondaryContextMenuWeapon, CanEquipContextMenuItem, TryEquipContextMenuItem, CanUnequipContextMenuItem, TryUnequipContextMenuItem, TryDetachWeaponModule, TryDropItem);
+    private InventoryContextMenuController CreateContextMenuController() => new(_itemContextMenu, PlayerInput, () => _selectedItemGrid, () => _dragState.SelectedItem, DragController.GetTileGridPosition, HideItemInfoPanel, TryUseContextMenuItem, TryUnloadContextMenuWeapon, CanEquipPrimaryContextMenuWeapon, TryEquipPrimaryContextMenuWeapon, CanEquipSecondaryContextMenuWeapon, TryEquipSecondaryContextMenuWeapon, CanEquipContextMenuItem, TryEquipContextMenuItem, CanUnequipContextMenuItem, TryUnequipContextMenuItem, _equipmentSlotGrids, TryAttachContextMenuModule, TryDetachWeaponModule, TryDropItem);
     private InventoryItemDropProcessor CreateDropProcessor() => new(TrySpawnDroppedWorldItem, TryDetachItemFromGrid, DestroyInventoryItem, RefreshWeightState);
     private InventoryWeightStateController CreateWeightStateController() => new(_itemRegistry, _equipmentSlotGrids, EquipmentSlotService, SetWeightViewModelState, RenderCharacterStatsInfo, _playerController, _playerStats, _hidePlayerStatsInfoWhenEmpty, _maxCarryWeight, _movementBlockExtraWeight);
     private InventoryHoverInfoController CreateHoverInfoController() => new(_inventoryHighlight, _itemInfoPanel, IsContextMenuOpen, _itemCompatibilityService);
@@ -468,10 +468,64 @@ public class InventoryController : MonoBehaviour
 
     private bool TryInstallWeaponModule(InventoryGrid grid, InventoryItem weaponItem, ItemData moduleItemData) => _weaponModuleService != null && _weaponModuleService.TryInstall(grid, weaponItem, moduleItemData);
 
+    private bool TryAttachContextMenuModule(InventoryGrid sourceGrid, InventoryItem moduleItem, EquipmentSlotGrid targetGrid)
+    {
+        InventoryItem weaponItem = targetGrid == null ? null : targetGrid.EquippedItem;
+
+        if (sourceGrid == null ||
+            moduleItem == null ||
+            moduleItem.ItemData == null ||
+            moduleItem.ItemData.ItemType != ItemType.Module ||
+            weaponItem == null ||
+            WeaponModuleSupport.CanInstall(weaponItem, moduleItem.ItemData) == false)
+        {
+            return false;
+        }
+
+        Vector2Int sourcePosition = new(moduleItem.GridPositionX, moduleItem.GridPositionY);
+        bool sourceRotated = moduleItem.IsRotated;
+
+        if (TryDetachItemFromGrid(sourceGrid, moduleItem) == false)
+        {
+            return false;
+        }
+
+        if (_weaponModuleService != null && _weaponModuleService.TryInstall(targetGrid, weaponItem, moduleItem.ItemData))
+        {
+            DestroyInventoryItem(moduleItem);
+            HandleWeaponModulesChanged(weaponItem);
+            return true;
+        }
+
+        RestoreContextMenuModuleItem(sourceGrid, moduleItem, sourcePosition, sourceRotated);
+        return false;
+    }
+
+    private void RestoreContextMenuModuleItem(InventoryGrid sourceGrid, InventoryItem moduleItem, Vector2Int sourcePosition, bool sourceRotated)
+    {
+        moduleItem.SetRotated(sourceRotated);
+
+        if (sourceGrid.CanPlaceItem(moduleItem, sourcePosition.x, sourcePosition.y))
+        {
+            sourceGrid.PlaceItem(moduleItem, sourcePosition.x, sourcePosition.y);
+            return;
+        }
+
+        if (InsertItem(moduleItem, _defaultItemGrid) == false)
+        {
+            Debug.LogError($"[{nameof(InventoryController)}] Failed to restore {moduleItem.name} after a context-menu module installation rollback.");
+        }
+    }
+
     private void HandleWeaponModulesChanged(InventoryItem weaponItem)
     {
         RefreshWeightState();
-        HoverInfoController.RefreshHighlightedItemInfo(weaponItem);
+        HoverInfoController.RefreshHighlightedItem(weaponItem);
+
+        if (_firstPersonWeaponHolderController != null && _firstPersonWeaponHolderController.CurrentWeaponItem == weaponItem)
+        {
+            _firstPersonWeaponHolderController.SetWeapon(weaponItem);
+        }
     }
 
     private void RefreshWeightState()

@@ -74,6 +74,17 @@ internal sealed class InventoryHoverInfoController
         }
     }
 
+    public void RefreshHighlightedItem(InventoryItem item)
+    {
+        if (HighlightedItem != item)
+        {
+            return;
+        }
+
+        _compatibilityService.ShowCompatibleItems(item);
+        ShowItemInfoPanel(item);
+    }
+
     public void HideHighlight()
     {
         _inventoryHighlight.Show(false);

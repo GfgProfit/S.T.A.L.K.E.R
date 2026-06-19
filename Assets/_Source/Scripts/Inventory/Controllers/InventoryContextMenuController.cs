@@ -5,6 +5,7 @@ using UnityEngine;
 internal sealed class InventoryContextMenuController
 {
     private const string DETACH_MODULE_LABEL_FORMAT = "\u041e\u0442\u0441\u043e\u0435\u0434\u0438\u043d\u0438\u0442\u044c: {0}";
+    private const string ATTACH_MODULE_LABEL_FORMAT = "\u041f\u0440\u0438\u043a\u0440\u0435\u043f\u0438\u0442\u044c \u043a: {0}";
 
     private readonly InventoryItemContextMenu _contextMenu;
     private readonly IInventoryInput _playerInput;
@@ -22,12 +23,14 @@ internal sealed class InventoryContextMenuController
     private readonly Func<InventoryGrid, InventoryItem, bool> _equipItem;
     private readonly Func<InventoryGrid, InventoryItem, bool> _canUnequipItem;
     private readonly Func<InventoryGrid, InventoryItem, bool> _unequipItem;
+    private readonly IReadOnlyList<EquipmentSlotGrid> _equipmentSlotGrids;
+    private readonly Func<InventoryGrid, InventoryItem, EquipmentSlotGrid, bool> _attachWeaponModule;
     private readonly Func<InventoryGrid, InventoryItem, ItemData, bool> _detachWeaponModule;
     private readonly Func<InventoryGrid, InventoryItem, bool, bool> _dropItem;
     private InventoryGrid _contextMenuGrid;
     private InventoryItem _contextMenuItem;
 
-    public InventoryContextMenuController(InventoryItemContextMenu contextMenu, IInventoryInput playerInput, Func<InventoryGrid> getSelectedGrid, Func<InventoryItem> getSelectedItem, Func<Vector2Int> getTileGridPosition, Action hideItemInfoPanel, Func<InventoryGrid, InventoryItem, bool> useItem, Func<InventoryGrid, InventoryItem, bool> unloadWeapon, Func<InventoryGrid, InventoryItem, bool> canEquipPrimaryWeapon, Func<InventoryGrid, InventoryItem, bool> equipPrimaryWeapon, Func<InventoryGrid, InventoryItem, bool> canEquipSecondaryWeapon, Func<InventoryGrid, InventoryItem, bool> equipSecondaryWeapon, Func<InventoryGrid, InventoryItem, bool> canEquipItem, Func<InventoryGrid, InventoryItem, bool> equipItem, Func<InventoryGrid, InventoryItem, bool> canUnequipItem, Func<InventoryGrid, InventoryItem, bool> unequipItem, Func<InventoryGrid, InventoryItem, ItemData, bool> detachWeaponModule, Func<InventoryGrid, InventoryItem, bool, bool> dropItem)
+    public InventoryContextMenuController(InventoryItemContextMenu contextMenu, IInventoryInput playerInput, Func<InventoryGrid> getSelectedGrid, Func<InventoryItem> getSelectedItem, Func<Vector2Int> getTileGridPosition, Action hideItemInfoPanel, Func<InventoryGrid, InventoryItem, bool> useItem, Func<InventoryGrid, InventoryItem, bool> unloadWeapon, Func<InventoryGrid, InventoryItem, bool> canEquipPrimaryWeapon, Func<InventoryGrid, InventoryItem, bool> equipPrimaryWeapon, Func<InventoryGrid, InventoryItem, bool> canEquipSecondaryWeapon, Func<InventoryGrid, InventoryItem, bool> equipSecondaryWeapon, Func<InventoryGrid, InventoryItem, bool> canEquipItem, Func<InventoryGrid, InventoryItem, bool> equipItem, Func<InventoryGrid, InventoryItem, bool> canUnequipItem, Func<InventoryGrid, InventoryItem, bool> unequipItem, IReadOnlyList<EquipmentSlotGrid> equipmentSlotGrids, Func<InventoryGrid, InventoryItem, EquipmentSlotGrid, bool> attachWeaponModule, Func<InventoryGrid, InventoryItem, ItemData, bool> detachWeaponModule, Func<InventoryGrid, InventoryItem, bool, bool> dropItem)
     {
         _contextMenu = contextMenu;
         _playerInput = playerInput;
@@ -45,6 +48,8 @@ internal sealed class InventoryContextMenuController
         _equipItem = equipItem;
         _canUnequipItem = canUnequipItem;
         _unequipItem = unequipItem;
+        _equipmentSlotGrids = equipmentSlotGrids;
+        _attachWeaponModule = attachWeaponModule;
         _detachWeaponModule = detachWeaponModule;
         _dropItem = dropItem;
     }
@@ -193,6 +198,8 @@ internal sealed class InventoryContextMenuController
             return actions;
         }
 
+        AddAttachModuleActions(actions, item);
+
         for (int i = 0; i < item.InstalledModules.Count; i++)
         {
             ItemData moduleItemData = item.InstalledModules[i];
@@ -206,6 +213,36 @@ internal sealed class InventoryContextMenuController
         }
 
         return actions;
+    }
+
+    private void AddAttachModuleActions(ICollection<InventoryContextMenuAction> actions, InventoryItem moduleItem)
+    {
+        if (actions == null || moduleItem == null || moduleItem.ItemData == null || moduleItem.ItemData.ItemType != ItemType.Module || _equipmentSlotGrids == null)
+        {
+            return;
+        }
+
+        for (int i = 0; i < _equipmentSlotGrids.Count; i++)
+        {
+            EquipmentSlotGrid targetGrid = _equipmentSlotGrids[i];
+            InventoryItem weaponItem = targetGrid == null ? null : targetGrid.EquippedItem;
+
+            if (weaponItem == null || WeaponModuleSupport.CanInstall(weaponItem, moduleItem.ItemData) == false)
+            {
+                continue;
+            }
+
+            string weaponName = string.IsNullOrWhiteSpace(weaponItem.ItemData.ShortName) ? weaponItem.ItemData.ItemName : weaponItem.ItemData.ShortName;
+            actions.Add(new InventoryContextMenuAction(string.Format(ATTACH_MODULE_LABEL_FORMAT, weaponName), () => AttachContextMenuModule(targetGrid)));
+        }
+    }
+
+    private void AttachContextMenuModule(EquipmentSlotGrid targetGrid)
+    {
+        InventoryItem moduleItem = _contextMenuItem;
+        InventoryGrid sourceGrid = _contextMenuGrid;
+        Hide();
+        _attachWeaponModule?.Invoke(sourceGrid, moduleItem, targetGrid);
     }
 
     private void DetachContextMenuModule(ItemData moduleItemData)

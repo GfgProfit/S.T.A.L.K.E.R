@@ -75,7 +75,7 @@ internal sealed class InventoryItemState
 
     public bool AddInstalledModule(ItemData moduleItemData)
     {
-        if (moduleItemData == null || moduleItemData.ItemType != ItemType.Module || HasInstalledModule(moduleItemData))
+        if (moduleItemData == null || moduleItemData.ItemType != ItemType.Module || HasInstalledModule(moduleItemData) || HasOccupiedModuleSlot(moduleItemData))
         {
             return false;
         }
@@ -119,11 +119,33 @@ internal sealed class InventoryItemState
         {
             ItemData module = installedModules[i];
 
-            if (module != null && module.ItemType == ItemType.Module && _installedModules.Contains(module) == false)
+            if (module != null && module.ItemType == ItemType.Module && _installedModules.Contains(module) == false && HasOccupiedModuleSlot(module) == false)
             {
                 _installedModules.Add(module);
             }
         }
+    }
+
+    private bool HasOccupiedModuleSlot(ItemData moduleItemData)
+    {
+        WeaponModuleSlot moduleSlot = moduleItemData == null ? WeaponModuleSlot.None : moduleItemData.ModuleSlot;
+
+        if (moduleSlot == WeaponModuleSlot.None)
+        {
+            return false;
+        }
+
+        for (int i = 0; i < _installedModules.Count; i++)
+        {
+            ItemData installedModule = _installedModules[i];
+
+            if (installedModule != null && installedModule.ModuleSlot == moduleSlot)
+            {
+                return true;
+            }
+        }
+
+        return false;
     }
 
     private Vector2Int GetModuleSizeDelta()

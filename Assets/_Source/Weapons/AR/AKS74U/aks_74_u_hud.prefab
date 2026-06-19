@@ -203,6 +203,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::FirstPersonWeaponModule
   _moduleItemData: {fileID: 11400000, guid: 4d17b9c7aed1a444aad32e518f903938, type: 2}
   _requiredModules: []
+  _attachPoint: {fileID: 0}
   _enabledWhenInstalled:
   - {fileID: 7351497034772073716}
   _disabledWhenInstalled:
@@ -1586,6 +1587,7 @@ MonoBehaviour:
   _requiredModules:
   - {fileID: 11400000, guid: c95964fd243d9bc4bac212c72a79c6ad, type: 2}
   - {fileID: 11400000, guid: 6a968982702d18048b0fa34450beb31c, type: 2}
+  _attachPoint: {fileID: 0}
   _enabledWhenInstalled:
   - {fileID: 6615692353005081853}
   _disabledWhenInstalled: []
@@ -2327,6 +2329,7 @@ MonoBehaviour:
   _requiredModules:
   - {fileID: 11400000, guid: c95964fd243d9bc4bac212c72a79c6ad, type: 2}
   - {fileID: 11400000, guid: 6a968982702d18048b0fa34450beb31c, type: 2}
+  _attachPoint: {fileID: 0}
   _enabledWhenInstalled:
   - {fileID: 5365288442359422813}
   _disabledWhenInstalled: []
@@ -3714,6 +3717,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::FirstPersonWeaponModule
   _moduleItemData: {fileID: 11400000, guid: 501d4a9b478828a408cb6efbbe18e0a9, type: 2}
   _requiredModules: []
+  _attachPoint: {fileID: 0}
   _enabledWhenInstalled:
   - {fileID: 4642044071163507351}
   _disabledWhenInstalled:
@@ -4926,6 +4930,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::FirstPersonWeaponModule
   _moduleItemData: {fileID: 11400000, guid: b8209b5a48f1612498cf837c7c557c80, type: 2}
   _requiredModules: []
+  _attachPoint: {fileID: 0}
   _enabledWhenInstalled:
   - {fileID: 3986038352740330523}
   _disabledWhenInstalled:
@@ -5729,6 +5734,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::FirstPersonWeaponModule
   _moduleItemData: {fileID: 11400000, guid: 6a968982702d18048b0fa34450beb31c, type: 2}
   _requiredModules: []
+  _attachPoint: {fileID: 6512864697881006198}
   _enabledWhenInstalled:
   - {fileID: 6122896039807882611}
   _disabledWhenInstalled:
@@ -9157,6 +9163,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::FirstPersonWeaponModule
   _moduleItemData: {fileID: 11400000, guid: c95964fd243d9bc4bac212c72a79c6ad, type: 2}
   _requiredModules: []
+  _attachPoint: {fileID: 2399587100788550243}
   _enabledWhenInstalled:
   - {fileID: 7408969415795334427}
   _disabledWhenInstalled:
@@ -9610,6 +9617,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::FirstPersonWeaponModule
   _moduleItemData: {fileID: 11400000, guid: 72a71ea6a143f6f46be7f623404a79f7, type: 2}
   _requiredModules: []
+  _attachPoint: {fileID: 0}
   _enabledWhenInstalled:
   - {fileID: 6612944651147383797}
   _disabledWhenInstalled:
@@ -16096,6 +16104,11 @@ PrefabInstance:
     m_AddedGameObjects: []
     m_AddedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: af34a92d19b4dcd42bd8b8afccacadc1, type: 3}
+--- !u!4 &2399587100788550243 stripped
+Transform:
+  m_CorrespondingSourceObject: {fileID: 1259260799100301508, guid: af34a92d19b4dcd42bd8b8afccacadc1, type: 3}
+  m_PrefabInstance: {fileID: 3473613174881573543}
+  m_PrefabAsset: {fileID: 0}
 --- !u!4 &4516056114457003425 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 1051733297704345350, guid: af34a92d19b4dcd42bd8b8afccacadc1, type: 3}
@@ -16175,6 +16188,11 @@ Transform:
 --- !u!1 &6122896039807882611 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 1603686576085853577, guid: 8b266d17b1bcd934aa448b8ba6b1f84a, type: 3}
+  m_PrefabInstance: {fileID: 4808038936356974842}
+  m_PrefabAsset: {fileID: 0}
+--- !u!4 &6512864697881006198 stripped
+Transform:
+  m_CorrespondingSourceObject: {fileID: 1791238718979104908, guid: 8b266d17b1bcd934aa448b8ba6b1f84a, type: 3}
   m_PrefabInstance: {fileID: 4808038936356974842}
   m_PrefabAsset: {fileID: 0}
 --- !u!1001 &6589198875494002529

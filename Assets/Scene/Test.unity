@@ -10379,7 +10379,7 @@ MonoBehaviour:
   _dropOneButton: {fileID: 417679117}
   _dropStackButton: {fileID: 1375092425}
   _dropStackButtonText: {fileID: 1555326203}
-  _closeRadius: 500
+  _closeRadius: 5000
   _showCloseRadiusInEditor: 1
   _closeRadiusEditorColor: {r: 1, g: 0.65, b: 0, a: 0.9}
 --- !u!1 &570918327

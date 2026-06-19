@@ -64,6 +64,7 @@ public class InventoryItemContextMenu : MonoBehaviour, IView<InventoryItemContex
     private IDisposable _canUnequipSubscription;
     private IDisposable _canDropStackSubscription;
     private readonly List<Button> _moduleActionButtons = new();
+    private readonly List<Button> _layoutButtons = new();
 
     public bool IsOpen => gameObject.activeSelf;
 
@@ -385,6 +386,109 @@ public class InventoryItemContextMenu : MonoBehaviour, IView<InventoryItemContex
         }
 
         LayoutRebuilder.ForceRebuildLayoutImmediate(_panelRectTransform);
+
+        CollectLayoutButtons();
+
+        float widestButtonWidth = 0f;
+
+        for (int i = 0; i < _layoutButtons.Count; i++)
+        {
+            Button button = _layoutButtons[i];
+
+            if (button != null && button.gameObject.activeSelf)
+            {
+                widestButtonWidth = Mathf.Max(widestButtonWidth, CalculateButtonPreferredWidth(button));
+            }
+        }
+
+        if (widestButtonWidth <= 0f)
+        {
+            return;
+        }
+
+        widestButtonWidth = Mathf.Ceil(widestButtonWidth);
+
+        for (int i = 0; i < _layoutButtons.Count; i++)
+        {
+            ApplyButtonWidth(_layoutButtons[i], widestButtonWidth);
+        }
+
+        LayoutRebuilder.ForceRebuildLayoutImmediate(_panelRectTransform);
+    }
+
+    private void CollectLayoutButtons()
+    {
+        _layoutButtons.Clear();
+        AddLayoutButton(_useButton);
+        AddLayoutButton(_unloadButton);
+        AddLayoutButton(_equipPrimaryWeaponButton);
+        AddLayoutButton(_equipSecondaryWeaponButton);
+        AddLayoutButton(_equipButton);
+        AddLayoutButton(_unequipButton);
+        AddLayoutButton(_dropOneButton);
+        AddLayoutButton(_dropStackButton);
+
+        for (int i = 0; i < _moduleActionButtons.Count; i++)
+        {
+            AddLayoutButton(_moduleActionButtons[i]);
+        }
+    }
+
+    private void AddLayoutButton(Button button)
+    {
+        if (button != null && _layoutButtons.Contains(button) == false)
+        {
+            _layoutButtons.Add(button);
+        }
+    }
+
+    private static float CalculateButtonPreferredWidth(Button button)
+    {
+        TMP_Text buttonText = button.GetComponentInChildren<TMP_Text>(true);
+
+        if (buttonText == null)
+        {
+            return 0f;
+        }
+
+        float textWidth = buttonText.GetPreferredValues(buttonText.text, float.PositiveInfinity, float.PositiveInfinity).x;
+        return textWidth + GetTextHorizontalPadding(buttonText.rectTransform);
+    }
+
+    private static float GetTextHorizontalPadding(RectTransform textRectTransform)
+    {
+        if (textRectTransform == null)
+        {
+            return 0f;
+        }
+
+        float horizontalAnchorSpan = textRectTransform.anchorMax.x - textRectTransform.anchorMin.x;
+
+        if (Mathf.Approximately(horizontalAnchorSpan, 1f))
+        {
+            return Mathf.Max(0f, -textRectTransform.sizeDelta.x);
+        }
+
+        return 0f;
+    }
+
+    private static void ApplyButtonWidth(Button button, float width)
+    {
+        if (button == null)
+        {
+            return;
+        }
+
+        LayoutElement layoutElement = button.GetComponent<LayoutElement>();
+
+        if (layoutElement == null)
+        {
+            layoutElement = button.gameObject.AddComponent<LayoutElement>();
+        }
+
+        layoutElement.minWidth = width;
+        layoutElement.preferredWidth = width;
+        layoutElement.flexibleWidth = 0f;
     }
 
     private void RebuildModuleActionButtons(IReadOnlyList<InventoryContextMenuAction> actions)
@@ -409,7 +513,7 @@ public class InventoryItemContextMenu : MonoBehaviour, IView<InventoryItemContex
         {
             InventoryContextMenuAction action = actions[i];
             GameObject buttonObject = Instantiate(template.gameObject, template.transform.parent);
-            buttonObject.name = $"Detach Module Button {i + 1}";
+            buttonObject.name = $"Module Action Button {i + 1}";
             buttonObject.transform.SetSiblingIndex(Mathf.Clamp(siblingIndex + i, 0, template.transform.parent.childCount - 1));
 
             Button button = buttonObject.GetComponent<Button>();
