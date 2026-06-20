@@ -20,6 +20,51 @@ public static class ItemIconCache
         return itemData == null ? null : GetOrCreate(itemData, itemData.Width, itemData.Height, installedModules);
     }
 
+    internal static bool TryGet(ItemData itemData, IReadOnlyList<ItemData> installedModules, out Sprite icon)
+    {
+        return TryGet(itemData, itemData == null ? 1 : itemData.Width, itemData == null ? 1 : itemData.Height, installedModules, out icon);
+    }
+
+    internal static bool TryGet(ItemData itemData, int width, int height, IReadOnlyList<ItemData> installedModules, out Sprite icon)
+    {
+        if (itemData == null)
+        {
+            icon = null;
+            return true;
+        }
+
+        if (itemData.HasRuntimeIconSource() == false)
+        {
+            icon = itemData.FallbackIcon;
+            return true;
+        }
+
+        ItemIconGeneratorSettings settings = ItemIconGeneratorSettings.LoadDefault();
+        IconRenderProfile renderProfile = IconRenderProfile.CreateDefault(itemData, width, height);
+        IconCacheKey key = BuildCacheKey(itemData, installedModules, settings, renderProfile);
+        return TryGetCachedSprite(key, out icon);
+    }
+
+    internal static bool TryGetSlotIcon(ItemData itemData, int slotWidth, int slotHeight, IReadOnlyList<ItemData> installedModules, out Sprite icon)
+    {
+        if (itemData == null)
+        {
+            icon = null;
+            return true;
+        }
+
+        if (itemData.HasRuntimeIconSource() == false)
+        {
+            icon = itemData.FallbackIcon;
+            return true;
+        }
+
+        ItemIconGeneratorSettings settings = ItemIconGeneratorSettings.LoadDefault();
+        IconRenderProfile renderProfile = IconRenderProfile.CreateSlot(itemData, slotWidth, slotHeight);
+        IconCacheKey key = BuildCacheKey(itemData, installedModules, settings, renderProfile);
+        return TryGetCachedSprite(key, out icon);
+    }
+
     public static Sprite GetOrCreate(ItemData itemData, int width, int height, IReadOnlyList<ItemData> installedModules = null)
     {
         if (itemData == null)
@@ -255,15 +300,12 @@ public static class ItemIconCache
         CancellationToken generationCancellation = _generationCancellation.Token;
         ItemIconRenderSession renderSession = null;
         ItemIconGeneratorSettings activeSettings = null;
-        int budgetFrame = -1;
-        Stopwatch frameTimer = new();
 
         try
         {
-            await UniTask.Yield(PlayerLoopTiming.Update, generationCancellation);
-
             while (_standaloneQueue.Count > 0)
             {
+                await UniTask.Yield(PlayerLoopTiming.Update, generationCancellation);
                 generationCancellation.ThrowIfCancellationRequested();
 
                 StandaloneGenerationRequest generationRequest = _standaloneQueue.Dequeue();
@@ -275,12 +317,6 @@ public static class ItemIconCache
                         renderSession?.Dispose();
                         activeSettings = generationRequest.Settings;
                         renderSession = ItemIconRenderer.CreateSession(activeSettings);
-                    }
-
-                    if (budgetFrame != Time.frameCount)
-                    {
-                        budgetFrame = Time.frameCount;
-                        frameTimer.Restart();
                     }
 
                     Sprite sprite = await GetOrCreateAsync(generationRequest.Request, renderSession, false, generationCancellation);
@@ -311,12 +347,6 @@ public static class ItemIconCache
                     }
                 }
 
-                if (activeSettings != null && budgetFrame == Time.frameCount && frameTimer.Elapsed.TotalMilliseconds >= activeSettings.PrewarmFrameBudgetMilliseconds)
-                {
-                    await UniTask.Yield(PlayerLoopTiming.Update, generationCancellation);
-                    budgetFrame = Time.frameCount;
-                    frameTimer.Restart();
-                }
             }
         }
         catch (OperationCanceledException)

@@ -21,13 +21,8 @@ internal sealed class InventoryItemPlacementService
         _refreshWeightState = refreshWeightState;
     }
 
-    public bool TryInsertItem(ItemData itemData, int amount, float? durabilityPercent, IReadOnlyList<ItemData> installedModules, bool iconsReady, InventoryGrid insertionGrid, InventoryGrid defaultItemGrid)
+    public bool TryInsertItem(ItemData itemData, int amount, float? durabilityPercent, IReadOnlyList<ItemData> installedModules, InventoryGrid insertionGrid, InventoryGrid defaultItemGrid)
     {
-        if (iconsReady == false)
-        {
-            return false;
-        }
-
         if (itemData == null)
         {
             return false;

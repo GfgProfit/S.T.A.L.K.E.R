@@ -788,7 +788,6 @@ MonoBehaviour:
   _titleCanvasGroup: {fileID: 182611675}
   _progressText: {fileID: 2060579809}
   _fillImage: {fileID: 1213523197}
-  _postPrewarmDelaySeconds: 1
   _continueTextMinimumAlpha: 0.25
   _continueTextBlinkCycleSeconds: 1.2
 --- !u!114 &906170510

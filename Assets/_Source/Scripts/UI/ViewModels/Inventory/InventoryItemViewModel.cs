@@ -4,6 +4,7 @@ using UnityEngine;
 public sealed class InventoryItemViewModel : ViewModelBase
 {
     private readonly ReactiveProperty<Sprite> _icon = new();
+    private readonly ReactiveProperty<bool> _iconLoading = new();
     private readonly ReactiveProperty<Color> _cellBackgroundColor = new(Color.clear);
     private readonly ReactiveProperty<bool> _cellBackgroundVisible = new();
     private readonly ReactiveProperty<string> _countText = new(string.Empty);
@@ -17,6 +18,7 @@ public sealed class InventoryItemViewModel : ViewModelBase
     private readonly ReactiveProperty<bool> _statusIconVisible = new();
 
     public ReadOnlyReactiveProperty<Sprite> Icon => _icon;
+    public ReadOnlyReactiveProperty<bool> IconLoading => _iconLoading;
     public ReadOnlyReactiveProperty<Color> CellBackgroundColor => _cellBackgroundColor;
     public ReadOnlyReactiveProperty<bool> CellBackgroundVisible => _cellBackgroundVisible;
     public ReadOnlyReactiveProperty<string> CountText => _countText;
@@ -32,6 +34,11 @@ public sealed class InventoryItemViewModel : ViewModelBase
     public void SetIcon(Sprite icon)
     {
         _icon.Value = icon;
+    }
+
+    public void SetIconLoading(bool loading)
+    {
+        _iconLoading.Value = loading;
     }
 
     public void SetCellBackground(ItemData itemData, bool cellVisualsVisible, bool compatibilityHighlighted, Color compatibilityHighlightColor)
@@ -72,6 +79,7 @@ public sealed class InventoryItemViewModel : ViewModelBase
     protected override void DisposeManaged()
     {
         _icon.Dispose();
+        _iconLoading.Dispose();
         _cellBackgroundColor.Dispose();
         _cellBackgroundVisible.Dispose();
         _countText.Dispose();

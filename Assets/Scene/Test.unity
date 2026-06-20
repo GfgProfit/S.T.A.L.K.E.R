@@ -11605,8 +11605,6 @@ MonoBehaviour:
   _openOnStart: 0
   _unlockCursorWhileOpen: 1
   _disablePlayerControlsWhileOpen: 1
-  _prewarmItemIconsOnStart: 1
-  _logIconPrewarmProgress: 0
 --- !u!114 &602623721
 MonoBehaviour:
   m_ObjectHideFlags: 0

@@ -674,6 +674,8 @@ MonoBehaviour:
   _currentDurabilityPercent: 100
   _rectTransform: {fileID: 7244211069171183450}
   _itemImage: {fileID: 188510814560001004}
+  _iconLoadingRectTransform: {fileID: 9184193725441315231}
+  _iconLoadingRotationSpeed: 180
   _cellBackgroundImage: {fileID: 7244211069171183448}
   _countText: {fileID: 4250159603881515426}
   _countTextRectTransform: {fileID: 2350727213283944633}

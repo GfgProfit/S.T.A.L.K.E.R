@@ -4,7 +4,6 @@ internal sealed class InventoryUpdateController
 {
     private readonly IInventoryInput _playerInput;
     private readonly Func<bool> _isOpen;
-    private readonly Func<bool> _iconsReady;
     private readonly Func<InventoryGrid> _selectedGrid;
     private readonly InventoryHoverInfoController _hoverInfoController;
     private readonly InventoryContextMenuController _contextMenuController;
@@ -19,11 +18,10 @@ internal sealed class InventoryUpdateController
     private readonly Func<bool> _tryHandleQuickItemAction;
     private readonly Action _beginDrag;
 
-    public InventoryUpdateController(IInventoryInput playerInput, Func<bool> isOpen, Func<bool> iconsReady, Func<InventoryGrid> selectedGrid, InventoryHoverInfoController hoverInfoController, InventoryContextMenuController contextMenuController, Action toggleInventory, Action hideItemInfoPanel, Action hideContextMenu, Action dragItemIcon, Action releaseDraggedItem, Action rotateSelectedItem, Func<bool> tryHandleHoveredItemDropInput, Action handleHighlight, Func<bool> tryHandleQuickItemAction, Action beginDrag)
+    public InventoryUpdateController(IInventoryInput playerInput, Func<bool> isOpen, Func<InventoryGrid> selectedGrid, InventoryHoverInfoController hoverInfoController, InventoryContextMenuController contextMenuController, Action toggleInventory, Action hideItemInfoPanel, Action hideContextMenu, Action dragItemIcon, Action releaseDraggedItem, Action rotateSelectedItem, Func<bool> tryHandleHoveredItemDropInput, Action handleHighlight, Func<bool> tryHandleQuickItemAction, Action beginDrag)
     {
         _playerInput = playerInput;
         _isOpen = isOpen;
-        _iconsReady = iconsReady;
         _selectedGrid = selectedGrid;
         _hoverInfoController = hoverInfoController;
         _contextMenuController = contextMenuController;
@@ -46,7 +44,7 @@ internal sealed class InventoryUpdateController
             _toggleInventory();
         }
 
-        if (_isOpen() == false || _iconsReady() == false)
+        if (_isOpen() == false)
         {
             HideTransientUi();
             return;

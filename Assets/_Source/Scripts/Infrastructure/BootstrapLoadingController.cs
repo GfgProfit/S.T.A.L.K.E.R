@@ -8,10 +8,8 @@ using UnityEngine.UI;
 
 public sealed class BootstrapLoadingController : MonoBehaviour
 {
-    private const string LOADING_ITEMS_TITLE_FORMAT = "Загрузка предметов... {0}/{1}";
     private const string LOADING_SCENE_TITLE = "Загрузка сцены...";
     private const string CONTINUE_TITLE = "Нажмите любую клавишу, что бы продолжить.";
-    private const float ICON_PREWARM_PROGRESS_WEIGHT = 0.5f;
     private const float SCENE_READY_PROGRESS = 0.9f;
 
     [SerializeField] private string _gameSceneName = "Test";
@@ -19,7 +17,6 @@ public sealed class BootstrapLoadingController : MonoBehaviour
     [SerializeField] private CanvasGroup _titleCanvasGroup;
     [SerializeField] private TMP_Text _progressText;
     [SerializeField] private Image _fillImage;
-    [SerializeField] [Min(0f)] private float _postPrewarmDelaySeconds = 1f;
     [SerializeField] [Range(0f, 1f)] private float _continueTextMinimumAlpha = 0.25f;
     [SerializeField] [Min(0.1f)] private float _continueTextBlinkCycleSeconds = 1.2f;
 
@@ -34,15 +31,6 @@ public sealed class BootstrapLoadingController : MonoBehaviour
         SetOverallProgress(0f);
         _titleCanvasGroup.alpha = 1f;
 
-        ItemIconGeneratorSettings settings = ItemIconGeneratorSettings.LoadDefault();
-        await ItemIconCache.PrewarmAsync(settings.PrewarmItems, settings.PrewarmSlotProfiles, HandleIconPrewarmProgress, cancellationToken);
-        SetOverallProgress(ICON_PREWARM_PROGRESS_WEIGHT);
-
-        if (_postPrewarmDelaySeconds > 0f)
-        {
-            await UniTask.Delay(TimeSpan.FromSeconds(_postPrewarmDelaySeconds), cancellationToken: cancellationToken);
-        }
-
         _titleText.text = LOADING_SCENE_TITLE;
         AsyncOperation sceneLoadOperation = SceneManager.LoadSceneAsync(_gameSceneName, LoadSceneMode.Single);
 
@@ -56,7 +44,7 @@ public sealed class BootstrapLoadingController : MonoBehaviour
         while (sceneLoadOperation.progress < SCENE_READY_PROGRESS)
         {
             float sceneProgress = Mathf.Clamp01(sceneLoadOperation.progress / SCENE_READY_PROGRESS);
-            SetOverallProgress(Mathf.Lerp(ICON_PREWARM_PROGRESS_WEIGHT, 1f, sceneProgress));
+            SetOverallProgress(sceneProgress);
             await UniTask.Yield(PlayerLoopTiming.Update, cancellationToken);
         }
 
@@ -65,13 +53,6 @@ public sealed class BootstrapLoadingController : MonoBehaviour
         await WaitForContinueInputAsync(cancellationToken);
         _titleCanvasGroup.alpha = 1f;
         sceneLoadOperation.allowSceneActivation = true;
-    }
-
-    private void HandleIconPrewarmProgress(int completedCount, int totalCount, ItemData itemData)
-    {
-        _titleText.text = string.Format(LOADING_ITEMS_TITLE_FORMAT, completedCount, totalCount);
-        float prewarmProgress = totalCount <= 0 ? 1f : completedCount / (float)totalCount;
-        SetOverallProgress(prewarmProgress * ICON_PREWARM_PROGRESS_WEIGHT);
     }
 
     private async UniTask WaitForContinueInputAsync(CancellationToken cancellationToken)

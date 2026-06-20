@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Threading;
 using Cysharp.Threading.Tasks;
+using Unity.Collections;
 using UnityEngine;
 using UnityEngine.Rendering;
 using UnityEngine.Rendering.HighDefinition;
@@ -46,7 +47,7 @@ internal static class ItemIconRenderer
         cancellationToken.ThrowIfCancellationRequested();
         await UniTask.SwitchToMainThread(cancellationToken);
 
-        RawIconRenderResult rawResult = renderSession.RenderRawIcon(itemData, installedModules, renderProfile);
+        RawIconRenderResult rawResult = await renderSession.RenderRawIconAsync(itemData, installedModules, renderProfile, cancellationToken);
 
         if (rawResult == null)
         {
@@ -132,7 +133,7 @@ internal sealed class ItemIconRenderSession : IDisposable
         _lights = ItemIconLightFactory.CreateReusable(settings);
     }
 
-    public RawIconRenderResult RenderRawIcon(ItemData itemData, IReadOnlyList<ItemData> installedModules, IconRenderProfile renderProfile)
+    public async UniTask<RawIconRenderResult> RenderRawIconAsync(ItemData itemData, IReadOnlyList<ItemData> installedModules, IconRenderProfile renderProfile, CancellationToken cancellationToken)
     {
         if (_disposed || itemData == null || itemData.HasRuntimeIconSource() == false)
         {
@@ -156,30 +157,82 @@ internal sealed class ItemIconRenderSession : IDisposable
             return null;
         }
 
-        RenderTexture previousActiveTexture = RenderTexture.active;
         RenderTexture renderTexture = null;
+        RenderTexture readbackTexture = null;
         bool sceneEnvironmentIsolated = false;
+        bool readbackRequested = false;
+        AsyncGPUReadbackRequest readbackRequest = default;
 
         try
         {
-            _sceneIsolation.Apply(_settings.ExcludeIconLayerFromSceneLights);
-            sceneEnvironmentIsolated = true;
-
             int textureWidth = renderProfile.TextureWidth;
             int textureHeight = renderProfile.TextureHeight;
 
             renderTexture = RenderTexture.GetTemporary(textureWidth, textureHeight, 24, _settings.RenderTextureFormat, RenderTextureReadWrite.Default, itemData.IconAntiAliasing);
             renderTexture.filterMode = FilterMode.Bilinear;
 
-            ItemIconCameraConfigurator.ConfigureRenderCamera(_renderCamera, bounds, renderTexture, _settings, renderProfile, itemData.IconAntiAliasing);
-
-            if (renderProfile.UseDirectionalLight)
+            if (_requiresExposureWarmup)
             {
-                ItemIconLightFactory.Configure(_lights, itemData, _renderCamera.transform, _settings, renderProfile);
+                RenderExposureWarmupFrame(itemData, bounds, renderTexture, renderProfile);
+                _requiresExposureWarmup = false;
+                await UniTask.Yield(PlayerLoopTiming.Update, cancellationToken);
             }
 
-            RenderCamera();
-            RenderTexture.active = renderTexture;
+            try
+            {
+                _sceneIsolation.Apply(_settings.ExcludeIconLayerFromSceneLights);
+                sceneEnvironmentIsolated = true;
+
+                ItemIconCameraConfigurator.ConfigureRenderCamera(_renderCamera, bounds, renderTexture, _settings, renderProfile, itemData.IconAntiAliasing);
+
+                if (renderProfile.UseDirectionalLight)
+                {
+                    ItemIconLightFactory.Configure(_lights, itemData, _renderCamera.transform, _settings, renderProfile);
+                }
+
+                RenderCamera();
+                readbackTexture = PrepareReadbackTexture(renderTexture, textureWidth, textureHeight);
+                readbackRequest = AsyncGPUReadback.Request(readbackTexture, 0, TextureFormat.RGBA32);
+                readbackRequested = true;
+            }
+            finally
+            {
+                _renderCamera.targetTexture = null;
+
+                if (sceneEnvironmentIsolated)
+                {
+                    _sceneIsolation.Restore();
+                    sceneEnvironmentIsolated = false;
+                }
+
+                ItemIconLightFactory.Disable(_lights);
+            }
+
+            if (readbackRequested == false)
+            {
+                return null;
+            }
+
+            while (readbackRequest.done == false)
+            {
+                await UniTask.Yield(PlayerLoopTiming.PostLateUpdate);
+            }
+
+            cancellationToken.ThrowIfCancellationRequested();
+
+            if (readbackRequest.hasError)
+            {
+                Debug.LogError($"Asynchronous GPU readback failed while generating the icon for '{itemData.name}'.", itemData);
+                return null;
+            }
+
+            NativeArray<Color32> readbackData = readbackRequest.GetData<Color32>();
+            Color32[] itemPixels = readbackData.ToArray();
+
+            if (ItemIconTextureProcessor.HasVisiblePixels(itemPixels) == false)
+            {
+                return null;
+            }
 
             Texture2D texture = new(textureWidth, textureHeight, TextureFormat.RGBA32, false)
             {
@@ -188,23 +241,13 @@ internal sealed class ItemIconRenderSession : IDisposable
                 name = $"{itemData.name} Runtime Icon Texture"
             };
 
-            texture.ReadPixels(new Rect(0, 0, textureWidth, textureHeight), 0, 0);
+            texture.SetPixels32(itemPixels);
             texture.Apply(false, false);
-
-            Color32[] itemPixels = texture.GetPixels32();
-
-            if (ItemIconTextureProcessor.HasVisiblePixels(itemPixels) == false)
-            {
-                ItemIconRenderer.DestroyObject(texture);
-                return null;
-            }
 
             return new RawIconRenderResult(texture, itemPixels, textureWidth, textureHeight);
         }
         finally
         {
-            RenderTexture.active = previousActiveTexture;
-
             if (sceneEnvironmentIsolated)
             {
                 _sceneIsolation.Restore();
@@ -214,6 +257,11 @@ internal sealed class ItemIconRenderSession : IDisposable
             {
                 _renderCamera.targetTexture = null;
                 RenderTexture.ReleaseTemporary(renderTexture);
+            }
+
+            if (readbackTexture != null && readbackTexture != renderTexture)
+            {
+                RenderTexture.ReleaseTemporary(readbackTexture);
             }
 
             ItemIconLightFactory.Disable(_lights);
@@ -313,14 +361,51 @@ internal sealed class ItemIconRenderSession : IDisposable
         }
     }
 
-    private void RenderCamera()
+    private void RenderExposureWarmupFrame(ItemData itemData, Bounds bounds, RenderTexture renderTexture, IconRenderProfile renderProfile)
     {
-        if (_requiresExposureWarmup)
+        bool sceneEnvironmentIsolated = false;
+
+        try
         {
+            _sceneIsolation.Apply(_settings.ExcludeIconLayerFromSceneLights);
+            sceneEnvironmentIsolated = true;
+            ItemIconCameraConfigurator.ConfigureRenderCamera(_renderCamera, bounds, renderTexture, _settings, renderProfile, itemData.IconAntiAliasing);
+
+            if (renderProfile.UseDirectionalLight)
+            {
+                ItemIconLightFactory.Configure(_lights, itemData, _renderCamera.transform, _settings, renderProfile);
+            }
+
             _renderCamera.Render();
-            _requiresExposureWarmup = false;
+        }
+        finally
+        {
+            _renderCamera.targetTexture = null;
+
+            if (sceneEnvironmentIsolated)
+            {
+                _sceneIsolation.Restore();
+            }
+
+            ItemIconLightFactory.Disable(_lights);
+        }
+    }
+
+    private RenderTexture PrepareReadbackTexture(RenderTexture renderTexture, int width, int height)
+    {
+        if (renderTexture.antiAliasing <= 1)
+        {
+            return renderTexture;
         }
 
+        RenderTexture resolvedTexture = RenderTexture.GetTemporary(width, height, 0, _settings.RenderTextureFormat, RenderTextureReadWrite.Default, 1);
+        resolvedTexture.filterMode = FilterMode.Bilinear;
+        Graphics.Blit(renderTexture, resolvedTexture);
+        return resolvedTexture;
+    }
+
+    private void RenderCamera()
+    {
         _renderCamera.Render();
     }
 

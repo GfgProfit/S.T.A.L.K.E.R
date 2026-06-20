@@ -65,21 +65,22 @@ internal sealed class InventoryItemVisualState
             : itemData.GetIconAsync(installedModules, cancellationToken);
     }
 
-    public Sprite GetCachedIcon(ItemData itemData, int width, int height, IReadOnlyList<ItemData> installedModules)
+    public bool TryGetCachedIcon(ItemData itemData, int width, int height, IReadOnlyList<ItemData> installedModules, out Sprite icon)
     {
         if (itemData == null)
         {
-            return null;
+            icon = null;
+            return true;
         }
 
         if (_hasVisualSizeOverride == false)
         {
-            return itemData.GetIcon(width, height, installedModules);
+            return ItemIconCache.TryGet(itemData, width, height, installedModules, out icon);
         }
 
         return _useGeneratedSlotIcon
-            ? itemData.GetSlotIcon(_visualWidthOverride, _visualHeightOverride, installedModules)
-            : itemData.GetIcon(installedModules);
+            ? ItemIconCache.TryGetSlotIcon(itemData, _visualWidthOverride, _visualHeightOverride, installedModules, out icon)
+            : ItemIconCache.TryGet(itemData, installedModules, out icon);
     }
 
     public int GetVisualWidth(int baseWidth) => _hasVisualSizeOverride ? _visualWidthOverride : baseWidth;

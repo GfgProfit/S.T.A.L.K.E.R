@@ -57,9 +57,6 @@ public class InventoryController : MonoBehaviour
     [SerializeField] [BoxGroup("Open State")] private bool _openOnStart;
     [SerializeField] [BoxGroup("Open State")] private bool _unlockCursorWhileOpen = true;
     [SerializeField] [BoxGroup("Open State")] private bool _disablePlayerControlsWhileOpen = true;
-    [SerializeField] [BoxGroup("Icon Prewarm")] private bool _prewarmItemIconsOnStart = true;
-    [SerializeField] [BoxGroup("Icon Prewarm")] [EnableIf(nameof(PrewarmsItemIcons))] private bool _logIconPrewarmProgress;
-
     [Inject] private IPlayerInput _playerInput = null;
 
     private IPlayerInput _fallbackPlayerInput;
@@ -80,7 +77,6 @@ public class InventoryController : MonoBehaviour
     private InventoryHoveredItemActionController _hoveredItemActionController;
     private InventoryQuickUseService _quickUseService;
     private InventoryUpdateController _updateController;
-    private InventoryIconPrewarmController _iconPrewarmController;
     private InventoryRootView _inventoryView;
     private MiniActionTextView _miniActionTextView;
     private InventoryViewModel _viewModel;
@@ -116,7 +112,6 @@ public class InventoryController : MonoBehaviour
     public float MovementBlockWeight => WeightStateController.MovementBlockWeight;
     public bool IsMovementBlockedByWeight => WeightStateController.IsMovementBlockedByWeight;
     private bool UsesMiniActionText() => _miniActionText != null;
-    private bool PrewarmsItemIcons() => _prewarmItemIconsOnStart;
 
     private IPlayerInput PlayerInput
     {
@@ -258,15 +253,6 @@ public class InventoryController : MonoBehaviour
         }
     }
 
-    private InventoryIconPrewarmController IconPrewarmController
-    {
-        get
-        {
-            _iconPrewarmController ??= CreateIconPrewarmController();
-            return _iconPrewarmController;
-        }
-    }
-
     private InventoryEquipmentSlotService CreateEquipmentSlotService() => new(_equipmentSlotGrids, _slottedItemGrids, _defaultItemGrid, InsertItem, TryDetachItemFromGrid, RegisterInventoryItem, RefreshWeightState, () => _closedSlotPrefab);
     private InventoryEquipmentActionService CreateEquipmentActionService() => new(_equipmentSlotGrids, _defaultItemGrid, InsertItem, TryDetachItemFromGrid, TryPrepareSlotRestrictionsForPlacement, RegisterInventoryItem, RefreshWeightState);
     private InventoryQuickActionService CreateQuickActionService() => new(_quickActionGridReferences, _defaultItemGrid, TryMoveItemToGrid, CreateItem, RegisterInventoryItem, RefreshWeightState);
@@ -282,8 +268,7 @@ public class InventoryController : MonoBehaviour
     private InventoryItemPlacementService CreateItemPlacementService() => new(ItemFactory, _itemRegistry, TryPrepareSlotRestrictionsForPlacement, TryDetachItemFromGrid, DestroyInventoryItem, RefreshWeightState);
     private InventoryHoveredItemActionController CreateHoveredItemActionController() => new(PlayerInput, _dragState, () => _selectedItemGrid, DragController.GetTileGridPosition, IsContextMenuOpen, QuickActionService, TryDropItem, HoverInfoController, HideItemInfoPanel, HideContextMenu);
     private InventoryQuickUseService CreateQuickUseService() => new(_quickUseSlotBindings, TryDetachItemFromGrid, DestroyInventoryItem, RefreshWeightState);
-    private InventoryUpdateController CreateUpdateController() => new(PlayerInput, () => IsOpen, () => IconPrewarmController.IconsReady, () => _selectedItemGrid, HoverInfoController, ContextMenuController, ToggleInventory, HideItemInfoPanel, HideContextMenu, DragController.ItemIconDrag, DragController.ReleaseDraggedItem, DragController.RotateSelectedItem, TryHandleHoveredItemDropInput, HandleHighlight, TryHandleQuickItemAction, DragController.BeginDrag);
-    private InventoryIconPrewarmController CreateIconPrewarmController() => new(_prewarmItemIconsOnStart, _logIconPrewarmProgress, this, _equipmentSlotGrids);
+    private InventoryUpdateController CreateUpdateController() => new(PlayerInput, () => IsOpen, () => _selectedItemGrid, HoverInfoController, ContextMenuController, ToggleInventory, HideItemInfoPanel, HideContextMenu, DragController.ItemIconDrag, DragController.ReleaseDraggedItem, DragController.RotateSelectedItem, TryHandleHoveredItemDropInput, HandleHighlight, TryHandleQuickItemAction, DragController.BeginDrag);
 
     private void Awake()
     {
@@ -309,7 +294,6 @@ public class InventoryController : MonoBehaviour
         _itemPlacementService = CreateItemPlacementService();
         _hoveredItemActionController = CreateHoveredItemActionController();
         _quickUseService = CreateQuickUseService();
-        _iconPrewarmController = CreateIconPrewarmController();
         _updateController = CreateUpdateController();
         _itemRegistry.DurabilityChanged += HandleInventoryItemDurabilityChanged;
 
@@ -325,7 +309,6 @@ public class InventoryController : MonoBehaviour
     private void Start()
     {
         RefreshWeightState();
-        IconPrewarmController.PrewarmAsync(destroyCancellationToken).Forget(Debug.LogException);
     }
 
     private void Update()
@@ -350,7 +333,7 @@ public class InventoryController : MonoBehaviour
     public bool TryInsertItem(ItemData itemData) => TryInsertItem(itemData, 1);
     public bool TryInsertItem(ItemData itemData, int amount) => TryInsertItem(itemData, amount, null);
     public bool TryInsertItem(ItemData itemData, int amount, float? durabilityPercent) => TryInsertItem(itemData, amount, durabilityPercent, null);
-    public bool TryInsertItem(ItemData itemData, int amount, float? durabilityPercent, IReadOnlyList<ItemData> installedModules) => ItemPlacementService.TryInsertItem(itemData, amount, durabilityPercent, installedModules, IconPrewarmController.IconsReady, GetInsertionGrid(), _defaultItemGrid);
+    public bool TryInsertItem(ItemData itemData, int amount, float? durabilityPercent, IReadOnlyList<ItemData> installedModules) => ItemPlacementService.TryInsertItem(itemData, amount, durabilityPercent, installedModules, GetInsertionGrid(), _defaultItemGrid);
 
     public int GetInventoryItemCount(ItemData itemData)
     {
@@ -707,7 +690,7 @@ public class InventoryController : MonoBehaviour
     {
         int slotIndex = PlayerInput.GetInventoryQuickUseSlotIndexPressed();
 
-        if (slotIndex < 0 || _dragState.HasSelectedItem || IconPrewarmController.IconsReady == false)
+        if (slotIndex < 0 || _dragState.HasSelectedItem)
         {
             return;
         }

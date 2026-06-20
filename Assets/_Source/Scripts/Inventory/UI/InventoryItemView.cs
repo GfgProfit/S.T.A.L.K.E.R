@@ -9,6 +9,7 @@ internal sealed class InventoryItemView : IView<InventoryItemViewModel>, IDispos
     private readonly Transform _ownerTransform;
     private readonly RectTransform _rootRectTransform;
     private readonly Image _itemImage;
+    private readonly RectTransform _iconLoadingRectTransform;
     private readonly Image _cellBackgroundImage;
     private readonly TMP_Text _countText;
     private readonly RectTransform _countTextRectTransform;
@@ -27,6 +28,7 @@ internal sealed class InventoryItemView : IView<InventoryItemViewModel>, IDispos
 
     private RectTransform _cellGridRoot;
     private IDisposable _iconSubscription;
+    private IDisposable _iconLoadingSubscription;
     private IDisposable _cellBackgroundColorSubscription;
     private IDisposable _cellBackgroundVisibleSubscription;
     private IDisposable _countTextSubscription;
@@ -39,11 +41,12 @@ internal sealed class InventoryItemView : IView<InventoryItemViewModel>, IDispos
     private IDisposable _statusIconSubscription;
     private IDisposable _statusIconVisibleSubscription;
 
-    public InventoryItemView(Transform ownerTransform, RectTransform rootRectTransform, Image itemImage, Image cellBackgroundImage, TMP_Text countText, RectTransform countTextRectTransform, TMP_Text shortNameText, RectTransform shortNameTextRectTransform, RectTransform durabilityBackgroundRectTransform, Graphic durabilityBackgroundGraphic, RectTransform durabilityFillRectTransform, Graphic durabilityFillGraphic, Image statusIconImage, RectTransform statusIconRectTransform, Func<bool> isVisuallyRotated, Func<int> getVisualWidth, Func<int> getVisualHeight, Func<float> getCurrentDurabilityPercent)
+    public InventoryItemView(Transform ownerTransform, RectTransform rootRectTransform, Image itemImage, RectTransform iconLoadingRectTransform, Image cellBackgroundImage, TMP_Text countText, RectTransform countTextRectTransform, TMP_Text shortNameText, RectTransform shortNameTextRectTransform, RectTransform durabilityBackgroundRectTransform, Graphic durabilityBackgroundGraphic, RectTransform durabilityFillRectTransform, Graphic durabilityFillGraphic, Image statusIconImage, RectTransform statusIconRectTransform, Func<bool> isVisuallyRotated, Func<int> getVisualWidth, Func<int> getVisualHeight, Func<float> getCurrentDurabilityPercent)
     {
         _ownerTransform = ownerTransform;
         _rootRectTransform = rootRectTransform;
         _itemImage = itemImage;
+        _iconLoadingRectTransform = iconLoadingRectTransform;
         _cellBackgroundImage = cellBackgroundImage;
         _countText = countText;
         _countTextRectTransform = countTextRectTransform;
@@ -71,6 +74,7 @@ internal sealed class InventoryItemView : IView<InventoryItemViewModel>, IDispos
         }
 
         _iconSubscription = viewModel.Icon.Subscribe(SetItemIcon);
+        _iconLoadingSubscription = viewModel.IconLoading.Subscribe(SetIconLoading);
         _cellBackgroundColorSubscription = viewModel.CellBackgroundColor.Subscribe(SetCellBackgroundColor);
         _cellBackgroundVisibleSubscription = viewModel.CellBackgroundVisible.Subscribe(SetCellBackgroundVisible);
         _countTextSubscription = viewModel.CountText.Subscribe(SetCountText);
@@ -87,6 +91,7 @@ internal sealed class InventoryItemView : IView<InventoryItemViewModel>, IDispos
     public void Unbind()
     {
         _iconSubscription?.Dispose();
+        _iconLoadingSubscription?.Dispose();
         _cellBackgroundColorSubscription?.Dispose();
         _cellBackgroundVisibleSubscription?.Dispose();
         _countTextSubscription?.Dispose();
@@ -99,6 +104,7 @@ internal sealed class InventoryItemView : IView<InventoryItemViewModel>, IDispos
         _statusIconSubscription?.Dispose();
         _statusIconVisibleSubscription?.Dispose();
         _iconSubscription = null;
+        _iconLoadingSubscription = null;
         _cellBackgroundColorSubscription = null;
         _cellBackgroundVisibleSubscription = null;
         _countTextSubscription = null;
@@ -211,6 +217,26 @@ internal sealed class InventoryItemView : IView<InventoryItemViewModel>, IDispos
         }
 
         _itemImage.sprite = icon;
+    }
+
+    private void SetIconLoading(bool loading)
+    {
+        if (_itemImage != null)
+        {
+            _itemImage.gameObject.SetActive(loading == false);
+        }
+
+        if (_iconLoadingRectTransform == null)
+        {
+            return;
+        }
+
+        _iconLoadingRectTransform.gameObject.SetActive(loading);
+
+        if (loading == false)
+        {
+            _iconLoadingRectTransform.localRotation = Quaternion.identity;
+        }
     }
 
     private void SetCellBackgroundColor(Color color)

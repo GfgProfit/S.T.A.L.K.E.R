@@ -12,6 +12,8 @@ public class InventoryItem : MonoBehaviour, IView<InventoryItemViewModel>
     [SerializeField] [Range(0f, 100f)] private float _currentDurabilityPercent = 100f;
     [SerializeField] private RectTransform _rectTransform;
     [SerializeField] private Image _itemImage;
+    [SerializeField] private RectTransform _iconLoadingRectTransform;
+    [SerializeField] [Min(0f)] private float _iconLoadingRotationSpeed = 180f;
     [SerializeField] private Image _cellBackgroundImage;
     [SerializeField] private TMP_Text _countText;
     [SerializeField] private RectTransform _countTextRectTransform;
@@ -124,12 +126,12 @@ public class InventoryItem : MonoBehaviour, IView<InventoryItemViewModel>
         RefreshDurabilityVisual(true);
         RefreshShortNameText();
 
-        RefreshIcon();
         RebuildCellVisuals();
         RefreshStatusIcon();
 
         if (ItemData == null)
         {
+            RefreshIcon();
             return;
         }
 
@@ -137,6 +139,7 @@ public class InventoryItem : MonoBehaviour, IView<InventoryItemViewModel>
         ApplyRotation();
         SetCellVisualsVisible(true);
         RefreshStatusIcon();
+        RefreshIcon();
     }
 
     public void SetAmount(int amount) => SetAmountInternal(amount);
@@ -165,8 +168,18 @@ public class InventoryItem : MonoBehaviour, IView<InventoryItemViewModel>
         EnsureViewModel();
         ApplySerializedVisualSettings();
         ItemData[] installedModules = CopyInstalledModules();
-        _viewModel.SetIcon(_visualState.GetCachedIcon(ItemData, BaseWidth, BaseHeight, installedModules));
         int requestVersion = ++_iconRequestVersion;
+
+        if (_visualState.TryGetCachedIcon(ItemData, BaseWidth, BaseHeight, installedModules, out Sprite cachedIcon))
+        {
+            _viewModel.SetIcon(cachedIcon);
+            _viewModel.SetIconLoading(false);
+            return;
+        }
+
+        _viewModel.SetIcon(null);
+        _viewModel.SetIconLoading(true);
+        RotateIconLoadingAsync(requestVersion, destroyCancellationToken).Forget();
         RefreshIconAsync(ItemData, BaseWidth, BaseHeight, installedModules, requestVersion).Forget(Debug.LogException);
     }
 
@@ -177,10 +190,10 @@ public class InventoryItem : MonoBehaviour, IView<InventoryItemViewModel>
         _visualState.ApplySlotVisual(slotWidth, slotHeight, useGeneratedSlotIcon);
 
         ApplyVisualSize();
-        RefreshIcon();
         RebuildCellVisuals();
         ApplyRotation();
         SetCellVisualsVisible(true);
+        RefreshIcon();
     }
 
     internal void RestoreDefaultVisual()
@@ -188,10 +201,10 @@ public class InventoryItem : MonoBehaviour, IView<InventoryItemViewModel>
         ApplySerializedVisualSettings();
         _visualState.RestoreDefaultVisual();
         ApplyVisualSize();
-        RefreshIcon();
         RebuildCellVisuals();
         ApplyRotation();
         SetCellVisualsVisible(true);
+        RefreshIcon();
     }
 
     internal void SetCellVisualsVisible(bool visible)
@@ -356,7 +369,7 @@ public class InventoryItem : MonoBehaviour, IView<InventoryItemViewModel>
 
     private void EnsureItemView()
     {
-        _itemView ??= new(transform, _rectTransform, _itemImage, _cellBackgroundImage, _countText, _countTextRectTransform, _shortNameText, _shortNameTextRectTransform, _durabilityBackgroundRectTransform, _durabilityBackgroundGraphic, _durabilityFillRectTransform, _durabilityFillGraphic, _statusIconImage, _statusIconRectTransform, () => IsVisuallyRotated, () => VisualWidth, () => VisualHeight, () => CurrentDurabilityPercent);
+        _itemView ??= new(transform, _rectTransform, _itemImage, _iconLoadingRectTransform, _cellBackgroundImage, _countText, _countTextRectTransform, _shortNameText, _shortNameTextRectTransform, _durabilityBackgroundRectTransform, _durabilityBackgroundGraphic, _durabilityFillRectTransform, _durabilityFillGraphic, _statusIconImage, _statusIconRectTransform, () => IsVisuallyRotated, () => VisualWidth, () => VisualHeight, () => CurrentDurabilityPercent);
     }
 
     private void EnsureViewModel()
@@ -386,24 +399,43 @@ public class InventoryItem : MonoBehaviour, IView<InventoryItemViewModel>
     {
         SyncSerializedStateFromState();
         ApplyVisualSize();
-        RefreshIcon();
         RebuildCellVisuals();
         ApplyRotation();
         SetCellVisualsVisible(_visualState.CellVisualsVisible);
+        RefreshIcon();
     }
 
     private async UniTask RefreshIconAsync(ItemData itemData, int width, int height, ItemData[] installedModules, int requestVersion)
     {
-        (bool isCanceled, Sprite icon) = await _visualState
-            .GetIconAsync(itemData, width, height, installedModules, destroyCancellationToken)
-            .SuppressCancellationThrow();
-
-        if (isCanceled || requestVersion != _iconRequestVersion || _viewModel == null)
+        try
         {
-            return;
-        }
+            (bool isCanceled, Sprite icon) = await _visualState
+                .GetIconAsync(itemData, width, height, installedModules, destroyCancellationToken)
+                .SuppressCancellationThrow();
 
-        _viewModel.SetIcon(icon);
+            if (isCanceled || requestVersion != _iconRequestVersion || _viewModel == null)
+            {
+                return;
+            }
+
+            _viewModel.SetIcon(icon);
+        }
+        finally
+        {
+            if (requestVersion == _iconRequestVersion && _viewModel != null)
+            {
+                _viewModel.SetIconLoading(false);
+            }
+        }
+    }
+
+    private async UniTask RotateIconLoadingAsync(int requestVersion, System.Threading.CancellationToken cancellationToken)
+    {
+        while (requestVersion == _iconRequestVersion && _iconLoadingRectTransform != null && cancellationToken.IsCancellationRequested == false)
+        {
+            _iconLoadingRectTransform.Rotate(0f, 0f, -_iconLoadingRotationSpeed * Time.unscaledDeltaTime);
+            await UniTask.Yield(PlayerLoopTiming.Update);
+        }
     }
 
     private ItemData[] CopyInstalledModules()
