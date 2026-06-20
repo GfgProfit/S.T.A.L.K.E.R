@@ -1,6 +1,12 @@
 using UnityEngine;
 
-internal readonly struct IconRenderProfile
+public enum ItemIconProfileType
+{
+    Default = 0,
+    Slot = 1
+}
+
+public readonly struct IconRenderProfile
 {
     public readonly bool UseSlotSettings;
     public readonly int CellWidth;
@@ -14,6 +20,8 @@ internal readonly struct IconRenderProfile
     public readonly bool UseDirectionalLight;
     public readonly Vector3 LightEulerAngles;
     public readonly float LightIntensity;
+
+    public ItemIconProfileType ProfileType => UseSlotSettings ? ItemIconProfileType.Slot : ItemIconProfileType.Default;
 
     private IconRenderProfile(bool useSlotSettings, int cellWidth, int cellHeight, int textureWidth, int textureHeight, Vector3 modelEulerAngles, Vector3 modelScale, Vector3 cameraEulerAngles, float padding, bool useDirectionalLight, Vector3 lightEulerAngles, float lightIntensity)
     {

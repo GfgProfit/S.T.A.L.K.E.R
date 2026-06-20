@@ -41,7 +41,7 @@ public sealed class FirstPersonWeaponModule : MonoBehaviour
         return ConfigurationSatisfied(installedModules);
     }
 
-    internal bool ConfigurationSatisfied(IReadOnlyList<ItemData> installedModules)
+    public bool ConfigurationSatisfied(IReadOnlyList<ItemData> installedModules)
     {
         return RequirementsSatisfied(installedModules) && IncompatibilitiesSatisfied(installedModules);
     }

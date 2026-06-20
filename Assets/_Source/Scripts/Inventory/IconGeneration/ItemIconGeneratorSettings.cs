@@ -92,7 +92,7 @@ public class ItemIconGeneratorSettings : ScriptableObject
 
     public int RenderLayer => Mathf.Clamp(_renderLayer, 0, 31);
     public IReadOnlyList<ItemData> PrewarmItems => _prewarmItems;
-    internal IReadOnlyList<ItemIconSlotProfile> PrewarmSlotProfiles => _prewarmSlotProfiles;
+    public IReadOnlyList<ItemIconSlotProfile> PrewarmSlotProfiles => _prewarmSlotProfiles;
     public float PrewarmFrameBudgetMilliseconds => Mathf.Max(0.5f, _prewarmFrameBudgetMilliseconds);
     public int RenderLayerMask => 1 << RenderLayer;
     public int RenderingLayer => Mathf.Clamp(_renderingLayer, 0, 15);
@@ -152,6 +152,7 @@ public class ItemIconGeneratorSettings : ScriptableObject
     public TonemappingMode TonemappingMode => _tonemappingMode;
 
     public int BuildHash() => ItemIconGeneratorSettingsHashBuilder.BuildHash(this);
+    public ulong BuildStableHash() => ItemIconGeneratorSettingsHashBuilder.BuildStableHash(this);
 
     public static ItemIconGeneratorSettings LoadDefault()
     {

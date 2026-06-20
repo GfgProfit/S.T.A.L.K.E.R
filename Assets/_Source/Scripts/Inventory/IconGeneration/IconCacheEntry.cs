@@ -17,4 +17,5 @@ internal sealed class IconCacheEntry
 
     public static IconCacheEntry CreateGenerated(Sprite sprite, Texture2D texture) => new(sprite, texture, true, true);
     public static IconCacheEntry CreateFallback(Sprite sprite) => new(sprite, null, false, false);
+    public static IconCacheEntry CreateExternal(Sprite sprite) => new(sprite, null, false, false);
 }

@@ -4,66 +4,68 @@ internal static class ItemIconGeneratorSettingsHashBuilder
 {
     public static int BuildHash(ItemIconGeneratorSettings settings)
     {
-        unchecked
-        {
-            int hash = 17;
-            hash = hash * 31 + settings.RenderLayer;
-            hash = hash * 31 + settings.RenderingLayer;
-            hash = hash * 31 + HashVector(settings.RenderOrigin);
-            hash = hash * 31 + (settings.ExcludeIconLayerFromSceneLights ? 1 : 0);
-            hash = hash * 31 + (int)settings.RendererLightProbeUsage;
-            hash = hash * 31 + (int)settings.RendererReflectionProbeUsage;
-            hash = hash * 31 + (settings.RendererReceiveShadows ? 1 : 0);
-            hash = hash * 31 + (int)settings.RenderTextureFormat;
-            hash = hash * 31 + (settings.AllowHdr ? 1 : 0);
-            hash = hash * 31 + (settings.UseCameraMsaa ? 1 : 0);
-            hash = hash * 31 + Quantize(settings.CameraDistanceMultiplier);
-            hash = hash * 31 + Quantize(settings.CameraDistanceOffset);
-            hash = hash * 31 + Quantize(settings.NearClipPlane);
-            hash = hash * 31 + Quantize(settings.FarClipBoundsMultiplier);
-            hash = hash * 31 + Quantize(settings.FarClipOffset);
-            hash = hash * 31 + (settings.EnableDirectSpecularLighting ? 1 : 0);
-            hash = hash * 31 + (settings.EnableExposureControl ? 1 : 0);
-            hash = hash * 31 + (settings.EnableAtmosphericScattering ? 1 : 0);
-            hash = hash * 31 + (settings.EnablePostProcess ? 1 : 0);
-            hash = hash * 31 + (settings.EnableColorGrading ? 1 : 0);
-            hash = hash * 31 + (settings.EnableTonemapping ? 1 : 0);
-            hash = hash * 31 + (settings.EnableVolumetrics ? 1 : 0);
-            hash = hash * 31 + (settings.EnableSkyReflection ? 1 : 0);
-            hash = hash * 31 + (settings.UseFrontFillLight ? 1 : 0);
-            hash = hash * 31 + Quantize(settings.FrontFillLightIntensityMultiplier);
-            hash = hash * 31 + HashVector(settings.FrontFillLightCameraDirection);
-            hash = hash * 31 + (settings.UseSideFillLight ? 1 : 0);
-            hash = hash * 31 + Quantize(settings.SideFillLightIntensityMultiplier);
-            hash = hash * 31 + HashVector(settings.SideFillLightCameraDirection);
-            hash = hash * 31 + (settings.UseRimLight ? 1 : 0);
-            hash = hash * 31 + Quantize(settings.RimLightIntensityMultiplier);
-            hash = hash * 31 + HashVector(settings.RimLightCameraDirection);
-            hash = hash * 31 + (int)settings.GeneratedLightShadows;
-            hash = hash * 31 + (int)settings.SkyAmbientMode;
-            hash = hash * 31 + (int)settings.SkyRenderingSpace;
-            hash = hash * 31 + (int)settings.PhysicallyBasedSkyModel;
-            hash = hash * 31 + HashColor(settings.PhysicallyBasedSkyGroundTint);
-            hash = hash * 31 + (settings.FogEnabled ? 1 : 0);
-            hash = hash * 31 + (int)settings.FogColorMode;
-            hash = hash * 31 + Quantize(settings.MaxFogDistance);
-            hash = hash * 31 + Quantize(settings.MeanFreePath);
-            hash = hash * 31 + (settings.EnableVolumetricFog ? 1 : 0);
-            hash = hash * 31 + Quantize(settings.FogAnisotropy);
-            hash = hash * 31 + (int)settings.ExposureMode;
-            hash = hash * 31 + Quantize(settings.FixedExposure);
-            hash = hash * 31 + Quantize(settings.ExposureCompensation);
-            hash = hash * 31 + Quantize(settings.ExposureLimitMin);
-            hash = hash * 31 + Quantize(settings.ExposureLimitMax);
-            hash = hash * 31 + HashVector(settings.HistogramPercentages);
-            hash = hash * 31 + Quantize(settings.PostExposure);
-            hash = hash * 31 + Quantize(settings.Contrast);
-            hash = hash * 31 + HashColor(settings.ColorFilter);
-            hash = hash * 31 + Quantize(settings.HueShift);
-            hash = hash * 31 + Quantize(settings.Saturation);
-            hash = hash * 31 + (int)settings.TonemappingMode;
-            return hash;
-        }
+        ulong stableHash = BuildStableHash(settings);
+        return unchecked((int)(stableHash ^ (stableHash >> 32)));
+    }
+
+    public static ulong BuildStableHash(ItemIconGeneratorSettings settings)
+    {
+        ulong hash = ItemIconStableHash.Begin();
+        hash = ItemIconStableHash.Add(hash, settings.RenderLayer);
+        hash = ItemIconStableHash.Add(hash, settings.RenderingLayer);
+        hash = ItemIconStableHash.Add(hash, settings.RenderOrigin);
+        hash = ItemIconStableHash.Add(hash, settings.ExcludeIconLayerFromSceneLights);
+        hash = ItemIconStableHash.Add(hash, (int)settings.RendererLightProbeUsage);
+        hash = ItemIconStableHash.Add(hash, (int)settings.RendererReflectionProbeUsage);
+        hash = ItemIconStableHash.Add(hash, settings.RendererReceiveShadows);
+        hash = ItemIconStableHash.Add(hash, (int)settings.RenderTextureFormat);
+        hash = ItemIconStableHash.Add(hash, settings.AllowHdr);
+        hash = ItemIconStableHash.Add(hash, settings.UseCameraMsaa);
+        hash = ItemIconStableHash.Add(hash, settings.CameraDistanceMultiplier);
+        hash = ItemIconStableHash.Add(hash, settings.CameraDistanceOffset);
+        hash = ItemIconStableHash.Add(hash, settings.NearClipPlane);
+        hash = ItemIconStableHash.Add(hash, settings.FarClipBoundsMultiplier);
+        hash = ItemIconStableHash.Add(hash, settings.FarClipOffset);
+        hash = ItemIconStableHash.Add(hash, settings.EnableDirectSpecularLighting);
+        hash = ItemIconStableHash.Add(hash, settings.EnableExposureControl);
+        hash = ItemIconStableHash.Add(hash, settings.EnableAtmosphericScattering);
+        hash = ItemIconStableHash.Add(hash, settings.EnablePostProcess);
+        hash = ItemIconStableHash.Add(hash, settings.EnableColorGrading);
+        hash = ItemIconStableHash.Add(hash, settings.EnableTonemapping);
+        hash = ItemIconStableHash.Add(hash, settings.EnableVolumetrics);
+        hash = ItemIconStableHash.Add(hash, settings.EnableSkyReflection);
+        hash = ItemIconStableHash.Add(hash, settings.UseFrontFillLight);
+        hash = ItemIconStableHash.Add(hash, settings.FrontFillLightIntensityMultiplier);
+        hash = ItemIconStableHash.Add(hash, settings.FrontFillLightCameraDirection);
+        hash = ItemIconStableHash.Add(hash, settings.UseSideFillLight);
+        hash = ItemIconStableHash.Add(hash, settings.SideFillLightIntensityMultiplier);
+        hash = ItemIconStableHash.Add(hash, settings.SideFillLightCameraDirection);
+        hash = ItemIconStableHash.Add(hash, settings.UseRimLight);
+        hash = ItemIconStableHash.Add(hash, settings.RimLightIntensityMultiplier);
+        hash = ItemIconStableHash.Add(hash, settings.RimLightCameraDirection);
+        hash = ItemIconStableHash.Add(hash, (int)settings.GeneratedLightShadows);
+        hash = ItemIconStableHash.Add(hash, (int)settings.SkyAmbientMode);
+        hash = ItemIconStableHash.Add(hash, (int)settings.SkyRenderingSpace);
+        hash = ItemIconStableHash.Add(hash, (int)settings.PhysicallyBasedSkyModel);
+        hash = ItemIconStableHash.Add(hash, settings.PhysicallyBasedSkyGroundTint);
+        hash = ItemIconStableHash.Add(hash, settings.FogEnabled);
+        hash = ItemIconStableHash.Add(hash, (int)settings.FogColorMode);
+        hash = ItemIconStableHash.Add(hash, settings.MaxFogDistance);
+        hash = ItemIconStableHash.Add(hash, settings.MeanFreePath);
+        hash = ItemIconStableHash.Add(hash, settings.EnableVolumetricFog);
+        hash = ItemIconStableHash.Add(hash, settings.FogAnisotropy);
+        hash = ItemIconStableHash.Add(hash, (int)settings.ExposureMode);
+        hash = ItemIconStableHash.Add(hash, settings.FixedExposure);
+        hash = ItemIconStableHash.Add(hash, settings.ExposureCompensation);
+        hash = ItemIconStableHash.Add(hash, settings.ExposureLimitMin);
+        hash = ItemIconStableHash.Add(hash, settings.ExposureLimitMax);
+        hash = ItemIconStableHash.Add(hash, settings.HistogramPercentages);
+        hash = ItemIconStableHash.Add(hash, settings.PostExposure);
+        hash = ItemIconStableHash.Add(hash, settings.Contrast);
+        hash = ItemIconStableHash.Add(hash, settings.ColorFilter);
+        hash = ItemIconStableHash.Add(hash, settings.HueShift);
+        hash = ItemIconStableHash.Add(hash, settings.Saturation);
+        return ItemIconStableHash.Add(hash, (int)settings.TonemappingMode);
     }
 
     private static int HashVector(Vector3 value)

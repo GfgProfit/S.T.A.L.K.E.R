@@ -44,6 +44,17 @@ internal static class ItemIconRenderer
         ItemIconRenderSession renderSession,
         CancellationToken cancellationToken)
     {
+        return await RenderIconTextureAsync(itemData, installedModules, renderProfile, renderSession, true, cancellationToken);
+    }
+
+    public static async UniTask<Texture2D> RenderIconTextureAsync(
+        ItemData itemData,
+        IReadOnlyList<ItemData> installedModules,
+        IconRenderProfile renderProfile,
+        ItemIconRenderSession renderSession,
+        bool makeNoLongerReadable,
+        CancellationToken cancellationToken)
+    {
         cancellationToken.ThrowIfCancellationRequested();
         await UniTask.SwitchToMainThread(cancellationToken);
 
@@ -64,7 +75,7 @@ internal static class ItemIconRenderer
 
             cancellationToken.ThrowIfCancellationRequested();
             rawResult.Texture.SetPixels32(processedPixels);
-            rawResult.Texture.Apply(false, true);
+            rawResult.Texture.Apply(false, makeNoLongerReadable);
             return rawResult.Texture;
         }
         catch

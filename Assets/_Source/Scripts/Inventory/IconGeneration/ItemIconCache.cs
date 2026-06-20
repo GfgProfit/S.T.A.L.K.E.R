@@ -37,16 +37,22 @@ public static class ItemIconCache
             return true;
         }
 
+        ItemIconGeneratorSettings settings = ItemIconGeneratorSettings.LoadDefault();
+        IconRenderProfile renderProfile = IconRenderProfile.CreateDefault(itemData, width, height);
+        IconCacheKey key = BuildCacheKey(itemData, installedModules, settings, renderProfile);
+
+        if (TryGetCachedSprite(key, out icon))
+        {
+            return true;
+        }
+
         if (itemData.HasRuntimeIconSource() == false)
         {
             icon = itemData.FallbackIcon;
             return true;
         }
 
-        ItemIconGeneratorSettings settings = ItemIconGeneratorSettings.LoadDefault();
-        IconRenderProfile renderProfile = IconRenderProfile.CreateDefault(itemData, width, height);
-        IconCacheKey key = BuildCacheKey(itemData, installedModules, settings, renderProfile);
-        return TryGetCachedSprite(key, out icon);
+        return false;
     }
 
     internal static bool TryGetSlotIcon(ItemData itemData, int slotWidth, int slotHeight, IReadOnlyList<ItemData> installedModules, out Sprite icon)
@@ -57,16 +63,22 @@ public static class ItemIconCache
             return true;
         }
 
+        ItemIconGeneratorSettings settings = ItemIconGeneratorSettings.LoadDefault();
+        IconRenderProfile renderProfile = IconRenderProfile.CreateSlot(itemData, slotWidth, slotHeight);
+        IconCacheKey key = BuildCacheKey(itemData, installedModules, settings, renderProfile);
+
+        if (TryGetCachedSprite(key, out icon))
+        {
+            return true;
+        }
+
         if (itemData.HasRuntimeIconSource() == false)
         {
             icon = itemData.FallbackIcon;
             return true;
         }
 
-        ItemIconGeneratorSettings settings = ItemIconGeneratorSettings.LoadDefault();
-        IconRenderProfile renderProfile = IconRenderProfile.CreateSlot(itemData, slotWidth, slotHeight);
-        IconCacheKey key = BuildCacheKey(itemData, installedModules, settings, renderProfile);
-        return TryGetCachedSprite(key, out icon);
+        return false;
     }
 
     public static Sprite GetOrCreate(ItemData itemData, int width, int height, IReadOnlyList<ItemData> installedModules = null)
@@ -74,11 +86,6 @@ public static class ItemIconCache
         if (itemData == null)
         {
             return null;
-        }
-
-        if (itemData.HasRuntimeIconSource() == false)
-        {
-            return itemData.FallbackIcon;
         }
 
         ItemIconGeneratorSettings settings = ItemIconGeneratorSettings.LoadDefault();
@@ -92,11 +99,6 @@ public static class ItemIconCache
         if (itemData == null)
         {
             return null;
-        }
-
-        if (itemData.HasRuntimeIconSource() == false)
-        {
-            return itemData.FallbackIcon;
         }
 
         ItemIconGeneratorSettings settings = ItemIconGeneratorSettings.LoadDefault();
@@ -269,19 +271,19 @@ public static class ItemIconCache
         IconRenderProfile renderProfile,
         CancellationToken cancellationToken)
     {
-        if (itemData.HasRuntimeIconSource() == false)
-        {
-            return itemData.FallbackIcon;
-        }
-
         await UniTask.SwitchToMainThread(cancellationToken);
 
         int settingsHash = settings.BuildHash();
-        IconCacheKey key = BuildCacheKey(itemData, installedModules, settingsHash, renderProfile);
+        IconCacheKey key = BuildCacheKey(itemData, installedModules, settings, renderProfile);
 
         if (TryGetCachedSprite(key, out Sprite cachedSprite))
         {
             return cachedSprite;
+        }
+
+        if (itemData.HasRuntimeIconSource() == false)
+        {
+            return itemData.FallbackIcon;
         }
 
         if (_inFlight.TryGetValue(key, out UniTaskCompletionSource<Sprite> existingGeneration))
@@ -760,7 +762,7 @@ public static class ItemIconCache
 
     private static IconCacheKey BuildCacheKey(ItemData itemData, IReadOnlyList<ItemData> installedModules, ItemIconGeneratorSettings settings, IconRenderProfile renderProfile)
     {
-        return BuildCacheKey(itemData, installedModules, settings.BuildHash(), renderProfile);
+        return ItemIconStableKeyBuilder.Build(itemData, installedModules, settings, renderProfile);
     }
 
     private static IconCacheKey BuildCacheKey(ItemData itemData, IReadOnlyList<ItemData> installedModules, int generatorHash, IconRenderProfile renderProfile)
@@ -768,8 +770,15 @@ public static class ItemIconCache
         int iconHash = renderProfile.UseSlotSettings
             ? itemData.BuildSlotIconHash(renderProfile.CellWidth, renderProfile.CellHeight, installedModules)
             : itemData.BuildIconHash(renderProfile.CellWidth, renderProfile.CellHeight, installedModules);
+        ulong transientSignature = ((ulong)(uint)generatorHash << 32) | (uint)iconHash;
 
-        return new IconCacheKey(itemData.GetInstanceID(), iconHash, generatorHash);
+        return new IconCacheKey(
+            itemData.ItemId,
+            ItemIconModuleKeyCache.GetCanonicalKey(installedModules),
+            renderProfile.CellWidth,
+            renderProfile.CellHeight,
+            renderProfile.ProfileType,
+            transientSignature);
     }
 
     private static bool TryGetCachedSprite(IconCacheKey key, out Sprite sprite)
@@ -777,6 +786,14 @@ public static class ItemIconCache
         if (_cache.TryGetValue(key, out IconCacheEntry entry) && entry.Sprite != null)
         {
             sprite = entry.Sprite;
+            return true;
+        }
+
+        BakedItemIconCatalog catalog = BakedItemIconCatalog.LoadDefault();
+
+        if (catalog != null && catalog.TryGetSprite(key, out sprite))
+        {
+            _cache[key] = IconCacheEntry.CreateExternal(sprite);
             return true;
         }
 
@@ -833,7 +850,7 @@ public static class ItemIconCache
 }
 
 [Serializable]
-internal struct ItemIconSlotProfile : IEquatable<ItemIconSlotProfile>
+public struct ItemIconSlotProfile : IEquatable<ItemIconSlotProfile>
 {
     [SerializeField] private bool _restrictItemType;
     [SerializeField] private ItemType _acceptedItemType;
@@ -850,6 +867,8 @@ internal struct ItemIconSlotProfile : IEquatable<ItemIconSlotProfile>
 
     public int Width => Mathf.Max(1, _width);
     public int Height => Mathf.Max(1, _height);
+    public bool RestrictsItemType => _restrictItemType;
+    public ItemType AcceptedItemType => _acceptedItemType;
 
     public bool Accepts(ItemData itemData) => itemData != null && (_restrictItemType == false || itemData.ItemType == _acceptedItemType);
     public bool Equals(ItemIconSlotProfile other) => _restrictItemType == other._restrictItemType && _acceptedItemType == other._acceptedItemType && Width == other.Width && Height == other.Height;
