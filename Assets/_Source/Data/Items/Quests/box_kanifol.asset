@@ -12,6 +12,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 737e751cd05516846acf43daad139c9e, type: 3}
   m_Name: box_kanifol
   m_EditorClassIdentifier: 
+  _itemId: c4130578e47791e41aa278f103966ff6
   _itemName: "\u0411\u0430\u043D\u043A\u0430 \u043A\u0430\u043D\u0438\u0444\u043E\u043B\u0438"
   _shortName: 
   _description: "\u041A\u0430\u043D\u0438\u0444\u043E\u043B\u044C \u0434\u043B\u044F

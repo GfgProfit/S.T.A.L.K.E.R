@@ -12,6 +12,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 737e751cd05516846acf43daad139c9e, type: 3}
   m_Name: HELM TACTIC
   m_EditorClassIdentifier: 
+  _itemId: a1c3e208050fd77468feaf5cd42b2840
   _itemName: "\u0422\u0430\u043A\u0442\u0438\u0447\u0435\u0441\u043A\u0438\u0439
     \u0448\u043B\u0435\u043C"
   _shortName: "\u0422\u0430\u043A\u0442"

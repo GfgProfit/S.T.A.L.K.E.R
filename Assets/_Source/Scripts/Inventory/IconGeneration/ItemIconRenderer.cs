@@ -241,9 +241,6 @@ internal sealed class ItemIconRenderSession : IDisposable
                 name = $"{itemData.name} Runtime Icon Texture"
             };
 
-            texture.SetPixels32(itemPixels);
-            texture.Apply(false, false);
-
             return new RawIconRenderResult(texture, itemPixels, textureWidth, textureHeight);
         }
         finally

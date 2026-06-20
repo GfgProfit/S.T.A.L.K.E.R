@@ -12,6 +12,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 737e751cd05516846acf43daad139c9e, type: 3}
   m_Name: identity_card
   m_EditorClassIdentifier: 
+  _itemId: 147c96f17ddbe3b41bf5642814f8a9ed
   _itemName: "\u041F\u0440\u043E\u043F\u0443\u0441\u043A"
   _shortName: 
   _description: "\u041F\u0440\u043E\u043F\u0443\u0441\u043A"

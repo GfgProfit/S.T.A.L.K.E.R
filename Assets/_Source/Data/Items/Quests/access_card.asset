@@ -12,6 +12,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 737e751cd05516846acf43daad139c9e, type: 3}
   m_Name: access_card
   m_EditorClassIdentifier: 
+  _itemId: 9747c533f632270468df8646d2813957
   _itemName: "\u0421\u0442\u0430\u0440\u0430\u044F \u043C\u0430\u0433\u043D\u0438\u0442\u043D\u0430\u044F
     \u043A\u043B\u044E\u0447-\u043A\u0430\u0440\u0442\u0430"
   _shortName: 

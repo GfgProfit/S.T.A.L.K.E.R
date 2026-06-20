@@ -12,6 +12,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 737e751cd05516846acf43daad139c9e, type: 3}
   m_Name: conserva
   m_EditorClassIdentifier: 
+  _itemId: 12ad837c88943d84781736e595b6ccaf
   _itemName: "\u041A\u043E\u043D\u0441\u0435\u0440\u0432\u044B \xAB\u0417\u0430\u0432\u0442\u0440\u0430\u043A
     \u0442\u0443\u0440\u0438\u0441\u0442\u0430\xBB"
   _shortName: 

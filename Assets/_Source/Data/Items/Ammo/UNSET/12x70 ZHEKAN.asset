@@ -12,6 +12,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 737e751cd05516846acf43daad139c9e, type: 3}
   m_Name: 12x70 ZHEKAN
   m_EditorClassIdentifier: 
+  _itemId: 0622d398b3cbb9d49a53a77aff79a425
   _itemName: "12x76 \u0436\u0435\u043A\u0430\u043D"
   _shortName: "\u0416\u0435\u043A\u0430\u043D"
   _description: "\u041F\u0430\u0442\u0440\u043E\u043D 12-\u0433\u043E \u043A\u0430\u043B\u0438\u0431\u0440\u0430

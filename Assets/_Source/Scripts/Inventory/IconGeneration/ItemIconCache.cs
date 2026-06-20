@@ -11,7 +11,11 @@ public static class ItemIconCache
     private static readonly Dictionary<IconCacheKey, UniTaskCompletionSource<Sprite>> _inFlight = new();
     private static readonly Queue<StandaloneGenerationRequest> _standaloneQueue = new();
     private static CancellationTokenSource _generationCancellation = new();
+    private static ItemIconRenderSession _standaloneRenderSession;
+    private static ItemIconGeneratorSettings _standaloneRenderSettings;
+    private static int _standaloneRenderSettingsHash;
     private static bool _standaloneWorkerRunning;
+    private static bool _releaseStandaloneRenderSessionWhenWorkerStops;
 
     internal static bool IsPrewarmed { get; private set; }
 
@@ -223,6 +227,15 @@ public static class ItemIconCache
         _inFlight.Clear();
         _standaloneQueue.Clear();
 
+        if (_standaloneWorkerRunning)
+        {
+            _releaseStandaloneRenderSessionWhenWorkerStops = true;
+        }
+        else
+        {
+            ReleaseStandaloneRenderSession();
+        }
+
         foreach (IconCacheEntry entry in _cache.Values)
         {
             if (entry == null)
@@ -263,7 +276,8 @@ public static class ItemIconCache
 
         await UniTask.SwitchToMainThread(cancellationToken);
 
-        IconCacheKey key = BuildCacheKey(itemData, installedModules, settings, renderProfile);
+        int settingsHash = settings.BuildHash();
+        IconCacheKey key = BuildCacheKey(itemData, installedModules, settingsHash, renderProfile);
 
         if (TryGetCachedSprite(key, out Sprite cachedSprite))
         {
@@ -279,7 +293,7 @@ public static class ItemIconCache
         UniTaskCompletionSource<Sprite> completionSource = new();
         PrewarmRequest request = new(itemData, modules, renderProfile, key);
         _inFlight.Add(key, completionSource);
-        _standaloneQueue.Enqueue(new StandaloneGenerationRequest(request, settings, completionSource));
+        _standaloneQueue.Enqueue(new StandaloneGenerationRequest(request, settings, settingsHash, completionSource));
         StartStandaloneWorker();
         return await completionSource.Task.AttachExternalCancellation(cancellationToken);
     }
@@ -298,8 +312,6 @@ public static class ItemIconCache
     private static async UniTask ProcessStandaloneQueueAsync()
     {
         CancellationToken generationCancellation = _generationCancellation.Token;
-        ItemIconRenderSession renderSession = null;
-        ItemIconGeneratorSettings activeSettings = null;
 
         try
         {
@@ -312,14 +324,17 @@ public static class ItemIconCache
 
                 try
                 {
-                    if (activeSettings != generationRequest.Settings || renderSession == null)
+                    if (_standaloneRenderSession == null ||
+                        _standaloneRenderSettings != generationRequest.Settings ||
+                        _standaloneRenderSettingsHash != generationRequest.SettingsHash)
                     {
-                        renderSession?.Dispose();
-                        activeSettings = generationRequest.Settings;
-                        renderSession = ItemIconRenderer.CreateSession(activeSettings);
+                        ReleaseStandaloneRenderSession();
+                        _standaloneRenderSettings = generationRequest.Settings;
+                        _standaloneRenderSettingsHash = generationRequest.SettingsHash;
+                        _standaloneRenderSession = ItemIconRenderer.CreateSession(_standaloneRenderSettings);
                     }
 
-                    Sprite sprite = await GetOrCreateAsync(generationRequest.Request, renderSession, false, generationCancellation);
+                    Sprite sprite = await GetOrCreateAsync(generationRequest.Request, _standaloneRenderSession, false, generationCancellation);
                     generationRequest.CompletionSource.TrySetResult(sprite);
                 }
                 catch (OperationCanceledException)
@@ -331,9 +346,10 @@ public static class ItemIconCache
                 {
                     Debug.LogException(exception);
 
-                    if (renderSession == null)
+                    if (_standaloneRenderSession == null)
                     {
-                        activeSettings = null;
+                        _standaloneRenderSettings = null;
+                        _standaloneRenderSettingsHash = 0;
                     }
 
                     CacheFallbackSprite(generationRequest.Request.Key, generationRequest.Request.ItemData);
@@ -354,7 +370,12 @@ public static class ItemIconCache
         }
         finally
         {
-            renderSession?.Dispose();
+            if (_releaseStandaloneRenderSessionWhenWorkerStops)
+            {
+                ReleaseStandaloneRenderSession();
+                _releaseStandaloneRenderSessionWhenWorkerStops = false;
+            }
+
             _standaloneWorkerRunning = false;
 
             if (_standaloneQueue.Count > 0)
@@ -362,6 +383,14 @@ public static class ItemIconCache
                 StartStandaloneWorker();
             }
         }
+    }
+
+    private static void ReleaseStandaloneRenderSession()
+    {
+        _standaloneRenderSession?.Dispose();
+        _standaloneRenderSession = null;
+        _standaloneRenderSettings = null;
+        _standaloneRenderSettingsHash = 0;
     }
 
     private static async UniTask<Sprite> GetOrCreateAsync(
@@ -788,15 +817,17 @@ public static class ItemIconCache
 
     private readonly struct StandaloneGenerationRequest
     {
-        public StandaloneGenerationRequest(PrewarmRequest request, ItemIconGeneratorSettings settings, UniTaskCompletionSource<Sprite> completionSource)
+        public StandaloneGenerationRequest(PrewarmRequest request, ItemIconGeneratorSettings settings, int settingsHash, UniTaskCompletionSource<Sprite> completionSource)
         {
             Request = request;
             Settings = settings;
+            SettingsHash = settingsHash;
             CompletionSource = completionSource;
         }
 
         public PrewarmRequest Request { get; }
         public ItemIconGeneratorSettings Settings { get; }
+        public int SettingsHash { get; }
         public UniTaskCompletionSource<Sprite> CompletionSource { get; }
     }
 }

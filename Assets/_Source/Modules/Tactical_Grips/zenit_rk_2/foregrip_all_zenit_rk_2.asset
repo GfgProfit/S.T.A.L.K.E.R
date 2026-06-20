@@ -12,6 +12,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 737e751cd05516846acf43daad139c9e, type: 3}
   m_Name: foregrip_all_zenit_rk_2
   m_EditorClassIdentifier: 
+  _itemId: 08884db88e7d52545b1c070bc9966dc0
   _itemName: "\u0422\u0430\u043A\u0442\u0438\u0447\u0435\u0441\u043A\u0430\u044F
     \u0440\u0443\u043A\u043E\u044F\u0442\u043A\u0430 \u0417\u0435\u043D\u0438\u0442
     \"\u0420\u041A-2\""

@@ -12,6 +12,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 737e751cd05516846acf43daad139c9e, type: 3}
   m_Name: stock_ak_zenit_pt_3_lock
   m_EditorClassIdentifier: 
+  _itemId: 32c2006d7db250f479e592d15fad416f
   _itemName: "\u0417\u0430\u043C\u043E\u043A \u0417\u0435\u043D\u0438\u0442 \u0434\u043B\u044F
     \u043F\u0440\u0438\u043A\u043B\u0430\u0434\u043E\u0432 \"\u041F\u0422\" \u0434\u043B\u044F
     \u0410\u041A\u0421-74/\u0410\u041A\u0421-74\u0423"
@@ -91,14 +92,14 @@ MonoBehaviour:
   _defaultIconModules: []
   _iconPixelsPerCell: 64
   _iconRenderScale: 2
-  _iconPadding: 1.1
+  _iconPadding: 1.25
   _iconAntiAliasing: 1
   _iconUseOutline: 1
   _iconOutlineWidth: 2
   _iconUseShadow: 1
   _iconShadowOffset: {x: 2, y: -2}
   _iconShadowBlur: 2
-  _iconModelEulerAngles: {x: 0, y: 0, z: 0}
+  _iconModelEulerAngles: {x: 45, y: 45, z: 0}
   _iconModelScale: {x: 1, y: 1, z: 1}
   _iconCameraEulerAngles: {x: 0, y: 90, z: 0}
   _slotIconModelEulerAngles: {x: 0, y: 0, z: 0}

@@ -12,6 +12,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 737e751cd05516846acf43daad139c9e, type: 3}
   m_Name: aks_74_u
   m_EditorClassIdentifier: 
+  _itemId: e1023743dec9c3d47b0530790b4f55f5
   _itemName: "\u0410\u0432\u0442\u043E\u043C\u0430\u0442 \u041A\u0430\u043B\u0430\u0448\u043D\u0438\u043A\u043E\u0432\u0430
     \u0410\u041A\u0421-74\u0423 5.45x39"
   _shortName: "\u0410\u041A\u0421-74\u0423"

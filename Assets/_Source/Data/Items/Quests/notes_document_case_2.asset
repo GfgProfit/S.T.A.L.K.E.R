@@ -12,6 +12,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 737e751cd05516846acf43daad139c9e, type: 3}
   m_Name: notes_document_case_2
   m_EditorClassIdentifier: 
+  _itemId: 35b6b5dd2b75e2e42be9339edebe3d94
   _itemName: "\u0414\u043E\u043A\u0443\u043C\u0435\u043D\u0442\u0430\u0446\u0438\u044F
     \u043F\u043E \xAB\u0438\u0437\u0434\u0435\u043B\u0438\u044E \u2116 62\xBB"
   _shortName: 

@@ -12,6 +12,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 737e751cd05516846acf43daad139c9e, type: 3}
   m_Name: 762x54 7H1
   m_EditorClassIdentifier: 
+  _itemId: 88ebd74e9c392e045a140240ef85cfb0
   _itemName: "7,62x54 \u043C\u043C 7\u041D1"
   _shortName: 7H1
   _description: "\u0421\u043F\u0435\u0446\u0438\u0430\u043B\u044C\u043D\u043E \u0440\u0430\u0437\u0440\u0430\u0431\u043E\u0442\u0430\u043D\u043D\u044B\u0439

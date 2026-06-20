@@ -12,6 +12,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 737e751cd05516846acf43daad139c9e, type: 3}
   m_Name: DOLG
   m_EditorClassIdentifier: 
+  _itemId: e13d51d399f8bd04ebc54d4f29eb735e
   _itemName: "\u041F\u04215-\u041C \xAB\u0423\u043D\u0438\u0432\u0435\u0440\u0441\u0430\u043B\u044C\u043D\u0430\u044F
     \u0437\u0430\u0449\u0438\u0442\u0430\xBB"
   _shortName: "\u041F\u04215-\u041C"

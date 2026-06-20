@@ -12,6 +12,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 737e751cd05516846acf43daad139c9e, type: 3}
   m_Name: balloon_poison_gas
   m_EditorClassIdentifier: 
+  _itemId: e32b040bd6f603244bbc53e9f588661e
   _itemName: "\u0411\u0430\u043B\u043B\u043E\u043D \u0441 \u0433\u0430\u0437\u043E\u043C
     \xAB\u041F\u0435\u0440\u0438\u043D-\u04123\xBB"
   _shortName: 

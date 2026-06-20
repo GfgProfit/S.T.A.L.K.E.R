@@ -12,6 +12,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 737e751cd05516846acf43daad139c9e, type: 3}
   m_Name: scar_h
   m_EditorClassIdentifier: 
+  _itemId: b39aaa6505a42684783cf794a9a86532
   _itemName: "\u0428\u0442\u0443\u0440\u043C\u043E\u0432\u0430\u044F \u0432\u0438\u043D\u0442\u043E\u0432\u043A\u0430
     FN SCAR-H 7.62x51"
   _shortName: SCAR-H

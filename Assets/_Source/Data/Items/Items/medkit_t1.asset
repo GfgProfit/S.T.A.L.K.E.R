@@ -12,6 +12,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 737e751cd05516846acf43daad139c9e, type: 3}
   m_Name: medkit_t1
   m_EditorClassIdentifier: 
+  _itemId: 2a9907fd10604654184ca93f21393946
   _itemName: "\u0410\u043F\u0442\u0435\u0447\u043A\u0430"
   _shortName: 
   _description: "\u0423\u043D\u0438\u0432\u0435\u0440\u0441\u0430\u043B\u044C\u043D\u044B\u0439

@@ -12,6 +12,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 737e751cd05516846acf43daad139c9e, type: 3}
   m_Name: 556x45 SS190
   m_EditorClassIdentifier: 
+  _itemId: dacc3d680ea713a4b8c13bf7b15a7feb
   _itemName: "5,56x45 \u043C\u043C"
   _shortName: SS190
   _description: "\u041C\u0430\u043B\u043E\u0438\u043C\u043F\u0443\u043B\u044C\u0441\u043D\u044B\u0439

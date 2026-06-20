@@ -12,6 +12,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 737e751cd05516846acf43daad139c9e, type: 3}
   m_Name: OG7B
   m_EditorClassIdentifier: 
+  _itemId: 717557fda6c419d4e93e29c0b9c1111b
   _itemName: "\u0413\u0440\u0430\u043D\u0430\u0442\u0430 \u041E\u0413-7\u0412"
   _shortName: "\u041E\u0413-7\u0412"
   _description: "\u041E\u0441\u043A\u043E\u043B\u043E\u0447\u043D\u043E-\u0444\u0443\u0433\u0430\u0441\u043D\u0430\u044F

@@ -12,6 +12,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 737e751cd05516846acf43daad139c9e, type: 3}
   m_Name: anabiotic
   m_EditorClassIdentifier: 
+  _itemId: 1118f1a5cbebd3f41b64721b0a766c06
   _itemName: "\u0410\u043D\u0430\u0431\u0438\u043E\u0442\u0438\u043A"
   _shortName: 
   _description: "\u042D\u043A\u0441\u043F\u0435\u0440\u0438\u043C\u0435\u043D\u0442\u0430\u043B\u044C\u043D\u044B\u0439

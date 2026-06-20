@@ -12,6 +12,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 737e751cd05516846acf43daad139c9e, type: 3}
   m_Name: bandage
   m_EditorClassIdentifier: 
+  _itemId: c2ae4bff9bc82c4479c57fbd3fa4d713
   _itemName: "\u0411\u0438\u043D\u0442"
   _shortName: 
   _description: "\u0410\u0441\u0435\u043F\u0442\u0438\u0447\u0435\u0441\u043A\u0438\u0439

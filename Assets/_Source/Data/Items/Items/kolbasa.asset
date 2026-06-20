@@ -12,6 +12,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 737e751cd05516846acf43daad139c9e, type: 3}
   m_Name: kolbasa
   m_EditorClassIdentifier: 
+  _itemId: 54b1d148fe35e5e478f49721cada2870
   _itemName: "\u041A\u043E\u043B\u0431\u0430\u0441\u0430 \xAB\u0414\u0438\u0435\u0442\u0438\u0447\u0435\u0441\u043A\u0430\u044F\xBB"
   _shortName: 
   _description: "\u0427\u0430\u0441\u0442\u043E \u0437\u0430 \u043D\u0435\u0438\u043C\u0435\u043D\u0438\u0435\u043C

@@ -12,6 +12,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 737e751cd05516846acf43daad139c9e, type: 3}
   m_Name: 545x39 AP
   m_EditorClassIdentifier: 
+  _itemId: a5dcd94f92e8dd949b78c4d4733b76cb
   _itemName: "5,45x39 \u043C\u043C \u0411\u041F"
   _shortName: "\u0411\u041F"
   _description: "\u0410\u0440\u043C\u0435\u0439\u0441\u043A\u0438\u0439 \u043F\u0430\u0442\u0440\u043E\u043D

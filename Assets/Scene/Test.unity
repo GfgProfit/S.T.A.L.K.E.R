@@ -34488,7 +34488,7 @@ MonoBehaviour:
   _durabilityText: {fileID: 318593381}
   _durabilityTextParent: {fileID: 101340129}
   _descriptionText: {fileID: 2068633160}
-  _descriptionWordsPerLine: 4
+  _descriptionWordsPerLine: 6
   _ammoFleshDamageText: {fileID: 553129670}
   _ammoFleshDamageParent: {fileID: 337142298}
   _ammoArmorPenetrationText: {fileID: 1962003193}

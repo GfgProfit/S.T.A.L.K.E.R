@@ -12,6 +12,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 737e751cd05516846acf43daad139c9e, type: 3}
   m_Name: Silencer 45ACP
   m_EditorClassIdentifier: 
+  _itemId: 993cf0ead34cedb45938608322ed9e57
   _itemName: "\u0413\u043B\u0443\u0448\u0438\u0442\u0435\u043B\u044C .45ACP"
   _shortName: 
   _description: "\u0413\u043B\u0443\u0448\u0438\u0442\u0435\u043B\u044C \u043F\u043E\u0434

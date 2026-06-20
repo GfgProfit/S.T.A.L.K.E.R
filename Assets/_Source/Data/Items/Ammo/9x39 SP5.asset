@@ -12,6 +12,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 737e751cd05516846acf43daad139c9e, type: 3}
   m_Name: 9x39 SP5
   m_EditorClassIdentifier: 
+  _itemId: 0a9eca98f392b924aa8c7e8b10a69885
   _itemName: "9x39 \u043C\u043C \u0421\u041F-5"
   _shortName: "\u0421\u041F-5"
   _description: "\u0414\u043E\u0437\u0432\u0443\u043A\u043E\u0432\u043E\u0439 \xAB\u0441\u043D\u0430\u0439\u043F\u0435\u0440\u0441\u043A\u0438\u0439\xBB

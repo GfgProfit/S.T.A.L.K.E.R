@@ -12,6 +12,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 737e751cd05516846acf43daad139c9e, type: 3}
   m_Name: silencer_pbs4
   m_EditorClassIdentifier: 
+  _itemId: 4d17b9c7aed1a444aad32e518f903938
   _itemName: "\u0413\u043B\u0443\u0448\u0438\u0442\u0435\u043B\u044C \u041F\u0411\u0421-4
     5.45x39 \u0434\u043B\u044F \u0410\u041A\u0421-74\u0423"
   _shortName: 

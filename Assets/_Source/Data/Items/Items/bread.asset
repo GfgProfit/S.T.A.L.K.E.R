@@ -12,6 +12,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 737e751cd05516846acf43daad139c9e, type: 3}
   m_Name: bread
   m_EditorClassIdentifier: 
+  _itemId: 3a22e9f6f613f804a9fd8edada63c0bd
   _itemName: "\u0425\u043B\u0435\u0431"
   _shortName: 
   _description: "\u041D\u0435\u0438\u0437\u0432\u0435\u0441\u0442\u043D\u043E, \u043A\u0442\u043E

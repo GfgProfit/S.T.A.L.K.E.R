@@ -7,6 +7,7 @@ using UnityEngine;
 [CreateAssetMenu]
 public class ItemData : ScriptableObject
 {
+    [SerializeField] [BoxGroup("Identity")] private string _itemId;
     [SerializeField] [BoxGroup("Identity")] private string _itemName;
     [SerializeField] [BoxGroup("Identity")] private string _shortName;
     [SerializeField] [BoxGroup("Identity")] [TextArea(3, 8)] private string _description;
@@ -84,6 +85,7 @@ public class ItemData : ScriptableObject
     [SerializeField] [BoxGroup("Slot Icon/Light")] [EnableIf(nameof(UsesSlotIconDirectionalLight))] private float _slotIconLightIntensity = 1.5f;
     [SerializeField, HideInInspector] private bool _slotIconSettingsInitialized;
 
+    public string ItemId => _itemId ?? string.Empty;
     public string ItemName => string.IsNullOrWhiteSpace(_itemName) ? name : _itemName;
     public string ShortName => string.IsNullOrWhiteSpace(_shortName) ? string.Empty : _shortName;
     public string Description => _description ?? string.Empty;

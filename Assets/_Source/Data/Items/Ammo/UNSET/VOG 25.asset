@@ -12,6 +12,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 737e751cd05516846acf43daad139c9e, type: 3}
   m_Name: VOG 25
   m_EditorClassIdentifier: 
+  _itemId: f5ba536ce18531b44b1a0a44df2e3039
   _itemName: "\u0413\u0440\u0430\u043D\u0430\u0442\u0430 \u0412\u041E\u0413-25"
   _shortName: "\u0412\u041E\u0413"
   _description: "\u041E\u0441\u043A\u043E\u043B\u043E\u0447\u043D\u0430\u044F \u0433\u0440\u0430\u043D\u0430\u0442\u0430

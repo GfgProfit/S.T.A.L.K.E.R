@@ -12,6 +12,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 737e751cd05516846acf43daad139c9e, type: 3}
   m_Name: antidot
   m_EditorClassIdentifier: 
+  _itemId: ad29928180ab8fa478f74fcac6c41924
   _itemName: "\u0410\u043D\u0442\u0438\u0434\u043E\u0442"
   _shortName: 
   _description: "\u041F\u0440\u0435\u043F\u0430\u0440\u0430\u0442 \xAB\u0410\u043D\u0442\u0438\u0442\u043E\u043A\u0441\u0438\u043A\u0430\u043D\u0442

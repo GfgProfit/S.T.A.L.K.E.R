@@ -12,6 +12,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 737e751cd05516846acf43daad139c9e, type: 3}
   m_Name: box_toolkit_3
   m_EditorClassIdentifier: 
+  _itemId: 6c8059c19fdc2fd4e823e70c6d5a47ab
   _itemName: "\u0418\u043D\u0441\u0442\u0440\u0443\u043C\u0435\u043D\u0442\u044B
     \u0434\u043B\u044F \u043A\u0430\u043B\u0438\u0431\u0440\u043E\u0432\u043A\u0438"
   _shortName: 

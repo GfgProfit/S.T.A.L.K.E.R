@@ -12,6 +12,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 737e751cd05516846acf43daad139c9e, type: 3}
   m_Name: 545x39 FMJ
   m_EditorClassIdentifier: 
+  _itemId: 0921ba32c21f58e479afd8ec656e6d4d
   _itemName: "5,45x39 \u043C\u043C"
   _shortName: FMJ
   _description: "\u041F\u0430\u0442\u0440\u043E\u043D \u043A\u0430\u043B\u0438\u0431\u0440\u0430

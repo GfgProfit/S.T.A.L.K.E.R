@@ -12,6 +12,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 737e751cd05516846acf43daad139c9e, type: 3}
   m_Name: HELM BATTLE
   m_EditorClassIdentifier: 
+  _itemId: 1701b6f701d2fb84db8569e7b0c14cda
   _itemName: "\u0428\u043B\u0435\u043C \xAB\u0421\u0444\u0435\u0440\u0430 \u041C12\xBB"
   _shortName: "\u0421\u041C12"
   _description: "\u041E\u0442\u0434\u0435\u043B\u0430\u043D\u043D\u044B\u0439 \u0442\u043A\u0430\u043D\u044C\u044E

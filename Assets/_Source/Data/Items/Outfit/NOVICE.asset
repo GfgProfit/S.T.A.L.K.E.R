@@ -12,6 +12,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 737e751cd05516846acf43daad139c9e, type: 3}
   m_Name: NOVICE
   m_EditorClassIdentifier: 
+  _itemId: cfa7c433927c65143bdc9b98eb04dbf1
   _itemName: "\u041A\u043E\u0436\u0430\u043D\u044B\u0439 \u043F\u043B\u0430\u0449"
   _shortName: "\u041F\u043B\u0430\u0449"
   _description: "\u041E\u0431\u044B\u0447\u043D\u044B\u0439 \u043F\u043B\u0430\u0449

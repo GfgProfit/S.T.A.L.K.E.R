@@ -12,6 +12,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 737e751cd05516846acf43daad139c9e, type: 3}
   m_Name: detector_4
   m_EditorClassIdentifier: 
+  _itemId: 9cb092567350dcb4784c696570d51aa6
   _itemName: "\u0414\u0435\u0442\u0435\u043A\u0442\u043E\u0440 \xAB\u0421\u0432\u0430\u0440\u043E\u0433\xBB"
   _shortName: "\u0421\u0432\u0430\u0440\u043E\u0433"
   _description: "\u041F\u0440\u043E\u0442\u043E\u0442\u0438\u043F \u0441\u043A\u0430\u043D\u0435\u0440\u0430

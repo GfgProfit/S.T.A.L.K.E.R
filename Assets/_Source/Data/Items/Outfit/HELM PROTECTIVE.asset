@@ -12,6 +12,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 737e751cd05516846acf43daad139c9e, type: 3}
   m_Name: HELM PROTECTIVE
   m_EditorClassIdentifier: 
+  _itemId: a35f6166abf056a4891cbda48eb518f5
   _itemName: "\u0428\u043B\u0435\u043C \xAB\u0417\u0430\u0441\u043B\u043E\u043D\xBB"
   _shortName: "\u0417\u0430\u0441\u043B\u043E\u043D"
   _description: "\u041B\u0451\u0433\u043A\u0438\u0439 \u0448\u043B\u0435\u043C \u0441

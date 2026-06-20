@@ -12,6 +12,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 737e751cd05516846acf43daad139c9e, type: 3}
   m_Name: 9x19 PBP
   m_EditorClassIdentifier: 
+  _itemId: c1a8239caad8ce0428121a07f9bef6d8
   _itemName: "9x19 \u043C\u043C \u0411\u041F"
   _shortName: "\u0411\u041F"
   _description: "\u041F\u043E\u043B\u0443\u043E\u0431\u043E\u043B\u043E\u0447\u0435\u0447\u043D\u0430\u044F

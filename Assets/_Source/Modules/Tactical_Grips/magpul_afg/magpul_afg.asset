@@ -12,6 +12,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 737e751cd05516846acf43daad139c9e, type: 3}
   m_Name: magpul_afg
   m_EditorClassIdentifier: 
+  _itemId: eb1adecb8b02bdd48ae194727c241285
   _itemName: "\u0422\u0430\u043A\u0442\u0438\u0447\u0435\u0441\u043A\u0430\u044F
     \u0440\u0443\u043A\u043E\u044F\u0442\u043A\u0430 Magpul \"AFG\" (FDE)"
   _shortName: 

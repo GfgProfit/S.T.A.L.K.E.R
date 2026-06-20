@@ -12,6 +12,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 737e751cd05516846acf43daad139c9e, type: 3}
   m_Name: EXO
   m_EditorClassIdentifier: 
+  _itemId: fc44f8ea89d96984b971ba0357b92b32
   _itemName: "\u042D\u043A\u0437\u043E\u0441\u043A\u0435\u043B\u0435\u0442"
   _shortName: "\u042D\u043A\u0437\u043E\u0441\u043A\u0435\u043B\u0435\u0442"
   _description: "\u042D\u043A\u0441\u043F\u0435\u0440\u0438\u043C\u0435\u043D\u0442\u0430\u043B\u044C\u043D\u044B\u0439

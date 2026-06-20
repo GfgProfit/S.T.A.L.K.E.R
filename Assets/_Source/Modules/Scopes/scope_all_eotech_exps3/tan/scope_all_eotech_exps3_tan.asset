@@ -12,6 +12,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 737e751cd05516846acf43daad139c9e, type: 3}
   m_Name: scope_all_eotech_exps3_tan
   m_EditorClassIdentifier: 
+  _itemId: 7dbf85449c258aa4d8a026d595c8ad02
   _itemName: "\u0413\u043E\u043B\u043E\u0433\u0440\u0430\u0444\u0438\u0447\u0435\u0441\u043A\u0438\u0439
     \u043F\u0440\u0438\u0446\u0435\u043B EOTech \"EXPS3-0\" (\u041F\u0435\u0441\u043E\u0447\u043D\u044B\u0439)"
   _shortName: 

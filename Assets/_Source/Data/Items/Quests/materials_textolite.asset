@@ -12,6 +12,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 737e751cd05516846acf43daad139c9e, type: 3}
   m_Name: materials_textolite
   m_EditorClassIdentifier: 
+  _itemId: 248162580fd2c484da2317626d23b2ff
   _itemName: "\u0422\u0435\u043A\u0441\u0442\u043E\u043B\u0438\u0442\u043E\u0432\u0430\u044F
     \u043E\u0441\u043D\u043E\u0432\u0430"
   _shortName: 

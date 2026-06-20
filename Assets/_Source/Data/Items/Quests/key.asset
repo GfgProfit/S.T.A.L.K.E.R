@@ -12,6 +12,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 737e751cd05516846acf43daad139c9e, type: 3}
   m_Name: key
   m_EditorClassIdentifier: 
+  _itemId: f977c4dcbe37ac149828589678cc2220
   _itemName: "\u041A\u043B\u044E\u0447 \xABA\xBB"
   _shortName: 
   _description: "\u041E\u0431\u044B\u0447\u043D\u044B\u0439 \u043A\u043B\u044E\u0447,

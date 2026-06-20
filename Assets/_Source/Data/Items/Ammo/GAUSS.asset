@@ -12,6 +12,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 737e751cd05516846acf43daad139c9e, type: 3}
   m_Name: GAUSS
   m_EditorClassIdentifier: 
+  _itemId: ba29e50dc010ef5489d15ac69eaf5fb7
   _itemName: "\u0410\u043A\u043A\u0443\u043C\u0443\u043B\u044F\u0442\u043E\u0440"
   _shortName: "\u0413\u0430\u0443\u0441\u0441"
   _description: "\u042D\u043D\u0435\u0440\u0433\u0435\u0442\u0438\u0447\u0435\u0441\u043A\u0438\u0435

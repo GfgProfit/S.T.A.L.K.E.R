@@ -12,6 +12,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 737e751cd05516846acf43daad139c9e, type: 3}
   m_Name: drink_stalker
   m_EditorClassIdentifier: 
+  _itemId: d3ca041b9903f3248ac7b3d7530d9f18
   _itemName: "\u042D\u043D\u0435\u0440\u0433\u0435\u0442\u0438\u0447\u0435\u0441\u043A\u0438\u0439
     \u043D\u0430\u043F\u0438\u0442\u043E\u043A \xAB\u0421\u0442\u0430\u043B\u043A\u0435\u0440\xBB"
   _shortName: 

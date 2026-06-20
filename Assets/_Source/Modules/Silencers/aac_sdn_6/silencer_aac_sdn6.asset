@@ -12,6 +12,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 737e751cd05516846acf43daad139c9e, type: 3}
   m_Name: silencer_aac_sdn6
   m_EditorClassIdentifier: 
+  _itemId: c67ed2716aa977b4c906caddde9e4795
   _itemName: "\u0413\u043B\u0443\u0448\u0438\u0442\u0435\u043B\u044C AAC \"762-SDN-6\"
     \u043C\u0443\u043B\u044C\u0442\u0438\u043A\u0430\u043B\u0438\u0431\u0435\u0440\u043D\u044B\u0439"
   _shortName: 
