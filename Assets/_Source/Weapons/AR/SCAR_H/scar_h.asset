@@ -51,6 +51,7 @@ MonoBehaviour:
   _useDurability: 1
   _defaultDurabilityPercent: 100
   _canEquipHelmet: 1
+  _armorRecoilReductionPercent: 0
   _ammoFleshDamage: 0
   _ammoArmorPenetration: 0
   _ammoWeaponRecoilPercentModifier: 0
@@ -75,7 +76,13 @@ MonoBehaviour:
   _firstPersonWeaponSpawnScale: {x: 0.6, y: 0.6, z: 0.6}
   _weaponData: {fileID: 11400000, guid: 33b3d3e4e897329439732448ac5b9190, type: 2}
   _moduleSlot: 0
+  _moduleType: 0
   _moduleInventorySizeDelta: {x: 0, y: 0}
+  _moduleWeaponRecoilPercentModifier: 0
+  _moduleWeaponDurabilityLossPercentModifier: 0
+  _moduleAccuracyMinutesOfAngleModifier: 0
+  _moduleErgonomicsModifier: 0
+  _moduleMagazineCapacity: 0
   _statModifiers: []
   _worldItemPrefab: {fileID: 9063196561116383210, guid: 3a768300695a6d64495132266fe1958c, type: 3}
   _width: 4

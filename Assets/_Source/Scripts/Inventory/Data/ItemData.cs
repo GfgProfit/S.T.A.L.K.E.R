@@ -78,10 +78,10 @@ public class ItemData : ScriptableObject
     [SerializeField] [BoxGroup("Icon/Grid")] [EnableIf(nameof(ShowsIconCellGrid))] private bool _iconShowCellGridBorder = true;
     [SerializeField] [BoxGroup("Icon/Grid")] [EnableIf(nameof(ShowsIconCellGridBorder))] [Range(1, 8)] private int _iconCellGridBorderLineThickness = 2;
     [SerializeField] [BoxGroup("Icon/Light")] private bool _iconUseDirectionalLight = true;
-    [SerializeField] [BoxGroup("Icon/Light")] [EnableIf(nameof(UsesIconDirectionalLight))] private Vector3 _iconLightEulerAngles = new(50f, -30f, 0f);
+    [SerializeField, HideInInspector] private Vector3 _iconLightEulerAngles = new(50f, -30f, 0f);
     [SerializeField] [BoxGroup("Icon/Light")] [EnableIf(nameof(UsesIconDirectionalLight))] private float _iconLightIntensity = 1.5f;
     [SerializeField] [BoxGroup("Slot Icon/Light")] private bool _slotIconUseDirectionalLight = true;
-    [SerializeField] [BoxGroup("Slot Icon/Light")] [EnableIf(nameof(UsesSlotIconDirectionalLight))] private Vector3 _slotIconLightEulerAngles = new(50f, -30f, 0f);
+    [SerializeField, HideInInspector] private Vector3 _slotIconLightEulerAngles = new(50f, -30f, 0f);
     [SerializeField] [BoxGroup("Slot Icon/Light")] [EnableIf(nameof(UsesSlotIconDirectionalLight))] private float _slotIconLightIntensity = 1.5f;
     [SerializeField, HideInInspector] private bool _slotIconSettingsInitialized;
 
@@ -198,7 +198,6 @@ public class ItemData : ScriptableObject
     public Color IconCellGridBorderColor => Settings.GetIconCellGridBorderColor(_rarity);
     public float IconCellGridBorderLineThickness => Mathf.Max(1f, _iconCellGridBorderLineThickness);
     public bool IconUseDirectionalLight => _iconUseDirectionalLight;
-    public Vector3 IconLightEulerAngles => _iconLightEulerAngles;
     public float IconLightIntensity => _iconLightIntensity;
 
     public bool SlotIconUseDirectionalLight
@@ -207,15 +206,6 @@ public class ItemData : ScriptableObject
         {
             EnsureSlotIconSettingsInitialized();
             return _slotIconUseDirectionalLight;
-        }
-    }
-
-    public Vector3 SlotIconLightEulerAngles
-    {
-        get
-        {
-            EnsureSlotIconSettingsInitialized();
-            return _slotIconLightEulerAngles;
         }
     }
 

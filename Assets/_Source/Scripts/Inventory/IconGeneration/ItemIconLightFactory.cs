@@ -32,7 +32,7 @@ internal static class ItemIconLightFactory
         int lightIndex = 0;
         float baseIntensity = renderProfile.LightIntensity;
 
-        ConfigureLight(lights[lightIndex++], $"Runtime Icon Key Light - {itemData.name}", baseIntensity, Quaternion.Euler(renderProfile.LightEulerAngles));
+        ConfigureLight(lights[lightIndex++], $"Runtime Icon Key Light - {itemData.name}", baseIntensity, cameraTransform.rotation);
 
         if (settings.UseFrontFillLight && lightIndex < lights.Count)
         {

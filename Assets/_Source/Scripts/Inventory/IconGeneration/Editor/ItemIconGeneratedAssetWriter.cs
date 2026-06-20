@@ -87,6 +87,39 @@ internal static class ItemIconGeneratedAssetWriter
         ItemIconCache.Clear();
     }
 
+    public static void DeleteGeneratedAssetsExcept(IReadOnlyList<BakedItemIconEntry> retainedEntries)
+    {
+        if (AssetDatabase.IsValidFolder(GENERATED_FOLDER_PATH) == false)
+        {
+            return;
+        }
+
+        HashSet<string> retainedPaths = new(StringComparer.Ordinal);
+
+        if (retainedEntries != null)
+        {
+            for (int i = 0; i < retainedEntries.Count; i++)
+            {
+                if (retainedEntries[i] != null)
+                {
+                    retainedPaths.Add(ResourcePathToAssetPath(retainedEntries[i].SpriteResourcePath));
+                }
+            }
+        }
+
+        string[] generatedAssetGuids = AssetDatabase.FindAssets("t:Texture2D", new[] { GENERATED_FOLDER_PATH });
+
+        for (int i = 0; i < generatedAssetGuids.Length; i++)
+        {
+            string assetPath = AssetDatabase.GUIDToAssetPath(generatedAssetGuids[i]);
+
+            if (string.IsNullOrEmpty(assetPath) == false && retainedPaths.Contains(assetPath) == false)
+            {
+                AssetDatabase.DeleteAsset(assetPath);
+            }
+        }
+    }
+
     public static string ResourcePathToAssetPath(string resourcePath)
     {
         return string.IsNullOrEmpty(resourcePath) ? string.Empty : $"Assets/Resources/{resourcePath}.png";

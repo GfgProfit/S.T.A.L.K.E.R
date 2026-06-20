@@ -55,7 +55,6 @@ internal static class ItemIconHashBuilder
         hash = ItemIconStableHash.Add(hash, renderProfile.ModelScale);
         hash = ItemIconStableHash.Add(hash, renderProfile.CameraEulerAngles);
         hash = ItemIconStableHash.Add(hash, renderProfile.UseDirectionalLight);
-        hash = ItemIconStableHash.Add(hash, renderProfile.LightEulerAngles);
         hash = ItemIconStableHash.Add(hash, renderProfile.LightIntensity);
         hash = ItemIconStableHash.Add(hash, ItemIconModuleKeyCache.GetCanonicalKey(itemData.DefaultIconModules));
         return ItemIconStableHash.Add(hash, settings.BuildStableHash());

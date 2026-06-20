@@ -92,6 +92,7 @@ internal static class ItemIconBakeCoordinator
                 if (replaceCatalog && completed)
                 {
                     catalog.ReplaceEntries(bakedEntries);
+                    ItemIconGeneratedAssetWriter.DeleteGeneratedAssetsExcept(bakedEntries);
                 }
                 else
                 {
