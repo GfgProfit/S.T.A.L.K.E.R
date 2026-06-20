@@ -76,6 +76,8 @@ MonoBehaviour:
   _moduleInventorySizeDelta: {x: 0, y: 0}
   _moduleWeaponRecoilPercentModifier: -4
   _moduleWeaponDurabilityLossPercentModifier: 0
+  _moduleAccuracyMinutesOfAngleModifier: 0
+  _moduleErgonomicsModifier: 4
   _moduleMagazineCapacity: 0
   _statModifiers: []
   _worldItemPrefab: {fileID: 1697562066478666830, guid: d9b55f345785b0840b0d6099f346d691, type: 3}
@@ -87,7 +89,7 @@ MonoBehaviour:
   _defaultIconModules: []
   _iconPixelsPerCell: 64
   _iconRenderScale: 2
-  _iconPadding: 1.1
+  _iconPadding: 1.25
   _iconAntiAliasing: 1
   _iconUseOutline: 1
   _iconOutlineWidth: 2

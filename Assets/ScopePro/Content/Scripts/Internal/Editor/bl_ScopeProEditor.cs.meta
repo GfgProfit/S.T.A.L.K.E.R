@@ -1,0 +1,18 @@
+fileFormatVersion: 2
+guid: 34a1f583d0eae5a48b202a585cf88aac
+MonoImporter:
+  externalObjects: {}
+  serializedVersion: 2
+  defaultReferences: []
+  executionOrder: 0
+  icon: {instanceID: 0}
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 159537
+  packageName: 'Scope Pro: Realistic scope effect.'
+  packageVersion: 1.1.0
+  assetPath: Assets/ScopePro/Content/Scripts/Internal/Editor/bl_ScopeProEditor.cs
+  uploadId: 516423

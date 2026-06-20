@@ -54,6 +54,9 @@ public sealed class WeaponData : ScriptableObject
     [SerializeField] [Min(0f)] private float _recoilSnappiness = 16f;
     [SerializeField] [Range(0f, 100f)] private float _crouchRecoilReductionPercent = 25f;
 
+    [Header("Handling")]
+    [SerializeField] [Min(1f)] private float _baseErgonomics = 100f;
+
     public int MagazineCapacity => Mathf.Max(1, _magazineCapacity);
     public int DurabilityShotsResource => Mathf.Max(1, _durabilityShotsResource);
     public float DurabilityPercentPerShot => 100f / DurabilityShotsResource;
@@ -85,6 +88,7 @@ public sealed class WeaponData : ScriptableObject
     public float RecoilReturnSpeed => Mathf.Max(0f, _recoilReturnSpeed);
     public float RecoilSnappiness => Mathf.Max(0f, _recoilSnappiness);
     public float CrouchRecoilReductionPercent => Mathf.Clamp(_crouchRecoilReductionPercent, 0f, 100f);
+    public float BaseErgonomics => Mathf.Max(1f, _baseErgonomics);
     public float JammingDurabilityThreshold => Mathf.Clamp(_jammingDurabilityThreshold, 0f, 100f);
     public float BaseJammedChance => Mathf.Clamp(_baseJammedChance, 0f, 100f);
     public float MaximumJammedChance => Mathf.Max(BaseJammedChance, Mathf.Clamp(_maximumJammedChance, 0f, 100f));
@@ -119,6 +123,7 @@ public sealed class WeaponData : ScriptableObject
         _recoilReturnSpeed = Mathf.Max(0f, _recoilReturnSpeed);
         _recoilSnappiness = Mathf.Max(0f, _recoilSnappiness);
         _crouchRecoilReductionPercent = Mathf.Clamp(_crouchRecoilReductionPercent, 0f, 100f);
+        _baseErgonomics = Mathf.Max(1f, _baseErgonomics);
     }
 
     public int GetReloadAmmoApplyFrame(bool fullReload) => fullReload ? Mathf.Max(0, _reloadFullAmmoApplyFrame) : Mathf.Max(0, _reloadAmmoApplyFrame);

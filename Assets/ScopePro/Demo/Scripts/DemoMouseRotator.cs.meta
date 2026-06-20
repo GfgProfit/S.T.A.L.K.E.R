@@ -1,0 +1,18 @@
+fileFormatVersion: 2
+guid: 6cc37e85a0138ed458ea8abd2c37ae9e
+MonoImporter:
+  externalObjects: {}
+  serializedVersion: 2
+  defaultReferences: []
+  executionOrder: 0
+  icon: {instanceID: 0}
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 159537
+  packageName: 'Scope Pro: Realistic scope effect.'
+  packageVersion: 1.1.0
+  assetPath: Assets/ScopePro/Demo/Scripts/DemoMouseRotator.cs
+  uploadId: 516423

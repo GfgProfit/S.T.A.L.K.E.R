@@ -1,0 +1,15 @@
+fileFormatVersion: 2
+guid: a7e4fcdf1e6108247a0b8b65490a78d4
+NativeFormatImporter:
+  externalObjects: {}
+  mainObjectFileID: 2100000
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 159537
+  packageName: 'Scope Pro: Realistic scope effect.'
+  packageVersion: 1.1.0
+  assetPath: Assets/ScopePro/Content/Art/Material/Customs/scope-pro 2.mat
+  uploadId: 516423

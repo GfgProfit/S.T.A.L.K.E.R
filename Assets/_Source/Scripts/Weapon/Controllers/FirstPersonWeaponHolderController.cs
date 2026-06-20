@@ -288,6 +288,7 @@ public sealed class FirstPersonWeaponHolderController : MonoBehaviour
 
         FirstPersonWeaponController weaponController = _spawnedWeapon.GetComponent<FirstPersonWeaponController>();
         weaponController?.SetEquippedArmor(_equippedArmorItemData);
+        _spawnedWeaponRuntimeController?.SetEquippedArmor(_equippedArmorItemData);
     }
 
     private void ApplyInstalledModulesToSpawnedWeapon()

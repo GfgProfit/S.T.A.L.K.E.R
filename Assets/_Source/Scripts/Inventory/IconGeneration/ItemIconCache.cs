@@ -480,7 +480,7 @@ public static class ItemIconCache
         ISet<IconCacheKey> requestKeys)
     {
         FirstPersonWeaponModule[] definitions = itemData.IconPrefab.GetComponentsInChildren<FirstPersonWeaponModule>(true);
-        List<FirstPersonWeaponModule>[] definitionsBySlot = new List<FirstPersonWeaponModule>[(int)WeaponModuleSlot.Underbarrel + 1];
+        List<FirstPersonWeaponModule>[] definitionsBySlot = new List<FirstPersonWeaponModule>[(int)WeaponModuleSlot.StockAdapter + 1];
         Dictionary<ItemData, FirstPersonWeaponModule> uniqueDefinitions = new();
 
         for (int i = 0; i < definitions.Length; i++)

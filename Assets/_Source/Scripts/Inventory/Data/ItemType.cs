@@ -24,7 +24,8 @@ public enum WeaponModuleSlot
     Stock = 5,
     Grip = 6,
     TacticalBlock = 7,
-    Underbarrel = 8
+    Underbarrel = 8,
+    StockAdapter = 9
 }
 
 public enum WeaponModuleType

@@ -55,6 +55,18 @@ internal static class ItemTooltipTextFormatter
 
     public static AmmoTooltipTextData FormatAmmoDetails(ItemData itemData, GameProjectSettings settings) => itemData != null && itemData.ItemType == ItemType.Ammo ? new(itemData, settings) : null;
 
+    public static string FormatArmorRecoilReduction(ItemData itemData, GameProjectSettings settings)
+    {
+        float reductionPercent = itemData == null ? 0f : itemData.ArmorRecoilReductionPercent;
+
+        if (Mathf.Approximately(reductionPercent, 0f))
+        {
+            return string.Empty;
+        }
+
+        return $"Гашение отдачи: {FormatColoredValue($"{FormatNumber(reductionPercent)}%", reductionPercent, false, settings)}";
+    }
+
     public static ModuleTooltipTextData FormatModuleDetails(ItemTooltipData item, GameProjectSettings settings)
     {
         ItemData itemData = item.ItemData;
@@ -70,7 +82,8 @@ internal static class ItemTooltipTextFormatter
                 FormatAmmoModifier("Отдача", itemData.ModuleWeaponRecoilPercentModifier, settings),
                 FormatAmmoModifier("Износ", itemData.ModuleWeaponDurabilityLossPercentModifier, settings),
                 FormatMagazineSize(itemData.ModuleMagazineCapacity, itemData.ModuleMagazineCapacity, settings),
-                FormatAccuracy(itemData.ModuleAccuracyMinutesOfAngleModifier, itemData.ModuleAccuracyMinutesOfAngleModifier, true, settings));
+                FormatAccuracy(itemData.ModuleAccuracyMinutesOfAngleModifier, itemData.ModuleAccuracyMinutesOfAngleModifier, true, settings),
+                FormatErgonomics(itemData.ModuleErgonomicsModifier, itemData.ModuleErgonomicsModifier, true, settings));
         }
 
         if (itemData.WeaponData == null)
@@ -81,12 +94,15 @@ internal static class ItemTooltipTextFormatter
         int magazineCapacity = WeaponModuleSupport.GetInstalledMagazineCapacity(item.InstalledModules);
         float baseAccuracy = itemData.WeaponData.AccuracyMinutesOfAngle;
         float effectiveAccuracy = WeaponModuleSupport.GetAccuracyMinutesOfAngle(itemData.WeaponData, item.InstalledModules);
+        float baseErgonomics = itemData.WeaponData.BaseErgonomics;
+        float effectiveErgonomics = WeaponModuleSupport.GetErgonomics(itemData.WeaponData, item.InstalledModules);
 
         return new ModuleTooltipTextData(
             FormatAmmoModifier("Отдача", WeaponModuleSupport.GetRecoilPercentModifier(item.InstalledModules), settings),
             FormatAmmoModifier("Износ", WeaponModuleSupport.GetDurabilityLossPercentModifier(item.InstalledModules), settings),
             FormatMagazineSize(magazineCapacity, magazineCapacity > 0 ? magazineCapacity - itemData.WeaponData.MagazineCapacity : 0f, settings),
-            FormatAccuracy(effectiveAccuracy, effectiveAccuracy - baseAccuracy, false, settings));
+            FormatAccuracy(effectiveAccuracy, effectiveAccuracy - baseAccuracy, false, settings),
+            FormatErgonomics(effectiveErgonomics, effectiveErgonomics - baseErgonomics, false, settings));
     }
 
     internal static string FormatArmorPenetrationClassification(float armorPenetration, int armorClass, GameProjectSettings settings)
@@ -175,6 +191,17 @@ internal static class ItemTooltipTextFormatter
         string value = signed ? FormatSignedNumber(accuracyMinutesOfAngle) : FormatNumber(accuracyMinutesOfAngle);
         string valueWithUnit = $"{value} МОА";
         return $"Точность: {FormatColoredValue(valueWithUnit, accuracyModifier, true, settings)}";
+    }
+
+    internal static string FormatErgonomics(float ergonomics, float ergonomicsModifier, bool signed, GameProjectSettings settings)
+    {
+        if (signed && Mathf.Approximately(ergonomics, 0f))
+        {
+            return string.Empty;
+        }
+
+        string value = signed ? FormatSignedNumber(ergonomics) : FormatNumber(ergonomics);
+        return $"Эргономика: {FormatColoredValue(value, ergonomicsModifier, false, settings)}";
     }
 
     internal static string FormatNumber(float value) => value.ToString("0.##");
@@ -287,16 +314,18 @@ internal sealed class AmmoTooltipTextData
 
 internal sealed class ModuleTooltipTextData
 {
-    public ModuleTooltipTextData(string recoilModifierText, string durabilityLossModifierText, string magazineSizeText, string accuracyText)
+    public ModuleTooltipTextData(string recoilModifierText, string durabilityLossModifierText, string magazineSizeText, string accuracyText, string ergonomicsText)
     {
         RecoilModifierText = recoilModifierText;
         DurabilityLossModifierText = durabilityLossModifierText;
         MagazineSizeText = magazineSizeText;
         AccuracyText = accuracyText;
+        ErgonomicsText = ergonomicsText;
     }
 
     public string RecoilModifierText { get; }
     public string DurabilityLossModifierText { get; }
     public string MagazineSizeText { get; }
     public string AccuracyText { get; }
+    public string ErgonomicsText { get; }
 }

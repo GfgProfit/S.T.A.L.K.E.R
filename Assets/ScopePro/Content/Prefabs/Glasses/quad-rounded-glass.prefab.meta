@@ -1,0 +1,14 @@
+fileFormatVersion: 2
+guid: af989805d99f83843b917a3998bfcb0c
+PrefabImporter:
+  externalObjects: {}
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 159537
+  packageName: 'Scope Pro: Realistic scope effect.'
+  packageVersion: 1.1.0
+  assetPath: Assets/ScopePro/Content/Prefabs/Glasses/quad-rounded-glass.prefab
+  uploadId: 516423

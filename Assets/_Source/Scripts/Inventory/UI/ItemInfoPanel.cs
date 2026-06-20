@@ -48,6 +48,8 @@ public class ItemInfoPanel : MonoBehaviour, IView<ItemTooltipViewModel>
     [SerializeField] private GameObject _moduleMagazineSizeParent;
     [SerializeField] private TMP_Text _moduleAccuracyText;
     [SerializeField] private GameObject _moduleAccuracyParent;
+    [SerializeField] private TMP_Text _ergonomicsText;
+    [SerializeField] private GameObject _ergonomicsParent;
 
     [Header("Stats Info")]
     [SerializeField] private CharacterStatsInfoPanel _statsInfoPanel;
@@ -112,6 +114,7 @@ public class ItemInfoPanel : MonoBehaviour, IView<ItemTooltipViewModel>
         _viewModel.Show(item, _descriptionWordsPerLine, settings);
         SetAmmoInfo(item.ItemData, settings);
         SetModuleInfo(item, settings);
+        SetArmorInfo(item.ItemData, settings);
         SetStatsInfo(item, settings);
         RebuildLayout();
         UpdatePosition();
@@ -245,6 +248,20 @@ public class ItemInfoPanel : MonoBehaviour, IView<ItemTooltipViewModel>
         SetAmmoText(_moduleMagazineSizeText, _moduleMagazineSizeParent, showMagazineSize ? moduleInfo.MagazineSizeText : string.Empty, showMagazineSize);
         bool showAccuracy = moduleInfo != null && string.IsNullOrEmpty(moduleInfo.AccuracyText) == false;
         SetAmmoText(_moduleAccuracyText, _moduleAccuracyParent, showAccuracy ? moduleInfo.AccuracyText : string.Empty, showAccuracy);
+        bool showErgonomics = moduleInfo != null && string.IsNullOrEmpty(moduleInfo.ErgonomicsText) == false;
+        SetAmmoText(_ergonomicsText, _ergonomicsParent, showErgonomics ? moduleInfo.ErgonomicsText : string.Empty, showErgonomics);
+    }
+
+    private void SetArmorInfo(ItemData itemData, GameProjectSettings settings)
+    {
+        if (itemData == null || itemData.ItemType != ItemType.Armor)
+        {
+            return;
+        }
+
+        string recoilReductionText = ItemTooltipTextFormatter.FormatArmorRecoilReduction(itemData, settings);
+        bool visible = string.IsNullOrEmpty(recoilReductionText) == false;
+        SetAmmoText(_ammoRecoilModifierText, _ammoRecoilModifierParent, recoilReductionText, visible);
     }
 
     private static void SetAmmoText(TMP_Text text, GameObject parent, string value, bool visible)

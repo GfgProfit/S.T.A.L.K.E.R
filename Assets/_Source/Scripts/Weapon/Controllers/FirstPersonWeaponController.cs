@@ -49,6 +49,9 @@ public sealed class FirstPersonWeaponController : MonoBehaviour
     private Quaternion _cameraBoneTargetBaseRotation;
     private bool _hasCameraBoneTargetBasePose;
     private bool _useTacticalGripAnimations;
+    private float _aimTransitionSpeedMultiplier = 1f;
+    private FirstPersonWeaponModule _installedOpticModule;
+    private IReadOnlyList<ItemData> _installedModules;
 
     public WeaponCondition Condition => _weaponCondition;
     public FirstPersonWeaponAnimationKey CurrentAnimationKey => _currentAnimationKey;
@@ -92,6 +95,7 @@ public sealed class FirstPersonWeaponController : MonoBehaviour
 
     private void LateUpdate()
     {
+        _installedOpticModule?.ApplySightShaderOffsets(_installedModules);
         UpdateRootPositionOffset(Time.deltaTime);
         _weaponFollower?.SetEnabled(_followHands);
         _weaponFollower?.SetAdditionalOffset(_weaponFollowPositionOffset, _weaponFollowRotationOffset);
@@ -160,6 +164,12 @@ public sealed class FirstPersonWeaponController : MonoBehaviour
     }
 
     public void SetLoopPlaybackSpeed(float speed) => _animationPlayer?.SetLoopPlaybackSpeed(speed);
+    public void SetAimTransitionSpeed(float speedMultiplier)
+    {
+        _aimTransitionSpeedMultiplier = Mathf.Max(0.01f, speedMultiplier);
+        EnsureInitialized();
+        _animationPlayer?.SetAimTransitionPlaybackSpeed(_aimTransitionSpeedMultiplier);
+    }
     public float PlayStartup()
     {
         if (IsContinuous(_startupAnimation))
@@ -187,8 +197,8 @@ public sealed class FirstPersonWeaponController : MonoBehaviour
     public void Reload(bool full = false) => Play(full ? FirstPersonWeaponAnimationKey.ReloadFull : FirstPersonWeaponAnimationKey.Reload);
     public void PlayMisfire() => Play(FirstPersonWeaponAnimationKey.Misfire);
     public void PlayRevival(bool lastRound = false) => Play(lastRound ? FirstPersonWeaponAnimationKey.RevivalLast : FirstPersonWeaponAnimationKey.Revival);
-    public float GetAnimationLength(FirstPersonWeaponAnimationKey key) => _clips == null ? 0f : _clips.GetLength(key, _weaponCondition, _useTacticalGripAnimations);
-    public float GetAnimationFrameTime(FirstPersonWeaponAnimationKey key, int frame) => _clips == null ? 0f : _clips.GetFrameTime(key, _weaponCondition, frame, _useTacticalGripAnimations);
+    public float GetAnimationLength(FirstPersonWeaponAnimationKey key) => _clips == null ? 0f : ScaleAimTransitionDuration(key, _clips.GetLength(key, _weaponCondition, _useTacticalGripAnimations));
+    public float GetAnimationFrameTime(FirstPersonWeaponAnimationKey key, int frame) => _clips == null ? 0f : ScaleAimTransitionDuration(key, _clips.GetFrameTime(key, _weaponCondition, frame, _useTacticalGripAnimations));
     public float GetNextAnimationLength(FirstPersonWeaponAnimationKey key) => GetNextAnimationStartDelay(key) + GetAnimationLength(key);
     public float GetNextAnimationFrameTime(FirstPersonWeaponAnimationKey key, int frame) => GetNextAnimationStartDelay(key) + GetAnimationFrameTime(key, frame);
     public float GetCurrentAnimationLength(FirstPersonWeaponAnimationKey key) => _lastAnimationStartDelay + GetAnimationLength(key);
@@ -202,6 +212,9 @@ public sealed class FirstPersonWeaponController : MonoBehaviour
 
     public void SetInstalledModules(IReadOnlyList<ItemData> installedModules)
     {
+        _installedModules = installedModules;
+        _installedOpticModule = FindInstalledOpticModule(installedModules);
+
         bool hasHorizontalGrip = WeaponModuleSupport.HasInstalledModuleType(installedModules, WeaponModuleType.TacticalGripHorizontal);
         bool useTacticalGripAnimations = hasHorizontalGrip == false &&
                                            WeaponModuleSupport.HasInstalledModuleType(installedModules, WeaponModuleType.TacticalGripVertical);
@@ -306,16 +319,17 @@ public sealed class FirstPersonWeaponController : MonoBehaviour
 
     private void UpdateRootPositionOffset(float deltaTime)
     {
-        Vector3 targetPosition = GetActiveRootPositionOffset();
-        Quaternion targetRotation = GetActiveRootRotationOffset();
+        GetActiveRootOffsets(out Vector3 targetPosition, out Quaternion targetRotation);
 
-        if (_rootPositionOffsetLerpSpeed <= 0f || deltaTime <= 0f)
+        float lerpSpeed = _rootPositionOffsetLerpSpeed * _aimTransitionSpeedMultiplier;
+
+        if (lerpSpeed <= 0f || deltaTime <= 0f)
         {
             transform.SetLocalPositionAndRotation(targetPosition, targetRotation);
             return;
         }
 
-        float t = 1f - Mathf.Exp(-_rootPositionOffsetLerpSpeed * deltaTime);
+        float t = 1f - Mathf.Exp(-lerpSpeed * deltaTime);
         Vector3 nextPosition = Vector3.Lerp(transform.localPosition, targetPosition, t);
         Quaternion nextRotation = Quaternion.Slerp(transform.localRotation, targetRotation, t);
 
@@ -332,10 +346,53 @@ public sealed class FirstPersonWeaponController : MonoBehaviour
         transform.SetLocalPositionAndRotation(nextPosition, nextRotation);
     }
 
-    private void SnapRootPositionOffset() => transform.SetLocalPositionAndRotation(GetActiveRootPositionOffset(), GetActiveRootRotationOffset());
+    private void SnapRootPositionOffset()
+    {
+        GetActiveRootOffsets(out Vector3 targetPosition, out Quaternion targetRotation);
+        transform.SetLocalPositionAndRotation(targetPosition, targetRotation);
+    }
 
-    private Vector3 GetActiveRootPositionOffset() => _useAimRootPositionOffset ? _aimRootPositionOffset : _rootPositionOffset;
-    private Quaternion GetActiveRootRotationOffset() => _rootBaseRotation * Quaternion.Euler(_useAimRootPositionOffset ? _aimRootRotationOffset : Vector3.zero);
+    private void GetActiveRootOffsets(out Vector3 positionOffset, out Quaternion rotationOffset)
+    {
+        if (_useAimRootPositionOffset == false)
+        {
+            positionOffset = _rootPositionOffset;
+            rotationOffset = _rootBaseRotation;
+            return;
+        }
+
+        Vector3 aimPositionOffset = _aimRootPositionOffset;
+        Vector3 aimRotationOffset = _aimRootRotationOffset;
+        _installedOpticModule?.ResolveAimRootOffsets(_installedModules, out aimPositionOffset, out aimRotationOffset);
+
+        positionOffset = aimPositionOffset;
+        rotationOffset = _rootBaseRotation * Quaternion.Euler(aimRotationOffset);
+    }
+
+    private FirstPersonWeaponModule FindInstalledOpticModule(IReadOnlyList<ItemData> installedModules)
+    {
+        if (installedModules == null)
+        {
+            return null;
+        }
+
+        FirstPersonWeaponModule[] moduleDefinitions = GetComponentsInChildren<FirstPersonWeaponModule>(true);
+
+        for (int i = 0; i < moduleDefinitions.Length; i++)
+        {
+            FirstPersonWeaponModule moduleDefinition = moduleDefinitions[i];
+            ItemData moduleItemData = moduleDefinition == null ? null : moduleDefinition.ModuleItemData;
+
+            if (moduleItemData != null &&
+                moduleItemData.ModuleSlot == WeaponModuleSlot.Optic &&
+                moduleDefinition.IsInstalled(installedModules))
+            {
+                return moduleDefinition;
+            }
+        }
+
+        return null;
+    }
 
     private void UpdateCameraBoneFollow()
     {
@@ -429,7 +486,11 @@ public sealed class FirstPersonWeaponController : MonoBehaviour
     }
 
     private void ApplyEquippedArmorHandsMesh() => _handsMeshSwitcher?.SetMesh(_equippedArmor == null ? string.Empty : _equippedArmor.FirstPersonHandsMeshName);
-    private float GetCrossFadeDuration(FirstPersonWeaponAnimationKey key) => key == FirstPersonWeaponAnimationKey.Walk || IsAimWalkKey(key) ? _walkCrossFadeDuration : _crossFadeDuration;
+    private float GetCrossFadeDuration(FirstPersonWeaponAnimationKey key)
+    {
+        float duration = key == FirstPersonWeaponAnimationKey.Walk || IsAimWalkKey(key) ? _walkCrossFadeDuration : _crossFadeDuration;
+        return ScaleAimTransitionDuration(key, duration);
+    }
     private float GetNextAnimationStartDelay(FirstPersonWeaponAnimationKey key) => GetNextAnimationStartDelay(key, GetCrossFadeDuration(key));
     private float GetNextAnimationStartDelay(FirstPersonWeaponAnimationKey key, float crossFadeDuration) => _animationPlayer != null && _animationPlayer.HasActivePair && ShouldDelayAnimationStart(key) ? Mathf.Max(0f, crossFadeDuration) : 0f;
     private bool IsRuntimeControlled => TryGetComponent(out FirstPersonWeaponRuntimeController _);
@@ -441,6 +502,16 @@ public sealed class FirstPersonWeaponController : MonoBehaviour
                key == FirstPersonWeaponAnimationKey.AimWalkBackward ||
                key == FirstPersonWeaponAnimationKey.AimWalkLeft ||
                key == FirstPersonWeaponAnimationKey.AimWalkRight;
+    }
+
+    private float ScaleAimTransitionDuration(FirstPersonWeaponAnimationKey key, float duration)
+    {
+        return IsAimTransition(key) ? duration / _aimTransitionSpeedMultiplier : duration;
+    }
+
+    private static bool IsAimTransition(FirstPersonWeaponAnimationKey key)
+    {
+        return key == FirstPersonWeaponAnimationKey.AimIn || key == FirstPersonWeaponAnimationKey.AimOut;
     }
 
     private static Transform GetRootTransform(Transform target)

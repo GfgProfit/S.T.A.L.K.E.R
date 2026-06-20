@@ -1,0 +1,15 @@
+fileFormatVersion: 2
+guid: 11451eea57304fa4ea147587225dd410
+timeCreated: 1554949145
+licenseType: Store
+TextScriptImporter:
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 159537
+  packageName: 'Scope Pro: Realistic scope effect.'
+  packageVersion: 1.1.0
+  assetPath: Assets/ScopePro/ReadMe.txt
+  uploadId: 516423

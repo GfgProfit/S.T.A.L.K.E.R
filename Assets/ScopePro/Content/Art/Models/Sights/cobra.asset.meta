@@ -1,0 +1,16 @@
+fileFormatVersion: 2
+guid: b8ebdadba2f1f074caacffae73577a78
+timeCreated: 1551909350
+licenseType: Store
+NativeFormatImporter:
+  mainObjectFileID: 4300000
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 159537
+  packageName: 'Scope Pro: Realistic scope effect.'
+  packageVersion: 1.1.0
+  assetPath: Assets/ScopePro/Content/Art/Models/Sights/cobra.asset
+  uploadId: 516423

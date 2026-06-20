@@ -577,6 +577,57 @@ MeshCollider:
   m_Convex: 1
   m_CookingOptions: 30
   m_Mesh: {fileID: 5853390477395751080, guid: 0238d66110b04da44990428ea2e1ecdb, type: 3}
+--- !u!1 &6479287905032345629
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 4368541538192728009}
+  - component: {fileID: 3107105214330987060}
+  m_Layer: 0
+  m_Name: magpul_afg
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &4368541538192728009
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6479287905032345629}
+  serializedVersion: 2
+  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 7921172380051177439}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &3107105214330987060
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6479287905032345629}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c7739ffe20d549879d2bdf6f85c90289, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::FirstPersonWeaponModule
+  _moduleItemData: {fileID: 11400000, guid: eb1adecb8b02bdd48ae194727c241285, type: 2}
+  _requiredModules: []
+  _incompatibleModules: []
+  _attachPoint: {fileID: 0}
+  _enabledWhenInstalled:
+  - {fileID: 450720204346948909}
+  _disabledWhenInstalled: []
 --- !u!1 &6624986508438657549
 GameObject:
   m_ObjectHideFlags: 0
@@ -825,6 +876,7 @@ Transform:
   - {fileID: 8573627962220533555}
   - {fileID: 3381181559967178441}
   - {fileID: 6019239523385212202}
+  - {fileID: 4368541538192728009}
   - {fileID: 8895842484011602715}
   - {fileID: 94136877224874267}
   m_Father: {fileID: 3336455095422259840}

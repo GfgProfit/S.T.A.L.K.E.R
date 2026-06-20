@@ -1,0 +1,14 @@
+fileFormatVersion: 2
+guid: 7989ffe57e5df9240b4c85ffc501f54a
+PrefabImporter:
+  externalObjects: {}
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 159537
+  packageName: 'Scope Pro: Realistic scope effect.'
+  packageVersion: 1.1.0
+  assetPath: Assets/ScopePro/Content/Prefabs/Glasses/prima-glass.prefab
+  uploadId: 516423

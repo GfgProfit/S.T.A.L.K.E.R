@@ -1,0 +1,16 @@
+fileFormatVersion: 2
+guid: a4c7baae65eb5ee448f2f36bd545fe6d
+timeCreated: 1554919391
+licenseType: Store
+NativeFormatImporter:
+  mainObjectFileID: 4300000
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 159537
+  packageName: 'Scope Pro: Realistic scope effect.'
+  packageVersion: 1.1.0
+  assetPath: Assets/ScopePro/Content/Art/Models/Glass/cobra-glass.asset
+  uploadId: 516423

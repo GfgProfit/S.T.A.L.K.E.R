@@ -17,6 +17,7 @@ public class ItemData : ScriptableObject
     [SerializeField] [BoxGroup("Durability")] private bool _useDurability;
     [SerializeField] [BoxGroup("Durability")] [ShowIf(nameof(UsesDurability))] [Range(0f, 100f)] private float _defaultDurabilityPercent = 100f;
     [SerializeField] [BoxGroup("Equipment")] [ShowIf(nameof(IsArmor))] private bool _canEquipHelmet = true;
+    [SerializeField] [BoxGroup("Equipment")] [ShowIf(nameof(IsArmor))] [Range(0f, 100f)] private float _armorRecoilReductionPercent;
     [SerializeField] [BoxGroup("Ammo")] [ShowIf(nameof(IsAmmo))] [Min(0f)] private float _ammoFleshDamage;
     [SerializeField] [BoxGroup("Ammo")] [ShowIf(nameof(IsAmmo))] [Min(0f)] private float _ammoArmorPenetration;
     [SerializeField] [BoxGroup("Ammo")] [ShowIf(nameof(IsAmmo))] private float _ammoWeaponRecoilPercentModifier;
@@ -46,6 +47,7 @@ public class ItemData : ScriptableObject
     [SerializeField] [BoxGroup("Module/Weapon Stats")] [ShowIf(nameof(IsModule))] private float _moduleWeaponRecoilPercentModifier;
     [SerializeField] [BoxGroup("Module/Weapon Stats")] [ShowIf(nameof(IsModule))] private float _moduleWeaponDurabilityLossPercentModifier;
     [SerializeField] [BoxGroup("Module/Weapon Stats")] [ShowIf(nameof(IsModule))] private float _moduleAccuracyMinutesOfAngleModifier;
+    [SerializeField] [BoxGroup("Module/Weapon Stats")] [ShowIf(nameof(IsModule))] private float _moduleErgonomicsModifier;
     [SerializeField] [BoxGroup("Module/Magazine")] [ShowIf(nameof(IsMagazineModule))] [Min(0)] private int _moduleMagazineCapacity;
     [SerializeField] [BoxGroup("Stats")] [ShowIf(nameof(CanHaveStats))] private List<CharacterStatModifier> _statModifiers = new();
     [SerializeField] [BoxGroup("World")] private WorldItem _worldItemPrefab;
@@ -93,6 +95,7 @@ public class ItemData : ScriptableObject
     public bool HasDurability => _useDurability;
     public float DefaultDurabilityPercent => NormalizeDurability(_defaultDurabilityPercent);
     public bool CanEquipHelmet => _canEquipHelmet;
+    public float ArmorRecoilReductionPercent => _itemType == ItemType.Armor ? Mathf.Clamp(_armorRecoilReductionPercent, 0f, 100f) : 0f;
     public float AmmoFleshDamage => Mathf.Max(0f, _ammoFleshDamage);
     public float AmmoArmorPenetration => Mathf.Max(0f, _ammoArmorPenetration);
     public float AmmoBulletVelocityMetersPerSecondFallback => Mathf.Max(0f, _ammoBulletVelocityMetersPerSecondFallback);
@@ -120,10 +123,11 @@ public class ItemData : ScriptableObject
     public WeaponData WeaponData => _weaponData;
     public WeaponModuleSlot ModuleSlot => _itemType == ItemType.Module ? _moduleSlot : WeaponModuleSlot.None;
     public WeaponModuleType ModuleType => _itemType == ItemType.Module ? _moduleType : WeaponModuleType.None;
-    public Vector2Int ModuleInventorySizeDelta => new(Mathf.Max(0, _moduleInventorySizeDelta.x), Mathf.Max(0, _moduleInventorySizeDelta.y));
+    public Vector2Int ModuleInventorySizeDelta => _moduleInventorySizeDelta;
     public float ModuleWeaponRecoilPercentModifier => _itemType == ItemType.Module ? _moduleWeaponRecoilPercentModifier : 0f;
     public float ModuleWeaponDurabilityLossPercentModifier => _itemType == ItemType.Module ? _moduleWeaponDurabilityLossPercentModifier : 0f;
     public float ModuleAccuracyMinutesOfAngleModifier => _itemType == ItemType.Module ? _moduleAccuracyMinutesOfAngleModifier : 0f;
+    public float ModuleErgonomicsModifier => _itemType == ItemType.Module ? _moduleErgonomicsModifier : 0f;
     public int ModuleMagazineCapacity => IsMagazineModule() ? Mathf.Max(0, _moduleMagazineCapacity) : 0;
     public IReadOnlyList<CharacterStatModifier> StatModifiers => _statModifiers;
     public bool HasStatModifiers => CharacterStatUtility.HasAnyModifier(_statModifiers);
@@ -250,6 +254,7 @@ public class ItemData : ScriptableObject
         _width = Mathf.Max(1, _width);
         _height = Mathf.Max(1, _height);
         _defaultDurabilityPercent = NormalizeDurability(_defaultDurabilityPercent);
+        _armorRecoilReductionPercent = Mathf.Clamp(_armorRecoilReductionPercent, 0f, 100f);
         _firstPersonWeaponSpawnScale = _firstPersonWeaponSpawnScale == Vector3.zero ? Vector3.one : _firstPersonWeaponSpawnScale;
         _ammoFleshDamage = Mathf.Max(0f, _ammoFleshDamage);
         _ammoArmorPenetration = Mathf.Max(0f, _ammoArmorPenetration);
@@ -263,7 +268,6 @@ public class ItemData : ScriptableObject
         _ammoTracerIgnitionDistanceMeters = Mathf.Max(0f, _ammoTracerIgnitionDistanceMeters);
         _ammoTracerBurnDurationSeconds = Mathf.Max(0f, _ammoTracerBurnDurationSeconds);
         _ammoTracerEmissionIntensity = Mathf.Max(0f, _ammoTracerEmissionIntensity);
-        _moduleInventorySizeDelta = new Vector2Int(Mathf.Max(0, _moduleInventorySizeDelta.x), Mathf.Max(0, _moduleInventorySizeDelta.y));
         _moduleMagazineCapacity = Mathf.Max(0, _moduleMagazineCapacity);
     }
 

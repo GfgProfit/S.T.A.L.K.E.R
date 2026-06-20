@@ -127,6 +127,48 @@ internal static class WeaponModuleSupport
         return Mathf.Max(0f, weaponData.AccuracyMinutesOfAngle + GetAccuracyMinutesOfAngleModifier(installedModules));
     }
 
+    public static float GetErgonomicsModifier(IReadOnlyList<ItemData> installedModules)
+    {
+        float modifier = 0f;
+
+        if (installedModules == null)
+        {
+            return modifier;
+        }
+
+        for (int i = 0; i < installedModules.Count; i++)
+        {
+            ItemData module = installedModules[i];
+
+            if (module != null)
+            {
+                modifier += module.ModuleErgonomicsModifier;
+            }
+        }
+
+        return modifier;
+    }
+
+    public static float GetErgonomics(WeaponData weaponData, IReadOnlyList<ItemData> installedModules)
+    {
+        if (weaponData == null)
+        {
+            return 0f;
+        }
+
+        return Mathf.Max(0f, weaponData.BaseErgonomics + GetErgonomicsModifier(installedModules));
+    }
+
+    public static float GetAimSpeedMultiplier(WeaponData weaponData, IReadOnlyList<ItemData> installedModules)
+    {
+        if (weaponData == null)
+        {
+            return 1f;
+        }
+
+        return Mathf.Max(0.01f, GetErgonomics(weaponData, installedModules) / weaponData.BaseErgonomics);
+    }
+
     public static int GetMagazineCapacity(int baseCapacity, IReadOnlyList<ItemData> installedModules)
     {
         int capacity = Mathf.Max(1, baseCapacity);

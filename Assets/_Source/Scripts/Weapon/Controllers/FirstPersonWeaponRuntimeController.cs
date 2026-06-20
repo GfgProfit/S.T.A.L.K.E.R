@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.Threading;
 using Cysharp.Threading.Tasks;
 using UnityEngine;
@@ -19,6 +20,7 @@ public sealed class FirstPersonWeaponRuntimeController : MonoBehaviour
 
     private InventoryItem _weaponItem;
     private ItemData _weaponItemData;
+    private ItemData _equippedArmorItemData;
     private WeaponData _weaponData;
     private InventoryController _inventoryController;
     private IPlayerInput _playerInput;
@@ -59,6 +61,11 @@ public sealed class FirstPersonWeaponRuntimeController : MonoBehaviour
     public bool IsAiming => _isAiming;
     private int MagazineCapacity => WeaponModuleSupport.GetMagazineCapacity(_weaponData == null ? 1 : _weaponData.MagazineCapacity, _weaponItem == null ? null : _weaponItem.InstalledModules);
 
+    public void SetEquippedArmor(ItemData armorItemData)
+    {
+        _equippedArmorItemData = armorItemData != null && armorItemData.ItemType == ItemType.Armor ? armorItemData : null;
+    }
+
     public void Initialize(InventoryItem weaponItem, InventoryController inventoryController, IPlayerInput playerInput, FirstPersonWeaponAmmoHudViewModel ammoHudViewModel)
     {
         CancelReload();
@@ -76,6 +83,7 @@ public sealed class FirstPersonWeaponRuntimeController : MonoBehaviour
         _defaultAmmoMaterial ??= _ammoRenderer == null ? null : _ammoRenderer.sharedMaterial;
         _cameraAllAnimationController = FindCameraAllAnimationController();
         _cameraAllAnimationController?.SetAimActive(false);
+        RefreshAimTransitionSpeed();
         _animationController?.SetAimRootPositionOffsetActive(false, true);
         _playerController = GetComponentInParent<PlayerController>();
         _weaponRecoilService?.Reset();
@@ -862,6 +870,7 @@ public sealed class FirstPersonWeaponRuntimeController : MonoBehaviour
         {
             if (_isAiming == false)
             {
+                RefreshAimTransitionSpeed();
                 _isAiming = true;
                 SetSprintBlockedByAim(true);
                 _cameraAllAnimationController?.SetAimActive(true);
@@ -880,6 +889,7 @@ public sealed class FirstPersonWeaponRuntimeController : MonoBehaviour
         }
 
         _isAiming = false;
+        RefreshAimTransitionSpeed();
         SetSprintBlockedByAim(false);
         _cameraAllAnimationController?.SetAimActive(false);
         _animationController.SetAimRootPositionOffsetActive(false);
@@ -913,6 +923,17 @@ public sealed class FirstPersonWeaponRuntimeController : MonoBehaviour
     {
         return (_animationController != null && _animationController.ForceAim) ||
                (_playerInput != null && _playerInput.IsWeaponAimHeld());
+    }
+
+    private void RefreshAimTransitionSpeed()
+    {
+        if (_animationController == null)
+        {
+            return;
+        }
+
+        IReadOnlyList<ItemData> installedModules = _weaponItem == null ? null : _weaponItem.InstalledModules;
+        _animationController.SetAimTransitionSpeed(WeaponModuleSupport.GetAimSpeedMultiplier(_weaponData, installedModules));
     }
 
     private void ApplyDurabilityShotCost(ItemData ammoData)
@@ -990,6 +1011,7 @@ public sealed class FirstPersonWeaponRuntimeController : MonoBehaviour
     {
         float recoilPercentModifier = ammoData == null ? 0f : ammoData.AmmoWeaponRecoilPercentModifier;
         recoilPercentModifier += WeaponModuleSupport.GetRecoilPercentModifier(_weaponItem == null ? null : _weaponItem.InstalledModules);
+        recoilPercentModifier -= _equippedArmorItemData == null ? 0f : _equippedArmorItemData.ArmorRecoilReductionPercent;
 
         if (_playerController != null && _playerController.IsCrouching)
         {

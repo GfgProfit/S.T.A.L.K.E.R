@@ -27,6 +27,7 @@ internal sealed class FirstPersonWeaponAnimationPlayer : IDisposable
     private float _fadeElapsed;
     private float _fadeDuration;
     private double _loopPlaybackSpeed = 1d;
+    private double _aimTransitionPlaybackSpeed = 1d;
     private bool _hasActivePair;
     private bool _isFading;
 
@@ -44,6 +45,12 @@ internal sealed class FirstPersonWeaponAnimationPlayer : IDisposable
     {
         _loopPlaybackSpeed = Mathf.Max(0.01f, speed);
         ApplyLoopPlaybackSpeed();
+    }
+
+    public void SetAimTransitionPlaybackSpeed(float speed)
+    {
+        _aimTransitionPlaybackSpeed = Mathf.Max(0.01f, speed);
+        ApplyAimTransitionPlaybackSpeed();
     }
 
     public void Play(FirstPersonWeaponAnimationKey key, FirstPersonWeaponAnimationClipPair pair, bool restartIfSame)
@@ -300,6 +307,28 @@ internal sealed class FirstPersonWeaponAnimationPlayer : IDisposable
         }
     }
 
+    private void ApplyAimTransitionPlaybackSpeed()
+    {
+        if (_hasActivePair == false || IsAimTransition(_currentKey) == false)
+        {
+            return;
+        }
+
+        if (_activeKey == _currentKey)
+        {
+            SetStateSpeed(_activeWeaponState, _aimTransitionPlaybackSpeed);
+            SetStateSpeed(_activeHandsState, _aimTransitionPlaybackSpeed);
+            SetStateSpeed(_activeCameraState, _aimTransitionPlaybackSpeed);
+        }
+
+        if (_isFading && _fadingKey == _currentKey)
+        {
+            SetStateSpeed(_fadingWeaponState, _aimTransitionPlaybackSpeed);
+            SetStateSpeed(_fadingHandsState, _aimTransitionPlaybackSpeed);
+            SetStateSpeed(_fadingCameraState, _aimTransitionPlaybackSpeed);
+        }
+    }
+
     private static void SetStateSpeed(AnimancerState state, double speed)
     {
         if (state != null)
@@ -315,7 +344,20 @@ internal sealed class FirstPersonWeaponAnimationPlayer : IDisposable
 
     private static bool ShouldDelayClipStart(FirstPersonWeaponAnimationKey key) => IsLoopLike(key) == false;
 
-    private double GetPlaybackSpeed(FirstPersonWeaponAnimationKey key) => IsLoopLike(key) ? _loopPlaybackSpeed : 1d;
+    private double GetPlaybackSpeed(FirstPersonWeaponAnimationKey key)
+    {
+        if (IsAimTransition(key))
+        {
+            return _aimTransitionPlaybackSpeed;
+        }
+
+        return IsLoopLike(key) ? _loopPlaybackSpeed : 1d;
+    }
+
+    private static bool IsAimTransition(FirstPersonWeaponAnimationKey key)
+    {
+        return key == FirstPersonWeaponAnimationKey.AimIn || key == FirstPersonWeaponAnimationKey.AimOut;
+    }
 
     private static AnimancerComponent GetOrCreateAnimancer(Animator animator)
     {

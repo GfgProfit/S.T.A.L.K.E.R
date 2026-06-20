@@ -78,6 +78,8 @@ MonoBehaviour:
   _moduleInventorySizeDelta: {x: 1, y: 0}
   _moduleWeaponRecoilPercentModifier: -7
   _moduleWeaponDurabilityLossPercentModifier: 15
+  _moduleAccuracyMinutesOfAngleModifier: 0
+  _moduleErgonomicsModifier: -10
   _moduleMagazineCapacity: 0
   _statModifiers: []
   _worldItemPrefab: {fileID: 7235208428658940705, guid: 7da60ef7b6e1dca46b679a2c9a3f5da6, type: 3}
