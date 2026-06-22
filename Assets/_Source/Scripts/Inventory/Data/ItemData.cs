@@ -59,7 +59,6 @@ public class ItemData : ScriptableObject
     [SerializeField] [BoxGroup("Icon/Runtime")] [EnableIf(nameof(GeneratesIconAtRuntime))] private GameObject _iconPrefab;
     [SerializeField] [BoxGroup("Icon/Weapon Variants")] [ShowIf(nameof(UsesFirstPersonWeapon))] private ItemData[] _defaultIconModules = System.Array.Empty<ItemData>();
     [SerializeField] [BoxGroup("Icon/Texture")] [Min(16)] private int _iconPixelsPerCell = 64;
-    [SerializeField] [BoxGroup("Icon/Texture")] [Range(1, 4)] private int _iconRenderScale = 2;
     [SerializeField] [BoxGroup("Icon/Texture")] [Range(1f, 2f)] private float _iconPadding = 1.15f;
     [SerializeField] [BoxGroup("Icon/Texture")] [Range(1, 8)] private int _iconAntiAliasing = 4;
     [SerializeField] [BoxGroup("Icon/Effects")] private bool _iconUseOutline = true;
@@ -142,15 +141,15 @@ public class ItemData : ScriptableObject
     public bool CanGenerateIcon => HasRuntimeIconSource();
     public IReadOnlyList<ItemData> DefaultIconModules => _defaultIconModules ?? System.Array.Empty<ItemData>();
     public int IconPixelsPerCell => Mathf.Max(16, _iconPixelsPerCell);
-    public int IconRenderScale => Mathf.Clamp(_iconRenderScale, 1, 4);
+    public int IconRenderScale => ItemIconGeneratorSettings.LoadDefault().IconRenderScale;
     public int IconAntiAliasing => GetSupportedAntiAliasing(_iconAntiAliasing);
     public bool IconUseOutline => _iconUseOutline && IconOutlineTextureWidth > 0 && IconOutlineColor.a > 0f;
     public Color IconOutlineColor => Settings.IconOutlineColor;
-    public int IconOutlineTextureWidth => Mathf.Max(0, _iconOutlineWidth) * IconRenderScale;
+    public int IconOutlineTextureWidth => GetIconOutlineTextureWidth(IconRenderScale);
     public bool IconUseShadow => _iconUseShadow && IconShadowColor.a > 0f && (IconShadowTextureOffset != Vector2Int.zero || IconShadowTextureBlur > 0);
     public Color IconShadowColor => Settings.IconShadowColor;
-    public Vector2Int IconShadowTextureOffset => Vector2Int.RoundToInt(_iconShadowOffset * IconRenderScale);
-    public int IconShadowTextureBlur => Mathf.Max(0, _iconShadowBlur) * IconRenderScale;
+    public Vector2Int IconShadowTextureOffset => GetIconShadowTextureOffset(IconRenderScale);
+    public int IconShadowTextureBlur => GetIconShadowTextureBlur(IconRenderScale);
     public float IconPadding => Mathf.Max(1f, _iconPadding);
     public Vector3 IconModelEulerAngles => _iconModelEulerAngles;
     public Vector3 IconModelScale => _iconModelScale == Vector3.zero ? Vector3.one : _iconModelScale;
@@ -220,7 +219,7 @@ public class ItemData : ScriptableObject
 
     public int IconTextureWidth => Width * IconPixelsPerCell * IconRenderScale;
     public int IconTextureHeight => Height * IconPixelsPerCell * IconRenderScale;
-    public float IconSpritePixelsPerUnit => IconPixelsPerCell * IconRenderScale;
+    public float IconSpritePixelsPerUnit => GetIconSpritePixelsPerUnit(IconRenderScale);
 
     private GameProjectSettings Settings => GameProjectSettings.LoadDefault();
     private bool UsesDurability() => _useDurability;
@@ -302,6 +301,10 @@ public class ItemData : ScriptableObject
     internal int BuildIconHash(IReadOnlyList<ItemData> installedModules = null) => BuildIconHash(Width, Height, installedModules);
     internal int BuildIconHash(int width, int height, IReadOnlyList<ItemData> installedModules = null) => ItemIconHashBuilder.BuildHash(this, installedModules, Mathf.Max(1, width), Mathf.Max(1, height), false);
     internal int BuildSlotIconHash(int slotWidth, int slotHeight, IReadOnlyList<ItemData> installedModules = null) => ItemIconHashBuilder.BuildHash(this, installedModules, Mathf.Max(1, slotWidth), Mathf.Max(1, slotHeight), true);
+    public int GetIconOutlineTextureWidth(int iconRenderScale) => Mathf.Max(0, _iconOutlineWidth) * ClampIconRenderScale(iconRenderScale);
+    public Vector2Int GetIconShadowTextureOffset(int iconRenderScale) => Vector2Int.RoundToInt(_iconShadowOffset * ClampIconRenderScale(iconRenderScale));
+    public int GetIconShadowTextureBlur(int iconRenderScale) => Mathf.Max(0, _iconShadowBlur) * ClampIconRenderScale(iconRenderScale);
+    public float GetIconSpritePixelsPerUnit(int iconRenderScale) => IconPixelsPerCell * ClampIconRenderScale(iconRenderScale);
     public void SetWorldPrefab(WorldItem worldItem) => _worldItemPrefab = worldItem;
     public static float NormalizeDurability(float durabilityPercent) => Mathf.Clamp(durabilityPercent, 0f, 100f);
 
@@ -341,4 +344,6 @@ public class ItemData : ScriptableObject
 
         return 8;
     }
+
+    private static int ClampIconRenderScale(int iconRenderScale) => Mathf.Clamp(iconRenderScale, 1, 4);
 }

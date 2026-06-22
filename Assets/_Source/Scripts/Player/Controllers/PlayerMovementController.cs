@@ -20,13 +20,13 @@ public class PlayerMovementController
     public bool IsSprinting { get; private set; }
     public bool IsWalking { get; private set; }
 
-    public void SetInput(IPlayerMovementInput playerInput, bool canSprint)
+    public void SetInput(IPlayerMovementInput playerInput, bool canSprint, bool isCrouching)
     {
         Vector2 input = playerInput.GetMovementInput();
         _rawInput = new(input.x, 0.0f, input.y);
 
         IsWalking = _rawInput.x != 0.0f || _rawInput.z != 0.0f;
-        IsSprinting = canSprint && IsWalking && playerInput.IsSprintHeld() && _rawInput.z > 0.0f;
+        IsSprinting = canSprint && isCrouching == false && IsWalking && playerInput.IsSprintHeld() && _rawInput.z > 0.0f;
     }
 
     public void ClearInput()

@@ -32,7 +32,7 @@ internal static class ItemIconRenderer
         return await RenderIconTextureAsync(
             itemData,
             Array.Empty<ItemData>(),
-            IconRenderProfile.CreateDefault(itemData),
+            IconRenderProfile.CreateDefault(itemData, resolvedSettings),
             renderSession,
             cancellationToken);
     }
@@ -67,7 +67,7 @@ internal static class ItemIconRenderer
 
         try
         {
-            ItemIconPostProcessSettings postProcessSettings = ItemIconTextureProcessor.CreatePostProcessSettings(itemData);
+            ItemIconPostProcessSettings postProcessSettings = ItemIconTextureProcessor.CreatePostProcessSettings(itemData, renderProfile);
             Color32[] processedPixels = await UniTask.RunOnThreadPool(
                 () => ItemIconTextureProcessor.CreateProcessedPixels(rawResult.ItemPixels, rawResult.Width, rawResult.Height, postProcessSettings),
                 true,
@@ -162,6 +162,7 @@ internal sealed class ItemIconRenderSession : IDisposable
         _rootObject.transform.localScale = renderProfile.ModelScale;
         BuildEffectiveModules(itemData, installedModules);
         WeaponModuleSupport.ApplyToVisual(_moduleDefinitions, _effectiveModules);
+        ItemIconSceneBuilder.DisableLocalEnvironment(_rootObject);
 
         if (ItemIconSceneBuilder.TryCalculateBounds(_renderers, _rootObject.transform.position, out Bounds bounds) == false)
         {
@@ -181,12 +182,14 @@ internal sealed class ItemIconRenderSession : IDisposable
 
             renderTexture = RenderTexture.GetTemporary(textureWidth, textureHeight, 24, _settings.RenderTextureFormat, RenderTextureReadWrite.Default, itemData.IconAntiAliasing);
             renderTexture.filterMode = FilterMode.Bilinear;
+            ClearRenderTexture(renderTexture, true);
 
             if (_requiresExposureWarmup)
             {
                 RenderExposureWarmupFrame(itemData, bounds, renderTexture, renderProfile);
                 _requiresExposureWarmup = false;
                 await UniTask.Yield(PlayerLoopTiming.Update, cancellationToken);
+                ClearRenderTexture(renderTexture, true);
             }
 
             try
@@ -201,6 +204,7 @@ internal sealed class ItemIconRenderSession : IDisposable
                     ItemIconLightFactory.Configure(_lights, itemData, _renderCamera.transform, _settings, renderProfile);
                 }
 
+                ClearRenderTexture(renderTexture, true);
                 RenderCamera();
                 readbackTexture = PrepareReadbackTexture(renderTexture, textureWidth, textureHeight);
                 readbackRequest = AsyncGPUReadback.Request(readbackTexture, 0, TextureFormat.RGBA32);
@@ -327,6 +331,7 @@ internal sealed class ItemIconRenderSession : IDisposable
         _renderers = _rootObject.GetComponentsInChildren<Renderer>(true);
         ItemIconSceneBuilder.SetLayerRecursively(_rootObject, _settings.RenderLayer);
         ItemIconSceneBuilder.SetRendererIsolation(_renderers, _settings);
+        ItemIconSceneBuilder.DisableLocalEnvironment(_rootObject);
     }
 
     private void ReleaseCurrentItemVisual()
@@ -408,6 +413,7 @@ internal sealed class ItemIconRenderSession : IDisposable
 
         RenderTexture resolvedTexture = RenderTexture.GetTemporary(width, height, 0, _settings.RenderTextureFormat, RenderTextureReadWrite.Default, 1);
         resolvedTexture.filterMode = FilterMode.Bilinear;
+        ClearRenderTexture(resolvedTexture, false);
         Graphics.Blit(renderTexture, resolvedTexture);
         return resolvedTexture;
     }
@@ -425,4 +431,18 @@ internal sealed class ItemIconRenderSession : IDisposable
                 _settings.ExposureMode == ExposureMode.CurveMapping);
     }
 
+    private static void ClearRenderTexture(RenderTexture renderTexture, bool clearDepth)
+    {
+        RenderTexture previousActive = RenderTexture.active;
+
+        try
+        {
+            RenderTexture.active = renderTexture;
+            GL.Clear(clearDepth, true, Color.clear);
+        }
+        finally
+        {
+            RenderTexture.active = previousActive;
+        }
+    }
 }

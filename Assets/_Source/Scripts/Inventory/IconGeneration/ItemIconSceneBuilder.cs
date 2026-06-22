@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.Rendering;
 
 internal static class ItemIconSceneBuilder
 {
@@ -81,6 +82,29 @@ internal static class ItemIconSceneBuilder
             renderer.lightProbeUsage = settings.RendererLightProbeUsage;
             renderer.reflectionProbeUsage = settings.RendererReflectionProbeUsage;
             renderer.receiveShadows = settings.RendererReceiveShadows;
+        }
+    }
+
+    public static void DisableLocalEnvironment(GameObject rootObject)
+    {
+        if (rootObject == null)
+        {
+            return;
+        }
+
+        DisableBehaviours(rootObject.GetComponentsInChildren<Light>(true));
+        DisableBehaviours(rootObject.GetComponentsInChildren<Volume>(true));
+        DisableBehaviours(rootObject.GetComponentsInChildren<ReflectionProbe>(true));
+    }
+
+    private static void DisableBehaviours<T>(IReadOnlyList<T> behaviours) where T : Behaviour
+    {
+        for (int i = 0; i < behaviours.Count; i++)
+        {
+            if (behaviours[i] != null)
+            {
+                behaviours[i].enabled = false;
+            }
         }
     }
 }

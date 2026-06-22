@@ -202,8 +202,8 @@ public sealed class BakedItemIconEntry
         long estimatedTextureBytes)
     {
         IconRenderProfile renderProfile = profileType == ItemIconProfileType.Slot
-            ? IconRenderProfile.CreateSlot(itemData, width, height)
-            : IconRenderProfile.CreateDefault(itemData, width, height);
+            ? IconRenderProfile.CreateSlot(itemData, width, height, settings)
+            : IconRenderProfile.CreateDefault(itemData, width, height, settings);
         IconCacheKey key = ItemIconStableKeyBuilder.Build(itemData, installedModules, settings, renderProfile);
 
         return new BakedItemIconEntry(

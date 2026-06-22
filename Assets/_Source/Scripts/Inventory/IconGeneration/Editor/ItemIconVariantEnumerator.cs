@@ -21,11 +21,11 @@ internal static class ItemIconVariantEnumerator
             }
 
             int firstVariantIndex = analysis.Variants.Count;
-            AddProfileVariants(itemData, Array.Empty<ItemData>(), settings.PrewarmSlotProfiles, analysis.Variants);
+            AddProfileVariants(itemData, Array.Empty<ItemData>(), settings, settings.PrewarmSlotProfiles, analysis.Variants);
 
             if (IsWeapon(itemData) && itemData.IconPrefab != null)
             {
-                AddWeaponModuleVariants(itemData, settings.PrewarmSlotProfiles, analysis.Variants);
+                AddWeaponModuleVariants(itemData, settings, settings.PrewarmSlotProfiles, analysis.Variants);
             }
 
             int itemVariantCount = analysis.Variants.Count - firstVariantIndex;
@@ -49,13 +49,14 @@ internal static class ItemIconVariantEnumerator
     private static void AddProfileVariants(
         ItemData itemData,
         ItemData[] installedModules,
+        ItemIconGeneratorSettings settings,
         IReadOnlyList<ItemIconSlotProfile> slotProfiles,
         ICollection<ItemIconBakeVariant> variants)
     {
         Vector2Int sizeDelta = CalculateSizeDelta(installedModules);
         int width = Mathf.Max(1, itemData.Width + sizeDelta.x);
         int height = Mathf.Max(1, itemData.Height + sizeDelta.y);
-        AddUnique(variants, new ItemIconBakeVariant(itemData, installedModules, width, height, ItemIconProfileType.Default));
+        AddUnique(variants, new ItemIconBakeVariant(itemData, installedModules, width, height, ItemIconProfileType.Default, settings.IconRenderScale));
 
         if (slotProfiles == null)
         {
@@ -68,13 +69,14 @@ internal static class ItemIconVariantEnumerator
 
             if (slotProfile.Accepts(itemData))
             {
-                AddUnique(variants, new ItemIconBakeVariant(itemData, installedModules, slotProfile.Width, slotProfile.Height, ItemIconProfileType.Slot));
+                AddUnique(variants, new ItemIconBakeVariant(itemData, installedModules, slotProfile.Width, slotProfile.Height, ItemIconProfileType.Slot, settings.IconRenderScale));
             }
         }
     }
 
     private static void AddWeaponModuleVariants(
         ItemData itemData,
+        ItemIconGeneratorSettings settings,
         IReadOnlyList<ItemIconSlotProfile> slotProfiles,
         ICollection<ItemIconBakeVariant> variants)
     {
@@ -130,7 +132,7 @@ internal static class ItemIconVariantEnumerator
 
         List<ItemData> selectedModules = new();
         List<ItemData> effectiveModules = new(defaultModules);
-        EnumerateSlot(0, itemData, orderedSlots, configurationDefinitions, slotProfiles, selectedModules, effectiveModules, variants);
+        EnumerateSlot(0, itemData, orderedSlots, configurationDefinitions, settings, slotProfiles, selectedModules, effectiveModules, variants);
     }
 
     private static void EnumerateSlot(
@@ -138,6 +140,7 @@ internal static class ItemIconVariantEnumerator
         ItemData itemData,
         IReadOnlyList<List<FirstPersonWeaponModule>> orderedSlots,
         IReadOnlyDictionary<string, FirstPersonWeaponModule> configurationDefinitions,
+        ItemIconGeneratorSettings settings,
         IReadOnlyList<ItemIconSlotProfile> slotProfiles,
         List<ItemData> selectedModules,
         List<ItemData> effectiveModules,
@@ -149,13 +152,13 @@ internal static class ItemIconVariantEnumerator
             {
                 ItemData[] modules = selectedModules.ToArray();
                 Array.Sort(modules, (left, right) => string.CompareOrdinal(left.ItemId, right.ItemId));
-                AddProfileVariants(itemData, modules, slotProfiles, variants);
+                AddProfileVariants(itemData, modules, settings, slotProfiles, variants);
             }
 
             return;
         }
 
-        EnumerateSlot(slotIndex + 1, itemData, orderedSlots, configurationDefinitions, slotProfiles, selectedModules, effectiveModules, variants);
+        EnumerateSlot(slotIndex + 1, itemData, orderedSlots, configurationDefinitions, settings, slotProfiles, selectedModules, effectiveModules, variants);
 
         IReadOnlyList<FirstPersonWeaponModule> slotDefinitions = orderedSlots[slotIndex];
 
@@ -164,7 +167,7 @@ internal static class ItemIconVariantEnumerator
             ItemData module = slotDefinitions[i].ModuleItemData;
             selectedModules.Add(module);
             effectiveModules.Add(module);
-            EnumerateSlot(slotIndex + 1, itemData, orderedSlots, configurationDefinitions, slotProfiles, selectedModules, effectiveModules, variants);
+            EnumerateSlot(slotIndex + 1, itemData, orderedSlots, configurationDefinitions, settings, slotProfiles, selectedModules, effectiveModules, variants);
             effectiveModules.RemoveAt(effectiveModules.Count - 1);
             selectedModules.RemoveAt(selectedModules.Count - 1);
         }
@@ -328,13 +331,14 @@ internal sealed class ItemIconVariantAnalysis
 
 internal sealed class ItemIconBakeVariant : IEquatable<ItemIconBakeVariant>
 {
-    public ItemIconBakeVariant(ItemData itemData, ItemData[] installedModules, int width, int height, ItemIconProfileType profileType)
+    public ItemIconBakeVariant(ItemData itemData, ItemData[] installedModules, int width, int height, ItemIconProfileType profileType, int iconRenderScale)
     {
         ItemData = itemData;
         InstalledModules = installedModules ?? Array.Empty<ItemData>();
         Width = Mathf.Max(1, width);
         Height = Mathf.Max(1, height);
         ProfileType = profileType;
+        IconRenderScale = Mathf.Clamp(iconRenderScale, 1, 4);
     }
 
     public ItemData ItemData { get; }
@@ -342,7 +346,8 @@ internal sealed class ItemIconBakeVariant : IEquatable<ItemIconBakeVariant>
     public int Width { get; }
     public int Height { get; }
     public ItemIconProfileType ProfileType { get; }
-    public long EstimatedTextureBytes => (long)Width * ItemData.IconPixelsPerCell * ItemData.IconRenderScale * Height * ItemData.IconPixelsPerCell * ItemData.IconRenderScale * 4L;
+    public int IconRenderScale { get; }
+    public long EstimatedTextureBytes => (long)Width * ItemData.IconPixelsPerCell * IconRenderScale * Height * ItemData.IconPixelsPerCell * IconRenderScale * 4L;
     public string DisplayName => $"{ItemData.ItemName} | {ProfileType} {Width}x{Height} | {GetModuleLabel()}";
 
     public bool Equals(ItemIconBakeVariant other)

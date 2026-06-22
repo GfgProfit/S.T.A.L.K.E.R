@@ -38,7 +38,7 @@ public static class ItemIconCache
         }
 
         ItemIconGeneratorSettings settings = ItemIconGeneratorSettings.LoadDefault();
-        IconRenderProfile renderProfile = IconRenderProfile.CreateDefault(itemData, width, height);
+        IconRenderProfile renderProfile = IconRenderProfile.CreateDefault(itemData, width, height, settings);
         IconCacheKey key = BuildCacheKey(itemData, installedModules, settings, renderProfile);
 
         if (TryGetCachedSprite(key, out icon))
@@ -64,7 +64,7 @@ public static class ItemIconCache
         }
 
         ItemIconGeneratorSettings settings = ItemIconGeneratorSettings.LoadDefault();
-        IconRenderProfile renderProfile = IconRenderProfile.CreateSlot(itemData, slotWidth, slotHeight);
+        IconRenderProfile renderProfile = IconRenderProfile.CreateSlot(itemData, slotWidth, slotHeight, settings);
         IconCacheKey key = BuildCacheKey(itemData, installedModules, settings, renderProfile);
 
         if (TryGetCachedSprite(key, out icon))
@@ -89,7 +89,7 @@ public static class ItemIconCache
         }
 
         ItemIconGeneratorSettings settings = ItemIconGeneratorSettings.LoadDefault();
-        IconRenderProfile renderProfile = IconRenderProfile.CreateDefault(itemData, width, height);
+        IconRenderProfile renderProfile = IconRenderProfile.CreateDefault(itemData, width, height, settings);
         IconCacheKey key = BuildCacheKey(itemData, installedModules, settings, renderProfile);
         return TryGetCachedSprite(key, out Sprite cachedSprite) ? cachedSprite : itemData.FallbackIcon;
     }
@@ -102,7 +102,7 @@ public static class ItemIconCache
         }
 
         ItemIconGeneratorSettings settings = ItemIconGeneratorSettings.LoadDefault();
-        IconRenderProfile renderProfile = IconRenderProfile.CreateSlot(itemData, slotWidth, slotHeight);
+        IconRenderProfile renderProfile = IconRenderProfile.CreateSlot(itemData, slotWidth, slotHeight, settings);
         IconCacheKey key = BuildCacheKey(itemData, installedModules, settings, renderProfile);
         return TryGetCachedSprite(key, out Sprite cachedSprite) ? cachedSprite : itemData.FallbackIcon;
     }
@@ -122,7 +122,7 @@ public static class ItemIconCache
         }
 
         ItemIconGeneratorSettings settings = ItemIconGeneratorSettings.LoadDefault();
-        IconRenderProfile renderProfile = IconRenderProfile.CreateDefault(itemData, width, height);
+        IconRenderProfile renderProfile = IconRenderProfile.CreateDefault(itemData, width, height, settings);
         return GetOrCreateStandaloneAsync(itemData, installedModules, settings, renderProfile, cancellationToken);
     }
 
@@ -134,7 +134,7 @@ public static class ItemIconCache
         }
 
         ItemIconGeneratorSettings settings = ItemIconGeneratorSettings.LoadDefault();
-        IconRenderProfile renderProfile = IconRenderProfile.CreateSlot(itemData, slotWidth, slotHeight);
+        IconRenderProfile renderProfile = IconRenderProfile.CreateSlot(itemData, slotWidth, slotHeight, settings);
         return GetOrCreateStandaloneAsync(itemData, installedModules, settings, renderProfile, cancellationToken);
     }
 
@@ -151,7 +151,7 @@ public static class ItemIconCache
 
         ItemIconGeneratorSettings settings = ItemIconGeneratorSettings.LoadDefault();
         int generatorHash = settings.BuildHash();
-        List<PrewarmRequest> requests = BuildPrewarmRequests(BuildUniqueItemList(itemDataList), slotProfiles, generatorHash);
+        List<PrewarmRequest> requests = BuildPrewarmRequests(BuildUniqueItemList(itemDataList), slotProfiles, settings, generatorHash);
         int total = requests.Count;
         float frameBudgetMilliseconds = settings.PrewarmFrameBudgetMilliseconds;
         int budgetFrame = -1;
@@ -424,7 +424,7 @@ public static class ItemIconCache
             return request.ItemData.FallbackIcon;
         }
 
-        Sprite generatedSprite = ItemIconTextureProcessor.CreateSprite(request.ItemData, generatedTexture);
+        Sprite generatedSprite = ItemIconTextureProcessor.CreateSprite(request.ItemData, generatedTexture, request.RenderProfile);
         _cache[request.Key] = IconCacheEntry.CreateGenerated(generatedSprite, generatedTexture);
         return generatedSprite;
     }
@@ -450,6 +450,7 @@ public static class ItemIconCache
     private static List<PrewarmRequest> BuildPrewarmRequests(
         IReadOnlyList<ItemData> itemDataList,
         IReadOnlyList<ItemIconSlotProfile> slotProfiles,
+        ItemIconGeneratorSettings settings,
         int generatorHash)
     {
         List<PrewarmRequest> requests = new();
@@ -464,11 +465,11 @@ public static class ItemIconCache
                 continue;
             }
 
-            AddVariantRequests(itemData, Array.Empty<ItemData>(), slotProfiles, generatorHash, requests, requestKeys);
+            AddVariantRequests(itemData, Array.Empty<ItemData>(), slotProfiles, settings, generatorHash, requests, requestKeys);
 
             if (IsWeapon(itemData) && itemData.IconPrefab != null)
             {
-                AddWeaponModuleVariants(itemData, slotProfiles, generatorHash, requests, requestKeys);
+                AddWeaponModuleVariants(itemData, slotProfiles, settings, generatorHash, requests, requestKeys);
             }
         }
 
@@ -479,6 +480,7 @@ public static class ItemIconCache
         ItemData itemData,
         ItemData[] installedModules,
         IReadOnlyList<ItemIconSlotProfile> slotProfiles,
+        ItemIconGeneratorSettings settings,
         int generatorHash,
         ICollection<PrewarmRequest> requests,
         ISet<IconCacheKey> requestKeys)
@@ -487,7 +489,7 @@ public static class ItemIconCache
         int defaultWidth = Mathf.Max(1, itemData.Width + moduleSizeDelta.x);
         int defaultHeight = Mathf.Max(1, itemData.Height + moduleSizeDelta.y);
 
-        AddRequest(itemData, installedModules, generatorHash, IconRenderProfile.CreateDefault(itemData, defaultWidth, defaultHeight), requests, requestKeys);
+        AddRequest(itemData, installedModules, generatorHash, IconRenderProfile.CreateDefault(itemData, defaultWidth, defaultHeight, settings), requests, requestKeys);
 
         if (slotProfiles == null)
         {
@@ -507,13 +509,13 @@ public static class ItemIconCache
             {
                 if (defaultWidth != itemData.Width || defaultHeight != itemData.Height)
                 {
-                    AddRequest(itemData, installedModules, generatorHash, IconRenderProfile.CreateDefault(itemData), requests, requestKeys);
+                    AddRequest(itemData, installedModules, generatorHash, IconRenderProfile.CreateDefault(itemData, settings), requests, requestKeys);
                 }
 
                 continue;
             }
 
-            AddRequest(itemData, installedModules, generatorHash, IconRenderProfile.CreateSlot(itemData, slotProfile.Width, slotProfile.Height), requests, requestKeys);
+            AddRequest(itemData, installedModules, generatorHash, IconRenderProfile.CreateSlot(itemData, slotProfile.Width, slotProfile.Height, settings), requests, requestKeys);
         }
     }
 
@@ -536,6 +538,7 @@ public static class ItemIconCache
     private static void AddWeaponModuleVariants(
         ItemData itemData,
         IReadOnlyList<ItemIconSlotProfile> slotProfiles,
+        ItemIconGeneratorSettings settings,
         int generatorHash,
         ICollection<PrewarmRequest> requests,
         ISet<IconCacheKey> requestKeys)
@@ -586,7 +589,7 @@ public static class ItemIconCache
 
         List<ItemData> selectedModules = new();
         List<ItemData> configurationModules = new(defaultModules);
-        AddWeaponModuleVariants(itemData, definitionsBySlot, configurationDefinitions, slotProfiles, generatorHash, 1, selectedModules, configurationModules, requests, requestKeys);
+        AddWeaponModuleVariants(itemData, definitionsBySlot, configurationDefinitions, slotProfiles, settings, generatorHash, 1, selectedModules, configurationModules, requests, requestKeys);
     }
 
     private static void AddWeaponModuleVariants(
@@ -594,6 +597,7 @@ public static class ItemIconCache
         IReadOnlyList<List<FirstPersonWeaponModule>> definitionsBySlot,
         IReadOnlyDictionary<ItemData, FirstPersonWeaponModule> definitions,
         IReadOnlyList<ItemIconSlotProfile> slotProfiles,
+        ItemIconGeneratorSettings settings,
         int generatorHash,
         int slotIndex,
         List<ItemData> selectedModules,
@@ -605,13 +609,13 @@ public static class ItemIconCache
         {
             if (selectedModules.Count > 0 && AreModuleConfigurationsSatisfied(configurationModules, definitions))
             {
-                AddVariantRequests(itemData, selectedModules.ToArray(), slotProfiles, generatorHash, requests, requestKeys);
+                AddVariantRequests(itemData, selectedModules.ToArray(), slotProfiles, settings, generatorHash, requests, requestKeys);
             }
 
             return;
         }
 
-        AddWeaponModuleVariants(itemData, definitionsBySlot, definitions, slotProfiles, generatorHash, slotIndex + 1, selectedModules, configurationModules, requests, requestKeys);
+        AddWeaponModuleVariants(itemData, definitionsBySlot, definitions, slotProfiles, settings, generatorHash, slotIndex + 1, selectedModules, configurationModules, requests, requestKeys);
 
         IReadOnlyList<FirstPersonWeaponModule> slotDefinitions = definitionsBySlot[slotIndex];
 
@@ -625,7 +629,7 @@ public static class ItemIconCache
             ItemData moduleItemData = slotDefinitions[i].ModuleItemData;
             selectedModules.Add(moduleItemData);
             configurationModules.Add(moduleItemData);
-            AddWeaponModuleVariants(itemData, definitionsBySlot, definitions, slotProfiles, generatorHash, slotIndex + 1, selectedModules, configurationModules, requests, requestKeys);
+            AddWeaponModuleVariants(itemData, definitionsBySlot, definitions, slotProfiles, settings, generatorHash, slotIndex + 1, selectedModules, configurationModules, requests, requestKeys);
             configurationModules.RemoveAt(configurationModules.Count - 1);
             selectedModules.RemoveAt(selectedModules.Count - 1);
         }

@@ -79,8 +79,8 @@ public class PlayerController : MonoBehaviour
 
             if (_movementEnabled)
             {
-                _movementController.SetInput(_playerInput, CanSprinting && !isSprintBlockedByUnarmedAim);
                 _crouchController.Tick(_playerInput, _canCrouching, _crouchTransitionSpeed);
+                _movementController.SetInput(_playerInput, CanSprinting && !isSprintBlockedByUnarmedAim, IsCrouching);
             }
             else
             {
@@ -132,7 +132,7 @@ public class PlayerController : MonoBehaviour
 
         if (canSprinting == false && IsSprinting)
         {
-            _movementController.SetInput(_playerInput, false);
+            _movementController.SetInput(_playerInput, false, IsCrouching);
         }
     }
 

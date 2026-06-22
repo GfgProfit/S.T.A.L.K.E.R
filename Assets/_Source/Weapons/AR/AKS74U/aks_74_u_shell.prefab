@@ -11,7 +11,7 @@ GameObject:
   - component: {fileID: 2216890354378738721}
   - component: {fileID: 983915258110520581}
   - component: {fileID: 6471988976658079152}
-  - component: {fileID: 1615053772231798420}
+  - component: {fileID: 5185162879321782113}
   - component: {fileID: 178647810484530590}
   m_Layer: 0
   m_Name: aks_74_u_shell
@@ -92,8 +92,8 @@ MeshRenderer:
   m_SortingOrder: 0
   m_MaskInteraction: 0
   m_AdditionalVertexStreams: {fileID: 0}
---- !u!136 &1615053772231798420
-CapsuleCollider:
+--- !u!64 &5185162879321782113
+MeshCollider:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
@@ -110,11 +110,10 @@ CapsuleCollider:
   m_IsTrigger: 0
   m_ProvidesContacts: 0
   m_Enabled: 1
-  serializedVersion: 2
-  m_Radius: 0.008
-  m_Height: 0.06
-  m_Direction: 2
-  m_Center: {x: 0.000000005820766, y: -0.000000038184226, z: 0.0021697655}
+  serializedVersion: 5
+  m_Convex: 1
+  m_CookingOptions: 30
+  m_Mesh: {fileID: -8043985579680301360, guid: 3345cd6700e37c34196a821e29edfb8b, type: 3}
 --- !u!54 &178647810484530590
 Rigidbody:
   m_ObjectHideFlags: 0

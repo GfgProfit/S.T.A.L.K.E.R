@@ -161,9 +161,10 @@ MonoBehaviour:
   _renderOrigin: {x: 8192, y: 0, z: 8192}
   _excludeIconLayerFromSceneLights: 1
   _rendererLightProbeUsage: 0
-  _rendererReflectionProbeUsage: 2
+  _rendererReflectionProbeUsage: 0
   _rendererReceiveShadows: 0
   _renderTextureFormat: 2
+  _iconRenderScale: 2
   _allowHdr: 1
   _useCameraMsaa: 1
   _cameraDistanceMultiplier: 3
@@ -173,12 +174,12 @@ MonoBehaviour:
   _farClipOffset: 10
   _enableDirectSpecularLighting: 0
   _enableExposureControl: 1
-  _enableAtmosphericScattering: 1
+  _enableAtmosphericScattering: 0
   _enablePostProcess: 1
   _enableColorGrading: 1
   _enableTonemapping: 1
-  _enableVolumetrics: 1
-  _enableSkyReflection: 1
+  _enableVolumetrics: 0
+  _enableSkyReflection: 0
   _useFrontFillLight: 1
   _frontFillLightIntensityMultiplier: 0.65
   _frontFillLightCameraDirection: {x: 0, y: 0.15, z: 1}
@@ -193,13 +194,13 @@ MonoBehaviour:
   _skyRenderingSpace: 0
   _physicallyBasedSkyModel: 1
   _physicallyBasedSkyGroundTint: {r: 0.122641504, g: 0.1043775, b: 0.09313812, a: 1}
-  _fogEnabled: 1
+  _fogEnabled: 0
   _fogColorMode: 1
   _maxFogDistance: 5000
   _meanFreePath: 400
-  _enableVolumetricFog: 1
+  _enableVolumetricFog: 0
   _fogAnisotropy: 0.65
-  _exposureMode: 4
+  _exposureMode: 0
   _fixedExposure: 0
   _exposureCompensation: 0.1
   _exposureLimitMin: 2
@@ -209,5 +210,5 @@ MonoBehaviour:
   _contrast: 0
   _colorFilter: {r: 1, g: 1, b: 1, a: 1}
   _hueShift: 0
-  _saturation: 0
+  _saturation: 18
   _tonemappingMode: 1

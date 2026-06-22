@@ -10,6 +10,14 @@ public sealed class ItemIconGeneratorWindow : EditorWindow
     private const string DEFAULT_ASSET_PATH = "Assets/Resources/" + ItemIconGeneratorSettings.DEFAULT_RESOURCE_PATH + ".asset";
     private const string RESOURCES_FOLDER_PATH = "Assets/Resources";
     private const int LARGE_BAKE_CONFIRMATION_THRESHOLD = 2000;
+    private const float DEFAULT_VARIANT_COUNT_HEIGHT = 82f;
+    private const float MIN_VARIANT_COUNT_HEIGHT = 32f;
+    private const float MAX_VARIANT_COUNT_HEIGHT = 260f;
+    private const float VARIANT_COUNT_RESIZE_HANDLE_HEIGHT = 6f;
+
+    private static readonly ItemType[] BAKE_ITEM_TYPES = (ItemType[])Enum.GetValues(typeof(ItemType));
+    private static readonly string[] BAKE_ITEM_TYPE_LABELS = Enum.GetNames(typeof(ItemType));
+    private static readonly int ALL_BAKE_ITEM_TYPE_MASK = BuildAllBakeItemTypeMask();
 
     private ItemIconGeneratorSettings _settings;
     private SerializedObject _settingsObject;
@@ -24,9 +32,12 @@ public sealed class ItemIconGeneratorWindow : EditorWindow
     private ItemIconVariantAnalysis _previewVariantAnalysis;
     private string[] _previewVariantLabels = Array.Empty<string>();
     private int _selectedVariantIndex;
+    private int _selectedBakeItemTypeMask = GetBakeItemTypeMask(ItemType.Weapon);
     private bool _isBaking;
     private string _bakeStatus = "Analysis not refreshed";
     private Vector2 _variantCountScroll;
+    private float _variantCountHeight = DEFAULT_VARIANT_COUNT_HEIGHT;
+    private bool _isResizingVariantCount;
 
     [MenuItem("Tools/Inventory/Item Icon Generator")]
     private static void Open()
@@ -177,7 +188,7 @@ public sealed class ItemIconGeneratorWindow : EditorWindow
                         MessageType.Warning);
                 }
 
-                _variantCountScroll = EditorGUILayout.BeginScrollView(_variantCountScroll, GUILayout.MaxHeight(82f));
+                _variantCountScroll = EditorGUILayout.BeginScrollView(_variantCountScroll, GUILayout.Height(_variantCountHeight));
 
                 foreach (KeyValuePair<ItemData, int> pair in _allVariantAnalysis.VariantCountsByItem)
                 {
@@ -188,11 +199,23 @@ public sealed class ItemIconGeneratorWindow : EditorWindow
                 }
 
                 EditorGUILayout.EndScrollView();
+                DrawVariantCountResizeHandle();
             }
 
             if (_previewVariantLabels.Length > 0)
             {
                 _selectedVariantIndex = EditorGUILayout.Popup("Selected Variant", Mathf.Clamp(_selectedVariantIndex, 0, _previewVariantLabels.Length - 1), _previewVariantLabels);
+            }
+
+            using (new EditorGUI.DisabledScope(_isBaking))
+            using (new EditorGUILayout.HorizontalScope())
+            {
+                _selectedBakeItemTypeMask = EditorGUILayout.MaskField("Item Types", _selectedBakeItemTypeMask, BAKE_ITEM_TYPE_LABELS);
+
+                if (GUILayout.Button("Bake Item Types", GUILayout.Width(140f)))
+                {
+                    StartBakeSelectedItemTypes();
+                }
             }
 
             using (new EditorGUI.DisabledScope(_isBaking))
@@ -286,6 +309,49 @@ public sealed class ItemIconGeneratorWindow : EditorWindow
 
         if (RequiresLargeBakeConfirmation(analysis) &&
             EditorUtility.DisplayDialog("Large Item Icon Bake", $"Bake {analysis.Variants.Count} selected variants?", "Bake", "Cancel") == false)
+        {
+            return;
+        }
+
+        RunBakeAsync(analysis.Variants, false).Forget(Debug.LogException);
+    }
+
+    private void StartBakeSelectedItemTypes()
+    {
+        if (HasSelectedBakeItemTypes() == false)
+        {
+            EditorUtility.DisplayDialog("Item Icon Bake", "Select at least one item type.", "OK");
+            return;
+        }
+
+        List<ItemData> selectedItems = new();
+        List<ItemData> allItems = ItemDataIdValidator.LoadAllItems();
+
+        for (int i = 0; i < allItems.Count; i++)
+        {
+            ItemData itemData = allItems[i];
+
+            if (itemData != null && IsBakeItemTypeSelected(itemData.ItemType))
+            {
+                selectedItems.Add(itemData);
+            }
+        }
+
+        ItemIconVariantAnalysis analysis = ItemIconVariantEnumerator.Enumerate(selectedItems, _settings);
+        string itemTypeLabel = GetSelectedBakeItemTypeLabel();
+
+        if (analysis.Variants.Count == 0)
+        {
+            EditorUtility.DisplayDialog("Item Icon Bake", $"No valid {itemTypeLabel} icon variants were found.", "OK");
+            return;
+        }
+
+        if (RequiresLargeBakeConfirmation(analysis) &&
+            EditorUtility.DisplayDialog(
+                "Large Item Icon Bake",
+                $"Bake {analysis.Variants.Count} {itemTypeLabel} icon variant(s)? Estimated raw RGBA size is {EditorUtility.FormatBytes(analysis.EstimatedTextureBytes)}.",
+                "Bake",
+                "Cancel") == false)
         {
             return;
         }
@@ -443,6 +509,77 @@ public sealed class ItemIconGeneratorWindow : EditorWindow
         return analysis.Variants.Count >= LARGE_BAKE_CONFIRMATION_THRESHOLD || analysis.ExcessiveVariantItems.Count > 0;
     }
 
+    private static int BuildAllBakeItemTypeMask()
+    {
+        int mask = 0;
+
+        for (int i = 0; i < BAKE_ITEM_TYPES.Length; i++)
+        {
+            mask |= 1 << i;
+        }
+
+        return mask;
+    }
+
+    private static int GetBakeItemTypeMask(ItemType itemType)
+    {
+        for (int i = 0; i < BAKE_ITEM_TYPES.Length; i++)
+        {
+            if (BAKE_ITEM_TYPES[i] == itemType)
+            {
+                return 1 << i;
+            }
+        }
+
+        return 0;
+    }
+
+    private bool HasSelectedBakeItemTypes() => _selectedBakeItemTypeMask != 0;
+
+    private bool IsBakeItemTypeSelected(ItemType itemType)
+    {
+        int normalizedMask = NormalizeBakeItemTypeMask(_selectedBakeItemTypeMask);
+
+        for (int i = 0; i < BAKE_ITEM_TYPES.Length; i++)
+        {
+            if (BAKE_ITEM_TYPES[i] == itemType)
+            {
+                return (normalizedMask & (1 << i)) != 0;
+            }
+        }
+
+        return false;
+    }
+
+    private string GetSelectedBakeItemTypeLabel()
+    {
+        int normalizedMask = NormalizeBakeItemTypeMask(_selectedBakeItemTypeMask);
+
+        if (normalizedMask == ALL_BAKE_ITEM_TYPE_MASK)
+        {
+            return "all item types";
+        }
+
+        List<string> selectedLabels = new();
+
+        for (int i = 0; i < BAKE_ITEM_TYPES.Length; i++)
+        {
+            if ((normalizedMask & (1 << i)) != 0)
+            {
+                selectedLabels.Add(BAKE_ITEM_TYPE_LABELS[i]);
+            }
+        }
+
+        if (selectedLabels.Count <= 3)
+        {
+            return string.Join(", ", selectedLabels);
+        }
+
+        return $"{selectedLabels.Count} selected item types";
+    }
+
+    private static int NormalizeBakeItemTypeMask(int mask) => mask == -1 ? ALL_BAKE_ITEM_TYPE_MASK : mask & ALL_BAKE_ITEM_TYPE_MASK;
+
     private void CancelBake()
     {
         _bakeCancellation?.Cancel();
@@ -468,6 +605,32 @@ public sealed class ItemIconGeneratorWindow : EditorWindow
             EditorGUI.DrawTextureTransparent(imageRect, _previewTexture, ScaleMode.ScaleToFit);
 
             EditorGUILayout.LabelField($"{_previewTexture.width} x {_previewTexture.height}", EditorStyles.miniLabel);
+        }
+    }
+
+    private void DrawVariantCountResizeHandle()
+    {
+        Rect handleRect = GUILayoutUtility.GetRect(1f, VARIANT_COUNT_RESIZE_HANDLE_HEIGHT, GUILayout.ExpandWidth(true));
+        EditorGUIUtility.AddCursorRect(handleRect, MouseCursor.ResizeVertical);
+        EditorGUI.DrawRect(new Rect(handleRect.x, handleRect.center.y, handleRect.width, 1f), new Color(0.32f, 0.32f, 0.32f, 1f));
+
+        Event currentEvent = Event.current;
+
+        if (currentEvent.type == EventType.MouseDown && currentEvent.button == 0 && handleRect.Contains(currentEvent.mousePosition))
+        {
+            _isResizingVariantCount = true;
+            currentEvent.Use();
+        }
+        else if (currentEvent.type == EventType.MouseDrag && _isResizingVariantCount)
+        {
+            _variantCountHeight = Mathf.Clamp(_variantCountHeight + currentEvent.delta.y, MIN_VARIANT_COUNT_HEIGHT, MAX_VARIANT_COUNT_HEIGHT);
+            currentEvent.Use();
+            Repaint();
+        }
+        else if (currentEvent.type == EventType.MouseUp && _isResizingVariantCount)
+        {
+            _isResizingVariantCount = false;
+            currentEvent.Use();
         }
     }
 

@@ -6,11 +6,13 @@ using UnityEngine;
 
 public sealed class ItemIconBatchRenderSession : IDisposable
 {
+    private readonly ItemIconGeneratorSettings _settings;
     private readonly ItemIconRenderSession _renderSession;
 
     public ItemIconBatchRenderSession(ItemIconGeneratorSettings settings)
     {
-        _renderSession = ItemIconRenderer.CreateSession(settings ?? ItemIconGeneratorSettings.LoadDefault());
+        _settings = settings ?? ItemIconGeneratorSettings.LoadDefault();
+        _renderSession = ItemIconRenderer.CreateSession(_settings);
     }
 
     public UniTask<Texture2D> RenderAsync(
@@ -22,8 +24,8 @@ public sealed class ItemIconBatchRenderSession : IDisposable
         CancellationToken cancellationToken)
     {
         IconRenderProfile renderProfile = profileType == ItemIconProfileType.Slot
-            ? IconRenderProfile.CreateSlot(itemData, width, height)
-            : IconRenderProfile.CreateDefault(itemData, width, height);
+            ? IconRenderProfile.CreateSlot(itemData, width, height, _settings)
+            : IconRenderProfile.CreateDefault(itemData, width, height, _settings);
 
         return ItemIconRenderer.RenderIconTextureAsync(itemData, installedModules, renderProfile, _renderSession, false, cancellationToken);
     }

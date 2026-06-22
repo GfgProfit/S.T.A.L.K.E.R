@@ -19,6 +19,7 @@ internal static class ItemIconGeneratorSettingsHashBuilder
         hash = ItemIconStableHash.Add(hash, (int)settings.RendererReflectionProbeUsage);
         hash = ItemIconStableHash.Add(hash, settings.RendererReceiveShadows);
         hash = ItemIconStableHash.Add(hash, (int)settings.RenderTextureFormat);
+        hash = ItemIconStableHash.Add(hash, settings.IconRenderScale);
         hash = ItemIconStableHash.Add(hash, settings.AllowHdr);
         hash = ItemIconStableHash.Add(hash, settings.UseCameraMsaa);
         hash = ItemIconStableHash.Add(hash, settings.CameraDistanceMultiplier);

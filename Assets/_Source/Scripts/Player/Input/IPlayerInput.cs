@@ -69,4 +69,5 @@ public interface IWeaponInput
     bool IsWeaponAimHeld();
     bool IsWeaponReloadPressed();
     bool IsWeaponAmmoTypeChangePressed();
+    bool IsWeaponHidePressed();
 }

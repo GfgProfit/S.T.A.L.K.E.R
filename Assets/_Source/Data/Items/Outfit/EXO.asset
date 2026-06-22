@@ -41,7 +41,7 @@ MonoBehaviour:
   _useDurability: 1
   _defaultDurabilityPercent: 100
   _canEquipHelmet: 1
-  _armorRecoilReductionPercent: 15
+  _armorRecoilReductionPercent: 20
   _ammoFleshDamage: 0
   _ammoArmorPenetration: 0
   _ammoWeaponRecoilPercentModifier: 0
@@ -100,7 +100,6 @@ MonoBehaviour:
   _iconPrefab: {fileID: 2083313449321355190, guid: 8a15012fed79eb947b510d05070a42f4, type: 3}
   _defaultIconModules: []
   _iconPixelsPerCell: 64
-  _iconRenderScale: 2
   _iconPadding: 1.2
   _iconAntiAliasing: 1
   _iconUseOutline: 1
@@ -120,8 +119,8 @@ MonoBehaviour:
   _iconCellGridBorderLineThickness: 2
   _iconUseDirectionalLight: 1
   _iconLightEulerAngles: {x: 50, y: -130, z: 0}
-  _iconLightIntensity: 100000
+  _iconLightIntensity: 20
   _slotIconUseDirectionalLight: 1
   _slotIconLightEulerAngles: {x: 50, y: -130, z: 0}
-  _slotIconLightIntensity: 100000
+  _slotIconLightIntensity: 20
   _slotIconSettingsInitialized: 1

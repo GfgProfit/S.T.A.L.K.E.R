@@ -1,4 +1,6 @@
+using NaughtyAttributes;
 using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 
 public class WorldItem : MonoBehaviour
@@ -154,5 +156,16 @@ public class WorldItem : MonoBehaviour
         }
 
         return weight;
+    }
+
+    [Button]
+    private void SetupChildColliders()
+    {
+        _itemColliders = null;
+        _itemColliders = new();
+
+        Collider[] colliders = GetComponentsInChildren<Collider>(true);
+
+        _itemColliders = colliders.ToList();
     }
 }

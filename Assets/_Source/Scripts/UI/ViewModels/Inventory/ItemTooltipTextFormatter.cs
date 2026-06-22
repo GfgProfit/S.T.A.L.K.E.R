@@ -263,7 +263,7 @@ internal static class ItemTooltipTextFormatter
 
         if (normalizedWeight < 1f)
         {
-            return $"<color=orange>{Mathf.RoundToInt(normalizedWeight * 1000f)}</color> г";
+            return $"<color=orange>{normalizedWeight * 1000f}</color> г";
         }
 
         return $"<color=orange>{normalizedWeight:0.000}</color> кг";

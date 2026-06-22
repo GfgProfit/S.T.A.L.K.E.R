@@ -28,7 +28,7 @@ public sealed class FirstPersonWeaponHolderController : MonoBehaviour
     public InventoryItem CurrentWeaponItem => _currentWeaponItem;
     public bool HasWeaponInHands => _spawnedWeapon != null;
     public bool IsSwitchingWeapon => _isSwitchingWeapon;
-    public bool IsWeaponChangeLocked => _isSwitchingWeapon || IsCurrentWeaponBusy;
+    public bool IsWeaponChangeLocked => _isSwitchingWeapon || IsCurrentWeaponBusy || IsCurrentWeaponAiming;
 
     private IPlayerInput PlayerInput
     {
@@ -312,4 +312,6 @@ public sealed class FirstPersonWeaponHolderController : MonoBehaviour
             return runtimeController != null && (runtimeController.IsReloading || runtimeController.IsClearingJam);
         }
     }
+
+    private bool IsCurrentWeaponAiming => _spawnedWeaponRuntimeController != null && _spawnedWeaponRuntimeController.IsAiming;
 }

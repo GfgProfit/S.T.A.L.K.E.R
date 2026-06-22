@@ -46,6 +46,7 @@ MonoBehaviour:
   _useDurability: 1
   _defaultDurabilityPercent: 100
   _canEquipHelmet: 1
+  _armorRecoilReductionPercent: 0
   _ammoFleshDamage: 0
   _ammoArmorPenetration: 0
   _ammoWeaponRecoilPercentModifier: 0
@@ -70,7 +71,13 @@ MonoBehaviour:
   _firstPersonWeaponSpawnScale: {x: 0.6, y: 0.6, z: 0.6}
   _weaponData: {fileID: 11400000, guid: 3d7250701e90f384684c73a8ca81bc3a, type: 2}
   _moduleSlot: 0
+  _moduleType: 0
   _moduleInventorySizeDelta: {x: 0, y: 0}
+  _moduleWeaponRecoilPercentModifier: 0
+  _moduleWeaponDurabilityLossPercentModifier: 0
+  _moduleAccuracyMinutesOfAngleModifier: 0
+  _moduleErgonomicsModifier: 0
+  _moduleMagazineCapacity: 0
   _statModifiers: []
   _worldItemPrefab: {fileID: 5621424911309646573, guid: e5ea3e1362bad3441aa5581342f31c45, type: 3}
   _width: 3
@@ -100,8 +107,8 @@ MonoBehaviour:
   _iconCellGridBorderLineThickness: 2
   _iconUseDirectionalLight: 1
   _iconLightEulerAngles: {x: 50, y: -130, z: 0}
-  _iconLightIntensity: 100000
+  _iconLightIntensity: 25
   _slotIconUseDirectionalLight: 1
   _slotIconLightEulerAngles: {x: 50, y: -130, z: 0}
-  _slotIconLightIntensity: 100000
+  _slotIconLightIntensity: 25
   _slotIconSettingsInitialized: 1

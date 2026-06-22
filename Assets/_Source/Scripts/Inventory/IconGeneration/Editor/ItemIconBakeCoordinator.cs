@@ -61,7 +61,7 @@ internal static class ItemIconBakeCoordinator
 
                 try
                 {
-                    string resourcePath = ItemIconGeneratedAssetWriter.WriteTexture(texture, keyEntry, variant.ItemData);
+                    string resourcePath = ItemIconGeneratedAssetWriter.WriteTexture(texture, keyEntry, variant.ItemData, settings);
                     bakedEntries.Add(BakedItemIconEntry.Create(
                         variant.ItemData,
                         variant.InstalledModules,

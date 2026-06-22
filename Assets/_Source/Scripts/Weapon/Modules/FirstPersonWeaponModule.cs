@@ -14,6 +14,7 @@ public sealed class FirstPersonWeaponModule : MonoBehaviour
     [SerializeField] private ItemData[] _requiredModules = System.Array.Empty<ItemData>();
     [SerializeField] private ItemData[] _incompatibleModules = System.Array.Empty<ItemData>();
     [SerializeField] private Transform _attachPoint;
+    [SerializeField] private ModuleAttachPoint[] _attachPoints = System.Array.Empty<ModuleAttachPoint>();
     [SerializeField] private GameObject[] _enabledWhenInstalled = System.Array.Empty<GameObject>();
     [SerializeField] private GameObject[] _disabledWhenInstalled = System.Array.Empty<GameObject>();
     [SerializeField] [ShowIf(nameof(IsOpticModule))] private Vector3 _aimRootPositionOffset;
@@ -29,7 +30,6 @@ public sealed class FirstPersonWeaponModule : MonoBehaviour
 
     public ItemData ModuleItemData => _moduleItemData;
     internal IReadOnlyList<ItemData> RequiredModules => _requiredModules;
-    internal Transform AttachPoint => _attachPoint;
 
     public bool CanInstall(IReadOnlyList<ItemData> installedModules)
     {
@@ -92,6 +92,34 @@ public sealed class FirstPersonWeaponModule : MonoBehaviour
     internal bool IsIncompatibleWith(ItemData moduleItemData)
     {
         return Contains(_incompatibleModules, moduleItemData);
+    }
+
+    internal Transform GetAttachPoint(WeaponModuleSlot moduleSlot)
+    {
+        bool hasSlotAttachPoints = false;
+        int attachPointCount = _attachPoints?.Length ?? 0;
+
+        for (int i = 0; i < attachPointCount; i++)
+        {
+            ModuleAttachPoint attachPoint = _attachPoints[i];
+
+            if (attachPoint == null)
+            {
+                continue;
+            }
+
+            if (attachPoint.ModuleSlot != WeaponModuleSlot.None)
+            {
+                hasSlotAttachPoints = true;
+            }
+
+            if (attachPoint.Matches(moduleSlot))
+            {
+                return attachPoint.AttachPoint;
+            }
+        }
+
+        return hasSlotAttachPoints ? null : _attachPoint;
     }
 
     internal bool IsInstalled(IReadOnlyList<ItemData> installedModules)
@@ -305,6 +333,21 @@ public sealed class FirstPersonWeaponModule : MonoBehaviour
     {
         _cachedSightMaterial = null;
         _sightMaterialBindings.Clear();
+    }
+
+    [System.Serializable]
+    private sealed class ModuleAttachPoint
+    {
+        [SerializeField] private WeaponModuleSlot _moduleSlot;
+        [SerializeField] private Transform _attachPoint;
+
+        public WeaponModuleSlot ModuleSlot => _moduleSlot;
+        public Transform AttachPoint => _attachPoint;
+
+        public bool Matches(WeaponModuleSlot moduleSlot)
+        {
+            return _moduleSlot != WeaponModuleSlot.None && _moduleSlot == moduleSlot;
+        }
     }
 
     [System.Serializable]

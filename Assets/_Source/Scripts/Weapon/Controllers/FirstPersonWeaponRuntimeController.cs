@@ -16,7 +16,8 @@ public sealed class FirstPersonWeaponRuntimeController : MonoBehaviour
 
     [SerializeField] private Transform _muzzle;
     [SerializeField] private WeaponShellEjector _shellEjector;
-    [SerializeField] private Renderer _ammoRenderer;
+    [SerializeField] private Renderer[] _ammoRenderers;
+    [SerializeField] private Renderer[] _secondMagazineAmmoRenderers;
 
     private InventoryItem _weaponItem;
     private ItemData _weaponItemData;
@@ -30,6 +31,7 @@ public sealed class FirstPersonWeaponRuntimeController : MonoBehaviour
     private PlayerController _playerController;
     private WeaponRecoilService _weaponRecoilService;
     private Material _defaultAmmoMaterial;
+    private Material _secondMagazineDefaultAmmoMaterial;
     private CancellationTokenSource _reloadCancellation;
     private CancellationTokenSource _jamClearingCancellation;
     private ItemData _requestedAmmoData;
@@ -60,6 +62,7 @@ public sealed class FirstPersonWeaponRuntimeController : MonoBehaviour
     public bool IsClearingJam => _isClearingJam;
     public bool IsAiming => _isAiming;
     private int MagazineCapacity => WeaponModuleSupport.GetMagazineCapacity(_weaponData == null ? 1 : _weaponData.MagazineCapacity, _weaponItem == null ? null : _weaponItem.InstalledModules);
+    private bool HasSecondMagazineAmmoRenderers => _secondMagazineAmmoRenderers != null && _secondMagazineAmmoRenderers.Length > 0;
 
     public void SetEquippedArmor(ItemData armorItemData)
     {
@@ -80,7 +83,8 @@ public sealed class FirstPersonWeaponRuntimeController : MonoBehaviour
         _ammoHudViewModel = ammoHudViewModel;
         _animationController = GetComponent<FirstPersonWeaponController>();
         _muzzle = FindMuzzleTransform();
-        _defaultAmmoMaterial ??= _ammoRenderer == null ? null : _ammoRenderer.sharedMaterial;
+        _defaultAmmoMaterial ??= GetDefaultAmmoMaterial(_ammoRenderers);
+        _secondMagazineDefaultAmmoMaterial ??= GetDefaultAmmoMaterial(_secondMagazineAmmoRenderers);
         _cameraAllAnimationController = FindCameraAllAnimationController();
         _cameraAllAnimationController?.SetAimActive(false);
         RefreshAimTransitionSpeed();
@@ -544,6 +548,7 @@ public sealed class FirstPersonWeaponRuntimeController : MonoBehaviour
         float ammoApplyDelay = GetReloadAmmoApplyDelay(isFullReload, animationKey);
         float materialApplyDelay = isFullReload ? 0f : GetReloadAmmoMaterialApplyDelay(animationKey);
         float animationLength = GetAnimationLength(animationKey);
+        bool useTwoMagazineAmmoMaterials = isFullReload == false && HasSecondMagazineAmmoRenderers;
 
         CancelReload();
         _reloadAmmoData = reloadAmmoData;
@@ -555,15 +560,19 @@ public sealed class FirstPersonWeaponRuntimeController : MonoBehaviour
         {
             ApplyReloadAmmoMaterial();
         }
+        else if (useTwoMagazineAmmoMaterials)
+        {
+            ApplyTwoMagazineReloadAmmoMaterials();
+        }
 
         _animationController?.Reload(isFullReload);
         LockMovementAnimation(animationKey);
 
         _reloadCancellation = CancellationTokenSource.CreateLinkedTokenSource(destroyCancellationToken);
-        PlayReloadAsync(isFullReload, ammoApplyDelay, materialApplyDelay, animationLength, _reloadCancellation).Forget(Debug.LogException);
+        PlayReloadAsync(isFullReload, useTwoMagazineAmmoMaterials, ammoApplyDelay, materialApplyDelay, animationLength, _reloadCancellation).Forget(Debug.LogException);
     }
 
-    private async UniTask PlayReloadAsync(bool isFullReload, float ammoApplyDelay, float materialApplyDelay, float animationLength, CancellationTokenSource reloadCancellation)
+    private async UniTask PlayReloadAsync(bool isFullReload, bool useTwoMagazineAmmoMaterials, float ammoApplyDelay, float materialApplyDelay, float animationLength, CancellationTokenSource reloadCancellation)
     {
         CancellationToken cancellationToken = reloadCancellation.Token;
         float lastEventDelay;
@@ -627,6 +636,11 @@ public sealed class FirstPersonWeaponRuntimeController : MonoBehaviour
 
         _isReloading = false;
         _reloadAmmoData = null;
+
+        if (useTwoMagazineAmmoMaterials)
+        {
+            ApplyAmmoMaterial(_loadedAmmoData);
+        }
 
         if (isFullReload)
         {
@@ -769,14 +783,53 @@ public sealed class FirstPersonWeaponRuntimeController : MonoBehaviour
 
     private void ApplyAmmoMaterial(ItemData ammoData)
     {
-        Material ammoMaterial = ammoData == null || ammoData.AmmoMaterial == null ? _defaultAmmoMaterial : ammoData.AmmoMaterial;
+        ApplyAmmoMaterial(_ammoRenderers, ammoData, _defaultAmmoMaterial);
+    }
 
-        if (_ammoRenderer == null || _ammoRenderer.sharedMaterial == ammoMaterial)
+    private void ApplyTwoMagazineReloadAmmoMaterials()
+    {
+        ApplyAmmoMaterial(_ammoRenderers, _loadedAmmoData, _defaultAmmoMaterial);
+        ApplyAmmoMaterial(_secondMagazineAmmoRenderers, _reloadAmmoData, _secondMagazineDefaultAmmoMaterial);
+    }
+
+    private void ApplyAmmoMaterial(Renderer[] ammoRenderers, ItemData ammoData, Material defaultAmmoMaterial)
+    {
+        if (ammoRenderers == null)
         {
             return;
         }
 
-        _ammoRenderer.sharedMaterial = ammoMaterial;
+        Material ammoMaterial = ammoData == null || ammoData.AmmoMaterial == null ? defaultAmmoMaterial : ammoData.AmmoMaterial;
+
+        for (int i = 0; i < ammoRenderers.Length; i++)
+        {
+            Renderer ammoRenderer = ammoRenderers[i];
+
+            if (ammoRenderer == null || ammoRenderer.sharedMaterial == ammoMaterial)
+            {
+                continue;
+            }
+
+            ammoRenderer.sharedMaterial = ammoMaterial;
+        }
+    }
+
+    private static Material GetDefaultAmmoMaterial(Renderer[] ammoRenderers)
+    {
+        if (ammoRenderers == null)
+        {
+            return null;
+        }
+
+        for (int i = 0; i < ammoRenderers.Length; i++)
+        {
+            if (ammoRenderers[i] != null)
+            {
+                return ammoRenderers[i].sharedMaterial;
+            }
+        }
+
+        return null;
     }
 
     private void RestoreMagazineState()

@@ -12,10 +12,11 @@ internal static class ItemIconHashBuilder
             return 0;
         }
 
+        ItemIconGeneratorSettings settings = ItemIconGeneratorSettings.LoadDefault();
         IconRenderProfile renderProfile = useSlotIconSettings
-            ? IconRenderProfile.CreateSlot(itemData, targetWidth, targetHeight)
-            : IconRenderProfile.CreateDefault(itemData, targetWidth, targetHeight);
-        ulong stableHash = BuildStableHash(itemData, ItemIconGeneratorSettings.LoadDefault(), renderProfile);
+            ? IconRenderProfile.CreateSlot(itemData, targetWidth, targetHeight, settings)
+            : IconRenderProfile.CreateDefault(itemData, targetWidth, targetHeight, settings);
+        ulong stableHash = BuildStableHash(itemData, settings, renderProfile);
         stableHash = ItemIconStableHash.Add(stableHash, ItemIconModuleKeyCache.GetCanonicalKey(installedModules));
         return unchecked((int)(stableHash ^ (stableHash >> 32)));
     }
@@ -28,23 +29,23 @@ internal static class ItemIconHashBuilder
         }
 
         ulong hash = ItemIconStableHash.Begin();
-        hash = ItemIconStableHash.Add(hash, 2);
+        hash = ItemIconStableHash.Add(hash, 4);
         hash = ItemIconStableHash.Add(hash, itemData.ItemId);
         hash = ItemIconStableHash.Add(hash, (int)itemData.Rarity);
         hash = ItemIconStableHash.Add(hash, renderProfile.CellWidth);
         hash = ItemIconStableHash.Add(hash, renderProfile.CellHeight);
         hash = ItemIconStableHash.Add(hash, (int)renderProfile.ProfileType);
         hash = ItemIconStableHash.Add(hash, itemData.IconPixelsPerCell);
-        hash = ItemIconStableHash.Add(hash, itemData.IconRenderScale);
         hash = ItemIconStableHash.Add(hash, itemData.IconAntiAliasing);
         hash = ItemIconStableHash.Add(hash, itemData.IconUseOutline);
         hash = ItemIconStableHash.Add(hash, itemData.IconOutlineColor);
-        hash = ItemIconStableHash.Add(hash, itemData.IconOutlineTextureWidth);
+        hash = ItemIconStableHash.Add(hash, itemData.GetIconOutlineTextureWidth(renderProfile.RenderScale));
         hash = ItemIconStableHash.Add(hash, itemData.IconUseShadow);
         hash = ItemIconStableHash.Add(hash, itemData.IconShadowColor);
-        hash = ItemIconStableHash.Add(hash, itemData.IconShadowTextureOffset.x);
-        hash = ItemIconStableHash.Add(hash, itemData.IconShadowTextureOffset.y);
-        hash = ItemIconStableHash.Add(hash, itemData.IconShadowTextureBlur);
+        Vector2Int shadowTextureOffset = itemData.GetIconShadowTextureOffset(renderProfile.RenderScale);
+        hash = ItemIconStableHash.Add(hash, shadowTextureOffset.x);
+        hash = ItemIconStableHash.Add(hash, shadowTextureOffset.y);
+        hash = ItemIconStableHash.Add(hash, itemData.GetIconShadowTextureBlur(renderProfile.RenderScale));
         hash = ItemIconStableHash.Add(hash, itemData.IconBackgroundColor);
         hash = ItemIconStableHash.Add(hash, itemData.IconShowCellGrid);
         hash = ItemIconStableHash.Add(hash, itemData.IconShowCellGridBorder);

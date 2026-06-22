@@ -89,7 +89,7 @@ internal static class ItemIconCatalogValidator
                 result.Errors.Add($"Generated Sprite is missing for '{identity}': {assetPath}");
             }
 
-            ItemIconBakeVariant variant = new(itemData, modules, entry.Width, entry.Height, entry.ProfileType);
+            ItemIconBakeVariant variant = new(itemData, modules, entry.Width, entry.Height, entry.ProfileType, settings.IconRenderScale);
             BakedItemIconEntry expectedEntry = BakedItemIconEntry.Create(
                 itemData,
                 modules,

@@ -315,6 +315,7 @@ public class InventoryController : MonoBehaviour
     {
         RefreshQuickUseKeyTexts();
         TryHandleWeaponSlotInput();
+        TryHandleWeaponHideInput();
         TryHandleQuickUseInput();
         _updateController.Tick();
     }
@@ -568,6 +569,22 @@ public class InventoryController : MonoBehaviour
             _activeWeaponSlotIndex = slotIndex;
             RefreshFirstPersonWeapon();
         }
+    }
+
+    private void TryHandleWeaponHideInput()
+    {
+        if (PlayerInput.IsWeaponHidePressed() == false)
+        {
+            return;
+        }
+
+        if (_firstPersonWeaponHolderController == null || _firstPersonWeaponHolderController.HasWeaponInHands == false || _firstPersonWeaponHolderController.IsWeaponChangeLocked)
+        {
+            return;
+        }
+
+        _activeWeaponSlotIndex = -1;
+        RefreshFirstPersonWeapon();
     }
 
     private void RefreshQuickUseSlotsState()

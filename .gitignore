@@ -22,6 +22,7 @@
 
 /Assets/_Source/Weapons/_VIEW/
 /Assets/_Source/Weapons/AR/SCAR_H/scar_h_hands.fbx
+/Assets/Resources/Generated/ItemIcons
 
 # By default unity supports Blender asset imports, *.blend1 blender files do not need to be committed to version control.
 *.blend1

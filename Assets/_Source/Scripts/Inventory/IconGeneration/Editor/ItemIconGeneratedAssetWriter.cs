@@ -26,7 +26,7 @@ internal static class ItemIconGeneratedAssetWriter
         return catalog;
     }
 
-    public static string WriteTexture(Texture2D texture, BakedItemIconEntry keyEntry, ItemData itemData)
+    public static string WriteTexture(Texture2D texture, BakedItemIconEntry keyEntry, ItemData itemData, ItemIconGeneratorSettings settings)
     {
         EnsureFolder(GENERATED_FOLDER_PATH);
         string fileName = $"{keyEntry.ItemId}_{keyEntry.StableKeyHash:x16}.png";
@@ -40,7 +40,8 @@ internal static class ItemIconGeneratedAssetWriter
         {
             importer.textureType = TextureImporterType.Sprite;
             importer.spriteImportMode = SpriteImportMode.Single;
-            importer.spritePixelsPerUnit = itemData.IconSpritePixelsPerUnit;
+            int iconRenderScale = settings == null ? ItemIconGeneratorSettings.LoadDefault().IconRenderScale : settings.IconRenderScale;
+            importer.spritePixelsPerUnit = itemData.GetIconSpritePixelsPerUnit(iconRenderScale);
             importer.alphaIsTransparency = true;
             importer.mipmapEnabled = false;
             importer.filterMode = FilterMode.Bilinear;

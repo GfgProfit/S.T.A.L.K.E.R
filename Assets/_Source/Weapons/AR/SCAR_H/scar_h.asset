@@ -85,14 +85,13 @@ MonoBehaviour:
   _moduleMagazineCapacity: 0
   _statModifiers: []
   _worldItemPrefab: {fileID: 9063196561116383210, guid: 3a768300695a6d64495132266fe1958c, type: 3}
-  _width: 4
+  _width: 5
   _height: 2
   _itemIcon: {fileID: 0}
   _generateIconAtRuntime: 1
   _iconPrefab: {fileID: 2002889859650254261, guid: 8c5d1305b34b4eb46ac251f6c9ff98c1, type: 3}
   _defaultIconModules: []
   _iconPixelsPerCell: 64
-  _iconRenderScale: 2
   _iconPadding: 1.053
   _iconAntiAliasing: 1
   _iconUseOutline: 1
@@ -112,8 +111,8 @@ MonoBehaviour:
   _iconCellGridBorderLineThickness: 2
   _iconUseDirectionalLight: 1
   _iconLightEulerAngles: {x: 50, y: -130, z: 0}
-  _iconLightIntensity: 100000
+  _iconLightIntensity: 25
   _slotIconUseDirectionalLight: 1
   _slotIconLightEulerAngles: {x: 50, y: -130, z: 0}
-  _slotIconLightIntensity: 100000
+  _slotIconLightIntensity: 25
   _slotIconSettingsInitialized: 1

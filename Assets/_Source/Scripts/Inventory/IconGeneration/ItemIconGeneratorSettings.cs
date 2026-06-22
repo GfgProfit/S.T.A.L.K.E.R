@@ -23,11 +23,12 @@ public class ItemIconGeneratorSettings : ScriptableObject
     [SerializeField] private Vector3 _renderOrigin = new(8192f, 0f, 8192f);
     [SerializeField] private bool _excludeIconLayerFromSceneLights = true;
     [SerializeField] private LightProbeUsage _rendererLightProbeUsage = LightProbeUsage.Off;
-    [SerializeField] private ReflectionProbeUsage _rendererReflectionProbeUsage = ReflectionProbeUsage.BlendProbesAndSkybox;
+    [SerializeField] private ReflectionProbeUsage _rendererReflectionProbeUsage = ReflectionProbeUsage.Off;
     [SerializeField] private bool _rendererReceiveShadows;
 
     [Header("Render Target")]
     [SerializeField] private RenderTextureFormat _renderTextureFormat = RenderTextureFormat.ARGBHalf;
+    [SerializeField] [Range(1, 4)] private int _iconRenderScale = 2;
 
     [Header("Camera Overrides")]
     [SerializeField] private bool _allowHdr = true;
@@ -37,14 +38,14 @@ public class ItemIconGeneratorSettings : ScriptableObject
     [SerializeField] [Min(0.01f)] private float _nearClipPlane = 0.01f;
     [SerializeField] [Min(1f)] private float _farClipBoundsMultiplier = 8f;
     [SerializeField] [Min(0f)] private float _farClipOffset = 10f;
-    [SerializeField] private bool _enableDirectSpecularLighting = true;
+    [SerializeField] private bool _enableDirectSpecularLighting;
     [SerializeField] private bool _enableExposureControl = true;
-    [SerializeField] private bool _enableAtmosphericScattering = true;
+    [SerializeField] private bool _enableAtmosphericScattering;
     [SerializeField] private bool _enablePostProcess = true;
     [SerializeField] private bool _enableColorGrading = true;
     [SerializeField] private bool _enableTonemapping = true;
-    [SerializeField] private bool _enableVolumetrics = true;
-    [SerializeField] private bool _enableSkyReflection = true;
+    [SerializeField] private bool _enableVolumetrics;
+    [SerializeField] private bool _enableSkyReflection;
 
     [Header("Fill Lights")]
     [SerializeField] private bool _useFrontFillLight = true;
@@ -65,15 +66,15 @@ public class ItemIconGeneratorSettings : ScriptableObject
     [SerializeField] private Color _physicallyBasedSkyGroundTint = new Color(0.122641504f, 0.1043775f, 0.09313812f, 1f);
 
     [Header("Fog")]
-    [SerializeField] private bool _fogEnabled = true;
+    [SerializeField] private bool _fogEnabled;
     [SerializeField] private FogColorMode _fogColorMode = FogColorMode.SkyColor;
     [SerializeField] [Min(0f)] private float _maxFogDistance = 5000f;
     [SerializeField] [Min(0.0001f)] private float _meanFreePath = 400f;
-    [SerializeField] private bool _enableVolumetricFog = true;
+    [SerializeField] private bool _enableVolumetricFog;
     [SerializeField] [Range(-1f, 1f)] private float _fogAnisotropy = 0.65f;
 
     [Header("Exposure")]
-    [SerializeField] private ExposureMode _exposureMode = ExposureMode.AutomaticHistogram;
+    [SerializeField] private ExposureMode _exposureMode = ExposureMode.Fixed;
     [SerializeField] private float _fixedExposure;
     [SerializeField] private float _exposureCompensation;
     [SerializeField] private float _exposureLimitMin = 2f;
@@ -85,7 +86,7 @@ public class ItemIconGeneratorSettings : ScriptableObject
     [SerializeField] [Range(-100f, 100f)] private float _contrast;
     [SerializeField] private Color _colorFilter = Color.white;
     [SerializeField] [Range(-180f, 180f)] private float _hueShift;
-    [SerializeField] [Range(-100f, 100f)] private float _saturation;
+    [SerializeField] [Range(-100f, 100f)] private float _saturation = 18f;
 
     [Header("Tonemapping")]
     [SerializeField] private TonemappingMode _tonemappingMode = TonemappingMode.Neutral;
@@ -103,6 +104,7 @@ public class ItemIconGeneratorSettings : ScriptableObject
     public ReflectionProbeUsage RendererReflectionProbeUsage => _rendererReflectionProbeUsage;
     public bool RendererReceiveShadows => _rendererReceiveShadows;
     public RenderTextureFormat RenderTextureFormat => _renderTextureFormat;
+    public int IconRenderScale => Mathf.Clamp(_iconRenderScale, 1, 4);
     public bool AllowHdr => _allowHdr;
     public bool UseCameraMsaa => _useCameraMsaa;
     public float CameraDistanceMultiplier => Mathf.Max(0.1f, _cameraDistanceMultiplier);

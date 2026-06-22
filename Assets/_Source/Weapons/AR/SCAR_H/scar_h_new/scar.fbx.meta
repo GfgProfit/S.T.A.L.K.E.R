@@ -1,0 +1,205 @@
+fileFormatVersion: 2
+guid: bbf2df8ab345c4d4cbaa342135b257d6
+ModelImporter:
+  serializedVersion: 24200
+  internalIDToNameTable: []
+  externalObjects:
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: barrel_mk17_fn_406mm_762x51_LOD0
+    second: {fileID: 2100000, guid: 607ee722f6c7a1b4997d273850622d7b, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: barrel_mk17_fn_barrels_gas_block_762x51_LOD0
+    second: {fileID: 2100000, guid: 29191f23315b21e4ab8b1aea5573bc1d, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: bullet_762x51
+    second: {fileID: 2100000, guid: a7caba1397ef84d4186481c0e46c930c, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: charge_mk16_fn_charging_handle_std_LOD0
+    second: {fileID: 2100000, guid: 402e4c7c7255a8d4a848c00e5ef8d1a5, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: mag_ar10_magpul_pmag_sr_gen_3_762x51_20_LOD0
+    second: {fileID: 2100000, guid: 6754812c0a8c08847ba02cee845af2f9, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: mount_mk16_fn_scar_bottom_rail_std_LOD0
+    second: {fileID: 2100000, guid: 9c5295192693fb54b85522f4a019a7c8, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: mount_mk16_fn_scar_side_rail_std_LOD0
+    second: {fileID: 2100000, guid: 1f928173798d40c469ecb7e691e20189, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: muzzle_ar10_aac_scar_h_miter_51t_flash_hider_762x51_LOD0
+    second: {fileID: 2100000, guid: feb071adf5e613c42bf5f1ed1175b2a8, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: pistolgrip_ar15_colt_a2_LOD0
+    second: {fileID: 2100000, guid: 9f8afb088e697234699f0ddcde1a8b2a, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: reciever_mk17_fn_scar_h_std_LOD0
+    second: {fileID: 2100000, guid: a8a8acf8edbe24845b4b170eb5990c26, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: sight_front_all_magpul_mbus_gen2_LOD0
+    second: {fileID: 2100000, guid: 0632eaa420356934ea7591623ba0ea11, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: sight_rear_all_magpul_mbus_gen2_LOD0
+    second: {fileID: 2100000, guid: 2877aa73fa6ec6c45a2ebdadd813f7c6, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: stock_mk16_fn_scar_folding_stock_base_LOD0
+    second: {fileID: 2100000, guid: db590dd5f04e597479b16060202828ec, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: stock_mk16_fn_scar_folding_stock_cheek_LOD0
+    second: {fileID: 2100000, guid: 6e1569a449609f243a1fcf9f8d692d6c, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: stock_mk16_fn_scar_folding_stock_extension_LOD0
+    second: {fileID: 2100000, guid: eff0f7c7ceb28004e84751bed6ac2685, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: stock_mk16_fn_scar_stock_butt_pad_LOD0
+    second: {fileID: 2100000, guid: 5b2004218a1b9f64fa15cced3513cefe, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: weapon_fn_mk17_762x51_bolt_LOD0
+    second: {fileID: 2100000, guid: 5794bcb173461e24ca0e60bed8cf3d3d, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: weapon_fn_mk17_762x51_internals_LOD0
+    second: {fileID: 2100000, guid: aef519354451b1946894196bee300b8f, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: weapon_x_products_x17_scar_17_762x51_LOD0
+    second: {fileID: 2100000, guid: cf510c49783f1bc42aef447994b63a3b, type: 2}
+  materials:
+    materialImportMode: 2
+    materialName: 1
+    materialSearch: 2
+    materialLocation: 1
+  animations:
+    legacyGenerateAnimations: 4
+    bakeSimulation: 0
+    resampleCurves: 1
+    optimizeGameObjects: 0
+    removeConstantScaleCurves: 0
+    motionNodeName: 
+    animationImportErrors: 
+    animationImportWarnings: 
+    animationRetargetingWarnings: 
+    animationDoRetargetingWarnings: 0
+    importAnimatedCustomProperties: 0
+    importConstraints: 0
+    animationCompression: 1
+    animationRotationError: 0.5
+    animationPositionError: 0.5
+    animationScaleError: 0.5
+    animationWrapMode: 0
+    extraExposedTransformPaths: []
+    extraUserProperties: []
+    clipAnimations: []
+    isReadable: 0
+  meshes:
+    lODScreenPercentages: []
+    globalScale: 1
+    meshCompression: 0
+    addColliders: 0
+    useSRGBMaterialColor: 1
+    sortHierarchyByName: 1
+    importPhysicalCameras: 1
+    importVisibility: 0
+    importBlendShapes: 0
+    importCameras: 0
+    importLights: 0
+    nodeNameCollisionStrategy: 1
+    fileIdsGeneration: 2
+    swapUVChannels: 0
+    generateSecondaryUV: 0
+    useFileUnits: 1
+    keepQuads: 0
+    weldVertices: 1
+    bakeAxisConversion: 0
+    preserveHierarchy: 0
+    skinWeightsMode: 0
+    maxBonesPerVertex: 4
+    minBoneWeight: 0.001
+    optimizeBones: 1
+    generateMeshLods: 0
+    meshLodGenerationFlags: 0
+    maximumMeshLod: -1
+    meshOptimizationFlags: -1
+    indexFormat: 0
+    secondaryUVAngleDistortion: 8
+    secondaryUVAreaDistortion: 15.000001
+    secondaryUVHardAngle: 88
+    secondaryUVMarginMethod: 1
+    secondaryUVMinLightmapResolution: 40
+    secondaryUVMinObjectScale: 1
+    secondaryUVPackMargin: 4
+    useFileScale: 1
+    strictVertexDataChecks: 0
+  tangentSpace:
+    normalSmoothAngle: 60
+    normalImportMode: 0
+    tangentImportMode: 3
+    normalCalculationMode: 4
+    legacyComputeAllNormalsFromSmoothingGroupsWhenMeshHasBlendShapes: 0
+    blendShapeNormalImportMode: 1
+    normalSmoothingSource: 0
+  referencedClips: []
+  importAnimation: 0
+  humanDescription:
+    serializedVersion: 3
+    human: []
+    skeleton: []
+    armTwist: 0.5
+    foreArmTwist: 0.5
+    upperLegTwist: 0.5
+    legTwist: 0.5
+    armStretch: 0.05
+    legStretch: 0.05
+    feetSpacing: 0
+    globalScale: 1
+    rootMotionBoneName: 
+    hasTranslationDoF: 0
+    hasExtraRoot: 1
+    skeletonHasParents: 1
+  lastHumanDescriptionAvatarSource: {instanceID: 0}
+  autoGenerateAvatarMappingIfUnspecified: 1
+  animationType: 0
+  humanoidOversampling: 1
+  avatarSetup: 0
+  addHumanoidExtraRootOnlyWhenUsingAvatar: 1
+  importBlendShapeDeformPercent: 0
+  remapMaterialsIfMaterialImportModeIsNone: 0
+  additionalBone: 0
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 

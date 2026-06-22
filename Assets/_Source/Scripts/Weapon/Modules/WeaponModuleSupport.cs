@@ -276,6 +276,7 @@ internal static class WeaponModuleSupport
 
     private static Transform FindAttachPoint(FirstPersonWeaponModule module, IReadOnlyList<FirstPersonWeaponModule> definitions, IReadOnlyList<ItemData> installedModules)
     {
+        WeaponModuleSlot moduleSlot = module.ModuleItemData == null ? WeaponModuleSlot.None : module.ModuleItemData.ModuleSlot;
         IReadOnlyList<ItemData> requiredModules = module.RequiredModules;
 
         for (int requiredIndex = 0; requiredIndex < requiredModules.Count; requiredIndex++)
@@ -291,9 +292,14 @@ internal static class WeaponModuleSupport
             {
                 FirstPersonWeaponModule definition = definitions[definitionIndex];
 
-                if (definition != null && definition.ModuleItemData == requiredModule && definition.AttachPoint != null)
+                if (definition != null && definition.ModuleItemData == requiredModule)
                 {
-                    return definition.AttachPoint;
+                    Transform attachPoint = definition.GetAttachPoint(moduleSlot);
+
+                    if (attachPoint != null)
+                    {
+                        return attachPoint;
+                    }
                 }
             }
         }

@@ -38,15 +38,23 @@ internal static class ItemIconVolumeFactory
     private static void ConfigureProfile(VolumeProfile volumeProfile, ItemIconGeneratorSettings settings)
     {
         VisualEnvironment visualEnvironment = volumeProfile.Add<VisualEnvironment>(true);
-        visualEnvironment.skyType.Override(SkySettings.GetUniqueID<PhysicallyBasedSky>());
         visualEnvironment.cloudType.Override(0);
         visualEnvironment.skyAmbientMode.Override(settings.SkyAmbientMode);
         visualEnvironment.renderingSpace.Override(settings.SkyRenderingSpace);
 
-        PhysicallyBasedSky physicallyBasedSky = volumeProfile.Add<PhysicallyBasedSky>(true);
-        physicallyBasedSky.active = true;
-        physicallyBasedSky.type.Override(settings.PhysicallyBasedSkyModel);
-        physicallyBasedSky.groundTint.Override(settings.PhysicallyBasedSkyGroundTint);
+        if (settings.EnableSkyReflection || settings.EnableAtmosphericScattering)
+        {
+            visualEnvironment.skyType.Override(SkySettings.GetUniqueID<PhysicallyBasedSky>());
+
+            PhysicallyBasedSky physicallyBasedSky = volumeProfile.Add<PhysicallyBasedSky>(true);
+            physicallyBasedSky.active = true;
+            physicallyBasedSky.type.Override(settings.PhysicallyBasedSkyModel);
+            physicallyBasedSky.groundTint.Override(settings.PhysicallyBasedSkyGroundTint);
+        }
+        else
+        {
+            visualEnvironment.skyType.Override(0);
+        }
 
         Fog fog = volumeProfile.Add<Fog>(true);
         fog.enabled.Override(settings.FogEnabled);
