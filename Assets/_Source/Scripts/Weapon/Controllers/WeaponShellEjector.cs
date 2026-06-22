@@ -3,7 +3,18 @@ using UnityEngine;
 
 public sealed class WeaponShellEjector : MonoBehaviour
 {
+    [Serializable]
+    private sealed class ShellPrefabVariant
+    {
+        [SerializeField] private ItemData _ammoData;
+        [SerializeField] private GameObject _shellPrefab;
+
+        public ItemData AmmoData => _ammoData;
+        public GameObject ShellPrefab => _shellPrefab;
+    }
+
     [SerializeField] private GameObject _shellPrefab;
+    [SerializeField] private ShellPrefabVariant[] _shellPrefabVariants;
     [SerializeField] private Vector3 _shellSpawnScale = Vector3.one;
     [SerializeField] private Vector3 _minimumLocalEjectionVelocity = new(1.5f, 1.25f, -0.35f);
     [SerializeField] private Vector3 _maximumLocalEjectionVelocity = new(2.25f, 2f, 0.35f);
@@ -23,15 +34,25 @@ public sealed class WeaponShellEjector : MonoBehaviour
         CacheOwnerPhysics();
     }
 
+    public void Eject(ItemData ammoData)
+    {
+        Eject(GetShellPrefab(ammoData), ammoData == null ? null : ammoData.AmmoMaterial);
+    }
+
     public void Eject(Material shellMaterial)
     {
-        if (_shellPrefab == null)
+        Eject(_shellPrefab, shellMaterial);
+    }
+
+    private void Eject(GameObject shellPrefab, Material shellMaterial)
+    {
+        if (shellPrefab == null)
         {
             LogConfigurationWarning("Shell prefab is not assigned.");
             return;
         }
 
-        GameObject shellObject = Instantiate(_shellPrefab, transform.position, transform.rotation);
+        GameObject shellObject = Instantiate(shellPrefab, transform.position, transform.rotation);
         shellObject.transform.localScale = _shellSpawnScale;
         ApplyShellMaterial(shellObject, shellMaterial);
         Rigidbody shellRigidbody = shellObject.GetComponent<Rigidbody>();
@@ -43,7 +64,7 @@ public sealed class WeaponShellEjector : MonoBehaviour
 
         if (shellRigidbody == null)
         {
-            LogConfigurationWarning($"{_shellPrefab.name} requires a Rigidbody.");
+            LogConfigurationWarning($"{shellPrefab.name} requires a Rigidbody.");
             Destroy(shellObject);
             return;
         }
@@ -67,6 +88,24 @@ public sealed class WeaponShellEjector : MonoBehaviour
         }
 
         Destroy(shellObject, Mathf.Max(0.1f, _shellLifetimeSeconds));
+    }
+
+    private GameObject GetShellPrefab(ItemData ammoData)
+    {
+        if (_shellPrefabVariants != null && ammoData != null)
+        {
+            for (int i = 0; i < _shellPrefabVariants.Length; i++)
+            {
+                ShellPrefabVariant variant = _shellPrefabVariants[i];
+
+                if (variant != null && variant.AmmoData == ammoData && variant.ShellPrefab != null)
+                {
+                    return variant.ShellPrefab;
+                }
+            }
+        }
+
+        return _shellPrefab;
     }
 
     private static void ApplyShellMaterial(GameObject shellObject, Material shellMaterial)

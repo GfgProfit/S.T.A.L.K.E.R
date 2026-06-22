@@ -19,11 +19,21 @@ MonoBehaviour:
   _reloadAmmoApplyFrame: 530
   _reloadFullAmmoApplyFrame: 700
   _reloadAmmoMaterialApplyFrame: 300
+  _reloadFullAmmoMaterialApplyFrame: 0
   _compatibleAmmo:
-  - _ammoData: {fileID: 11400000, guid: 0921ba32c21f58e479afd8ec656e6d4d, type: 2}
-    _bulletVelocityMetersPerSecondOverride: 735
-  - _ammoData: {fileID: 11400000, guid: a5dcd94f92e8dd949b78c4d4733b76cb, type: 2}
-    _bulletVelocityMetersPerSecondOverride: 750
+  - _ammoData: {fileID: 11400000, guid: c34f475cd810aca4bae2da0241095a5f, type: 2}
+  - _ammoData: {fileID: 11400000, guid: e6a599f335faf7f4ba31ac8c0df67512, type: 2}
+  - _ammoData: {fileID: 11400000, guid: b9e9547cbde9356459325ee1eed5686d, type: 2}
+  - _ammoData: {fileID: 11400000, guid: 9d438b2ddf267ad47a5903a085a6e072, type: 2}
+  - _ammoData: {fileID: 11400000, guid: b3875ac3d9b9e9b4e8abc0f25a11fbb4, type: 2}
+  - _ammoData: {fileID: 11400000, guid: 03d2c43db64104845ae7fb3fd899ba04, type: 2}
+  - _ammoData: {fileID: 11400000, guid: bf9145c192835074eb63174224d6be90, type: 2}
+  - _ammoData: {fileID: 11400000, guid: fae682024bdf9704d896f1d7ec2eb9e0, type: 2}
+  - _ammoData: {fileID: 11400000, guid: a48cfb0689f1b324285a82c40e41a1ea, type: 2}
+  - _ammoData: {fileID: 11400000, guid: 933ca204d246ca24fa5a1d948ae58c43, type: 2}
+  - _ammoData: {fileID: 11400000, guid: 8a110eeeb362ce64a9fcd2a740a9cda9, type: 2}
+  - _ammoData: {fileID: 11400000, guid: 0866d792643a1214d98dc973d8fd96d5, type: 2}
+  - _ammoData: {fileID: 11400000, guid: 4f217a92ad281134b87a7b017d29c369, type: 2}
   _jammingDurabilityThreshold: 70
   _baseJammedChance: 0.2
   _maximumJammedChance: 20

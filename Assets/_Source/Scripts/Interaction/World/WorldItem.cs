@@ -159,7 +159,7 @@ public class WorldItem : MonoBehaviour
     }
 
     [Button]
-    private void SetupChildColliders()
+    private void Setup()
     {
         _itemColliders = null;
         _itemColliders = new();
@@ -167,5 +167,8 @@ public class WorldItem : MonoBehaviour
         Collider[] colliders = GetComponentsInChildren<Collider>(true);
 
         _itemColliders = colliders.ToList();
+
+        _itemRigidbody = null;
+        _itemRigidbody = GetComponent<Rigidbody>();
     }
 }

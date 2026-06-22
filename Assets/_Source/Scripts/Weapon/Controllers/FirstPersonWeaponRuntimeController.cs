@@ -14,10 +14,34 @@ public sealed class FirstPersonWeaponRuntimeController : MonoBehaviour
     private const string WEAPON_RECOIL_OBJECT_NAME_COMPACT = "WeaponRecoil";
     private const string MUZZLE_OBJECT_NAME = "Muzzle";
 
+    [Serializable]
+    private sealed class AmmoRendererVariant
+    {
+        [SerializeField] private ItemData _ammoData;
+        [SerializeField] private Renderer[] _renderers;
+        [SerializeField] private GameObject[] _objects;
+
+        private Material _defaultMaterial;
+
+        public ItemData AmmoData => _ammoData;
+        public GameObject[] Objects => _objects;
+        public Renderer[] Renderers => _renderers;
+        public Material DefaultMaterial => _defaultMaterial;
+
+        public void CacheDefaultMaterial()
+        {
+            _defaultMaterial ??= GetDefaultAmmoMaterial(_renderers, _objects);
+        }
+    }
+
     [SerializeField] private Transform _muzzle;
     [SerializeField] private WeaponShellEjector _shellEjector;
     [SerializeField] private Renderer[] _ammoRenderers;
+    [SerializeField] private AmmoRendererVariant[] _ammoRendererVariants;
     [SerializeField] private Renderer[] _secondMagazineAmmoRenderers;
+    [SerializeField] private AmmoRendererVariant[] _secondMagazineAmmoRendererVariants;
+    [SerializeField] private Renderer[] _shellRenderers;
+    [SerializeField] private AmmoRendererVariant[] _shellRendererVariants;
 
     private InventoryItem _weaponItem;
     private ItemData _weaponItemData;
@@ -32,6 +56,7 @@ public sealed class FirstPersonWeaponRuntimeController : MonoBehaviour
     private WeaponRecoilService _weaponRecoilService;
     private Material _defaultAmmoMaterial;
     private Material _secondMagazineDefaultAmmoMaterial;
+    private Material _defaultShellMaterial;
     private CancellationTokenSource _reloadCancellation;
     private CancellationTokenSource _jamClearingCancellation;
     private ItemData _requestedAmmoData;
@@ -62,7 +87,7 @@ public sealed class FirstPersonWeaponRuntimeController : MonoBehaviour
     public bool IsClearingJam => _isClearingJam;
     public bool IsAiming => _isAiming;
     private int MagazineCapacity => WeaponModuleSupport.GetMagazineCapacity(_weaponData == null ? 1 : _weaponData.MagazineCapacity, _weaponItem == null ? null : _weaponItem.InstalledModules);
-    private bool HasSecondMagazineAmmoRenderers => _secondMagazineAmmoRenderers != null && _secondMagazineAmmoRenderers.Length > 0;
+    private bool HasSecondMagazineAmmoRenderers => HasAmmoRenderers(_secondMagazineAmmoRenderers) || HasAmmoRendererVariants(_secondMagazineAmmoRendererVariants);
 
     public void SetEquippedArmor(ItemData armorItemData)
     {
@@ -85,6 +110,10 @@ public sealed class FirstPersonWeaponRuntimeController : MonoBehaviour
         _muzzle = FindMuzzleTransform();
         _defaultAmmoMaterial ??= GetDefaultAmmoMaterial(_ammoRenderers);
         _secondMagazineDefaultAmmoMaterial ??= GetDefaultAmmoMaterial(_secondMagazineAmmoRenderers);
+        _defaultShellMaterial ??= GetDefaultAmmoMaterial(_shellRenderers);
+        CacheDefaultAmmoMaterials(_ammoRendererVariants);
+        CacheDefaultAmmoMaterials(_secondMagazineAmmoRendererVariants);
+        CacheDefaultAmmoMaterials(_shellRendererVariants);
         _cameraAllAnimationController = FindCameraAllAnimationController();
         _cameraAllAnimationController?.SetAimActive(false);
         RefreshAimTransitionSpeed();
@@ -108,6 +137,7 @@ public sealed class FirstPersonWeaponRuntimeController : MonoBehaviour
         _reloadAmmoApplied = false;
         _ballisticConfigurationErrorLogged = false;
         _initialized = _weaponData != null;
+        ApplyShellVisual(ResolveShellVisualAmmoData());
 
         WeaponCondition initialCondition = _isJammed
             ? WeaponCondition.Jammed
@@ -241,7 +271,7 @@ public sealed class FirstPersonWeaponRuntimeController : MonoBehaviour
         _nextShootTime = Time.time + _weaponData.SecondsBetweenShots;
         _loadedAmmoAmount--;
         ApplyDurabilityShotCost(firedAmmoData);
-        _shellEjector?.Eject(firedAmmoData == null ? null : firedAmmoData.AmmoMaterial);
+        _shellEjector?.Eject(firedAmmoData);
 
         FirstPersonWeaponAnimationKey animationKey = _isAiming
             ? (isLastRound ? FirstPersonWeaponAnimationKey.AimShootLast : FirstPersonWeaponAnimationKey.AimShoot)
@@ -264,6 +294,7 @@ public sealed class FirstPersonWeaponRuntimeController : MonoBehaviour
         if (isLastRound)
         {
             _loadedAmmoData = null;
+            ApplyShellVisual(ResolveShellVisualAmmoData());
             _animationController?.SetCondition(WeaponCondition.Empty);
         }
 
@@ -313,6 +344,7 @@ public sealed class FirstPersonWeaponRuntimeController : MonoBehaviour
         _jammedOnLastRound = _loadedAmmoAmount == 1;
         _jammedAmmoRemoved = false;
         _movementAnimationState = WeaponMovementAnimationState.None;
+        ApplyShellVisual(ResolveShellVisualAmmoData());
         _animationController?.SetConditionInstant(WeaponCondition.Jammed);
         float animationLength = _animationController == null ? 0f : _animationController.PlayDryEmpty(jammedWhileAiming, true);
         _nextShootTime = Time.time + Mathf.Max(_weaponData.SecondsBetweenShots, animationLength);
@@ -338,6 +370,7 @@ public sealed class FirstPersonWeaponRuntimeController : MonoBehaviour
         FirstPersonWeaponAnimationKey animationKey = FirstPersonWeaponAnimationKey.DryEmpty;
 
         _loadedAmmoData = null;
+        ApplyShellVisual(ResolveShellVisualAmmoData());
         _animationController?.SetCondition(WeaponCondition.Empty);
         float animationLength = _animationController == null ? 0f : _animationController.PlayDryEmpty(_isAiming);
         _nextShootTime = Time.time + Mathf.Max(_weaponData.SecondsBetweenShots, animationLength);
@@ -406,6 +439,7 @@ public sealed class FirstPersonWeaponRuntimeController : MonoBehaviour
 
         _requestedAmmoIndex = nextAmmoIndex;
         _requestedAmmoData = _weaponData.GetCompatibleAmmo(_requestedAmmoIndex);
+        ApplyShellVisual(ResolveShellVisualAmmoData());
         SyncMagazineState();
         UpdateAmmoHud();
         return true;
@@ -546,7 +580,7 @@ public sealed class FirstPersonWeaponRuntimeController : MonoBehaviour
     {
         FirstPersonWeaponAnimationKey animationKey = isFullReload ? FirstPersonWeaponAnimationKey.ReloadFull : FirstPersonWeaponAnimationKey.Reload;
         float ammoApplyDelay = GetReloadAmmoApplyDelay(isFullReload, animationKey);
-        float materialApplyDelay = isFullReload ? 0f : GetReloadAmmoMaterialApplyDelay(animationKey);
+        float materialApplyDelay = GetReloadAmmoMaterialApplyDelay(isFullReload, animationKey);
         float animationLength = GetAnimationLength(animationKey);
         bool useTwoMagazineAmmoMaterials = isFullReload == false && HasSecondMagazineAmmoRenderers;
 
@@ -558,7 +592,7 @@ public sealed class FirstPersonWeaponRuntimeController : MonoBehaviour
 
         if (isFullReload)
         {
-            ApplyReloadAmmoMaterial();
+            HideAmmoMaterial();
         }
         else if (useTwoMagazineAmmoMaterials)
         {
@@ -579,13 +613,40 @@ public sealed class FirstPersonWeaponRuntimeController : MonoBehaviour
 
         if (isFullReload)
         {
-            if (await DelaySecondsAsync(ammoApplyDelay, cancellationToken))
+            if (materialApplyDelay <= ammoApplyDelay)
             {
-                return;
-            }
+                if (await DelaySecondsAsync(materialApplyDelay, cancellationToken))
+                {
+                    return;
+                }
 
-            ApplyReloadAmmo();
-            lastEventDelay = ammoApplyDelay;
+                ApplyReloadAmmoMaterial();
+
+                if (await DelaySecondsAsync(ammoApplyDelay - materialApplyDelay, cancellationToken))
+                {
+                    return;
+                }
+
+                ApplyReloadAmmo();
+                lastEventDelay = ammoApplyDelay;
+            }
+            else
+            {
+                if (await DelaySecondsAsync(ammoApplyDelay, cancellationToken))
+                {
+                    return;
+                }
+
+                ApplyReloadAmmo();
+
+                if (await DelaySecondsAsync(materialApplyDelay - ammoApplyDelay, cancellationToken))
+                {
+                    return;
+                }
+
+                ApplyReloadAmmoMaterial();
+                lastEventDelay = materialApplyDelay;
+            }
         }
         else if (materialApplyDelay <= ammoApplyDelay)
         {
@@ -723,6 +784,7 @@ public sealed class FirstPersonWeaponRuntimeController : MonoBehaviour
         _loadedAmmoData = _reloadAmmoData;
         _loadedAmmoAmount = consumedAmmoAmount;
         _reloadAmmoApplied = true;
+        ApplyShellVisual(ResolveShellVisualAmmoData());
         SyncMagazineState();
         RefreshInventoryWeightState();
         UpdateAmmoHud();
@@ -741,9 +803,11 @@ public sealed class FirstPersonWeaponRuntimeController : MonoBehaviour
         {
             _loadedAmmoAmount = 0;
             _loadedAmmoData = null;
+            ApplyAmmoMaterial(_loadedAmmoData);
         }
 
         _jammedAmmoRemoved = true;
+        ApplyShellVisual(ResolveShellVisualAmmoData());
         SyncMagazineState();
         RefreshInventoryWeightState();
         UpdateAmmoHud();
@@ -760,6 +824,8 @@ public sealed class FirstPersonWeaponRuntimeController : MonoBehaviour
         int loadedAmmoAmount = _loadedAmmoAmount;
         _loadedAmmoData = null;
         _loadedAmmoAmount = 0;
+        ApplyAmmoMaterial(_loadedAmmoData);
+        ApplyShellVisual(ResolveShellVisualAmmoData());
         SyncMagazineState();
         RefreshInventoryWeightState();
 
@@ -783,13 +849,54 @@ public sealed class FirstPersonWeaponRuntimeController : MonoBehaviour
 
     private void ApplyAmmoMaterial(ItemData ammoData)
     {
-        ApplyAmmoMaterial(_ammoRenderers, ammoData, _defaultAmmoMaterial);
+        ApplyAmmoVisual(_ammoRenderers, _ammoRendererVariants, ammoData, _defaultAmmoMaterial, false);
+    }
+
+    private void HideAmmoMaterial()
+    {
+        SetAmmoRenderersActive(_ammoRenderers, false);
+        SetAmmoRendererVariantsActive(_ammoRendererVariants, null);
+    }
+
+    private void ApplyShellVisual(ItemData ammoData)
+    {
+        ApplyAmmoVisual(_shellRenderers, _shellRendererVariants, ammoData, _defaultShellMaterial, false);
+    }
+
+    private ItemData ResolveShellVisualAmmoData()
+    {
+        return _loadedAmmoData != null ? _loadedAmmoData : _requestedAmmoData;
     }
 
     private void ApplyTwoMagazineReloadAmmoMaterials()
     {
-        ApplyAmmoMaterial(_ammoRenderers, _loadedAmmoData, _defaultAmmoMaterial);
-        ApplyAmmoMaterial(_secondMagazineAmmoRenderers, _reloadAmmoData, _secondMagazineDefaultAmmoMaterial);
+        ApplyAmmoVisual(_ammoRenderers, _ammoRendererVariants, _loadedAmmoData, _defaultAmmoMaterial, false);
+        ApplyAmmoVisual(_secondMagazineAmmoRenderers, _secondMagazineAmmoRendererVariants, _reloadAmmoData, _secondMagazineDefaultAmmoMaterial, false);
+    }
+
+    private void ApplyAmmoVisual(Renderer[] fallbackRenderers, AmmoRendererVariant[] variants, ItemData ammoData, Material defaultAmmoMaterial, bool hideWhenAmmoEmpty)
+    {
+        AmmoRendererVariant activeVariant = FindAmmoRendererVariant(variants, ammoData);
+
+        if (activeVariant != null)
+        {
+            SetAmmoRenderersActive(fallbackRenderers, false);
+            SetAmmoRendererVariantsActive(variants, activeVariant);
+            ApplyAmmoMaterial(activeVariant.Renderers, ammoData, activeVariant.DefaultMaterial);
+            ApplyAmmoMaterial(activeVariant.Objects, ammoData, activeVariant.DefaultMaterial);
+            return;
+        }
+
+        SetAmmoRendererVariantsActive(variants, null);
+
+        if (hideWhenAmmoEmpty && ammoData == null)
+        {
+            SetAmmoRenderersActive(fallbackRenderers, false);
+            return;
+        }
+
+        SetAmmoRenderersActive(fallbackRenderers, true);
+        ApplyAmmoMaterial(fallbackRenderers, ammoData, defaultAmmoMaterial);
     }
 
     private void ApplyAmmoMaterial(Renderer[] ammoRenderers, ItemData ammoData, Material defaultAmmoMaterial)
@@ -814,11 +921,207 @@ public sealed class FirstPersonWeaponRuntimeController : MonoBehaviour
         }
     }
 
-    private static Material GetDefaultAmmoMaterial(Renderer[] ammoRenderers)
+    private void ApplyAmmoMaterial(GameObject[] ammoObjects, ItemData ammoData, Material defaultAmmoMaterial)
+    {
+        if (ammoObjects == null)
+        {
+            return;
+        }
+
+        Material ammoMaterial = ammoData == null || ammoData.AmmoMaterial == null ? defaultAmmoMaterial : ammoData.AmmoMaterial;
+
+        for (int i = 0; i < ammoObjects.Length; i++)
+        {
+            GameObject ammoObject = ammoObjects[i];
+
+            if (ammoObject == null)
+            {
+                continue;
+            }
+
+            Renderer[] ammoRenderers = ammoObject.GetComponentsInChildren<Renderer>(true);
+
+            for (int rendererIndex = 0; rendererIndex < ammoRenderers.Length; rendererIndex++)
+            {
+                Renderer ammoRenderer = ammoRenderers[rendererIndex];
+
+                if (ammoRenderer != null && ammoRenderer.sharedMaterial != ammoMaterial)
+                {
+                    ammoRenderer.sharedMaterial = ammoMaterial;
+                }
+            }
+        }
+    }
+
+    private static AmmoRendererVariant FindAmmoRendererVariant(AmmoRendererVariant[] variants, ItemData ammoData)
+    {
+        if (variants == null || ammoData == null)
+        {
+            return null;
+        }
+
+        for (int i = 0; i < variants.Length; i++)
+        {
+            AmmoRendererVariant variant = variants[i];
+
+            if (variant != null && variant.AmmoData == ammoData && HasAmmoVisuals(variant))
+            {
+                return variant;
+            }
+        }
+
+        return null;
+    }
+
+    private static void SetAmmoRendererVariantsActive(AmmoRendererVariant[] variants, AmmoRendererVariant activeVariant)
+    {
+        if (variants == null)
+        {
+            return;
+        }
+
+        for (int i = 0; i < variants.Length; i++)
+        {
+            AmmoRendererVariant variant = variants[i];
+
+            if (variant != null)
+            {
+                SetAmmoObjectRenderersActive(variant.Objects, variant == activeVariant);
+                SetAmmoRenderersActive(variant.Renderers, variant == activeVariant);
+            }
+        }
+    }
+
+    private static void SetAmmoObjectRenderersActive(GameObject[] ammoObjects, bool active)
+    {
+        if (ammoObjects == null)
+        {
+            return;
+        }
+
+        for (int i = 0; i < ammoObjects.Length; i++)
+        {
+            GameObject ammoObject = ammoObjects[i];
+
+            if (ammoObject == null)
+            {
+                continue;
+            }
+
+            Renderer[] ammoRenderers = ammoObject.GetComponentsInChildren<Renderer>(true);
+
+            for (int rendererIndex = 0; rendererIndex < ammoRenderers.Length; rendererIndex++)
+            {
+                Renderer ammoRenderer = ammoRenderers[rendererIndex];
+
+                if (ammoRenderer != null && ammoRenderer.enabled != active)
+                {
+                    ammoRenderer.enabled = active;
+                }
+            }
+        }
+    }
+
+    private static void SetAmmoRenderersActive(Renderer[] ammoRenderers, bool active)
     {
         if (ammoRenderers == null)
         {
-            return null;
+            return;
+        }
+
+        for (int i = 0; i < ammoRenderers.Length; i++)
+        {
+            Renderer ammoRenderer = ammoRenderers[i];
+
+            if (ammoRenderer != null && ammoRenderer.enabled != active)
+            {
+                ammoRenderer.enabled = active;
+            }
+        }
+    }
+
+    private static void CacheDefaultAmmoMaterials(AmmoRendererVariant[] variants)
+    {
+        if (variants == null)
+        {
+            return;
+        }
+
+        for (int i = 0; i < variants.Length; i++)
+        {
+            variants[i]?.CacheDefaultMaterial();
+        }
+    }
+
+    private static bool HasAmmoRendererVariants(AmmoRendererVariant[] variants)
+    {
+        if (variants == null)
+        {
+            return false;
+        }
+
+        for (int i = 0; i < variants.Length; i++)
+        {
+            if (variants[i] != null && HasAmmoVisuals(variants[i]))
+            {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    private static bool HasAmmoRenderers(Renderer[] ammoRenderers)
+    {
+        if (ammoRenderers == null)
+        {
+            return false;
+        }
+
+        for (int i = 0; i < ammoRenderers.Length; i++)
+        {
+            if (ammoRenderers[i] != null)
+            {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    private static bool HasAmmoVisuals(AmmoRendererVariant variant)
+    {
+        return variant != null && (HasAmmoRenderers(variant.Renderers) || HasAmmoObjects(variant.Objects));
+    }
+
+    private static bool HasAmmoObjects(GameObject[] ammoObjects)
+    {
+        if (ammoObjects == null)
+        {
+            return false;
+        }
+
+        for (int i = 0; i < ammoObjects.Length; i++)
+        {
+            if (ammoObjects[i] != null)
+            {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    private static Material GetDefaultAmmoMaterial(Renderer[] ammoRenderers)
+    {
+        return GetDefaultAmmoMaterial(ammoRenderers, null);
+    }
+
+    private static Material GetDefaultAmmoMaterial(Renderer[] ammoRenderers, GameObject[] ammoObjects)
+    {
+        if (ammoRenderers == null)
+        {
+            return GetDefaultAmmoMaterial(ammoObjects);
         }
 
         for (int i = 0; i < ammoRenderers.Length; i++)
@@ -826,6 +1129,31 @@ public sealed class FirstPersonWeaponRuntimeController : MonoBehaviour
             if (ammoRenderers[i] != null)
             {
                 return ammoRenderers[i].sharedMaterial;
+            }
+        }
+
+        return GetDefaultAmmoMaterial(ammoObjects);
+    }
+
+    private static Material GetDefaultAmmoMaterial(GameObject[] ammoObjects)
+    {
+        if (ammoObjects == null)
+        {
+            return null;
+        }
+
+        for (int i = 0; i < ammoObjects.Length; i++)
+        {
+            if (ammoObjects[i] == null)
+            {
+                continue;
+            }
+
+            Renderer ammoRenderer = ammoObjects[i].GetComponentInChildren<Renderer>(true);
+
+            if (ammoRenderer != null)
+            {
+                return ammoRenderer.sharedMaterial;
             }
         }
 
@@ -1020,14 +1348,14 @@ public sealed class FirstPersonWeaponRuntimeController : MonoBehaviour
         return _animationController.GetNextAnimationFrameTime(animationKey, applyFrame);
     }
 
-    private float GetReloadAmmoMaterialApplyDelay(FirstPersonWeaponAnimationKey animationKey)
+    private float GetReloadAmmoMaterialApplyDelay(bool isFullReload, FirstPersonWeaponAnimationKey animationKey)
     {
         if (_weaponData == null || _animationController == null)
         {
             return 0f;
         }
 
-        return _animationController.GetNextAnimationFrameTime(animationKey, _weaponData.GetReloadAmmoMaterialApplyFrame());
+        return _animationController.GetNextAnimationFrameTime(animationKey, _weaponData.GetReloadAmmoMaterialApplyFrame(isFullReload));
     }
 
     private float GetJammedAmmoRemovalDelay(FirstPersonWeaponAnimationKey animationKey)
@@ -1247,6 +1575,7 @@ public sealed class FirstPersonWeaponRuntimeController : MonoBehaviour
         }
 
         _isClearingJam = false;
+        ApplyShellVisual(ResolveShellVisualAmmoData());
     }
 
     private void UpdateAmmoHud()

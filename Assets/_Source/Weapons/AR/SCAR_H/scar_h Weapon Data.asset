@@ -13,25 +13,20 @@ MonoBehaviour:
   m_Name: scar_h Weapon Data
   m_EditorClassIdentifier: Assembly-CSharp::WeaponData
   _magazineCapacity: 20
-  _durabilityShotsResource: 1400
+  _durabilityShotsResource: 1350
   _fireRateRoundsPerMinute: 625
   _fireMode: 1
   _reloadAmmoApplyFrame: 440
   _reloadFullAmmoApplyFrame: 630
   _reloadAmmoMaterialApplyFrame: 300
+  _reloadFullAmmoMaterialApplyFrame: 0
   _compatibleAmmo:
   - _ammoData: {fileID: 11400000, guid: a867dc2a04bb758499e84017132c8782, type: 2}
-    _bulletVelocityMetersPerSecondOverride: 0
   - _ammoData: {fileID: 11400000, guid: 7b71f4b3e2be8594a98a4edfe6c8076b, type: 2}
-    _bulletVelocityMetersPerSecondOverride: 0
   - _ammoData: {fileID: 11400000, guid: b6f5417a63f3bf4469f534f52b72cb63, type: 2}
-    _bulletVelocityMetersPerSecondOverride: 0
   - _ammoData: {fileID: 11400000, guid: 0e5ac3e38cae02a439a990afefcdfd7f, type: 2}
-    _bulletVelocityMetersPerSecondOverride: 0
   - _ammoData: {fileID: 11400000, guid: c0e21653836a53b42a31e4dfcdd4477b, type: 2}
-    _bulletVelocityMetersPerSecondOverride: 0
   - _ammoData: {fileID: 11400000, guid: 5a5e498aa5e2b3540bba14f7519059bf, type: 2}
-    _bulletVelocityMetersPerSecondOverride: 0
   _jammingDurabilityThreshold: 80
   _baseJammedChance: 0.1
   _maximumJammedChance: 15

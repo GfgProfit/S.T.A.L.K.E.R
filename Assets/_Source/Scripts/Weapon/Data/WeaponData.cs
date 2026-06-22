@@ -10,8 +10,10 @@ public sealed class WeaponData : ScriptableObject
     [SerializeField] private WeaponFireMode _fireMode = WeaponFireMode.Semi;
     [SerializeField] [Min(0)] private int _reloadAmmoApplyFrame;
     [SerializeField] [Min(0)] private int _reloadFullAmmoApplyFrame;
-    [Tooltip("Reload animation frame when the ammo visual material changes. Full reload applies it immediately.")]
+    [Tooltip("Reload animation frame when the ammo visual material changes.")]
     [SerializeField] [Min(0)] private int _reloadAmmoMaterialApplyFrame;
+    [Tooltip("Full reload animation frame when the ammo visual material changes after it was hidden at reload start.")]
+    [SerializeField] [Min(0)] private int _reloadFullAmmoMaterialApplyFrame;
     [SerializeField] private List<WeaponAmmoBallisticsData> _compatibleAmmo = new();
 
     [Header("Jamming")]
@@ -101,6 +103,7 @@ public sealed class WeaponData : ScriptableObject
         _reloadAmmoApplyFrame = Mathf.Max(0, _reloadAmmoApplyFrame);
         _reloadFullAmmoApplyFrame = Mathf.Max(0, _reloadFullAmmoApplyFrame);
         _reloadAmmoMaterialApplyFrame = Mathf.Max(0, _reloadAmmoMaterialApplyFrame);
+        _reloadFullAmmoMaterialApplyFrame = Mathf.Max(0, _reloadFullAmmoMaterialApplyFrame);
         _jammingDurabilityThreshold = Mathf.Clamp(_jammingDurabilityThreshold, 0f, 100f);
         _baseJammedChance = Mathf.Clamp(_baseJammedChance, 0f, 100f);
         _maximumJammedChance = Mathf.Clamp(_maximumJammedChance, _baseJammedChance, 100f);
@@ -128,6 +131,7 @@ public sealed class WeaponData : ScriptableObject
 
     public int GetReloadAmmoApplyFrame(bool fullReload) => fullReload ? Mathf.Max(0, _reloadFullAmmoApplyFrame) : Mathf.Max(0, _reloadAmmoApplyFrame);
     public int GetReloadAmmoMaterialApplyFrame() => Mathf.Max(0, _reloadAmmoMaterialApplyFrame);
+    public int GetReloadAmmoMaterialApplyFrame(bool fullReload) => fullReload ? Mathf.Max(0, _reloadFullAmmoMaterialApplyFrame) : Mathf.Max(0, _reloadAmmoMaterialApplyFrame);
     public int GetJammedAmmoRemovalFrame() => Mathf.Max(0, _jammedAmmoRemovalFrame);
 
     public float GetJammedChancePercent(float durabilityPercent)

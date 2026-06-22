@@ -29,7 +29,7 @@ public sealed class ItemTooltipViewModel : ViewModelBase
     public ReadOnlyReactiveProperty<bool> ShowDurability => _showDurability;
     public ReadOnlyReactiveProperty<string> DescriptionText => _descriptionText;
 
-    public void Show(ItemTooltipData item, int descriptionWordsPerLine, GameProjectSettings settings)
+    public void Show(ItemTooltipData item, GameProjectSettings settings)
     {
         if (item.IsValid == false)
         {
@@ -44,7 +44,7 @@ public sealed class ItemTooltipViewModel : ViewModelBase
         _weightText.Value = ItemTooltipTextFormatter.FormatWeight(item.Amount, item.UnitWeight, item.TotalWeight);
         _showDurability.Value = item.HasDurability;
         _durabilityText.Value = item.HasDurability ? ItemTooltipTextFormatter.FormatDurability(item.DurabilityPercent, settings.GetDurabilityColor(item.DurabilityPercent)) : string.Empty;
-        _descriptionText.Value = ItemTooltipTextFormatter.WrapDescription(item.ItemData.Description, descriptionWordsPerLine);
+        _descriptionText.Value = item.ItemData.Description?.Trim() ?? string.Empty;
         _isVisible.Value = true;
 
         int requestVersion = ++_iconRequestVersion;

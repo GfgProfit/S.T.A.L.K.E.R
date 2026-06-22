@@ -6,6 +6,16 @@ using UnityEngine.UI;
 
 public class ItemInfoPanel : MonoBehaviour, IView<ItemTooltipViewModel>
 {
+    private const float MIN_PANEL_WIDTH = 220f;
+    private const float MAX_PANEL_WIDTH = 520f;
+    private const float DEFAULT_PANEL_HORIZONTAL_PADDING = 32f;
+    private const float DESCRIPTION_WIDTH_STEP = 16f;
+    private const int MIN_DESCRIPTION_LINE_COUNT = 1;
+    private const int MAX_DESCRIPTION_LINE_COUNT = 6;
+    private const int TARGET_DESCRIPTION_CHARACTERS_PER_LINE = 70;
+
+    private static readonly char[] _descriptionWordSeparators = { ' ', '\t', '\n', '\r' };
+
     [SerializeField] private RectTransform _panelRectTransform;
     [SerializeField] private Vector2 _cursorOffset;
     [SerializeField] private Vector2 _screenPadding;
@@ -20,7 +30,10 @@ public class ItemInfoPanel : MonoBehaviour, IView<ItemTooltipViewModel>
     [SerializeField] private TMP_Text _durabilityText;
     [SerializeField] private GameObject _durabilityTextParent;
     [SerializeField] private TMP_Text _descriptionText;
-    [SerializeField] [Min(1)] private int _descriptionWordsPerLine;
+#pragma warning disable CS0169, CS0414
+    // Kept serialized to preserve existing prefab data after switching description wrapping to TMP metrics.
+    [SerializeField] [HideInInspector] [Min(1)] private int _descriptionWordsPerLine;
+#pragma warning restore CS0169, CS0414
 
     [Header("Ammo Info")]
     [SerializeField] private TMP_Text _ammoFleshDamageText;
@@ -69,6 +82,7 @@ public class ItemInfoPanel : MonoBehaviour, IView<ItemTooltipViewModel>
     private IDisposable _durabilitySubscription;
     private IDisposable _showDurabilitySubscription;
     private IDisposable _descriptionSubscription;
+    private LayoutElement _descriptionLayoutElement;
 
     private IPlayerPointerInput PlayerInput
     {
@@ -111,11 +125,12 @@ public class ItemInfoPanel : MonoBehaviour, IView<ItemTooltipViewModel>
         }
 
         GameProjectSettings settings = GameProjectSettings.LoadDefault();
-        _viewModel.Show(item, _descriptionWordsPerLine, settings);
+        _viewModel.Show(item, settings);
         SetAmmoInfo(item.ItemData, settings);
         SetModuleInfo(item, settings);
         SetArmorInfo(item.ItemData, settings);
         SetStatsInfo(item, settings);
+        FitDescriptionLayout(_descriptionText != null ? _descriptionText.text : string.Empty);
         RebuildLayout();
         UpdatePosition();
     }
@@ -361,6 +376,10 @@ public class ItemInfoPanel : MonoBehaviour, IView<ItemTooltipViewModel>
         }
 
         _descriptionText.text = description;
+        _descriptionText.enableAutoSizing = false;
+        _descriptionText.textWrappingMode = TextWrappingModes.Normal;
+        _descriptionText.overflowMode = TextOverflowModes.Overflow;
+        FitDescriptionLayout(description);
     }
 
     private void RebuildLayout()
@@ -371,6 +390,172 @@ public class ItemInfoPanel : MonoBehaviour, IView<ItemTooltipViewModel>
         }
 
         LayoutRebuilder.ForceRebuildLayoutImmediate(_panelRectTransform);
+    }
+
+    private void FitDescriptionLayout(string description)
+    {
+        if (_panelRectTransform == null || _descriptionText == null)
+        {
+            return;
+        }
+
+        float panelWidth = CalculatePanelWidth(description, out float descriptionWidth);
+        LayoutElement panelLayoutElement = _panelRectTransform.GetComponent<LayoutElement>();
+
+        if (panelLayoutElement != null)
+        {
+            panelLayoutElement.minWidth = panelWidth;
+            panelLayoutElement.preferredWidth = panelWidth;
+            panelLayoutElement.flexibleWidth = 0f;
+        }
+
+        _panelRectTransform.SetSizeWithCurrentAnchors(RectTransform.Axis.Horizontal, panelWidth);
+        SetDescriptionWidth(descriptionWidth);
+    }
+
+    private float CalculatePanelWidth(string description, out float descriptionWidth)
+    {
+        float maxPanelWidth = GetMaxPanelWidth();
+        float minPanelWidth = Mathf.Clamp(GetMinimumPanelWidth(), MIN_PANEL_WIDTH, maxPanelWidth);
+        float horizontalPadding = GetPanelHorizontalPadding();
+        descriptionWidth = Mathf.Max(1f, minPanelWidth - horizontalPadding);
+
+        if (string.IsNullOrWhiteSpace(description))
+        {
+            return minPanelWidth;
+        }
+
+        float minDescriptionWidth = Mathf.Max(1f, minPanelWidth - horizontalPadding);
+        float maxDescriptionWidth = Mathf.Max(minDescriptionWidth, maxPanelWidth - horizontalPadding);
+        descriptionWidth = CalculateDescriptionWidth(description, minDescriptionWidth, maxDescriptionWidth);
+
+        return Mathf.Clamp(descriptionWidth + horizontalPadding, minPanelWidth, maxPanelWidth);
+    }
+
+    private void SetDescriptionWidth(float width)
+    {
+        _descriptionText.rectTransform.SetSizeWithCurrentAnchors(RectTransform.Axis.Horizontal, width);
+
+        LayoutElement descriptionLayoutElement = GetDescriptionLayoutElement();
+        descriptionLayoutElement.minWidth = 0f;
+        descriptionLayoutElement.preferredWidth = width;
+        descriptionLayoutElement.flexibleWidth = 0f;
+    }
+
+    private LayoutElement GetDescriptionLayoutElement()
+    {
+        if (_descriptionLayoutElement != null)
+        {
+            return _descriptionLayoutElement;
+        }
+
+        if (_descriptionText.TryGetComponent(out _descriptionLayoutElement) == false)
+        {
+            _descriptionLayoutElement = _descriptionText.gameObject.AddComponent<LayoutElement>();
+        }
+
+        return _descriptionLayoutElement;
+    }
+
+    private float CalculateDescriptionWidth(string description, float minWidth, float maxWidth)
+    {
+        float longestWordWidth = GetLongestWordWidth(description);
+        float singleLineWidth = _descriptionText.GetPreferredValues(description).x;
+        int targetLineCount = Mathf.Clamp(Mathf.CeilToInt(description.Length / (float)TARGET_DESCRIPTION_CHARACTERS_PER_LINE), MIN_DESCRIPTION_LINE_COUNT, MAX_DESCRIPTION_LINE_COUNT);
+        float targetWidth = Mathf.Max(singleLineWidth / targetLineCount, longestWordWidth);
+        float width = Mathf.Clamp(targetWidth, minWidth, maxWidth);
+        float lineHeight = Mathf.Max(1f, _descriptionText.GetPreferredValues("A", maxWidth, 0f).y);
+        float targetHeight = lineHeight * targetLineCount;
+
+        while (width < maxWidth && _descriptionText.GetPreferredValues(description, width, 0f).y > targetHeight)
+        {
+            width = Mathf.Min(width + DESCRIPTION_WIDTH_STEP, maxWidth);
+        }
+
+        while (width - DESCRIPTION_WIDTH_STEP >= minWidth && _descriptionText.GetPreferredValues(description, width - DESCRIPTION_WIDTH_STEP, 0f).y <= targetHeight)
+        {
+            width -= DESCRIPTION_WIDTH_STEP;
+        }
+
+        return width;
+    }
+
+    private float GetLongestWordWidth(string description)
+    {
+        float width = 0f;
+        string[] words = description.Split(_descriptionWordSeparators, StringSplitOptions.RemoveEmptyEntries);
+
+        for (int i = 0; i < words.Length; i++)
+        {
+            width = Mathf.Max(width, _descriptionText.GetPreferredValues(words[i]).x);
+        }
+
+        return width;
+    }
+
+    private float GetMinimumPanelWidth()
+    {
+        float width = MIN_PANEL_WIDTH;
+        width = Mathf.Max(width, GetPreferredTextWidth(_itemNameText));
+        width = Mathf.Max(width, GetPreferredTextWidth(_typeText));
+        width = Mathf.Max(width, GetPreferredTextWidth(_weightText));
+        width = Mathf.Max(width, GetPreferredTextWidth(_durabilityText));
+        width = Mathf.Max(width, GetPreferredTextWidth(_ammoFleshDamageText));
+        width = Mathf.Max(width, GetPreferredTextWidth(_ammoArmorPenetrationText));
+        width = Mathf.Max(width, GetPreferredTextWidth(_ammoBulletSpeedText));
+        width = Mathf.Max(width, GetPreferredTextWidth(_ammoBulletMassText));
+        width = Mathf.Max(width, GetPreferredTextWidth(_ammoBulletDiameterText));
+        width = Mathf.Max(width, GetPreferredTextWidth(_ammoRicochetChanceText));
+        width = Mathf.Max(width, GetPreferredTextWidth(_ammoRecoilModifierText));
+        width = Mathf.Max(width, GetPreferredTextWidth(_ammoDurabilityLossModifierText));
+        width = Mathf.Max(width, GetPreferredTextWidth(_moduleMagazineSizeText));
+        width = Mathf.Max(width, GetPreferredTextWidth(_moduleAccuracyText));
+        width = Mathf.Max(width, GetPreferredTextWidth(_ergonomicsText));
+
+        if (_ammoArmorClassTexts != null)
+        {
+            for (int i = 0; i < _ammoArmorClassTexts.Length; i++)
+            {
+                width = Mathf.Max(width, GetPreferredTextWidth(_ammoArmorClassTexts[i]));
+            }
+        }
+
+        if (_iconLayoutElement != null)
+        {
+            width = Mathf.Max(width, _iconLayoutElement.preferredWidth);
+        }
+
+        return width + GetPanelHorizontalPadding();
+    }
+
+    private static float GetPreferredTextWidth(TMP_Text text)
+    {
+        if (text == null || text.gameObject.activeInHierarchy == false || string.IsNullOrEmpty(text.text))
+        {
+            return 0f;
+        }
+
+        return text.GetPreferredValues(text.text).x;
+    }
+
+    private float GetPanelHorizontalPadding()
+    {
+        if (_panelRectTransform != null && _panelRectTransform.TryGetComponent(out LayoutGroup layoutGroup))
+        {
+            return layoutGroup.padding.left + layoutGroup.padding.right;
+        }
+
+        return DEFAULT_PANEL_HORIZONTAL_PADDING;
+    }
+
+    private float GetMaxPanelWidth()
+    {
+        float screenWidth = Screen.width;
+        Canvas canvas = _panelRectTransform.GetComponentInParent<Canvas>();
+        float scaleFactor = canvas != null && canvas.scaleFactor > 0f ? canvas.scaleFactor : 1f;
+        float availableWidth = (screenWidth - _screenPadding.x * 2f - Mathf.Abs(_cursorOffset.x)) / scaleFactor;
+
+        return Mathf.Max(MIN_PANEL_WIDTH, Mathf.Min(MAX_PANEL_WIDTH, availableWidth));
     }
 
     private void UpdatePosition() => _positioner.UpdatePosition(_panelRectTransform, PlayerInput.GetPointerPosition(), _cursorOffset, _screenPadding);
