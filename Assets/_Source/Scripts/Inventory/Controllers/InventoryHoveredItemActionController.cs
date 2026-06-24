@@ -11,10 +11,10 @@ internal sealed class InventoryHoveredItemActionController
     private readonly InventoryQuickActionService _quickActionService;
     private readonly Func<InventoryGrid, InventoryItem, bool, bool> _tryDropItem;
     private readonly InventoryHoverInfoController _hoverInfoController;
-    private readonly Action _hideItemInfoPanel;
+    private readonly Action _hideItemTooltip;
     private readonly Action _hideContextMenu;
 
-    public InventoryHoveredItemActionController(IInventoryInput playerInput, InventoryDragState dragState, Func<InventoryGrid> getSelectedItemGrid, Func<Vector2Int> getTileGridPosition, Func<bool> isContextMenuOpen, InventoryQuickActionService quickActionService, Func<InventoryGrid, InventoryItem, bool, bool> tryDropItem, InventoryHoverInfoController hoverInfoController, Action hideItemInfoPanel, Action hideContextMenu)
+    public InventoryHoveredItemActionController(IInventoryInput playerInput, InventoryDragState dragState, Func<InventoryGrid> getSelectedItemGrid, Func<Vector2Int> getTileGridPosition, Func<bool> isContextMenuOpen, InventoryQuickActionService quickActionService, Func<InventoryGrid, InventoryItem, bool, bool> tryDropItem, InventoryHoverInfoController hoverInfoController, Action hideItemTooltip, Action hideContextMenu)
     {
         _playerInput = playerInput;
         _dragState = dragState;
@@ -24,7 +24,7 @@ internal sealed class InventoryHoveredItemActionController
         _quickActionService = quickActionService;
         _tryDropItem = tryDropItem;
         _hoverInfoController = hoverInfoController;
-        _hideItemInfoPanel = hideItemInfoPanel;
+        _hideItemTooltip = hideItemTooltip;
         _hideContextMenu = hideContextMenu;
     }
 
@@ -102,6 +102,6 @@ internal sealed class InventoryHoveredItemActionController
     private void HideHoverInfo()
     {
         _hoverInfoController.HideHighlight();
-        _hideItemInfoPanel();
+        _hideItemTooltip();
     }
 }

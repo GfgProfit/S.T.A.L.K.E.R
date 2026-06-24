@@ -13,6 +13,7 @@ public class WorldItem : MonoBehaviour
     [SerializeField] [Min(1)] private int _amount = 1;
     [SerializeField] [Range(0f, 100f)] private float _durabilityPercent = 100f;
     [SerializeField] private List<ItemData> _installedModules = new();
+    [SerializeField] private FirstPersonWeaponMagazineState _weaponMagazineState = new();
     [SerializeField] private bool _destroyOnPickup = true;
 
     public ItemData ItemData => _itemData;
@@ -21,7 +22,8 @@ public class WorldItem : MonoBehaviour
     public int Amount => NormalizeAmount(_itemData, _amount);
     public float DurabilityPercent => NormalizeDurability(_itemData, _durabilityPercent);
     public IReadOnlyList<ItemData> InstalledModules => _installedModules;
-    public float TotalWeight => _itemData == null ? 0f : _itemData.Weight * Amount + GetInstalledModulesWeight();
+    public FirstPersonWeaponMagazineState WeaponMagazineState => GetWeaponMagazineState();
+    public float TotalWeight => _itemData == null ? 0f : _itemData.Weight * Amount + GetInstalledModulesWeight() + GetLoadedMagazineWeight();
     public string DisplayName => Amount > 1 ? $"{ItemName} x{Amount}" : ItemName;
 
     public static bool TryGetByCollider(Collider itemCollider, out WorldItem worldItem)
@@ -33,18 +35,20 @@ public class WorldItem : MonoBehaviour
     private void OnEnable()
     {
         RegisterColliders();
+        GetWeaponMagazineState().NormalizeForWeapon(_itemData, _installedModules);
         ApplyInstalledModules();
     }
     private void OnDisable() => UnregisterColliders();
 
-    public void Initialize(ItemData itemData, int amount) => Initialize(itemData, amount, itemData == null ? 100f : itemData.DefaultDurabilityPercent, null);
+    public void Initialize(ItemData itemData, int amount) => Initialize(itemData, amount, itemData == null ? 100f : itemData.DefaultDurabilityPercent, null, null);
 
-    public void Initialize(ItemData itemData, int amount, float durabilityPercent, IReadOnlyList<ItemData> installedModules = null)
+    public void Initialize(ItemData itemData, int amount, float durabilityPercent, IReadOnlyList<ItemData> installedModules = null, FirstPersonWeaponMagazineState weaponMagazineState = null)
     {
         _itemData = itemData;
         _amount = NormalizeAmount(itemData, amount);
         _durabilityPercent = NormalizeDurability(itemData, durabilityPercent);
         SetInstalledModules(installedModules);
+        SetWeaponMagazineState(weaponMagazineState);
         ApplyInstalledModules();
     }
 
@@ -55,7 +59,7 @@ public class WorldItem : MonoBehaviour
             return false;
         }
 
-        if (inventoryController.TryInsertItem(_itemData, Amount, DurabilityPercent, _installedModules) == false)
+        if (inventoryController.TryInsertItem(_itemData, Amount, DurabilityPercent, _installedModules, WeaponMagazineState) == false)
         {
             return false;
         }
@@ -77,6 +81,7 @@ public class WorldItem : MonoBehaviour
         _amount = NormalizeAmount(_itemData, _amount);
         _durabilityPercent = NormalizeDurability(_itemData, _durabilityPercent);
         NormalizeInstalledModules();
+        GetWeaponMagazineState().NormalizeForWeapon(_itemData, _installedModules);
     }
 
     private void RegisterColliders()
@@ -143,6 +148,19 @@ public class WorldItem : MonoBehaviour
 
     private void ApplyInstalledModules() => WeaponModuleSupport.ApplyToVisual(gameObject, _installedModules);
 
+    private FirstPersonWeaponMagazineState GetWeaponMagazineState()
+    {
+        _weaponMagazineState ??= new FirstPersonWeaponMagazineState();
+        return _weaponMagazineState;
+    }
+
+    private void SetWeaponMagazineState(FirstPersonWeaponMagazineState weaponMagazineState)
+    {
+        FirstPersonWeaponMagazineState targetState = GetWeaponMagazineState();
+        targetState.CopyFrom(weaponMagazineState);
+        targetState.NormalizeForWeapon(_itemData, _installedModules);
+    }
+
     private float GetInstalledModulesWeight()
     {
         float weight = 0f;
@@ -156,6 +174,12 @@ public class WorldItem : MonoBehaviour
         }
 
         return weight;
+    }
+
+    private float GetLoadedMagazineWeight()
+    {
+        FirstPersonWeaponMagazineState magazineState = WeaponMagazineState;
+        return magazineState.LoadedAmmoData == null || magazineState.LoadedAmmoAmount <= 0 ? 0f : magazineState.LoadedAmmoData.Weight * magazineState.LoadedAmmoAmount;
     }
 
     [Button]

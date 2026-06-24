@@ -21,7 +21,7 @@ internal sealed class InventoryItemPlacementService
         _refreshWeightState = refreshWeightState;
     }
 
-    public bool TryInsertItem(ItemData itemData, int amount, float? durabilityPercent, IReadOnlyList<ItemData> installedModules, InventoryGrid insertionGrid, InventoryGrid defaultItemGrid)
+    public bool TryInsertItem(ItemData itemData, int amount, float? durabilityPercent, IReadOnlyList<ItemData> installedModules, FirstPersonWeaponMagazineState weaponMagazineState, InventoryGrid insertionGrid, InventoryGrid defaultItemGrid)
     {
         if (itemData == null)
         {
@@ -41,7 +41,7 @@ internal sealed class InventoryItemPlacementService
             return true;
         }
 
-        InventoryItem itemToInsert = _itemFactory.Create(itemData, normalizedAmount, durabilityPercent, installedModules);
+        InventoryItem itemToInsert = _itemFactory.Create(itemData, normalizedAmount, durabilityPercent, installedModules, weaponMagazineState);
 
         if (InsertItem(itemToInsert, insertionGrid) || (insertionGrid != defaultItemGrid && InsertItem(itemToInsert, defaultItemGrid)))
         {

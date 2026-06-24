@@ -54,7 +54,7 @@ public class LegacyPlayerInput : IPlayerInput
     }
 
     public bool IsEscapePressed() => Input.GetKeyDown(KeyCode.Escape);
-    public bool IsInventoryPressed() => Input.GetKeyDown(KeyCode.I);
+    public bool IsInventoryPressed() => Input.GetKeyDown(KeyCode.Tab);
     public int GetInventoryQuickUseSlotIndexPressed()
     {
         for (int i = 0; i < INVENTORY_QUICK_USE_KEYS.Length; i++)

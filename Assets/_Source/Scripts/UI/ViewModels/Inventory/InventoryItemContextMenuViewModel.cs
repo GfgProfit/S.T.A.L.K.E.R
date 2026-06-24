@@ -6,6 +6,7 @@ using R3;
 public sealed class InventoryItemContextMenuViewModel : ViewModelBase
 {
     private readonly Action _useAction;
+    private readonly Action _inspectAction;
     private readonly Action _unloadAction;
     private readonly Action _equipPrimaryWeaponAction;
     private readonly Action _equipSecondaryWeaponAction;
@@ -23,9 +24,10 @@ public sealed class InventoryItemContextMenuViewModel : ViewModelBase
     private readonly ReactiveProperty<bool> _canUnequip = new();
     private readonly ReactiveProperty<bool> _canDropStack = new();
 
-    public InventoryItemContextMenuViewModel(Action useAction, Action unloadAction, Action equipPrimaryWeaponAction, Action equipSecondaryWeaponAction, Action equipAction, Action unequipAction, Action dropOneAction, Action dropStackAction)
+    public InventoryItemContextMenuViewModel(Action useAction, Action inspectAction, Action unloadAction, Action equipPrimaryWeaponAction, Action equipSecondaryWeaponAction, Action equipAction, Action unequipAction, Action dropOneAction, Action dropStackAction)
     {
         _useAction = useAction;
+        _inspectAction = inspectAction;
         _unloadAction = unloadAction;
         _equipPrimaryWeaponAction = equipPrimaryWeaponAction;
         _equipSecondaryWeaponAction = equipSecondaryWeaponAction;
@@ -34,6 +36,7 @@ public sealed class InventoryItemContextMenuViewModel : ViewModelBase
         _dropOneAction = dropOneAction;
         _dropStackAction = dropStackAction;
         UseCommand = new(UseAsync, () => _canUse.Value);
+        InspectCommand = new(InspectAsync);
         UnloadCommand = new(UnloadAsync, () => _canUnload.Value);
         EquipPrimaryWeaponCommand = new(EquipPrimaryWeaponAsync, () => _canEquipPrimaryWeapon.Value);
         EquipSecondaryWeaponCommand = new(EquipSecondaryWeaponAsync, () => _canEquipSecondaryWeapon.Value);
@@ -53,6 +56,7 @@ public sealed class InventoryItemContextMenuViewModel : ViewModelBase
     public ReadOnlyReactiveProperty<bool> CanUnequip => _canUnequip;
     public ReadOnlyReactiveProperty<bool> CanDropStack => _canDropStack;
     public AsyncReactiveCommand UseCommand { get; }
+    public AsyncReactiveCommand InspectCommand { get; }
     public AsyncReactiveCommand UnloadCommand { get; }
     public AsyncReactiveCommand EquipPrimaryWeaponCommand { get; }
     public AsyncReactiveCommand EquipSecondaryWeaponCommand { get; }
@@ -90,6 +94,13 @@ public sealed class InventoryItemContextMenuViewModel : ViewModelBase
     {
         cancellationToken.ThrowIfCancellationRequested();
         _useAction?.Invoke();
+        return UniTask.CompletedTask;
+    }
+
+    private UniTask InspectAsync(CancellationToken cancellationToken)
+    {
+        cancellationToken.ThrowIfCancellationRequested();
+        _inspectAction?.Invoke();
         return UniTask.CompletedTask;
     }
 
@@ -145,6 +156,7 @@ public sealed class InventoryItemContextMenuViewModel : ViewModelBase
     protected override void DisposeManaged()
     {
         UseCommand.Dispose();
+        InspectCommand.Dispose();
         UnloadCommand.Dispose();
         EquipPrimaryWeaponCommand.Dispose();
         EquipSecondaryWeaponCommand.Dispose();

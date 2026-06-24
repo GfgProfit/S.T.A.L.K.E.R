@@ -22,6 +22,8 @@ public class InventoryItemContextMenu : MonoBehaviour, IView<InventoryItemContex
     [SerializeField] private Canvas _canvas;
     [SerializeField] private Button _useButton;
     [SerializeField] private TMP_Text _useButtonText;
+    [SerializeField] private Button _inspectButton;
+    [SerializeField] private TMP_Text _inspectButtonText;
     [SerializeField] private Button _unloadButton;
     [SerializeField] private TMP_Text _unloadButtonText;
     [SerializeField] private Button _equipPrimaryWeaponButton;
@@ -32,6 +34,7 @@ public class InventoryItemContextMenu : MonoBehaviour, IView<InventoryItemContex
     [SerializeField] private TMP_Text _equipButtonText;
     [SerializeField] private Button _unequipButton;
     [SerializeField] private TMP_Text _unequipButtonText;
+    [SerializeField] private string _inspectButtonLabel = "\u041e\u0441\u043c\u043e\u0442\u0440\u0435\u0442\u044c";
     [SerializeField] private string _unloadButtonLabel = "Разрядить";
     [SerializeField] private string _equipPrimaryWeaponButtonLabel = "Экипировать в основной слот";
     [SerializeField] private string _equipSecondaryWeaponButtonLabel = "Экипировать во вторичный слот";
@@ -45,6 +48,7 @@ public class InventoryItemContextMenu : MonoBehaviour, IView<InventoryItemContex
     [SerializeField] private Color _closeRadiusEditorColor = new(1f, 0.65f, 0f, 0.9f);
 
     private Action _onUse;
+    private Action _onInspect;
     private Action _onUnload;
     private Action _onEquipPrimaryWeapon;
     private Action _onEquipSecondaryWeapon;
@@ -85,9 +89,10 @@ public class InventoryItemContextMenu : MonoBehaviour, IView<InventoryItemContex
         }
     }
 
-    public void Initialize(Action useAction, Action unloadAction, Action equipPrimaryWeaponAction, Action equipSecondaryWeaponAction, Action equipAction, Action unequipAction, Action dropOneAction, Action dropStackAction)
+    public void Initialize(Action useAction, Action inspectAction, Action unloadAction, Action equipPrimaryWeaponAction, Action equipSecondaryWeaponAction, Action equipAction, Action unequipAction, Action dropOneAction, Action dropStackAction)
     {
         _onUse = useAction;
+        _onInspect = inspectAction;
         _onUnload = unloadAction;
         _onEquipPrimaryWeapon = equipPrimaryWeaponAction;
         _onEquipSecondaryWeapon = equipSecondaryWeaponAction;
@@ -96,12 +101,18 @@ public class InventoryItemContextMenu : MonoBehaviour, IView<InventoryItemContex
         _onDropOne = dropOneAction;
         _onDropStack = dropStackAction;
         EnsureContextButtons();
-        Bind(InventoryViewModelFactory.CreateContextMenu(_onUse, _onUnload, _onEquipPrimaryWeapon, _onEquipSecondaryWeapon, _onEquip, _onUnequip, _onDropOne, _onDropStack));
+        Bind(InventoryViewModelFactory.CreateContextMenu(_onUse, _onInspect, _onUnload, _onEquipPrimaryWeapon, _onEquipSecondaryWeapon, _onEquip, _onUnequip, _onDropOne, _onDropStack));
 
         if (_useButton != null)
         {
             _useButton.onClick.RemoveListener(HandleUseClicked);
             _useButton.onClick.AddListener(HandleUseClicked);
+        }
+
+        if (_inspectButton != null)
+        {
+            _inspectButton.onClick.RemoveListener(HandleInspectClicked);
+            _inspectButton.onClick.AddListener(HandleInspectClicked);
         }
 
         if (_dropOneButton != null)
@@ -157,6 +168,7 @@ public class InventoryItemContextMenu : MonoBehaviour, IView<InventoryItemContex
 
         RebuildModuleActionButtons(moduleActions);
         _viewModel.Show(canUse, showUnload, canUnload, canEquipPrimaryWeapon, canEquipSecondaryWeapon, canEquip, canUnequip, canDropStack);
+        SetButtonVisible(_inspectButton, _inspectButtonText, true);
         transform.SetAsLastSibling();
 
         RebuildLayout();
@@ -242,6 +254,7 @@ public class InventoryItemContextMenu : MonoBehaviour, IView<InventoryItemContex
     }
 
     private void HandleUseClicked() => ExecuteCommandAsync(_viewModel?.UseCommand, destroyCancellationToken).Forget(Debug.LogException);
+    private void HandleInspectClicked() => ExecuteCommandAsync(_viewModel?.InspectCommand, destroyCancellationToken).Forget(Debug.LogException);
     private void HandleUnloadClicked() => ExecuteCommandAsync(_viewModel?.UnloadCommand, destroyCancellationToken).Forget(Debug.LogException);
     private void HandleEquipPrimaryWeaponClicked() => ExecuteCommandAsync(_viewModel?.EquipPrimaryWeaponCommand, destroyCancellationToken).Forget(Debug.LogException);
     private void HandleEquipSecondaryWeaponClicked() => ExecuteCommandAsync(_viewModel?.EquipSecondaryWeaponCommand, destroyCancellationToken).Forget(Debug.LogException);
@@ -260,6 +273,11 @@ public class InventoryItemContextMenu : MonoBehaviour, IView<InventoryItemContex
         if (_unloadButton != null)
         {
             _unloadButton.onClick.RemoveListener(HandleUnloadClicked);
+        }
+
+        if (_inspectButton != null)
+        {
+            _inspectButton.onClick.RemoveListener(HandleInspectClicked);
         }
 
         if (_equipPrimaryWeaponButton != null)
@@ -330,6 +348,7 @@ public class InventoryItemContextMenu : MonoBehaviour, IView<InventoryItemContex
     private void EnsureContextButtons()
     {
         int nextSiblingIndex = GetNextButtonSiblingIndex(_useButton);
+        EnsureActionButton(ref _inspectButton, ref _inspectButtonText, "Inspect Button", _inspectButtonLabel, nextSiblingIndex++);
         EnsureActionButton(ref _equipPrimaryWeaponButton, ref _equipPrimaryWeaponButtonText, "Equip Primary Weapon Button", _equipPrimaryWeaponButtonLabel, nextSiblingIndex++);
         EnsureActionButton(ref _equipSecondaryWeaponButton, ref _equipSecondaryWeaponButtonText, "Equip Secondary Weapon Button", _equipSecondaryWeaponButtonLabel, nextSiblingIndex++);
         EnsureActionButton(ref _equipButton, ref _equipButtonText, "Equip Button", _equipButtonLabel, nextSiblingIndex++);
@@ -420,6 +439,7 @@ public class InventoryItemContextMenu : MonoBehaviour, IView<InventoryItemContex
     {
         _layoutButtons.Clear();
         AddLayoutButton(_useButton);
+        AddLayoutButton(_inspectButton);
         AddLayoutButton(_unloadButton);
         AddLayoutButton(_equipPrimaryWeaponButton);
         AddLayoutButton(_equipSecondaryWeaponButton);

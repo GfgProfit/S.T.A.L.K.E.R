@@ -10,10 +10,10 @@ internal sealed class InventoryDragController
     private readonly Func<InventoryGrid> _getSelectedItemGrid;
     private readonly Func<InventoryGrid, InventoryItem, bool> _canDetachItemWithSlotRestrictions;
     private readonly Action _hideContextMenu;
-    private readonly Action _hideItemInfoPanel;
+    private readonly Action _hideItemTooltip;
     private readonly Action _refreshWeightState;
 
-    public InventoryDragController(InventoryDragState dragState, InventoryDragPlacementService dragPlacementService, IInventoryInput playerInput, Transform canvasTransform, Func<InventoryGrid> getSelectedItemGrid, Func<InventoryGrid, InventoryItem, bool> canDetachItemWithSlotRestrictions, Action hideContextMenu, Action hideItemInfoPanel, Action refreshWeightState)
+    public InventoryDragController(InventoryDragState dragState, InventoryDragPlacementService dragPlacementService, IInventoryInput playerInput, Transform canvasTransform, Func<InventoryGrid> getSelectedItemGrid, Func<InventoryGrid, InventoryItem, bool> canDetachItemWithSlotRestrictions, Action hideContextMenu, Action hideItemTooltip, Action refreshWeightState)
     {
         _dragState = dragState;
         _dragPlacementService = dragPlacementService;
@@ -22,7 +22,7 @@ internal sealed class InventoryDragController
         _getSelectedItemGrid = getSelectedItemGrid;
         _canDetachItemWithSlotRestrictions = canDetachItemWithSlotRestrictions;
         _hideContextMenu = hideContextMenu;
-        _hideItemInfoPanel = hideItemInfoPanel;
+        _hideItemTooltip = hideItemTooltip;
         _refreshWeightState = refreshWeightState;
     }
 
@@ -110,7 +110,7 @@ internal sealed class InventoryDragController
 
     private void StartDraggingItem(InventoryItem item)
     {
-        _hideItemInfoPanel();
+        _hideItemTooltip();
         _dragState.StartDragging(item, _canvasTransform, _playerInput.GetPointerPosition());
     }
 }

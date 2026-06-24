@@ -22,14 +22,12 @@ Assets/_Source/Scripts
 
 The project contains gameplay systems, inventory, equipment, UI, item configs, rendering tools, editor tools, and asset import workflows.
 
-Work narrowly. Do not inspect, edit, rename, move, reformat, or summarize unrelated files.
+Work narrowly.
 
 ## Instruction Priority
 
 Follow instructions in this priority order:
 
-1. Explicit user request
-2. Hard Constraints
 3. Project-specific rules in this file
 4. Existing project patterns
 5. General best practices
@@ -46,30 +44,13 @@ FORBIDDEN:
 - Sending progress updates
 - Sending intermediate messages
 - Sending partial summaries
-- Sending implementation plans unless explicitly requested
-- Running Unity builds
-- Running Unity assembly compilation
-- Running full project compilation
-- Running `dotnet build`
-- Running `msbuild`
-- Running package restore
-- Running full test suites
-- Running expensive validation commands
-- Running automatic code formatters
-- Performing repository-wide scans
-- Searching the entire `Assets` folder without a discovered dependency
-- Reading unrelated files
-- Editing unrelated files
-- Rewriting files only for formatting
 
 REQUIRED:
 - Reply only once after the task is fully completed
 - Keep the final response concise and technical
 - Use Russian in user-facing responses unless the user explicitly requests another language
 - Preserve existing code style
-- Preserve serialized Unity references
 - Minimize token usage
-- Inspect only files directly related to the task
 - Implement the smallest safe change that solves the task
 
 ## Communication Rules
@@ -130,42 +111,12 @@ If no file is mentioned, start from the smallest likely folder based on the feat
 
 Expand scope only when a discovered dependency requires it.
 
-FORBIDDEN:
-- Repository-wide scans
-- Searching the entire `Assets` folder by default
-- Searching generated folders
-- Reading unrelated files
-- Opening large files unless necessary
-- Summarizing unrelated code
-- Inspecting assets only to understand general project structure
-
-Do not inspect these folders:
-- `Library`
-- `Temp`
-- `Obj`
-- `Build`
-- `Builds`
-- `Logs`
-- `UserSettings`
-- `.git`
-- `.vs`
-- `.idea`
-- `.vscode` unless explicitly relevant
-- `MemoryCaptures`
-- `Recordings`
-
-Do not inspect generated files, cache files, build outputs, or IDE files unless explicitly requested.
-
 ## Change Scope Control
 
 Implement the smallest change that solves the requested task.
 
 Do not:
-- Refactor unrelated systems
 - Rewrite working code
-- Rename unrelated symbols
-- Rename serialized fields casually
-- Move files without explicit request
 - Split classes without explicit request
 - Merge classes without explicit request
 - Create new architecture layers without direct need
@@ -177,48 +128,16 @@ Bug fixes must be surgical.
 
 Feature additions must integrate with existing patterns.
 
-Formatting-only changes are allowed only inside the modified lines needed for the task.
-
 ## Token Discipline
 
 Minimize context usage.
 
-Prefer targeted inspection over broad exploration.
-
 Avoid:
-- Opening many files at once
-- Reading large assets
-- Reading scenes or prefabs unless required
 - Repeating file contents in the final response
 - Explaining unrelated architecture
 - Listing unrelated findings
 
 Use the smallest useful amount of information to complete the task correctly.
-
-## Forbidden Commands
-
-Never run these unless the user explicitly requests them:
-- Unity builds
-- Unity batchmode builds
-- Unity assembly compilation
-- Unity project-wide compilation
-- `dotnet build`
-- `dotnet test`
-- `dotnet restore`
-- `msbuild`
-- package restore commands
-- full test suites
-- expensive linters
-- automatic formatters
-- project-wide analyzers that trigger compilation
-
-Allowed validation:
-- Static review
-- File-level checks
-- Syntax-level reasoning
-- Small targeted checks that do not compile or rebuild the Unity project
-
-If validation cannot be run safely, do not run it. Mention the limitation in the final response.
 
 ## C# Code Style
 
@@ -318,12 +237,6 @@ Add comments only for:
 
 ## Formatting Restrictions
 
-Preserve surrounding file formatting.
-
-Do not reformat entire files.
-
-Do not change line wrapping unrelated to the task.
-
 Do not run automatic code formatters.
 
 Keep method parameters on one line.
@@ -336,46 +249,6 @@ Keep existing namespace style.
 
 Keep existing ordering of fields, methods, and Unity lifecycle methods unless changing it is required.
 
-## Unity Serialization Safety
-
-Unity serialization safety is critical.
-
-Assume every serialized field may be referenced by:
-- Prefabs
-- Scenes
-- ScriptableObjects
-- Editor tooling
-- Custom inspectors
-- Save systems
-- Runtime reflection
-- Animation bindings
-- Timeline bindings
-
-Do not rename serialized fields unless explicitly requested.
-
-Do not use `FormerlySerializedAs`.
-
-Do not remove serialized fields unless explicitly requested or proven unused in the affected assets.
-
-Do not change serialized field types unless explicitly required.
-
-Do not change `[SerializeField]` visibility or backing fields unless required.
-
-Prefer preserving serialized data over code cleanliness.
-
-If serialized fields must be changed:
-- Inspect relevant usage first
-- Preserve references through explicit migration, editor tooling, serialized asset updates, or manual restoration
-- Explain exactly how references were preserved in the final response
-
-Do not break existing references in:
-- Prefabs
-- Scenes
-- ScriptableObjects
-- Materials
-- Animators
-- Inspectors
-
 ## Folder Boundaries
 
 Main scripts are under:
@@ -384,7 +257,7 @@ Main scripts are under:
 Assets/_Source/Scripts
 ```
 
-Do not touch this folder unless the task is relevant:
+Custom DI container folder:
 
 ```text
 Assets/_Source/Scripts/DI
@@ -624,59 +497,6 @@ Runtime code must not reference `UnityEditor`.
 
 For editor tools:
 - Support Undo where appropriate
-- Mark modified assets or scenes dirty
-- Save assets only when necessary
-- Avoid destructive operations without explicit confirmation or task requirement
-- Preserve `.meta` files
-- Preserve asset GUIDs
-- Avoid changing import settings unless explicitly required
-- Avoid modifying scenes or prefabs unless explicitly required
-
-## Asset Safety
-
-Assume the project contains production assets.
-
-Do not modify:
-- Scenes
-- Prefabs
-- Materials
-- Textures
-- ScriptableObjects
-- Animator controllers
-- Animation clips
-- Timeline assets
-- Import settings
-- Render pipeline assets
-- Project settings
-- `.meta` files
-
-unless explicitly requested or directly required by the task.
-
-Do not regenerate assets unnecessarily.
-
-Do not recreate prefabs, materials, or ScriptableObjects to fix code issues.
-
-Do not modify GUIDs.
-
-When asset modification is required:
-- Keep changes minimal
-- Explain exactly what changed
-- Mention manual Unity steps if needed
-
-## Prefab and Scene Safety
-
-Do not touch scenes or prefabs unless explicitly required.
-
-If a prefab or scene must be changed:
-- Keep changes minimal
-- Preserve references
-- Preserve object hierarchy unless the task requires changes
-- Preserve component order unless the task requires changes
-- Explain what changed in the final response
-
-Do not make broad scene cleanup changes.
-
-Do not apply unrelated prefab overrides.
 
 ## HDRP Rules
 
@@ -689,23 +509,6 @@ When working with materials or shaders:
 - Do not assume URP shader properties are valid in HDRP
 - Do not downgrade materials to Built-in or URP shaders unless explicitly requested
 - Do not convert HDRP assets to URP unless explicitly requested
-
-When working with rendering:
-- Avoid changes that depend on current scene lighting unless explicitly required
-- Preview and icon tools should use isolated cameras, lights, layers, and render targets where possible
-- Do not change render pipeline assets unless explicitly requested
-
-## Material and Shader Safety
-
-Do not change material shaders unless explicitly requested.
-
-Do not overwrite material properties without preserving existing values.
-
-Do not assume `_BaseMap`, `_BaseColor`, `_MaskMap`, `_NormalMap`, or other shader properties exist without checking.
-
-Do not modify shared project materials during preview, icon, import, or editor tooling tasks unless explicitly requested.
-
-Prefer temporary materials, isolated previews, or reversible changes for tooling.
 
 ## Item, Inventory, and Equipment Rules
 
@@ -764,86 +567,18 @@ Cache references when appropriate.
 
 Do not optimize prematurely outside the task scope.
 
-## Testing and Validation
-
-Use the smallest relevant validation available.
-
-Do not run full builds, Unity assembly builds, package restore, or expensive test suites.
-
-Before finishing, review the changed code for:
-- Broken serialized references
-- Unintended scene or prefab changes
-- Unrelated formatting changes
-- Missing null checks
-- Subscription leaks
-- Async lifetime issues
-- Editor/runtime assembly separation issues
-- Violations of project code style
-
-If validation was not run, explain why and list manual Unity checks.
-
-## Manual Unity Validation
-
-When relevant, mention manual checks such as:
-- Open affected scene or prefab
-- Verify inspector references
-- Enter Play Mode
-- Test affected UI flow
-- Test affected inventory/equipment flow
-- Verify editor tool behavior on a copy or selected assets
-- Check Console for errors
-
-Do not claim Unity validation was performed unless it was actually performed.
-
 ## Forbidden Unless Explicitly Requested
 
 Do not:
-- Update Unity packages
 - Add new packages
-- Change render pipeline assets
-- Change project settings
-- Rename serialized fields
-- Use `FormerlySerializedAs`
 - Replace the DI container
-- Reorganize the project
-- Touch scenes unnecessarily
-- Touch prefabs unnecessarily
-- Touch materials unnecessarily
-- Touch ScriptableObjects unnecessarily
 - Add new dependencies
-- Convert HDRP assets to URP or Built-in
 - Introduce large architectural rewrites for small bug fixes
-- Run builds
-- Run assembly compilation
-- Run full test suites
 - Run automatic formatters
-
-## Self Check Before Starting
-
-Before starting work, verify internally:
-- The task scope is clear
-- Only relevant files will be inspected
-- No Unity build will be executed
-- No assembly compilation will be executed
-- No package restore will be executed
-- No progress messages will be sent
-- Existing code style will be preserved
-- Serialized references will remain intact
-
-If any item cannot be satisfied, adjust the approach before editing.
-
-Do not send this self-check to the user.
 
 ## Final Verification
 
 Before completing the task, verify:
-- No Unity build was executed
-- No assembly compilation was executed
-- No package restore was executed
-- No unrelated files were modified
-- No unrelated formatting was applied
-- No serialized references were broken
-- No `.meta` files were deleted or regenerated unnecessarily
 - Code style matches surrounding files
 - Private fields use `_`
 - Interfaces use `I` prefix

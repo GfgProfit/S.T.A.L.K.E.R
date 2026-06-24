@@ -5,7 +5,7 @@ using Random = UnityEngine.Random;
 
 internal sealed class InventoryDropService
 {
-    public bool TrySpawnDroppedWorldItem(ItemData itemData, int amount, float durabilityPercent, IReadOnlyList<ItemData> installedModules, InventoryDropContext context)
+    public bool TrySpawnDroppedWorldItem(ItemData itemData, int amount, float durabilityPercent, IReadOnlyList<ItemData> installedModules, FirstPersonWeaponMagazineState weaponMagazineState, InventoryDropContext context)
     {
         if (itemData == null)
         {
@@ -24,7 +24,7 @@ internal sealed class InventoryDropService
         Quaternion dropRotation = Quaternion.Euler(0f, Random.Range(0f, 360f), 0f);
         WorldItem worldItem = Object.Instantiate(worldItemPrefab, dropPosition, dropRotation);
 
-        worldItem.Initialize(itemData, amount, durabilityPercent, installedModules);
+        worldItem.Initialize(itemData, amount, durabilityPercent, installedModules, weaponMagazineState);
         ApplyDropImpulse(worldItem.ItemRigidbody, dropForward, context.DropImpulse);
         return true;
     }

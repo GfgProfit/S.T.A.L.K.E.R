@@ -13,8 +13,8 @@ MonoBehaviour:
   m_Name: ItemIconGeneratorSettings
   m_EditorClassIdentifier: Assembly-CSharp::ItemIconGeneratorSettings
   _prewarmItems:
-  - {fileID: 11400000, guid: 7cfa863fe3ca085409a15dacd574b4c0, type: 2}
-  - {fileID: 11400000, guid: ba87b39b2541642478660d6a8ef9404d, type: 2}
+  - {fileID: 0}
+  - {fileID: 0}
   - {fileID: 0}
   - {fileID: 0}
   - {fileID: 11400000, guid: e48dbac9531b3ea4a9c3dd49b6c42d31, type: 2}
@@ -164,7 +164,7 @@ MonoBehaviour:
   _rendererReflectionProbeUsage: 0
   _rendererReceiveShadows: 0
   _renderTextureFormat: 2
-  _iconRenderScale: 2
+  _iconRenderScale: 3
   _allowHdr: 1
   _useCameraMsaa: 1
   _cameraDistanceMultiplier: 3

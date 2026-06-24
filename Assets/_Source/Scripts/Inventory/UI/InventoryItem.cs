@@ -37,7 +37,7 @@ public class InventoryItem : MonoBehaviour, IView<InventoryItemViewModel>
     }
 
     private readonly InventoryItemState _state = new();
-    private readonly FirstPersonWeaponMagazineState _weaponMagazineState = new();
+    [SerializeField] private FirstPersonWeaponMagazineState _weaponMagazineState = new();
     private int _iconRequestVersion;
     private readonly InventoryItemVisualState _visualState = new InventoryItemVisualState();
     private InventoryItemView _itemView;
@@ -58,12 +58,13 @@ public class InventoryItem : MonoBehaviour, IView<InventoryItemViewModel>
     public int BaseHeight => _state.BaseHeight;
     public bool CanRotate => _state.CanRotate;
     public RectTransform RectTransform => _rectTransform;
-    public FirstPersonWeaponMagazineState WeaponMagazineState => _weaponMagazineState;
+    public FirstPersonWeaponMagazineState WeaponMagazineState => GetWeaponMagazineState();
     public IReadOnlyList<ItemData> InstalledModules => _state.InstalledModules;
 
     private void Awake()
     {
         _state.Initialize(_itemData, _currentAmount, _currentDurabilityPercent, false, _installedModules);
+        GetWeaponMagazineState().NormalizeForWeapon(ItemData, InstalledModules);
         SyncSerializedStateFromState();
         EnsureItemView();
         EnsureViewModel();
@@ -104,10 +105,10 @@ public class InventoryItem : MonoBehaviour, IView<InventoryItemViewModel>
         _itemView?.Unbind();
     }
 
-    internal void Set(ItemData itemData) => Set(itemData, 1, null, null);
-    internal void Set(ItemData itemData, int amount) => Set(itemData, amount, null, null);
+    internal void Set(ItemData itemData) => Set(itemData, 1, null, null, null);
+    internal void Set(ItemData itemData, int amount) => Set(itemData, amount, null, null, null);
 
-    internal void Set(ItemData itemData, int amount, float? durabilityPercent, IReadOnlyList<ItemData> installedModules)
+    internal void Set(ItemData itemData, int amount, float? durabilityPercent, IReadOnlyList<ItemData> installedModules, FirstPersonWeaponMagazineState weaponMagazineState = null)
     {
         ApplySerializedVisualSettings();
 
@@ -116,9 +117,11 @@ public class InventoryItem : MonoBehaviour, IView<InventoryItemViewModel>
 
         if (previousItemData != itemData)
         {
-            _weaponMagazineState.Clear();
+            GetWeaponMagazineState().Clear();
             _visualState.SetCompatibilityHighlight(false, Color.clear);
         }
+
+        ApplyWeaponMagazineState(previousItemData, itemData, weaponMagazineState);
 
         SyncSerializedStateFromState();
         _visualState.RestoreDefaultVisual();
@@ -285,6 +288,7 @@ public class InventoryItem : MonoBehaviour, IView<InventoryItemViewModel>
     {
         _currentAmount = InventoryItemState.NormalizeAmount(_itemData, _currentAmount);
         _currentDurabilityPercent = InventoryItemState.NormalizeDurability(_itemData, _currentDurabilityPercent);
+        GetWeaponMagazineState().NormalizeForWeapon(_itemData, _installedModules);
     }
 
     private void ApplyRotation()
@@ -397,6 +401,7 @@ public class InventoryItem : MonoBehaviour, IView<InventoryItemViewModel>
 
     private void RefreshAfterModulesChanged()
     {
+        GetWeaponMagazineState().NormalizeForWeapon(ItemData, InstalledModules);
         SyncSerializedStateFromState();
         ApplyVisualSize();
         RebuildCellVisuals();
@@ -455,10 +460,32 @@ public class InventoryItem : MonoBehaviour, IView<InventoryItemViewModel>
         return modules;
     }
 
+    private FirstPersonWeaponMagazineState GetWeaponMagazineState()
+    {
+        _weaponMagazineState ??= new FirstPersonWeaponMagazineState();
+        return _weaponMagazineState;
+    }
+
+    private void ApplyWeaponMagazineState(ItemData previousItemData, ItemData itemData, FirstPersonWeaponMagazineState weaponMagazineState)
+    {
+        FirstPersonWeaponMagazineState targetMagazineState = GetWeaponMagazineState();
+
+        if (weaponMagazineState != null)
+        {
+            targetMagazineState.CopyFrom(weaponMagazineState);
+        }
+        else if (itemData == null || itemData.WeaponData == null || previousItemData != itemData)
+        {
+            targetMagazineState.Clear();
+        }
+
+        targetMagazineState.NormalizeForWeapon(ItemData, InstalledModules);
+    }
+
     private int VisualWidth => _visualState.GetVisualWidth(BaseWidth);
     private int VisualHeight => _visualState.GetVisualHeight(BaseHeight);
     private bool IsVisuallyRotated => _visualState.HasVisualSizeOverride == false && IsRotated;
-    private float LoadedMagazineWeight => _weaponMagazineState.LoadedAmmoData == null || _weaponMagazineState.LoadedAmmoAmount <= 0 ? 0f : _weaponMagazineState.LoadedAmmoData.Weight * _weaponMagazineState.LoadedAmmoAmount;
+    private float LoadedMagazineWeight => WeaponMagazineState.LoadedAmmoData == null || WeaponMagazineState.LoadedAmmoAmount <= 0 ? 0f : WeaponMagazineState.LoadedAmmoData.Weight * WeaponMagazineState.LoadedAmmoAmount;
     private float InstalledModulesWeight
     {
         get

@@ -4,14 +4,14 @@ using UnityEngine;
 internal sealed class InventoryHoverInfoController
 {
     private readonly InventoryHighlight _inventoryHighlight;
-    private readonly ItemInfoPanel _itemInfoPanel;
+    private readonly ItemTooltip _itemTooltip;
     private readonly Func<bool> _isContextMenuOpen;
     private readonly InventoryItemCompatibilityService _compatibilityService;
 
-    public InventoryHoverInfoController(InventoryHighlight inventoryHighlight, ItemInfoPanel itemInfoPanel, Func<bool> isContextMenuOpen, InventoryItemCompatibilityService compatibilityService)
+    public InventoryHoverInfoController(InventoryHighlight inventoryHighlight, ItemTooltip itemTooltip, Func<bool> isContextMenuOpen, InventoryItemCompatibilityService compatibilityService)
     {
         _inventoryHighlight = inventoryHighlight;
-        _itemInfoPanel = itemInfoPanel;
+        _itemTooltip = itemTooltip;
         _isContextMenuOpen = isContextMenuOpen;
         _compatibilityService = compatibilityService;
     }
@@ -23,7 +23,7 @@ internal sealed class InventoryHoverInfoController
         if (selectedItemGrid == null)
         {
             HideHighlight();
-            HideItemInfoPanel();
+            HideItemTooltip();
 
             return;
         }
@@ -37,19 +37,19 @@ internal sealed class InventoryHoverInfoController
             {
                 _inventoryHighlight.Show(true);
                 SetHighlightTransform(selectedItemGrid, HighlightedItem, HighlightedItem.GridPositionX, HighlightedItem.GridPositionY);
-                ShowItemInfoPanel(HighlightedItem);
+                ShowItemTooltip(HighlightedItem);
             }
             else
             {
                 HideHighlight();
-                HideItemInfoPanel();
+                HideItemTooltip();
             }
 
             return;
         }
 
         _compatibilityService.Clear();
-        HideItemInfoPanel();
+        HideItemTooltip();
 
         bool canMergeStack = tryGetStackMergeTarget(selectedItemGrid, positionOnGrid, out InventoryItem stackMergeTarget);
         bool canPlaceItem = selectedItemGrid.CanPlaceItem(selectedItem, positionOnGrid.x, positionOnGrid.y);
@@ -68,9 +68,9 @@ internal sealed class InventoryHoverInfoController
 
     public void RefreshHighlightedItemInfo(InventoryItem item)
     {
-        if (_itemInfoPanel != null && HighlightedItem == item)
+        if (_itemTooltip != null && HighlightedItem == item)
         {
-            _itemInfoPanel.Show(CreateTooltipData(item));
+            ShowItemTooltip(item);
         }
     }
 
@@ -82,7 +82,7 @@ internal sealed class InventoryHoverInfoController
         }
 
         _compatibilityService.ShowCompatibleItems(item);
-        ShowItemInfoPanel(item);
+        ShowItemTooltip(item);
     }
 
     public void HideHighlight()
@@ -92,31 +92,31 @@ internal sealed class InventoryHoverInfoController
         _compatibilityService.Clear();
     }
 
-    public void HideItemInfoPanel()
+    public void HideItemTooltip()
     {
-        if (_itemInfoPanel == null)
+        if (_itemTooltip == null)
         {
             return;
         }
 
-        _itemInfoPanel.Hide();
+        _itemTooltip.Hide();
     }
 
-    private void ShowItemInfoPanel(InventoryItem item)
+    private void ShowItemTooltip(InventoryItem item)
     {
-        if (_itemInfoPanel == null)
+        if (_itemTooltip == null)
         {
             return;
         }
 
         if (_isContextMenuOpen())
         {
-            HideItemInfoPanel();
+            HideItemTooltip();
 
             return;
         }
 
-        _itemInfoPanel.Show(CreateTooltipData(item));
+        _itemTooltip.Show(CreateTooltipData(item));
     }
 
     private void SetHighlightTransform(InventoryGrid grid, InventoryItem item, int posX, int posY)

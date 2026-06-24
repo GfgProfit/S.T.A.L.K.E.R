@@ -2,9 +2,10 @@ using System;
 using TMPro;
 using R3;
 using UnityEngine;
+using UnityEngine.EventSystems;
 using UnityEngine.UI;
 
-public class ItemInfoPanel : MonoBehaviour, IView<ItemTooltipViewModel>
+public class ItemInfoPanel : MonoBehaviour, IView<ItemTooltipViewModel>, IBeginDragHandler, IDragHandler, IEndDragHandler, IPointerClickHandler
 {
     private const float MIN_PANEL_WIDTH = 220f;
     private const float MAX_PANEL_WIDTH = 520f;
@@ -19,6 +20,9 @@ public class ItemInfoPanel : MonoBehaviour, IView<ItemTooltipViewModel>
     [SerializeField] private RectTransform _panelRectTransform;
     [SerializeField] private Vector2 _cursorOffset;
     [SerializeField] private Vector2 _screenPadding;
+    [SerializeField] private Image _dragImage;
+    [SerializeField] private Button _closeButton;
+    [SerializeField] private RectTransform _armorClassHoverArea;
     [SerializeField] private Image _iconImage;
     [SerializeField] private RectTransform _iconRectTransform;
     [SerializeField] private LayoutElement _iconLayoutElement;
@@ -83,8 +87,17 @@ public class ItemInfoPanel : MonoBehaviour, IView<ItemTooltipViewModel>
     private IDisposable _showDurabilitySubscription;
     private IDisposable _descriptionSubscription;
     private LayoutElement _descriptionLayoutElement;
+    private bool _referencesResolved;
+    private bool _closeButtonSubscribed;
+    private bool _isDragging;
+    private bool _hasArmorClassInfo;
+    private int _closedByEscapeFrame = -1;
+    private Vector2 _dragPointerOffset;
 
-    private IPlayerPointerInput PlayerInput
+    public bool IsOpen => gameObject.activeSelf;
+    public bool WasClosedByEscapeThisFrame => _closedByEscapeFrame == Time.frameCount;
+
+    private IInventoryInput PlayerInput
     {
         get
         {
@@ -100,6 +113,8 @@ public class ItemInfoPanel : MonoBehaviour, IView<ItemTooltipViewModel>
 
     private void Awake()
     {
+        ResolveOptionalReferences();
+        SubscribeCloseButton();
         bool hasViewModel = _viewModel != null;
         EnsureViewModel();
 
@@ -109,13 +124,28 @@ public class ItemInfoPanel : MonoBehaviour, IView<ItemTooltipViewModel>
         }
     }
 
-    private void LateUpdate()
+    private void Update()
     {
-        UpdatePosition();
+        if (PlayerInput.IsEscapePressed())
+        {
+            _closedByEscapeFrame = Time.frameCount;
+            Hide();
+            return;
+        }
+
+        RefreshArmorClassVisibility();
+    }
+
+    private void OnDisable()
+    {
+        _isDragging = false;
+        SetArmorClassRootVisible(false);
     }
 
     public void Show(ItemTooltipData item)
     {
+        ResolveOptionalReferences();
+        SubscribeCloseButton();
         EnsureViewModel();
 
         if (item.IsValid == false)
@@ -132,13 +162,58 @@ public class ItemInfoPanel : MonoBehaviour, IView<ItemTooltipViewModel>
         SetStatsInfo(item, settings);
         FitDescriptionLayout(_descriptionText != null ? _descriptionText.text : string.Empty);
         RebuildLayout();
-        UpdatePosition();
+        FitDragAreaWidthToWidestPanelChild();
+        RebuildLayout();
+        CenterOnScreen();
     }
 
     public void Hide()
     {
         EnsureViewModel();
+        _hasArmorClassInfo = false;
+        SetArmorClassRootVisible(false);
         _viewModel.Hide();
+    }
+
+    public void OnBeginDrag(PointerEventData eventData)
+    {
+        ResolveOptionalReferences();
+
+        if (CanDragFromEvent(eventData) == false)
+        {
+            _isDragging = false;
+            return;
+        }
+
+        _isDragging = true;
+        _dragPointerOffset = (Vector2)_panelRectTransform.position - eventData.position;
+        transform.SetAsLastSibling();
+    }
+
+    public void OnDrag(PointerEventData eventData)
+    {
+        if (_isDragging == false || _panelRectTransform == null)
+        {
+            return;
+        }
+
+        _panelRectTransform.position = eventData.position + _dragPointerOffset;
+        ClampToScreen();
+    }
+
+    public void OnEndDrag(PointerEventData eventData)
+    {
+        _isDragging = false;
+    }
+
+    public void OnPointerClick(PointerEventData eventData)
+    {
+        ResolveOptionalReferences();
+
+        if (IsCloseButtonScreenPoint(eventData.position, eventData.pressEventCamera))
+        {
+            Hide();
+        }
     }
 
     public void Bind(ItemTooltipViewModel viewModel)
@@ -186,6 +261,7 @@ public class ItemInfoPanel : MonoBehaviour, IView<ItemTooltipViewModel>
 
     private void OnDestroy()
     {
+        UnsubscribeCloseButton();
         Unbind();
         _viewModel?.Dispose();
         _viewModel = null;
@@ -199,6 +275,131 @@ public class ItemInfoPanel : MonoBehaviour, IView<ItemTooltipViewModel>
         }
 
         Bind(InventoryViewModelFactory.CreateItemTooltip());
+    }
+
+    private void ResolveOptionalReferences()
+    {
+        if (_referencesResolved)
+        {
+            return;
+        }
+
+        if (_panelRectTransform == null)
+        {
+            _panelRectTransform = transform as RectTransform;
+        }
+
+        if (_dragImage == null)
+        {
+            Transform dragTransform = FindChildRecursive(transform, "Drag Image");
+
+            if (dragTransform != null)
+            {
+                _dragImage = dragTransform.GetComponent<Image>();
+            }
+        }
+
+        if (_closeButton == null)
+        {
+            Transform closeTransform = FindChildRecursive(transform, "Close Button");
+
+            if (closeTransform != null)
+            {
+                _closeButton = closeTransform.GetComponent<Button>();
+            }
+        }
+
+        if (_armorClassHoverArea == null)
+        {
+            Transform hoverAreaTransform = FindChildRecursive(transform, "Armor Class Area");
+
+            if (hoverAreaTransform == null && _panelRectTransform != null)
+            {
+                Canvas canvas = _panelRectTransform.GetComponentInParent<Canvas>();
+                Transform searchRoot = canvas != null ? canvas.transform : transform.root;
+                hoverAreaTransform = FindChildRecursive(searchRoot, "Armor Class Area");
+            }
+
+            _armorClassHoverArea = hoverAreaTransform as RectTransform;
+        }
+
+        _referencesResolved = true;
+    }
+
+    private static Transform FindChildRecursive(Transform root, string childName)
+    {
+        if (root == null)
+        {
+            return null;
+        }
+
+        for (int i = 0; i < root.childCount; i++)
+        {
+            Transform child = root.GetChild(i);
+
+            if (child.name == childName)
+            {
+                return child;
+            }
+
+            Transform result = FindChildRecursive(child, childName);
+
+            if (result != null)
+            {
+                return result;
+            }
+        }
+
+        return null;
+    }
+
+    private void SubscribeCloseButton()
+    {
+        if (_closeButton == null || _closeButtonSubscribed)
+        {
+            return;
+        }
+
+        _closeButton.onClick.RemoveListener(HandleCloseClicked);
+        _closeButton.onClick.AddListener(HandleCloseClicked);
+        _closeButtonSubscribed = true;
+    }
+
+    private void UnsubscribeCloseButton()
+    {
+        if (_closeButton == null || _closeButtonSubscribed == false)
+        {
+            return;
+        }
+
+        _closeButton.onClick.RemoveListener(HandleCloseClicked);
+        _closeButtonSubscribed = false;
+    }
+
+    private void HandleCloseClicked() => Hide();
+
+    private bool CanDragFromEvent(PointerEventData eventData)
+    {
+        if (_panelRectTransform == null || _dragImage == null || eventData == null)
+        {
+            return false;
+        }
+
+        Camera eventCamera = eventData.pressEventCamera;
+
+        if (IsCloseButtonScreenPoint(eventData.pressPosition, eventCamera))
+        {
+            return false;
+        }
+
+        return RectTransformUtility.RectangleContainsScreenPoint(_dragImage.rectTransform, eventData.pressPosition, eventCamera);
+    }
+
+    private bool IsCloseButtonScreenPoint(Vector2 screenPoint, Camera eventCamera)
+    {
+        return _closeButton != null &&
+               _closeButton.transform is RectTransform closeRectTransform &&
+               RectTransformUtility.RectangleContainsScreenPoint(closeRectTransform, screenPoint, eventCamera);
     }
 
     private void SetStatsInfo(ItemTooltipData item, GameProjectSettings settings)
@@ -227,24 +428,22 @@ public class ItemInfoPanel : MonoBehaviour, IView<ItemTooltipViewModel>
         SetAmmoText(_ammoRecoilModifierText, _ammoRecoilModifierParent, showRecoilModifier ? ammoInfo.RecoilModifierText : string.Empty, showRecoilModifier);
         SetAmmoText(_ammoDurabilityLossModifierText, _ammoDurabilityLossModifierParent, showDurabilityModifier ? ammoInfo.DurabilityLossModifierText : string.Empty, showDurabilityModifier);
 
-        if (_ammoArmorClassRoot != null)
+        _hasArmorClassInfo = visible;
+
+        if (_ammoArmorClassTexts != null)
         {
-            _ammoArmorClassRoot.SetActive(visible);
+            int valueCount = visible ? Mathf.Min(_ammoArmorClassTexts.Length, ammoInfo.ArmorClassTexts.Length) : 0;
+
+            for (int i = 0; i < _ammoArmorClassTexts.Length; i++)
+            {
+                bool showArmorClassText = i < valueCount;
+                GameObject parent = _ammoArmorClassTextParents != null && i < _ammoArmorClassTextParents.Length ? _ammoArmorClassTextParents[i] : null;
+                string value = showArmorClassText ? ammoInfo.ArmorClassTexts[i] : string.Empty;
+                SetAmmoText(_ammoArmorClassTexts[i], parent, value, showArmorClassText);
+            }
         }
 
-        if (_ammoArmorClassTexts == null)
-        {
-            return;
-        }
-
-        int count = visible ? Mathf.Min(_ammoArmorClassTexts.Length, ammoInfo.ArmorClassTexts.Length) : _ammoArmorClassTexts.Length;
-
-        for (int i = 0; i < count; i++)
-        {
-            GameObject parent = _ammoArmorClassTextParents != null && i < _ammoArmorClassTextParents.Length ? _ammoArmorClassTextParents[i] : null;
-            string value = visible ? ammoInfo.ArmorClassTexts[i] : string.Empty;
-            SetAmmoText(_ammoArmorClassTexts[i], parent, value, visible);
-        }
+        RefreshArmorClassVisibility();
     }
 
     private void SetModuleInfo(ItemTooltipData item, GameProjectSettings settings)
@@ -290,7 +489,91 @@ public class ItemInfoPanel : MonoBehaviour, IView<ItemTooltipViewModel>
         parent?.SetActive(visible);
     }
 
-    private void SetVisible(bool visible) => gameObject.SetActive(visible);
+    private void RefreshArmorClassVisibility()
+    {
+        bool visible = _hasArmorClassInfo && IsArmorClassAreaHovered();
+        SetArmorClassRootVisible(visible);
+
+        if (visible)
+        {
+            UpdateArmorClassPosition();
+        }
+    }
+
+    private bool IsArmorClassAreaHovered()
+    {
+        if (_armorClassHoverArea == null || _armorClassHoverArea.gameObject.activeInHierarchy == false)
+        {
+            return false;
+        }
+
+        return RectTransformUtility.RectangleContainsScreenPoint(
+            _armorClassHoverArea,
+            PlayerInput.GetPointerPosition(),
+            GetArmorClassAreaCamera());
+    }
+
+    private Camera GetArmorClassAreaCamera()
+    {
+        if (_armorClassHoverArea == null)
+        {
+            return null;
+        }
+
+        Canvas canvas = _armorClassHoverArea.GetComponentInParent<Canvas>();
+
+        if (canvas == null || canvas.renderMode == RenderMode.ScreenSpaceOverlay)
+        {
+            return null;
+        }
+
+        return canvas.worldCamera;
+    }
+
+    private void SetArmorClassRootVisible(bool visible)
+    {
+        if (_ammoArmorClassRoot == null)
+        {
+            return;
+        }
+
+        if (visible)
+        {
+            _ammoArmorClassRoot.transform.SetAsLastSibling();
+        }
+
+        if (_ammoArmorClassRoot.activeSelf != visible)
+        {
+            _ammoArmorClassRoot.SetActive(visible);
+        }
+    }
+
+    private void UpdateArmorClassPosition()
+    {
+        if (_ammoArmorClassRoot == null || _ammoArmorClassRoot.transform is not RectTransform armorClassRectTransform)
+        {
+            return;
+        }
+
+        LayoutRebuilder.ForceRebuildLayoutImmediate(armorClassRectTransform);
+        _positioner.UpdatePosition(armorClassRectTransform, PlayerInput.GetPointerPosition(), _cursorOffset, _screenPadding);
+    }
+
+    private void SetVisible(bool visible)
+    {
+        if (visible == false)
+        {
+            _hasArmorClassInfo = false;
+            SetArmorClassRootVisible(false);
+        }
+
+        gameObject.SetActive(visible);
+
+        if (visible)
+        {
+            transform.SetAsLastSibling();
+        }
+    }
 
     private void SetIconSize(Vector2 iconSize)
     {
@@ -390,6 +673,74 @@ public class ItemInfoPanel : MonoBehaviour, IView<ItemTooltipViewModel>
         }
 
         LayoutRebuilder.ForceRebuildLayoutImmediate(_panelRectTransform);
+    }
+
+    private void FitDragAreaWidthToWidestPanelChild()
+    {
+        if (_panelRectTransform == null || _dragImage == null)
+        {
+            return;
+        }
+
+        RectTransform dragRectTransform = _dragImage.rectTransform;
+        float width = GetWidestPanelChildWidth(dragRectTransform);
+
+        if (width <= 0f)
+        {
+            return;
+        }
+
+        ApplyDragAreaWidth(dragRectTransform, Mathf.Ceil(width));
+    }
+
+    private float GetWidestPanelChildWidth(RectTransform excludedChild)
+    {
+        float width = 0f;
+
+        for (int i = 0; i < _panelRectTransform.childCount; i++)
+        {
+            if (_panelRectTransform.GetChild(i) is not RectTransform child ||
+                child == excludedChild ||
+                child.gameObject.activeSelf == false)
+            {
+                continue;
+            }
+
+            width = Mathf.Max(width, GetLayoutChildWidth(child));
+        }
+
+        return width;
+    }
+
+    private static float GetLayoutChildWidth(RectTransform child)
+    {
+        float width = child.rect.width;
+        float preferredWidth = LayoutUtility.GetPreferredWidth(child);
+
+        if (preferredWidth > 0f)
+        {
+            width = Mathf.Max(width, preferredWidth);
+        }
+
+        return width;
+    }
+
+    private void ApplyDragAreaWidth(RectTransform dragRectTransform, float width)
+    {
+        dragRectTransform.SetSizeWithCurrentAnchors(RectTransform.Axis.Horizontal, width);
+
+        Vector2 anchoredPosition = dragRectTransform.anchoredPosition;
+        anchoredPosition.x = GetPanelLeftPadding() + width * dragRectTransform.pivot.x;
+        dragRectTransform.anchoredPosition = anchoredPosition;
+
+        if (dragRectTransform.TryGetComponent(out LayoutElement layoutElement) == false)
+        {
+            layoutElement = dragRectTransform.gameObject.AddComponent<LayoutElement>();
+        }
+
+        layoutElement.minWidth = width;
+        layoutElement.preferredWidth = width;
+        layoutElement.flexibleWidth = 0f;
     }
 
     private void FitDescriptionLayout(string description)
@@ -512,14 +863,6 @@ public class ItemInfoPanel : MonoBehaviour, IView<ItemTooltipViewModel>
         width = Mathf.Max(width, GetPreferredTextWidth(_moduleAccuracyText));
         width = Mathf.Max(width, GetPreferredTextWidth(_ergonomicsText));
 
-        if (_ammoArmorClassTexts != null)
-        {
-            for (int i = 0; i < _ammoArmorClassTexts.Length; i++)
-            {
-                width = Mathf.Max(width, GetPreferredTextWidth(_ammoArmorClassTexts[i]));
-            }
-        }
-
         if (_iconLayoutElement != null)
         {
             width = Mathf.Max(width, _iconLayoutElement.preferredWidth);
@@ -548,15 +891,33 @@ public class ItemInfoPanel : MonoBehaviour, IView<ItemTooltipViewModel>
         return DEFAULT_PANEL_HORIZONTAL_PADDING;
     }
 
+    private float GetPanelLeftPadding()
+    {
+        if (_panelRectTransform != null && _panelRectTransform.TryGetComponent(out LayoutGroup layoutGroup))
+        {
+            return layoutGroup.padding.left;
+        }
+
+        return DEFAULT_PANEL_HORIZONTAL_PADDING * 0.5f;
+    }
+
     private float GetMaxPanelWidth()
     {
         float screenWidth = Screen.width;
         Canvas canvas = _panelRectTransform.GetComponentInParent<Canvas>();
         float scaleFactor = canvas != null && canvas.scaleFactor > 0f ? canvas.scaleFactor : 1f;
-        float availableWidth = (screenWidth - _screenPadding.x * 2f - Mathf.Abs(_cursorOffset.x)) / scaleFactor;
+        float availableWidth = (screenWidth - _screenPadding.x * 2f) / scaleFactor;
 
         return Mathf.Max(MIN_PANEL_WIDTH, Mathf.Min(MAX_PANEL_WIDTH, availableWidth));
     }
 
-    private void UpdatePosition() => _positioner.UpdatePosition(_panelRectTransform, PlayerInput.GetPointerPosition(), _cursorOffset, _screenPadding);
+    private void CenterOnScreen()
+    {
+        _positioner.CenterOnScreen(_panelRectTransform, _screenPadding);
+    }
+
+    private void ClampToScreen()
+    {
+        _positioner.ClampToScreen(_panelRectTransform, _screenPadding);
+    }
 }

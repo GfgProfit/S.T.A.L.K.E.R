@@ -36,6 +36,7 @@ public class InventoryController : MonoBehaviour
     [SerializeField] [BoxGroup("Drop Settings")] private LayerMask _dropObstacleLayers = ~0;
     [SerializeField] [BoxGroup("UI")] private TMP_Text _weightText;
     [SerializeField] [BoxGroup("UI")] private ItemInfoPanel _itemInfoPanel;
+    [SerializeField] [BoxGroup("UI")] private ItemTooltip _itemTooltip;
     [SerializeField] [BoxGroup("UI")] private InventoryItemContextMenu _itemContextMenu;
     [SerializeField] [BoxGroup("Grids")] private GameObject _closedSlotPrefab;
     [SerializeField] [BoxGroup("Items")] private List<InventoryItem> _initialInventoryItems = new();
@@ -256,19 +257,19 @@ public class InventoryController : MonoBehaviour
     private InventoryEquipmentSlotService CreateEquipmentSlotService() => new(_equipmentSlotGrids, _slottedItemGrids, _defaultItemGrid, InsertItem, TryDetachItemFromGrid, RegisterInventoryItem, RefreshWeightState, () => _closedSlotPrefab);
     private InventoryEquipmentActionService CreateEquipmentActionService() => new(_equipmentSlotGrids, _defaultItemGrid, InsertItem, TryDetachItemFromGrid, TryPrepareSlotRestrictionsForPlacement, RegisterInventoryItem, RefreshWeightState);
     private InventoryQuickActionService CreateQuickActionService() => new(_quickActionGridReferences, _defaultItemGrid, TryMoveItemToGrid, CreateItem, RegisterInventoryItem, RefreshWeightState);
-    private InventoryContextMenuController CreateContextMenuController() => new(_itemContextMenu, PlayerInput, () => _selectedItemGrid, () => _dragState.SelectedItem, DragController.GetTileGridPosition, HideItemInfoPanel, TryUseContextMenuItem, TryUnloadContextMenuWeapon, CanEquipPrimaryContextMenuWeapon, TryEquipPrimaryContextMenuWeapon, CanEquipSecondaryContextMenuWeapon, TryEquipSecondaryContextMenuWeapon, CanEquipContextMenuItem, TryEquipContextMenuItem, CanUnequipContextMenuItem, TryUnequipContextMenuItem, _equipmentSlotGrids, TryAttachContextMenuModule, TryDetachWeaponModule, TryDropItem);
+    private InventoryContextMenuController CreateContextMenuController() => new(_itemContextMenu, PlayerInput, () => _selectedItemGrid, () => _dragState.SelectedItem, DragController.GetTileGridPosition, HideItemTooltip, ShowItemInfoPanel, TryUseContextMenuItem, TryUnloadContextMenuWeapon, CanEquipPrimaryContextMenuWeapon, TryEquipPrimaryContextMenuWeapon, CanEquipSecondaryContextMenuWeapon, TryEquipSecondaryContextMenuWeapon, CanEquipContextMenuItem, TryEquipContextMenuItem, CanUnequipContextMenuItem, TryUnequipContextMenuItem, _equipmentSlotGrids, TryAttachContextMenuModule, TryDetachWeaponModule, TryDropItem);
     private InventoryItemDropProcessor CreateDropProcessor() => new(TrySpawnDroppedWorldItem, TryDetachItemFromGrid, DestroyInventoryItem, RefreshWeightState);
     private InventoryWeightStateController CreateWeightStateController() => new(_itemRegistry, _equipmentSlotGrids, EquipmentSlotService, SetWeightViewModelState, RenderCharacterStatsInfo, _playerController, _playerStats, _hidePlayerStatsInfoWhenEmpty, _maxCarryWeight, _movementBlockExtraWeight);
-    private InventoryHoverInfoController CreateHoverInfoController() => new(_inventoryHighlight, _itemInfoPanel, IsContextMenuOpen, _itemCompatibilityService);
+    private InventoryHoverInfoController CreateHoverInfoController() => new(_inventoryHighlight, _itemTooltip, IsContextMenuOpen, _itemCompatibilityService);
     private InventoryItemCompatibilityService CreateItemCompatibilityService() => new(_itemRegistry, new IInventoryItemCompatibilityProvider[] { new WeaponAmmoInventoryCompatibilityProvider(), new WeaponModuleInventoryCompatibilityProvider() }, _settings.CompatibleItemHighlightColor);
     private InventoryWeaponModuleService CreateWeaponModuleService() => new(TryReturnItemToInventoryOrDrop, TryUnloadContextMenuWeapon);
     private InventoryDragPlacementService CreateDragPlacementService() => new(_dragState, ItemFactory, _itemRegistry, CanDetachItemWithSlotRestrictions, TryPrepareSlotRestrictionsForPlacement, TryInstallWeaponModule, HandleWeaponModulesChanged, RefreshWeightState);
-    private InventoryDragController CreateDragController() => new(_dragState, DragPlacementService, PlayerInput, _canvasTransform, () => _selectedItemGrid, CanDetachItemWithSlotRestrictions, HideContextMenu, HideItemInfoPanel, RefreshWeightState);
+    private InventoryDragController CreateDragController() => new(_dragState, DragPlacementService, PlayerInput, _canvasTransform, () => _selectedItemGrid, CanDetachItemWithSlotRestrictions, HideContextMenu, HideItemTooltip, RefreshWeightState);
     private InventoryOpenStateController CreateOpenStateController() => new(_playerController, _unlockCursorWhileOpen, _disablePlayerControlsWhileOpen, TryStashSelectedItem, ApplyWeightMovementState, HandleInventoryClosed);
     private InventoryItemPlacementService CreateItemPlacementService() => new(ItemFactory, _itemRegistry, TryPrepareSlotRestrictionsForPlacement, TryDetachItemFromGrid, DestroyInventoryItem, RefreshWeightState);
-    private InventoryHoveredItemActionController CreateHoveredItemActionController() => new(PlayerInput, _dragState, () => _selectedItemGrid, DragController.GetTileGridPosition, IsContextMenuOpen, QuickActionService, TryDropItem, HoverInfoController, HideItemInfoPanel, HideContextMenu);
+    private InventoryHoveredItemActionController CreateHoveredItemActionController() => new(PlayerInput, _dragState, () => _selectedItemGrid, DragController.GetTileGridPosition, IsContextMenuOpen, QuickActionService, TryDropItem, HoverInfoController, HideItemTooltip, HideContextMenu);
     private InventoryQuickUseService CreateQuickUseService() => new(_quickUseSlotBindings, TryDetachItemFromGrid, DestroyInventoryItem, RefreshWeightState);
-    private InventoryUpdateController CreateUpdateController() => new(PlayerInput, () => IsOpen, () => _selectedItemGrid, HoverInfoController, ContextMenuController, ToggleInventory, HideItemInfoPanel, HideContextMenu, DragController.ItemIconDrag, DragController.ReleaseDraggedItem, DragController.RotateSelectedItem, TryHandleHoveredItemDropInput, HandleHighlight, TryHandleQuickItemAction, DragController.BeginDrag);
+    private InventoryUpdateController CreateUpdateController() => new(PlayerInput, () => IsOpen, IsItemInfoPanelOpen, () => _selectedItemGrid, HoverInfoController, ContextMenuController, ToggleInventory, CloseInventory, HideItemTooltip, HideItemInfoPanel, HideContextMenu, DragController.ItemIconDrag, DragController.ReleaseDraggedItem, DragController.RotateSelectedItem, TryHandleHoveredItemDropInput, HandleHighlight, TryHandleQuickItemAction, DragController.BeginDrag);
 
     private void Awake()
     {
@@ -277,6 +278,8 @@ public class InventoryController : MonoBehaviour
         _miniActionTextViewModel = InventoryViewModelFactory.CreateMiniActionText();
         _inventoryView = new(_inventoryRoot, _inventoryCanvasGroup, _weightText, _settings);
         _miniActionTextView = new(_miniActionText);
+        _itemTooltip = ResolveItemTooltip();
+        _itemTooltip?.SetPlayerInput(PlayerInput);
 
         _itemFactory = new InventoryItemFactory(_itemPrefab);
         _equipmentSlotService = CreateEquipmentSlotService();
@@ -334,7 +337,8 @@ public class InventoryController : MonoBehaviour
     public bool TryInsertItem(ItemData itemData) => TryInsertItem(itemData, 1);
     public bool TryInsertItem(ItemData itemData, int amount) => TryInsertItem(itemData, amount, null);
     public bool TryInsertItem(ItemData itemData, int amount, float? durabilityPercent) => TryInsertItem(itemData, amount, durabilityPercent, null);
-    public bool TryInsertItem(ItemData itemData, int amount, float? durabilityPercent, IReadOnlyList<ItemData> installedModules) => ItemPlacementService.TryInsertItem(itemData, amount, durabilityPercent, installedModules, GetInsertionGrid(), _defaultItemGrid);
+    public bool TryInsertItem(ItemData itemData, int amount, float? durabilityPercent, IReadOnlyList<ItemData> installedModules) => TryInsertItem(itemData, amount, durabilityPercent, installedModules, null);
+    public bool TryInsertItem(ItemData itemData, int amount, float? durabilityPercent, IReadOnlyList<ItemData> installedModules, FirstPersonWeaponMagazineState weaponMagazineState) => ItemPlacementService.TryInsertItem(itemData, amount, durabilityPercent, installedModules, weaponMagazineState, GetInsertionGrid(), _defaultItemGrid);
 
     public int GetInventoryItemCount(ItemData itemData)
     {
@@ -786,7 +790,78 @@ public class InventoryController : MonoBehaviour
     private bool TryPrepareSlotRestrictionsForPlacement(InventoryGrid targetGrid, InventoryItem item) => EquipmentSlotService.TryPrepareSlotRestrictionsForPlacement(targetGrid, item);
     private bool CanDetachItemWithSlotRestrictions(InventoryGrid sourceGrid, InventoryItem item) => EquipmentSlotService.CanDetachItemWithSlotRestrictions(sourceGrid, item);
     private void ApplyWeightMovementState() => WeightStateController.ApplyMovementState();
-    private void HideItemInfoPanel() => HoverInfoController.HideItemInfoPanel();
+    private void HideItemTooltip() => HoverInfoController.HideItemTooltip();
+    private bool IsItemInfoPanelOpen() => _itemInfoPanel != null && (_itemInfoPanel.IsOpen || _itemInfoPanel.WasClosedByEscapeThisFrame);
+    private void HideItemInfoPanel() => _itemInfoPanel?.Hide();
+    private void ShowItemInfoPanel(InventoryItem item)
+    {
+        if (_itemInfoPanel == null)
+        {
+            return;
+        }
+
+        _itemInfoPanel.Show(CreateTooltipData(item));
+    }
+
+    private ItemTooltip ResolveItemTooltip()
+    {
+        if (_itemTooltip != null)
+        {
+            return _itemTooltip;
+        }
+
+        Transform tooltipTransform = FindChildRecursive(_canvasTransform, "Item Tooltip");
+
+        if (tooltipTransform == null)
+        {
+            return null;
+        }
+
+        if (tooltipTransform.TryGetComponent(out _itemTooltip) == false)
+        {
+            _itemTooltip = tooltipTransform.gameObject.AddComponent<ItemTooltip>();
+        }
+
+        return _itemTooltip;
+    }
+
+    private static Transform FindChildRecursive(Transform root, string childName)
+    {
+        if (root == null)
+        {
+            return null;
+        }
+
+        for (int i = 0; i < root.childCount; i++)
+        {
+            Transform child = root.GetChild(i);
+
+            if (child.name == childName)
+            {
+                return child;
+            }
+
+            Transform result = FindChildRecursive(child, childName);
+
+            if (result != null)
+            {
+                return result;
+            }
+        }
+
+        return null;
+    }
+
+    private static ItemTooltipData CreateTooltipData(InventoryItem item)
+    {
+        if (item == null)
+        {
+            return default;
+        }
+
+        return new(item.ItemData, item.CurrentAmount, item.UnitWeight, item.TotalWeight, item.HasDurability, item.CurrentDurabilityPercent, item.BaseWidth, item.BaseHeight, item.InstalledModules);
+    }
+
     private bool IsContextMenuOpen() => ContextMenuController.IsOpen;
     private InventoryGrid GetInsertionGrid() => _selectedItemGrid != null ? _selectedItemGrid : _defaultItemGrid;
     private void DestroyInventoryItem(InventoryItem item) => DragController.DestroyInventoryItem(item);
@@ -900,8 +975,8 @@ public class InventoryController : MonoBehaviour
     }
 
     private bool TryDropItem(InventoryGrid grid, InventoryItem item, bool wholeStack) => DropProcessor.TryDropItem(grid, item, wholeStack);
-    private bool TrySpawnDroppedWorldItem(ItemData itemData, int amount, float durabilityPercent) => TrySpawnDroppedWorldItem(itemData, amount, durabilityPercent, null);
-    private bool TrySpawnDroppedWorldItem(ItemData itemData, int amount, float durabilityPercent, IReadOnlyList<ItemData> installedModules) => _dropService.TrySpawnDroppedWorldItem(itemData, amount, durabilityPercent, installedModules, CreateDropContext());
+    private bool TrySpawnDroppedWorldItem(ItemData itemData, int amount, float durabilityPercent) => TrySpawnDroppedWorldItem(itemData, amount, durabilityPercent, null, null);
+    private bool TrySpawnDroppedWorldItem(ItemData itemData, int amount, float durabilityPercent, IReadOnlyList<ItemData> installedModules, FirstPersonWeaponMagazineState weaponMagazineState = null) => _dropService.TrySpawnDroppedWorldItem(itemData, amount, durabilityPercent, installedModules, weaponMagazineState, CreateDropContext());
     private InventoryDropContext CreateDropContext() => new(_dropOrigin, _playerController, transform, _dropCamera, _dropForwardDistance, _dropUpOffset, _dropGroundProbeHeight, _dropGroundProbeDistance, _dropGroundOffset, _dropObstacleClearance, _dropImpulse, _dropGroundLayers, _dropObstacleLayers);
 
     private bool TryDetachItemFromGrid(InventoryGrid grid, InventoryItem item) => DragController.TryDetachItemFromGrid(grid, item);
@@ -1062,6 +1137,8 @@ public class InventoryController : MonoBehaviour
 
     private void ToggleInventory() => ToggleInventoryAsync(destroyCancellationToken).Forget(Debug.LogException);
 
+    private void CloseInventory() => SetInventoryOpen(false, false);
+
     private async UniTask ToggleInventoryAsync(CancellationToken cancellationToken)
     {
         await _viewModel.ToggleOpenCommand.ExecuteAsync(cancellationToken);
@@ -1085,6 +1162,7 @@ public class InventoryController : MonoBehaviour
     {
         SelectedItemGrid = null;
         HoverInfoController.HideHighlight();
+        HideItemTooltip();
         HideItemInfoPanel();
         HideContextMenu();
     }

@@ -4,10 +4,13 @@ internal sealed class InventoryUpdateController
 {
     private readonly IInventoryInput _playerInput;
     private readonly Func<bool> _isOpen;
+    private readonly Func<bool> _isItemInfoPanelOpen;
     private readonly Func<InventoryGrid> _selectedGrid;
     private readonly InventoryHoverInfoController _hoverInfoController;
     private readonly InventoryContextMenuController _contextMenuController;
     private readonly Action _toggleInventory;
+    private readonly Action _closeInventory;
+    private readonly Action _hideItemTooltip;
     private readonly Action _hideItemInfoPanel;
     private readonly Action _hideContextMenu;
     private readonly Action _dragItemIcon;
@@ -18,14 +21,17 @@ internal sealed class InventoryUpdateController
     private readonly Func<bool> _tryHandleQuickItemAction;
     private readonly Action _beginDrag;
 
-    public InventoryUpdateController(IInventoryInput playerInput, Func<bool> isOpen, Func<InventoryGrid> selectedGrid, InventoryHoverInfoController hoverInfoController, InventoryContextMenuController contextMenuController, Action toggleInventory, Action hideItemInfoPanel, Action hideContextMenu, Action dragItemIcon, Action releaseDraggedItem, Action rotateSelectedItem, Func<bool> tryHandleHoveredItemDropInput, Action handleHighlight, Func<bool> tryHandleQuickItemAction, Action beginDrag)
+    public InventoryUpdateController(IInventoryInput playerInput, Func<bool> isOpen, Func<bool> isItemInfoPanelOpen, Func<InventoryGrid> selectedGrid, InventoryHoverInfoController hoverInfoController, InventoryContextMenuController contextMenuController, Action toggleInventory, Action closeInventory, Action hideItemTooltip, Action hideItemInfoPanel, Action hideContextMenu, Action dragItemIcon, Action releaseDraggedItem, Action rotateSelectedItem, Func<bool> tryHandleHoveredItemDropInput, Action handleHighlight, Func<bool> tryHandleQuickItemAction, Action beginDrag)
     {
         _playerInput = playerInput;
         _isOpen = isOpen;
+        _isItemInfoPanelOpen = isItemInfoPanelOpen;
         _selectedGrid = selectedGrid;
         _hoverInfoController = hoverInfoController;
         _contextMenuController = contextMenuController;
         _toggleInventory = toggleInventory;
+        _closeInventory = closeInventory;
+        _hideItemTooltip = hideItemTooltip;
         _hideItemInfoPanel = hideItemInfoPanel;
         _hideContextMenu = hideContextMenu;
         _dragItemIcon = dragItemIcon;
@@ -39,6 +45,18 @@ internal sealed class InventoryUpdateController
 
     public void Tick()
     {
+        if (_isOpen() && _playerInput.IsEscapePressed())
+        {
+            if (_isItemInfoPanelOpen())
+            {
+                _hideItemInfoPanel();
+                return;
+            }
+
+            _closeInventory();
+            return;
+        }
+
         if (_playerInput.IsInventoryPressed())
         {
             _toggleInventory();
@@ -47,6 +65,12 @@ internal sealed class InventoryUpdateController
         if (_isOpen() == false)
         {
             HideTransientUi();
+            return;
+        }
+
+        if (_isItemInfoPanelOpen())
+        {
+            HideItemInteractionUi();
             return;
         }
 
@@ -71,7 +95,7 @@ internal sealed class InventoryUpdateController
         if (_selectedGrid() == null)
         {
             _hoverInfoController.HideHighlight();
-            _hideItemInfoPanel();
+            _hideItemTooltip();
 
             return;
         }
@@ -98,8 +122,15 @@ internal sealed class InventoryUpdateController
 
     private void HideTransientUi()
     {
-        _hoverInfoController.HideHighlight();
+        HideItemInteractionUi();
         _hideItemInfoPanel();
+        _hideContextMenu();
+    }
+
+    private void HideItemInteractionUi()
+    {
+        _hoverInfoController.HideHighlight();
+        _hideItemTooltip();
         _hideContextMenu();
     }
 }
