@@ -35,6 +35,7 @@ internal sealed class InventoryWeightStateController
     public float MaxCarryWeight => Mathf.Max(0f, BaseMaxCarryWeight + GetCarryWeightBonusKg());
     public float MovementBlockWeight => MaxCarryWeight + Mathf.Max(0f, _movementBlockExtraWeight);
     public bool IsMovementBlockedByWeight => CurrentCarryWeight >= MovementBlockWeight;
+    public bool IsSprintBlockedByEquipment => HasEquippedSprintBlockingItem();
 
     public void Refresh()
     {
@@ -42,6 +43,7 @@ internal sealed class InventoryWeightStateController
         CurrentCarryWeight = _itemRegistry.CalculateCarryWeight();
         PublishWeightState();
         ApplyMovementState();
+        ApplySprintBlockState();
     }
 
     public void ApplyMovementState()
@@ -52,6 +54,16 @@ internal sealed class InventoryWeightStateController
         }
 
         _playerController.SetMovementEnabled(IsMovementBlockedByWeight == false);
+    }
+
+    private void ApplySprintBlockState()
+    {
+        if (_playerController == null)
+        {
+            return;
+        }
+
+        _playerController.SetSprintBlocked(PlayerSprintBlockSource.Equipment, IsSprintBlockedByEquipment);
     }
 
     private void RefreshEquippedStats()
@@ -85,6 +97,21 @@ internal sealed class InventoryWeightStateController
     }
 
     private float GetCarryWeightBonusKg() => _playerStats == null ? _equippedStats.Get(CharacterStatType.CarryWeight) : _playerStats.GetStat(CharacterStatType.CarryWeight);
+
+    private bool HasEquippedSprintBlockingItem()
+    {
+        for (int i = 0; i < _equipmentSlotGrids.Count; i++)
+        {
+            InventoryItem item = _equipmentSlotGrids[i] == null ? null : _equipmentSlotGrids[i].EquippedItem;
+
+            if (item != null && item.ItemData != null && item.ItemData.BlocksSprint)
+            {
+                return true;
+            }
+        }
+
+        return false;
+    }
 
     private static bool ShouldApplyEquippedStats(InventoryItem item)
     {

@@ -19,6 +19,7 @@ public class ItemData : ScriptableObject
     [SerializeField] [BoxGroup("Durability")] [ShowIf(nameof(UsesDurability))] [Range(0f, 100f)] private float _defaultDurabilityPercent = 100f;
     [SerializeField] [BoxGroup("Equipment")] [ShowIf(nameof(IsArmor))] private bool _canEquipHelmet = true;
     [SerializeField] [BoxGroup("Equipment")] [ShowIf(nameof(IsArmor))] [Range(0f, 100f)] private float _armorRecoilReductionPercent;
+    [SerializeField] [BoxGroup("Equipment")] [ShowIf(nameof(IsArmor))] private bool _blocksSprint;
     [SerializeField] [BoxGroup("Ammo")] [ShowIf(nameof(IsAmmo))] [Min(0f)] private float _ammoFleshDamage;
     [SerializeField] [BoxGroup("Ammo")] [ShowIf(nameof(IsAmmo))] [Min(0f)] private float _ammoArmorPenetration;
     [SerializeField] [BoxGroup("Ammo")] [ShowIf(nameof(IsAmmo))] private float _ammoWeaponRecoilPercentModifier;
@@ -97,6 +98,7 @@ public class ItemData : ScriptableObject
     public float DefaultDurabilityPercent => NormalizeDurability(_defaultDurabilityPercent);
     public bool CanEquipHelmet => _canEquipHelmet;
     public float ArmorRecoilReductionPercent => _itemType == ItemType.Armor ? Mathf.Clamp(_armorRecoilReductionPercent, 0f, 100f) : 0f;
+    public bool BlocksSprint => _itemType == ItemType.Armor && _blocksSprint;
     public float AmmoFleshDamage => Mathf.Max(0f, _ammoFleshDamage);
     public float AmmoArmorPenetration => Mathf.Max(0f, _ammoArmorPenetration);
     public float AmmoBulletVelocityMetersPerSecondFallback => Mathf.Max(0f, _ammoBulletVelocityMetersPerSecondFallback);

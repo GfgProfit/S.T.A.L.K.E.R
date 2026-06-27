@@ -292,8 +292,8 @@ MonoBehaviour:
       m_Calls: []
   m_text: 
   m_isRightToLeft: 0
-  m_fontAsset: {fileID: 11400000, guid: 3dd8eb48e7a28584cba86429b7013306, type: 2}
-  m_sharedMaterial: {fileID: 2067308906423154948, guid: 3dd8eb48e7a28584cba86429b7013306, type: 2}
+  m_fontAsset: {fileID: 11400000, guid: 3b371cb6383fbce4f989694e8daf9b59, type: 2}
+  m_sharedMaterial: {fileID: -7224779496788105734, guid: 3b371cb6383fbce4f989694e8daf9b59, type: 2}
   m_fontSharedMaterials: []
   m_fontMaterial: {fileID: 0}
   m_fontMaterials: []
@@ -505,8 +505,8 @@ MonoBehaviour:
       m_Calls: []
   m_text: 
   m_isRightToLeft: 0
-  m_fontAsset: {fileID: 11400000, guid: 3dd8eb48e7a28584cba86429b7013306, type: 2}
-  m_sharedMaterial: {fileID: 2067308906423154948, guid: 3dd8eb48e7a28584cba86429b7013306, type: 2}
+  m_fontAsset: {fileID: 11400000, guid: 3b371cb6383fbce4f989694e8daf9b59, type: 2}
+  m_sharedMaterial: {fileID: -7224779496788105734, guid: 3b371cb6383fbce4f989694e8daf9b59, type: 2}
   m_fontSharedMaterials: []
   m_fontMaterial: {fileID: 0}
   m_fontMaterials: []
@@ -689,6 +689,12 @@ MonoBehaviour:
   _statusIconImage: {fileID: 3862888517923799236}
   _statusIconRectTransform: {fileID: 2267048417686456693}
   _installedModules: []
+  _weaponMagazineState:
+    _requestedAmmoIndex: 0
+    _requestedAmmoData: {fileID: 0}
+    _loadedAmmoData: {fileID: 0}
+    _loadedAmmoAmount: 0
+    _isJammed: 0
 --- !u!1 &7510324070010390212
 GameObject:
   m_ObjectHideFlags: 0

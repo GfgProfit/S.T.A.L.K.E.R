@@ -36,20 +36,27 @@ public class PlayerMovementController
         IsSprinting = false;
     }
 
-    public void Move(IPlayerMovementInput playerInput, bool canJump, bool isCrouching, PlayerMovementSettings settings)
+    public void ClampCurrentSpeed(float maxSpeed)
+    {
+        _currentSpeed = Mathf.Min(_currentSpeed, Mathf.Max(0f, maxSpeed));
+    }
+
+    public bool Move(IPlayerMovementInput playerInput, bool canJump, bool isCrouching, PlayerMovementSettings settings)
     {
         float speed = CalculateTargetSpeed(isCrouching, settings);
-        UpdateVerticalMotion(playerInput, canJump, isCrouching, settings);
+        bool jumped = UpdateVerticalMotion(playerInput, canJump, isCrouching, settings);
 
         Vector3 horizontalMove = (_playerTransform.right * _rawInput.x + _playerTransform.forward * _rawInput.z).normalized * speed;
         Vector3 move = horizontalMove + Vector3.up * _verticalVelocity;
 
         _characterController.Move(move * Time.deltaTime);
+        return jumped;
     }
 
-    private void UpdateVerticalMotion(IPlayerMovementInput playerInput, bool canJump, bool isCrouching, PlayerMovementSettings settings)
+    private bool UpdateVerticalMotion(IPlayerMovementInput playerInput, bool canJump, bool isCrouching, PlayerMovementSettings settings)
     {
         IsGrounded = _characterController.isGrounded;
+        bool jumped = false;
 
         if (IsGrounded && _verticalVelocity < 0.0f)
         {
@@ -59,9 +66,11 @@ public class PlayerMovementController
         if (canJump && IsGrounded && !isCrouching && playerInput.IsJumpPressed())
         {
             _verticalVelocity = Mathf.Sqrt(settings.JumpHeight * -2.0f * settings.Gravity);
+            jumped = true;
         }
 
         _verticalVelocity += settings.Gravity * Time.deltaTime;
+        return jumped;
     }
 
     private float CalculateTargetSpeed(bool isCrouching, PlayerMovementSettings settings)

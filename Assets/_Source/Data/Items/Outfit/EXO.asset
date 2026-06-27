@@ -42,6 +42,7 @@ MonoBehaviour:
   _defaultDurabilityPercent: 100
   _canEquipHelmet: 1
   _armorRecoilReductionPercent: 20
+  _blocksSprint: 1
   _ammoFleshDamage: 0
   _ammoArmorPenetration: 0
   _ammoWeaponRecoilPercentModifier: 0

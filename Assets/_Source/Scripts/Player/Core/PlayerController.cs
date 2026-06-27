@@ -1,4 +1,14 @@
+using System;
 using UnityEngine;
+
+[System.Flags]
+public enum PlayerSprintBlockSource
+{
+    None = 0,
+    Aim = 1,
+    Stamina = 2,
+    Equipment = 4
+}
 
 [RequireComponent(typeof(AudioSource))]
 [RequireComponent(typeof(CharacterController))]
@@ -45,14 +55,18 @@ public class PlayerController : MonoBehaviour
     private bool _controlsEnabled = true;
     private bool _movementEnabled = true;
     private bool _canCrouching = true;
+    private float _walkSpeedMultiplier = 1f;
+    private PlayerSprintBlockSource _sprintBlockSources;
 
     public bool IsGrounded => _movementController != null && _movementController.IsGrounded;
     public bool IsSprinting => _movementController != null && _movementController.IsSprinting;
-    public bool CanSprinting { get; private set; } = true;
+    public bool CanSprinting => _sprintBlockSources == PlayerSprintBlockSource.None;
     public bool IsWalking => _movementController != null && _movementController.IsWalking;
     public bool CanJumping { get; private set; } = true;
     public bool IsCrouching => _crouchController != null && _crouchController.IsCrouching;
     public bool CanCrouching => _canCrouching;
+
+    public event Action Jumped;
 
     private void Awake()
     {
@@ -92,7 +106,13 @@ public class PlayerController : MonoBehaviour
             ClearMotionInput();
         }
 
-        _movementController.Move(_playerInput, _controlsEnabled && _movementEnabled && CanJumping, IsCrouching, CreateMovementSettings());
+        bool jumped = _movementController.Move(_playerInput, _controlsEnabled && _movementEnabled && CanJumping, IsCrouching, CreateMovementSettings());
+
+        if (jumped)
+        {
+            Jumped?.Invoke();
+        }
+
 
         bool isUnarmedAiming = isUnarmedAimRequested && !IsSprinting;
 
@@ -126,19 +146,29 @@ public class PlayerController : MonoBehaviour
         }
     }
 
-    public void SetCanSprinting(bool canSprinting)
-    {
-        CanSprinting = canSprinting;
+    public void SetCanSprinting(bool canSprinting) => SetSprintBlocked(PlayerSprintBlockSource.Aim, canSprinting == false);
 
-        if (canSprinting == false && IsSprinting)
+    public void SetSprintBlocked(PlayerSprintBlockSource source, bool blocked)
+    {
+        if (source == PlayerSprintBlockSource.None)
+        {
+            return;
+        }
+
+        _sprintBlockSources = blocked ? _sprintBlockSources | source : _sprintBlockSources & ~source;
+
+        if (CanSprinting == false && IsSprinting)
         {
             _movementController.SetInput(_playerInput, false, IsCrouching);
+            _movementController.ClampCurrentSpeed(_walkSpeed);
         }
     }
 
     public void SetCanCrouching(bool canCrouching) => _canCrouching = canCrouching;
+    public void SetCanJumping(bool canJumping) => CanJumping = canJumping;
+    public void SetWalkSpeedMultiplier(float walkSpeedMultiplier) => _walkSpeedMultiplier = Mathf.Max(0f, walkSpeedMultiplier);
     public bool TryGetCameraLocalRotation(out Quaternion localRotation) => _lookController.TryGetCameraLocalRotation(out localRotation);
     public void RestoreCameraLocalRotation(Quaternion localRotation) => _lookController.RestoreCameraLocalRotation(localRotation, _cameraClampLimit);
     private void ClearMotionInput() => _movementController.ClearInput();
-    private PlayerMovementSettings CreateMovementSettings() => new(_walkSpeed, _sprintSpeed, _crouchSpeed, _jumpHeight, _gravity, _groundedGravity, _fieldOfViewSmooth);
+    private PlayerMovementSettings CreateMovementSettings() => new(_walkSpeed * _walkSpeedMultiplier, _sprintSpeed, _crouchSpeed, _jumpHeight, _gravity, _groundedGravity, _fieldOfViewSmooth);
 }

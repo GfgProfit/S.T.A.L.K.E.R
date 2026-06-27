@@ -164,7 +164,7 @@ MonoBehaviour:
   _rendererReflectionProbeUsage: 0
   _rendererReceiveShadows: 0
   _renderTextureFormat: 2
-  _iconRenderScale: 3
+  _iconRenderScale: 2
   _allowHdr: 1
   _useCameraMsaa: 1
   _cameraDistanceMultiplier: 3
