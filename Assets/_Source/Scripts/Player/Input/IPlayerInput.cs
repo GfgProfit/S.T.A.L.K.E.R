@@ -47,8 +47,6 @@ public interface IInventoryInput : IPlayerPointerInput
     string GetInventoryQuickUseSlotDisplayName(int slotIndex);
     bool IsInventoryDropPressed();
     bool IsInventoryDropStackModifierHeld();
-    bool IsInventoryQuickEquipModifierHeld();
-    bool IsInventoryQuickMoveModifierHeld();
     bool IsInventoryPrimaryActionPressed();
     bool IsInventoryPrimaryActionReleased();
     bool IsInventorySecondaryActionPressed();

@@ -24,6 +24,7 @@ public sealed class ItemIconGeneratorWindow : EditorWindow
     private ItemData _previewItem;
     private Texture2D _previewTexture;
     private Vector2 _settingsScroll;
+    private Vector2 _previewScroll;
     private bool _autoRefresh = true;
     private bool _previewRenderScheduled;
     private CancellationTokenSource _previewRenderCancellation;
@@ -591,20 +592,25 @@ public sealed class ItemIconGeneratorWindow : EditorWindow
         {
             EditorGUILayout.LabelField("Preview", EditorStyles.boldLabel);
 
-            Rect previewRect = GUILayoutUtility.GetRect(256f, 256f, GUILayout.ExpandWidth(true), GUILayout.ExpandHeight(true));
+            _previewScroll = EditorGUILayout.BeginScrollView(_previewScroll, GUILayout.ExpandWidth(true), GUILayout.ExpandHeight(true));
+
+            Rect previewRect = GUILayoutUtility.GetRect(256f, 256f, GUILayout.ExpandWidth(true));
             EditorGUI.DrawRect(previewRect, new Color(0.14f, 0.14f, 0.14f, 1f));
 
             if (_previewTexture == null)
             {
                 string message = GetPreviewPlaceholderText();
                 GUI.Label(previewRect, message, CenteredLabelStyle);
-                return;
+            }
+            else
+            {
+                Rect imageRect = GetCenteredImageRect(previewRect, _previewTexture);
+                EditorGUI.DrawTextureTransparent(imageRect, _previewTexture, ScaleMode.ScaleToFit);
+
+                EditorGUILayout.LabelField($"{_previewTexture.width} x {_previewTexture.height}", EditorStyles.miniLabel);
             }
 
-            Rect imageRect = GetCenteredImageRect(previewRect, _previewTexture);
-            EditorGUI.DrawTextureTransparent(imageRect, _previewTexture, ScaleMode.ScaleToFit);
-
-            EditorGUILayout.LabelField($"{_previewTexture.width} x {_previewTexture.height}", EditorStyles.miniLabel);
+            EditorGUILayout.EndScrollView();
         }
     }
 

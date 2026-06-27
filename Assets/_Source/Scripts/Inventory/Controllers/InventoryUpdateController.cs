@@ -18,10 +18,9 @@ internal sealed class InventoryUpdateController
     private readonly Action _rotateSelectedItem;
     private readonly Func<bool> _tryHandleHoveredItemDropInput;
     private readonly Action _handleHighlight;
-    private readonly Func<bool> _tryHandleQuickItemAction;
     private readonly Action _beginDrag;
 
-    public InventoryUpdateController(IInventoryInput playerInput, Func<bool> isOpen, Func<bool> isItemInfoPanelOpen, Func<InventoryGrid> selectedGrid, InventoryHoverInfoController hoverInfoController, InventoryContextMenuController contextMenuController, Action toggleInventory, Action closeInventory, Action hideItemTooltip, Action hideItemInfoPanel, Action hideContextMenu, Action dragItemIcon, Action releaseDraggedItem, Action rotateSelectedItem, Func<bool> tryHandleHoveredItemDropInput, Action handleHighlight, Func<bool> tryHandleQuickItemAction, Action beginDrag)
+    public InventoryUpdateController(IInventoryInput playerInput, Func<bool> isOpen, Func<bool> isItemInfoPanelOpen, Func<InventoryGrid> selectedGrid, InventoryHoverInfoController hoverInfoController, InventoryContextMenuController contextMenuController, Action toggleInventory, Action closeInventory, Action hideItemTooltip, Action hideItemInfoPanel, Action hideContextMenu, Action dragItemIcon, Action releaseDraggedItem, Action rotateSelectedItem, Func<bool> tryHandleHoveredItemDropInput, Action handleHighlight, Action beginDrag)
     {
         _playerInput = playerInput;
         _isOpen = isOpen;
@@ -39,7 +38,6 @@ internal sealed class InventoryUpdateController
         _rotateSelectedItem = rotateSelectedItem;
         _tryHandleHoveredItemDropInput = tryHandleHoveredItemDropInput;
         _handleHighlight = handleHighlight;
-        _tryHandleQuickItemAction = tryHandleQuickItemAction;
         _beginDrag = beginDrag;
     }
 
@@ -108,11 +106,6 @@ internal sealed class InventoryUpdateController
         _handleHighlight();
 
         if (_playerInput.IsInventoryPrimaryActionPressed() == false)
-        {
-            return;
-        }
-
-        if (_tryHandleQuickItemAction())
         {
             return;
         }

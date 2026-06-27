@@ -40,7 +40,6 @@ public class InventoryController : MonoBehaviour
     [SerializeField] [BoxGroup("UI")] private InventoryItemContextMenu _itemContextMenu;
     [SerializeField] [BoxGroup("Grids")] private GameObject _closedSlotPrefab;
     [SerializeField] [BoxGroup("Items")] private List<InventoryItem> _initialInventoryItems = new();
-    [SerializeField] [BoxGroup("Grids")] private List<InventoryGrid> _quickActionGridReferences = new();
 
     [Header("Quick Use")]
     [SerializeField] [BoxGroup("Quick Use")] private List<QuickUseSlotBinding> _quickUseSlotBindings = new();
@@ -64,7 +63,6 @@ public class InventoryController : MonoBehaviour
     private InventoryItemFactory _itemFactory;
     private InventoryEquipmentSlotService _equipmentSlotService;
     private InventoryEquipmentActionService _equipmentActionService;
-    private InventoryQuickActionService _quickActionService;
     private InventoryContextMenuController _contextMenuController;
     private InventoryItemDropProcessor _dropProcessor;
     private InventoryWeightStateController _weightStateController;
@@ -143,15 +141,6 @@ public class InventoryController : MonoBehaviour
         {
             _itemFactory ??= new InventoryItemFactory(_itemPrefab);
             return _itemFactory;
-        }
-    }
-
-    private InventoryQuickActionService QuickActionService
-    {
-        get
-        {
-            _quickActionService ??= CreateQuickActionService();
-            return _quickActionService;
         }
     }
 
@@ -256,7 +245,6 @@ public class InventoryController : MonoBehaviour
 
     private InventoryEquipmentSlotService CreateEquipmentSlotService() => new(_equipmentSlotGrids, _slottedItemGrids, _defaultItemGrid, InsertItem, TryDetachItemFromGrid, RegisterInventoryItem, RefreshWeightState, () => _closedSlotPrefab);
     private InventoryEquipmentActionService CreateEquipmentActionService() => new(_equipmentSlotGrids, _defaultItemGrid, InsertItem, TryDetachItemFromGrid, TryPrepareSlotRestrictionsForPlacement, RegisterInventoryItem, RefreshWeightState);
-    private InventoryQuickActionService CreateQuickActionService() => new(_quickActionGridReferences, _defaultItemGrid, TryMoveItemToGrid, CreateItem, RegisterInventoryItem, RefreshWeightState);
     private InventoryContextMenuController CreateContextMenuController() => new(_itemContextMenu, PlayerInput, () => _selectedItemGrid, () => _dragState.SelectedItem, DragController.GetTileGridPosition, HideItemTooltip, ShowItemInfoPanel, TryUseContextMenuItem, TryUnloadContextMenuWeapon, CanEquipPrimaryContextMenuWeapon, TryEquipPrimaryContextMenuWeapon, CanEquipSecondaryContextMenuWeapon, TryEquipSecondaryContextMenuWeapon, CanEquipContextMenuItem, TryEquipContextMenuItem, CanUnequipContextMenuItem, TryUnequipContextMenuItem, _equipmentSlotGrids, TryAttachContextMenuModule, TryDetachWeaponModule, TryDropItem);
     private InventoryItemDropProcessor CreateDropProcessor() => new(TrySpawnDroppedWorldItem, TryDetachItemFromGrid, DestroyInventoryItem, RefreshWeightState);
     private InventoryWeightStateController CreateWeightStateController() => new(_itemRegistry, _equipmentSlotGrids, EquipmentSlotService, SetWeightViewModelState, RenderCharacterStatsInfo, _playerController, _playerStats, _hidePlayerStatsInfoWhenEmpty, _maxCarryWeight, _movementBlockExtraWeight);
@@ -266,10 +254,10 @@ public class InventoryController : MonoBehaviour
     private InventoryDragPlacementService CreateDragPlacementService() => new(_dragState, ItemFactory, _itemRegistry, CanDetachItemWithSlotRestrictions, TryPrepareSlotRestrictionsForPlacement, TryInstallWeaponModule, HandleWeaponModulesChanged, RefreshWeightState);
     private InventoryDragController CreateDragController() => new(_dragState, DragPlacementService, PlayerInput, _canvasTransform, () => _selectedItemGrid, CanDetachItemWithSlotRestrictions, HideContextMenu, HideItemTooltip, RefreshWeightState);
     private InventoryOpenStateController CreateOpenStateController() => new(_playerController, _unlockCursorWhileOpen, _disablePlayerControlsWhileOpen, TryStashSelectedItem, ApplyWeightMovementState, HandleInventoryClosed);
-    private InventoryItemPlacementService CreateItemPlacementService() => new(ItemFactory, _itemRegistry, TryPrepareSlotRestrictionsForPlacement, TryDetachItemFromGrid, DestroyInventoryItem, RefreshWeightState);
-    private InventoryHoveredItemActionController CreateHoveredItemActionController() => new(PlayerInput, _dragState, () => _selectedItemGrid, DragController.GetTileGridPosition, IsContextMenuOpen, QuickActionService, TryDropItem, HoverInfoController, HideItemTooltip, HideContextMenu);
+    private InventoryItemPlacementService CreateItemPlacementService() => new(ItemFactory, _itemRegistry, TryPrepareSlotRestrictionsForPlacement, RefreshWeightState);
+    private InventoryHoveredItemActionController CreateHoveredItemActionController() => new(PlayerInput, _dragState, () => _selectedItemGrid, DragController.GetTileGridPosition, IsContextMenuOpen, TryDropItem, HoverInfoController, HideItemTooltip);
     private InventoryQuickUseService CreateQuickUseService() => new(_quickUseSlotBindings, TryDetachItemFromGrid, DestroyInventoryItem, RefreshWeightState);
-    private InventoryUpdateController CreateUpdateController() => new(PlayerInput, () => IsOpen, IsItemInfoPanelOpen, () => _selectedItemGrid, HoverInfoController, ContextMenuController, ToggleInventory, CloseInventory, HideItemTooltip, HideItemInfoPanel, HideContextMenu, DragController.ItemIconDrag, DragController.ReleaseDraggedItem, DragController.RotateSelectedItem, TryHandleHoveredItemDropInput, HandleHighlight, TryHandleQuickItemAction, DragController.BeginDrag);
+    private InventoryUpdateController CreateUpdateController() => new(PlayerInput, () => IsOpen, IsItemInfoPanelOpen, () => _selectedItemGrid, HoverInfoController, ContextMenuController, ToggleInventory, CloseInventory, HideItemTooltip, HideItemInfoPanel, HideContextMenu, DragController.ItemIconDrag, DragController.ReleaseDraggedItem, DragController.RotateSelectedItem, TryHandleHoveredItemDropInput, HandleHighlight, DragController.BeginDrag);
 
     private void Awake()
     {
@@ -284,7 +272,6 @@ public class InventoryController : MonoBehaviour
         _itemFactory = new InventoryItemFactory(_itemPrefab);
         _equipmentSlotService = CreateEquipmentSlotService();
         _equipmentActionService = CreateEquipmentActionService();
-        _quickActionService = CreateQuickActionService();
         _weaponModuleService = CreateWeaponModuleService();
         _contextMenuController = CreateContextMenuController();
         _dropProcessor = CreateDropProcessor();
@@ -428,13 +415,9 @@ public class InventoryController : MonoBehaviour
     public void RefreshInventoryWeightState() => RefreshWeightState();
 
     private bool InsertItem(InventoryItem itemToInsert, InventoryGrid targetGrid) => ItemPlacementService.InsertItem(itemToInsert, targetGrid);
-    private bool TryHandleQuickItemAction() => HoveredItemActionController.TryHandleQuickItemAction();
     private bool TryHandleHoveredItemDropInput() => HoveredItemActionController.TryHandleHoveredItemDropInput();
-    private bool TryMoveItemToGrid(InventoryGrid sourceGrid, InventoryItem item, InventoryGrid targetGrid, bool allowStackMerge) => ItemPlacementService.TryMoveItemToGrid(sourceGrid, item, targetGrid, allowStackMerge);
 
     private void HandleHighlight() => HoverInfoController.HandleHighlight(_selectedItemGrid, _dragState.SelectedItem, DragController.GetTileGridPosition(), DragController.TryGetStackMergeTarget);
-
-    private InventoryItem CreateItem(ItemData itemData, int amount) => ItemFactory.Create(itemData, amount, null);
 
     private void RegisterInventoryItem(InventoryItem item) => _itemRegistry.Register(item);
 
@@ -1006,14 +989,6 @@ public class InventoryController : MonoBehaviour
         for (int i = 0; i < _slottedItemGrids.Count; i++)
         {
             if (TryUseItemGrid(_slottedItemGrids[i], item, out itemGrid))
-            {
-                return true;
-            }
-        }
-
-        for (int i = 0; i < _quickActionGridReferences.Count; i++)
-        {
-            if (TryUseItemGrid(_quickActionGridReferences[i], item, out itemGrid))
             {
                 return true;
             }

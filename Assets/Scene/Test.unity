@@ -11877,19 +11877,6 @@ MonoBehaviour:
   _itemContextMenu: {fileID: 564352809}
   _closedSlotPrefab: {fileID: 7039134793815377571, guid: aa9dbe456d8ccf8499b6d334af9b97de, type: 3}
   _initialInventoryItems: []
-  _quickActionGridReferences:
-  - {fileID: 0}
-  - {fileID: 210100001}
-  - {fileID: 210100003}
-  - {fileID: 210100005}
-  - {fileID: 210100007}
-  - {fileID: 210100009}
-  - {fileID: 210100011}
-  - {fileID: 210100013}
-  - {fileID: 0}
-  - {fileID: 0}
-  - {fileID: 0}
-  - {fileID: 741226605}
   _quickUseSlotBindings:
   - _slotIndex: 0
     _inventorySlot: {fileID: 226771813}

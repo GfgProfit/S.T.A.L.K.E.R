@@ -7,17 +7,13 @@ internal sealed class InventoryItemPlacementService
     private readonly InventoryItemFactory _itemFactory;
     private readonly InventoryItemRegistry _itemRegistry;
     private readonly Func<InventoryGrid, InventoryItem, bool> _tryPrepareSlotRestrictionsForPlacement;
-    private readonly Func<InventoryGrid, InventoryItem, bool> _tryDetachItemFromGrid;
-    private readonly Action<InventoryItem> _destroyInventoryItem;
     private readonly Action _refreshWeightState;
 
-    public InventoryItemPlacementService(InventoryItemFactory itemFactory, InventoryItemRegistry itemRegistry, Func<InventoryGrid, InventoryItem, bool> tryPrepareSlotRestrictionsForPlacement, Func<InventoryGrid, InventoryItem, bool> tryDetachItemFromGrid, Action<InventoryItem> destroyInventoryItem, Action refreshWeightState)
+    public InventoryItemPlacementService(InventoryItemFactory itemFactory, InventoryItemRegistry itemRegistry, Func<InventoryGrid, InventoryItem, bool> tryPrepareSlotRestrictionsForPlacement, Action refreshWeightState)
     {
         _itemFactory = itemFactory;
         _itemRegistry = itemRegistry;
         _tryPrepareSlotRestrictionsForPlacement = tryPrepareSlotRestrictionsForPlacement;
-        _tryDetachItemFromGrid = tryDetachItemFromGrid;
-        _destroyInventoryItem = destroyInventoryItem;
         _refreshWeightState = refreshWeightState;
     }
 
@@ -79,47 +75,6 @@ internal sealed class InventoryItemPlacementService
         }
 
         itemToInsert.Rotate();
-        return false;
-    }
-
-    public bool TryMoveItemToGrid(InventoryGrid sourceGrid, InventoryItem item, InventoryGrid targetGrid, bool allowStackMerge)
-    {
-        if (sourceGrid == null || item == null || targetGrid == null || sourceGrid == targetGrid)
-        {
-            return false;
-        }
-
-        Vector2Int restorePosition = new(item.GridPositionX, item.GridPositionY);
-        bool restoreRotated = item.IsRotated;
-
-        if (_tryDetachItemFromGrid(sourceGrid, item) == false)
-        {
-            return false;
-        }
-
-        if (_tryPrepareSlotRestrictionsForPlacement(targetGrid, item) == false)
-        {
-            item.SetRotated(restoreRotated);
-            sourceGrid.PlaceItem(item, restorePosition.x, restorePosition.y);
-            return false;
-        }
-
-        if (allowStackMerge && item.IsStackable && InventoryStackService.TryAddToExistingStackInGrid(targetGrid, item.ItemData, item.CurrentAmount))
-        {
-            _destroyInventoryItem(item);
-            _refreshWeightState();
-            return true;
-        }
-
-        if (InsertItem(item, targetGrid))
-        {
-            _itemRegistry.Register(item);
-            _refreshWeightState();
-            return true;
-        }
-
-        item.SetRotated(restoreRotated);
-        sourceGrid.PlaceItem(item, restorePosition.x, restorePosition.y);
         return false;
     }
 
