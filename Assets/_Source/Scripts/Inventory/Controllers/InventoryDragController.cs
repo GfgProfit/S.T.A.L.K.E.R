@@ -6,18 +6,26 @@ internal sealed class InventoryDragController
     private readonly InventoryDragState _dragState;
     private readonly InventoryDragPlacementService _dragPlacementService;
     private readonly IInventoryInput _playerInput;
+    private readonly InventoryCountDragWindow _countDragWindow;
     private readonly Transform _canvasTransform;
     private readonly Func<InventoryGrid> _getSelectedItemGrid;
     private readonly Func<InventoryGrid, InventoryItem, bool> _canDetachItemWithSlotRestrictions;
     private readonly Action _hideContextMenu;
     private readonly Action _hideItemTooltip;
     private readonly Action _refreshWeightState;
+    private InventoryGrid _pendingCountDragSourceGrid;
+    private InventoryItem _pendingCountDragSourceItem;
+    private Vector2Int _pendingCountDragSourcePosition;
+    private bool _pendingCountDragSourceRotated;
+    private InventoryGrid _pendingCountDragTargetGrid;
+    private Vector2Int _pendingCountDragTargetPosition;
 
-    public InventoryDragController(InventoryDragState dragState, InventoryDragPlacementService dragPlacementService, IInventoryInput playerInput, Transform canvasTransform, Func<InventoryGrid> getSelectedItemGrid, Func<InventoryGrid, InventoryItem, bool> canDetachItemWithSlotRestrictions, Action hideContextMenu, Action hideItemTooltip, Action refreshWeightState)
+    public InventoryDragController(InventoryDragState dragState, InventoryDragPlacementService dragPlacementService, IInventoryInput playerInput, InventoryCountDragWindow countDragWindow, Transform canvasTransform, Func<InventoryGrid> getSelectedItemGrid, Func<InventoryGrid, InventoryItem, bool> canDetachItemWithSlotRestrictions, Action hideContextMenu, Action hideItemTooltip, Action refreshWeightState)
     {
         _dragState = dragState;
         _dragPlacementService = dragPlacementService;
         _playerInput = playerInput;
+        _countDragWindow = countDragWindow;
         _canvasTransform = canvasTransform;
         _getSelectedItemGrid = getSelectedItemGrid;
         _canDetachItemWithSlotRestrictions = canDetachItemWithSlotRestrictions;
@@ -76,6 +84,11 @@ internal sealed class InventoryDragController
         {
             Vector2Int tileGridPosition = GetTileGridPosition();
 
+            if (TryOpenCountDragWindow(selectedItemGrid, tileGridPosition))
+            {
+                return;
+            }
+
             if (_dragPlacementService.TryPlaceDraggedItem(selectedItemGrid, tileGridPosition))
             {
                 return;
@@ -94,6 +107,17 @@ internal sealed class InventoryDragController
     public bool TryGetStackMergeTarget(InventoryGrid targetGrid, Vector2Int tileGridPosition, out InventoryItem targetStack) => _dragPlacementService.TryGetStackMergeTarget(targetGrid, tileGridPosition, out targetStack);
     public void DestroyInventoryItem(InventoryItem item) => _dragPlacementService.DestroyInventoryItem(item);
     public bool ReturnDraggedItemToOrigin() => _dragPlacementService.ReturnDraggedItemToOrigin();
+    public bool IsCountDragWindowOpen() => _countDragWindow != null && _countDragWindow.IsOpen;
+    public void CancelCountDragWindow()
+    {
+        if (_countDragWindow != null && _countDragWindow.IsOpen)
+        {
+            _countDragWindow.Cancel();
+            return;
+        }
+
+        ClearPendingCountDrag();
+    }
     public void ItemIconDrag() => _dragState.Drag(_playerInput.GetPointerPosition());
     public bool TryDetachItemFromGrid(InventoryGrid grid, InventoryItem item) => _dragPlacementService.TryDetachItemFromGrid(grid, item);
 
@@ -112,5 +136,88 @@ internal sealed class InventoryDragController
     {
         _hideItemTooltip();
         _dragState.StartDragging(item, _canvasTransform, _playerInput.GetPointerPosition());
+    }
+
+    private bool TryOpenCountDragWindow(InventoryGrid targetGrid, Vector2Int tileGridPosition)
+    {
+        if (_countDragWindow == null || _playerInput.IsInventoryCountDragModifierHeld() == false || _dragPlacementService.CanOpenCountDragWindow(targetGrid, tileGridPosition) == false)
+        {
+            return false;
+        }
+
+        InventoryItem selectedItem = _dragState.SelectedItem;
+
+        if (selectedItem == null)
+        {
+            return false;
+        }
+
+        CapturePendingCountDrag(selectedItem, targetGrid, tileGridPosition);
+        _countDragWindow.Show(selectedItem, selectedItem.CurrentAmount, ApplyPendingCountDrag, CancelPendingCountDrag);
+
+        if (ReturnDraggedItemToOrigin() == false)
+        {
+            _countDragWindow.Hide();
+            ClearPendingCountDrag();
+            return false;
+        }
+
+        return true;
+    }
+
+    private void CapturePendingCountDrag(InventoryItem sourceItem, InventoryGrid targetGrid, Vector2Int targetPosition)
+    {
+        _pendingCountDragSourceGrid = _dragState.OriginGrid;
+        _pendingCountDragSourceItem = sourceItem;
+        _pendingCountDragSourcePosition = _dragState.OriginPosition;
+        _pendingCountDragSourceRotated = _dragState.OriginRotated;
+        _pendingCountDragTargetGrid = targetGrid;
+        _pendingCountDragTargetPosition = targetPosition;
+    }
+
+    private void ApplyPendingCountDrag(int count)
+    {
+        InventoryGrid sourceGrid = _pendingCountDragSourceGrid;
+        InventoryItem sourceItem = _pendingCountDragSourceItem;
+        Vector2Int sourcePosition = _pendingCountDragSourcePosition;
+        bool sourceRotated = _pendingCountDragSourceRotated;
+        InventoryGrid targetGrid = _pendingCountDragTargetGrid;
+        Vector2Int targetPosition = _pendingCountDragTargetPosition;
+
+        ClearPendingCountDrag();
+
+        if (sourceGrid == null || sourceItem == null || targetGrid == null || sourceGrid.GetItem(sourcePosition.x, sourcePosition.y) != sourceItem)
+        {
+            return;
+        }
+
+        sourceItem.SetRotated(sourceRotated);
+
+        if (_dragPlacementService.TryDetachItemFromGrid(sourceGrid, sourceItem) == false)
+        {
+            return;
+        }
+
+        _dragState.CaptureOrigin(sourceGrid, sourceItem);
+        _dragState.StartDragging(sourceItem, _canvasTransform, _playerInput.GetPointerPosition());
+
+        if (_dragPlacementService.TryPlaceDraggedItemAmount(targetGrid, targetPosition, count))
+        {
+            return;
+        }
+
+        ReturnDraggedItemToOrigin();
+    }
+
+    private void CancelPendingCountDrag() => ClearPendingCountDrag();
+
+    private void ClearPendingCountDrag()
+    {
+        _pendingCountDragSourceGrid = null;
+        _pendingCountDragSourceItem = null;
+        _pendingCountDragTargetGrid = null;
+        _pendingCountDragSourcePosition = Vector2Int.zero;
+        _pendingCountDragTargetPosition = Vector2Int.zero;
+        _pendingCountDragSourceRotated = false;
     }
 }

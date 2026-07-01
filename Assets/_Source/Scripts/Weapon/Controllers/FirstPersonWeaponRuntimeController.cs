@@ -1291,13 +1291,17 @@ public sealed class FirstPersonWeaponRuntimeController : MonoBehaviour
 
     private bool IsSprintInputActive(Vector2 movementInput)
     {
-        return _playerInput != null &&
-               IsAimInputActive() == false &&
-               _isAiming == false &&
-               _playerInput.IsCrouchingHold() == false &&
-               _playerInput.IsSprintHeld() &&
-               movementInput.y > MOVEMENT_INPUT_THRESHOLD &&
-               movementInput.sqrMagnitude > MOVEMENT_INPUT_THRESHOLD;
+        if (HasSprintInput(movementInput) == false)
+        {
+            return false;
+        }
+
+        return _playerController == null || _playerController.IsSprinting;
+    }
+
+    private bool HasSprintInput(Vector2 movementInput)
+    {
+        return _playerInput != null && IsAimInputActive() == false && _isAiming == false && _playerInput.IsCrouchingHold() == false && _playerInput.IsSprintHeld() && movementInput.y > MOVEMENT_INPUT_THRESHOLD && movementInput.sqrMagnitude > MOVEMENT_INPUT_THRESHOLD;
     }
 
     private bool IsAimInputActive()

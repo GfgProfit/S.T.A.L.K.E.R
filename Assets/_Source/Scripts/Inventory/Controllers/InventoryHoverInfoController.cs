@@ -18,7 +18,7 @@ internal sealed class InventoryHoverInfoController
 
     public InventoryItem HighlightedItem { get; private set; }
 
-    public void HandleHighlight(InventoryGrid selectedItemGrid, InventoryItem selectedItem, Vector2Int positionOnGrid, TryGetStackMergeTargetDelegate tryGetStackMergeTarget)
+    public void HandleHighlight(InventoryGrid selectedItemGrid, InventoryItem selectedItem, Vector2Int positionOnGrid, TryGetStackMergeTargetDelegate tryGetStackMergeTarget, bool useCountDragHighlight, Color countDragHighlightColor)
     {
         if (selectedItemGrid == null)
         {
@@ -30,6 +30,7 @@ internal sealed class InventoryHoverInfoController
 
         if (selectedItem == null)
         {
+            _inventoryHighlight.SetDefaultColor();
             HighlightedItem = selectedItemGrid.GetItem(positionOnGrid.x, positionOnGrid.y);
             _compatibilityService.ShowCompatibleItems(HighlightedItem);
 
@@ -50,6 +51,15 @@ internal sealed class InventoryHoverInfoController
 
         _compatibilityService.Clear();
         HideItemTooltip();
+
+        if (useCountDragHighlight)
+        {
+            _inventoryHighlight.SetColor(countDragHighlightColor);
+        }
+        else
+        {
+            _inventoryHighlight.SetDefaultColor();
+        }
 
         bool canMergeStack = tryGetStackMergeTarget(selectedItemGrid, positionOnGrid, out InventoryItem stackMergeTarget);
         bool canPlaceItem = selectedItemGrid.CanPlaceItem(selectedItem, positionOnGrid.x, positionOnGrid.y);

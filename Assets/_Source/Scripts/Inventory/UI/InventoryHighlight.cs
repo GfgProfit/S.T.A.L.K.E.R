@@ -1,15 +1,26 @@
 using System;
 using R3;
 using UnityEngine;
+using UnityEngine.UI;
 
 public class InventoryHighlight : MonoBehaviour, IView<InventoryHighlightViewModel>
 {
     [SerializeField] private RectTransform _highlighter;
+    [SerializeField] private Graphic _highlighterGraphic;
 
     private InventoryHighlightViewModel _viewModel;
     private IDisposable _visibleSubscription;
     private IDisposable _sizeSubscription;
     private IDisposable _positionSubscription;
+    private IDisposable _colorSubscription;
+    private Color _defaultColor;
+    private bool _hasDefaultColor;
+
+    private void Awake()
+    {
+        EnsureHighlighterGraphic();
+        CaptureDefaultColor();
+    }
 
     public void Show(bool value)
     {
@@ -40,9 +51,22 @@ public class InventoryHighlight : MonoBehaviour, IView<InventoryHighlightViewMod
         _viewModel.SetPosition(position);
     }
 
+    public void SetColor(Color color)
+    {
+        EnsureViewModel();
+        _viewModel.SetColor(color);
+    }
+
+    public void SetDefaultColor()
+    {
+        EnsureViewModel();
+        _viewModel.SetColor(GetDefaultColor());
+    }
+
     public void Bind(InventoryHighlightViewModel viewModel)
     {
         Unbind();
+        CaptureDefaultColor();
         _viewModel = viewModel;
 
         if (_viewModel == null)
@@ -50,9 +74,11 @@ public class InventoryHighlight : MonoBehaviour, IView<InventoryHighlightViewMod
             return;
         }
 
+        _viewModel.SetColor(GetDefaultColor());
         _visibleSubscription = _viewModel.Visible.Subscribe(SetVisible);
         _sizeSubscription = _viewModel.Size.Subscribe(ApplySize);
         _positionSubscription = _viewModel.Position.Subscribe(ApplyPosition);
+        _colorSubscription = _viewModel.Color.Subscribe(ApplyColor);
     }
 
     public void Unbind()
@@ -60,9 +86,11 @@ public class InventoryHighlight : MonoBehaviour, IView<InventoryHighlightViewMod
         _visibleSubscription?.Dispose();
         _sizeSubscription?.Dispose();
         _positionSubscription?.Dispose();
+        _colorSubscription?.Dispose();
         _visibleSubscription = null;
         _sizeSubscription = null;
         _positionSubscription = null;
+        _colorSubscription = null;
     }
 
     private void OnDestroy()
@@ -82,6 +110,32 @@ public class InventoryHighlight : MonoBehaviour, IView<InventoryHighlightViewMod
         Bind(InventoryViewModelFactory.CreateHighlight());
     }
 
+    private void EnsureHighlighterGraphic()
+    {
+        if (_highlighterGraphic == null && _highlighter != null)
+        {
+            _highlighterGraphic = _highlighter.GetComponent<Graphic>();
+        }
+    }
+
+    private void CaptureDefaultColor()
+    {
+        if (_hasDefaultColor)
+        {
+            return;
+        }
+
+        EnsureHighlighterGraphic();
+        _defaultColor = _highlighterGraphic == null ? Color.white : _highlighterGraphic.color;
+        _hasDefaultColor = true;
+    }
+
+    private Color GetDefaultColor()
+    {
+        CaptureDefaultColor();
+        return _defaultColor;
+    }
+
     private void SetVisible(bool visible)
     {
         _highlighter.gameObject.SetActive(visible);
@@ -95,5 +149,15 @@ public class InventoryHighlight : MonoBehaviour, IView<InventoryHighlightViewMod
     private void ApplyPosition(Vector2 position)
     {
         _highlighter.localPosition = position;
+    }
+
+    private void ApplyColor(Color color)
+    {
+        EnsureHighlighterGraphic();
+
+        if (_highlighterGraphic != null)
+        {
+            _highlighterGraphic.color = color;
+        }
     }
 }

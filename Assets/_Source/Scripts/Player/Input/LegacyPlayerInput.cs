@@ -7,6 +7,7 @@ public class LegacyPlayerInput : IPlayerInput
     private const KeyCode CROUCH_KEY = KeyCode.LeftControl;
     private const KeyCode INVENTORY_DROP_KEY = KeyCode.Z;
     private const KeyCode INVENTORY_DROP_STACK_MODIFIER_KEY = KeyCode.LeftShift;
+    private const KeyCode INVENTORY_COUNT_DRAG_MODIFIER_KEY = KeyCode.LeftControl;
     private const KeyCode WEAPON_SHOOT_KEY = KeyCode.Mouse0;
     private const KeyCode WEAPON_AIM_KEY = KeyCode.Mouse1;
     private const KeyCode WEAPON_RELOAD_KEY = KeyCode.R;
@@ -98,6 +99,7 @@ public class LegacyPlayerInput : IPlayerInput
 
     public bool IsInventoryDropPressed() => Input.GetKeyDown(INVENTORY_DROP_KEY);
     public bool IsInventoryDropStackModifierHeld() => Input.GetKey(INVENTORY_DROP_STACK_MODIFIER_KEY);
+    public bool IsInventoryCountDragModifierHeld() => Input.GetKey(INVENTORY_COUNT_DRAG_MODIFIER_KEY) || Input.GetKey(KeyCode.RightControl);
     public bool IsInventoryPrimaryActionPressed() => Input.GetKeyDown(KeyCode.Mouse0);
     public bool IsInventoryPrimaryActionReleased() => Input.GetKeyUp(KeyCode.Mouse0);
     public bool IsInventorySecondaryActionPressed() => Input.GetKeyDown(KeyCode.Mouse1);

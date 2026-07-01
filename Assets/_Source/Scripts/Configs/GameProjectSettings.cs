@@ -20,6 +20,7 @@ public class GameProjectSettings : ScriptableObject
 
     [Header("Inventory Compatibility Visual Settings")]
     [SerializeField] private Color _compatibleItemHighlightColor = new Color(0f, 1f, 0.35f, 0.55f);
+    [SerializeField] private Color _countDragHighlightColor = new Color(1f, 0.7f, 0.1f, 0.55f);
 
     [Header("Item Durability Visual Settings")]
     [SerializeField] private Color _highDurabilityColor = new Color(0.3f, 1f, 0.3f, 1f);
@@ -59,6 +60,7 @@ public class GameProjectSettings : ScriptableObject
     public Color IconOutlineColor => _iconOutlineColor;
     public Color IconShadowColor => _iconShadowColor;
     public Color CompatibleItemHighlightColor => _compatibleItemHighlightColor;
+    public Color CountDragHighlightColor => _countDragHighlightColor;
     public Color StatCurrentValueColor => _statCurrentValueColor;
     public Color StatFullDurabilityValueColor => _statFullDurabilityValueColor;
     public Color VeryLowAmmoClassificationColor => _veryLowAmmoClassificationColor;

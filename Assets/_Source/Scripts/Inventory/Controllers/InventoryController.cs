@@ -38,6 +38,7 @@ public class InventoryController : MonoBehaviour
     [SerializeField] [BoxGroup("UI")] private ItemInfoPanel _itemInfoPanel;
     [SerializeField] [BoxGroup("UI")] private ItemTooltip _itemTooltip;
     [SerializeField] [BoxGroup("UI")] private InventoryItemContextMenu _itemContextMenu;
+    [SerializeField] [BoxGroup("UI")] private InventoryCountDragWindow _countDragWindow;
     [SerializeField] [BoxGroup("Grids")] private GameObject _closedSlotPrefab;
     [SerializeField] [BoxGroup("Items")] private List<InventoryItem> _initialInventoryItems = new();
 
@@ -252,12 +253,12 @@ public class InventoryController : MonoBehaviour
     private InventoryItemCompatibilityService CreateItemCompatibilityService() => new(_itemRegistry, new IInventoryItemCompatibilityProvider[] { new WeaponAmmoInventoryCompatibilityProvider(), new WeaponModuleInventoryCompatibilityProvider() }, _settings.CompatibleItemHighlightColor);
     private InventoryWeaponModuleService CreateWeaponModuleService() => new(TryReturnItemToInventoryOrDrop, TryUnloadContextMenuWeapon);
     private InventoryDragPlacementService CreateDragPlacementService() => new(_dragState, ItemFactory, _itemRegistry, CanDetachItemWithSlotRestrictions, TryPrepareSlotRestrictionsForPlacement, TryInstallWeaponModule, HandleWeaponModulesChanged, RefreshWeightState);
-    private InventoryDragController CreateDragController() => new(_dragState, DragPlacementService, PlayerInput, _canvasTransform, () => _selectedItemGrid, CanDetachItemWithSlotRestrictions, HideContextMenu, HideItemTooltip, RefreshWeightState);
+    private InventoryDragController CreateDragController() => new(_dragState, DragPlacementService, PlayerInput, _countDragWindow, _canvasTransform, () => _selectedItemGrid, CanDetachItemWithSlotRestrictions, HideContextMenu, HideItemTooltip, RefreshWeightState);
     private InventoryOpenStateController CreateOpenStateController() => new(_playerController, _unlockCursorWhileOpen, _disablePlayerControlsWhileOpen, TryStashSelectedItem, ApplyWeightMovementState, HandleInventoryClosed);
     private InventoryItemPlacementService CreateItemPlacementService() => new(ItemFactory, _itemRegistry, TryPrepareSlotRestrictionsForPlacement, RefreshWeightState);
     private InventoryHoveredItemActionController CreateHoveredItemActionController() => new(PlayerInput, _dragState, () => _selectedItemGrid, DragController.GetTileGridPosition, IsContextMenuOpen, TryDropItem, HoverInfoController, HideItemTooltip);
     private InventoryQuickUseService CreateQuickUseService() => new(_quickUseSlotBindings, TryDetachItemFromGrid, DestroyInventoryItem, RefreshWeightState);
-    private InventoryUpdateController CreateUpdateController() => new(PlayerInput, () => IsOpen, IsItemInfoPanelOpen, () => _selectedItemGrid, HoverInfoController, ContextMenuController, ToggleInventory, CloseInventory, HideItemTooltip, HideItemInfoPanel, HideContextMenu, DragController.ItemIconDrag, DragController.ReleaseDraggedItem, DragController.RotateSelectedItem, TryHandleHoveredItemDropInput, HandleHighlight, DragController.BeginDrag);
+    private InventoryUpdateController CreateUpdateController() => new(PlayerInput, () => IsOpen, IsItemInfoPanelOpen, () => _selectedItemGrid, HoverInfoController, ContextMenuController, ToggleInventory, CloseInventory, HideItemTooltip, HideItemInfoPanel, HideContextMenu, DragController.IsCountDragWindowOpen, DragController.CancelCountDragWindow, DragController.ItemIconDrag, DragController.ReleaseDraggedItem, DragController.RotateSelectedItem, TryHandleHoveredItemDropInput, HandleHighlight, DragController.BeginDrag);
 
     private void Awake()
     {
@@ -267,6 +268,7 @@ public class InventoryController : MonoBehaviour
         _inventoryView = new(_inventoryRoot, _inventoryCanvasGroup, _weightText, _settings);
         _miniActionTextView = new(_miniActionText);
         _itemTooltip = ResolveItemTooltip();
+        _countDragWindow = ResolveCountDragWindow();
         _itemTooltip?.SetPlayerInput(PlayerInput);
 
         _itemFactory = new InventoryItemFactory(_itemPrefab);
@@ -417,7 +419,11 @@ public class InventoryController : MonoBehaviour
     private bool InsertItem(InventoryItem itemToInsert, InventoryGrid targetGrid) => ItemPlacementService.InsertItem(itemToInsert, targetGrid);
     private bool TryHandleHoveredItemDropInput() => HoveredItemActionController.TryHandleHoveredItemDropInput();
 
-    private void HandleHighlight() => HoverInfoController.HandleHighlight(_selectedItemGrid, _dragState.SelectedItem, DragController.GetTileGridPosition(), DragController.TryGetStackMergeTarget);
+    private void HandleHighlight()
+    {
+        bool useCountDragHighlight = _dragState.SelectedItem != null && _dragState.SelectedItem.IsStackable && _dragState.SelectedItem.CurrentAmount > 1 && PlayerInput.IsInventoryCountDragModifierHeld();
+        HoverInfoController.HandleHighlight(_selectedItemGrid, _dragState.SelectedItem, DragController.GetTileGridPosition(), DragController.TryGetStackMergeTarget, useCountDragHighlight, _settings.CountDragHighlightColor);
+    }
 
     private void RegisterInventoryItem(InventoryItem item) => _itemRegistry.Register(item);
 
@@ -808,6 +814,28 @@ public class InventoryController : MonoBehaviour
         return _itemTooltip;
     }
 
+    private InventoryCountDragWindow ResolveCountDragWindow()
+    {
+        if (_countDragWindow != null)
+        {
+            return _countDragWindow;
+        }
+
+        Transform windowTransform = FindChildRecursive(_canvasTransform, "Count Drag Window");
+
+        if (windowTransform == null)
+        {
+            return null;
+        }
+
+        if (windowTransform.TryGetComponent(out _countDragWindow) == false)
+        {
+            _countDragWindow = windowTransform.gameObject.AddComponent<InventoryCountDragWindow>();
+        }
+
+        return _countDragWindow;
+    }
+
     private static Transform FindChildRecursive(Transform root, string childName)
     {
         if (root == null)
@@ -1136,6 +1164,7 @@ public class InventoryController : MonoBehaviour
     private void HandleInventoryClosed()
     {
         SelectedItemGrid = null;
+        DragController.CancelCountDragWindow();
         HoverInfoController.HideHighlight();
         HideItemTooltip();
         HideItemInfoPanel();

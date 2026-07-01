@@ -66,6 +66,47 @@ internal sealed class InventoryDragPlacementService
         return true;
     }
 
+    public bool CanOpenCountDragWindow(InventoryGrid targetGrid, Vector2Int tileGridPosition)
+    {
+        InventoryItem selectedItem = _dragState.SelectedItem;
+
+        if (targetGrid == null || selectedItem == null || selectedItem.IsStackable == false || selectedItem.CurrentAmount <= 1)
+        {
+            return false;
+        }
+
+        if (targetGrid == _dragState.OriginGrid && tileGridPosition == _dragState.OriginPosition)
+        {
+            return false;
+        }
+
+        return TryGetStackMergeTarget(targetGrid, tileGridPosition, out _) || targetGrid.CanPlaceItem(selectedItem, tileGridPosition.x, tileGridPosition.y);
+    }
+
+    public bool TryPlaceDraggedItemAmount(InventoryGrid targetGrid, Vector2Int tileGridPosition, int amount)
+    {
+        InventoryItem selectedItem = _dragState.SelectedItem;
+
+        if (targetGrid == null || selectedItem == null)
+        {
+            return false;
+        }
+
+        int normalizedAmount = Mathf.Clamp(amount, 1, selectedItem.CurrentAmount);
+
+        if (normalizedAmount >= selectedItem.CurrentAmount)
+        {
+            return TryPlaceDraggedItem(targetGrid, tileGridPosition);
+        }
+
+        if (TryMergeDraggedItemAmountIntoStack(targetGrid, tileGridPosition, normalizedAmount))
+        {
+            return true;
+        }
+
+        return TryPlaceSplitItemFromStack(targetGrid, tileGridPosition, normalizedAmount);
+    }
+
     public bool TryGetStackMergeTarget(InventoryGrid targetGrid, Vector2Int tileGridPosition, out InventoryItem targetStack)
     {
         targetStack = null;
@@ -155,6 +196,41 @@ internal sealed class InventoryDragPlacementService
         return true;
     }
 
+    private bool TryMergeDraggedItemAmountIntoStack(InventoryGrid targetGrid, Vector2Int tileGridPosition, int amount)
+    {
+        if (TryGetStackMergeTarget(targetGrid, tileGridPosition, out InventoryItem targetStack) == false)
+        {
+            return false;
+        }
+
+        InventoryItem selectedItem = _dragState.SelectedItem;
+
+        if (selectedItem == null || _dragState.OriginGrid == null || amount <= 0 || amount >= selectedItem.CurrentAmount)
+        {
+            return false;
+        }
+
+        int originalAmount = selectedItem.CurrentAmount;
+        bool originalRotated = selectedItem.IsRotated;
+
+        selectedItem.SetAmount(originalAmount - amount);
+        selectedItem.SetRotated(_dragState.OriginRotated);
+
+        if (_dragState.OriginGrid.CanPlaceItem(selectedItem, _dragState.OriginPosition.x, _dragState.OriginPosition.y) == false)
+        {
+            selectedItem.SetAmount(originalAmount);
+            selectedItem.SetRotated(originalRotated);
+            return false;
+        }
+
+        targetStack.AddAmount(amount);
+        _dragState.OriginGrid.PlaceItem(selectedItem, _dragState.OriginPosition.x, _dragState.OriginPosition.y);
+
+        _refreshWeightState();
+        FinishDraggingItem();
+        return true;
+    }
+
     private bool TryInstallDraggedWeaponModule(InventoryGrid targetGrid, Vector2Int tileGridPosition)
     {
         InventoryItem moduleItem = _dragState.SelectedItem;
@@ -235,6 +311,75 @@ internal sealed class InventoryDragPlacementService
         _refreshWeightState();
         FinishDraggingItem();
         return true;
+    }
+
+    private bool TryPlaceSplitItemFromStack(InventoryGrid targetGrid, Vector2Int tileGridPosition, int amount)
+    {
+        if (targetGrid == null || _dragState.SelectedItem == null || _dragState.OriginGrid == null)
+        {
+            return false;
+        }
+
+        InventoryItem selectedItem = _dragState.SelectedItem;
+
+        if (targetGrid == _dragState.OriginGrid && tileGridPosition == _dragState.OriginPosition)
+        {
+            return false;
+        }
+
+        if (targetGrid.CanPlaceItem(selectedItem, tileGridPosition.x, tileGridPosition.y) == false)
+        {
+            return false;
+        }
+
+        int originalAmount = selectedItem.CurrentAmount;
+        bool originalRotated = selectedItem.IsRotated;
+
+        if (amount <= 0 || amount >= originalAmount)
+        {
+            return false;
+        }
+
+        selectedItem.SetAmount(originalAmount - amount);
+        selectedItem.SetRotated(_dragState.OriginRotated);
+
+        if (_dragState.OriginGrid.CanPlaceItem(selectedItem, _dragState.OriginPosition.x, _dragState.OriginPosition.y) == false)
+        {
+            selectedItem.SetAmount(originalAmount);
+            selectedItem.SetRotated(originalRotated);
+            return false;
+        }
+
+        InventoryItem splitItem = _itemFactory.Create(selectedItem.ItemData, amount, selectedItem.CurrentDurabilityPercent, null);
+        splitItem.SetRotated(originalRotated);
+
+        if (targetGrid.CanPlaceItem(splitItem, tileGridPosition.x, tileGridPosition.y) == false || IsOverlappingOriginPlacement(targetGrid, selectedItem, splitItem, tileGridPosition) || _tryPrepareSlotRestrictionsForPlacement(targetGrid, splitItem) == false)
+        {
+            UnityEngine.Object.Destroy(splitItem.gameObject);
+            selectedItem.SetAmount(originalAmount);
+            selectedItem.SetRotated(originalRotated);
+            return false;
+        }
+
+        targetGrid.PlaceItem(splitItem, tileGridPosition.x, tileGridPosition.y);
+        _dragState.OriginGrid.PlaceItem(selectedItem, _dragState.OriginPosition.x, _dragState.OriginPosition.y);
+
+        _itemRegistry.Register(splitItem);
+        _refreshWeightState();
+        FinishDraggingItem();
+        return true;
+    }
+
+    private bool IsOverlappingOriginPlacement(InventoryGrid targetGrid, InventoryItem originItem, InventoryItem targetItem, Vector2Int targetPosition)
+    {
+        if (targetGrid != _dragState.OriginGrid || originItem == null || targetItem == null)
+        {
+            return false;
+        }
+
+        RectInt originRect = new(_dragState.OriginPosition.x, _dragState.OriginPosition.y, originItem.Width, originItem.Height);
+        RectInt targetRect = new(targetPosition.x, targetPosition.y, targetItem.Width, targetItem.Height);
+        return originRect.xMin < targetRect.xMax && originRect.xMax > targetRect.xMin && originRect.yMin < targetRect.yMax && originRect.yMax > targetRect.yMin;
     }
 
     private void FinishDraggingItem() => _dragState.Finish();

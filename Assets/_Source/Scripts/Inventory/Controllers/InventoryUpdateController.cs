@@ -13,6 +13,8 @@ internal sealed class InventoryUpdateController
     private readonly Action _hideItemTooltip;
     private readonly Action _hideItemInfoPanel;
     private readonly Action _hideContextMenu;
+    private readonly Func<bool> _isCountDragWindowOpen;
+    private readonly Action _cancelCountDragWindow;
     private readonly Action _dragItemIcon;
     private readonly Action _releaseDraggedItem;
     private readonly Action _rotateSelectedItem;
@@ -20,7 +22,7 @@ internal sealed class InventoryUpdateController
     private readonly Action _handleHighlight;
     private readonly Action _beginDrag;
 
-    public InventoryUpdateController(IInventoryInput playerInput, Func<bool> isOpen, Func<bool> isItemInfoPanelOpen, Func<InventoryGrid> selectedGrid, InventoryHoverInfoController hoverInfoController, InventoryContextMenuController contextMenuController, Action toggleInventory, Action closeInventory, Action hideItemTooltip, Action hideItemInfoPanel, Action hideContextMenu, Action dragItemIcon, Action releaseDraggedItem, Action rotateSelectedItem, Func<bool> tryHandleHoveredItemDropInput, Action handleHighlight, Action beginDrag)
+    public InventoryUpdateController(IInventoryInput playerInput, Func<bool> isOpen, Func<bool> isItemInfoPanelOpen, Func<InventoryGrid> selectedGrid, InventoryHoverInfoController hoverInfoController, InventoryContextMenuController contextMenuController, Action toggleInventory, Action closeInventory, Action hideItemTooltip, Action hideItemInfoPanel, Action hideContextMenu, Func<bool> isCountDragWindowOpen, Action cancelCountDragWindow, Action dragItemIcon, Action releaseDraggedItem, Action rotateSelectedItem, Func<bool> tryHandleHoveredItemDropInput, Action handleHighlight, Action beginDrag)
     {
         _playerInput = playerInput;
         _isOpen = isOpen;
@@ -33,6 +35,8 @@ internal sealed class InventoryUpdateController
         _hideItemTooltip = hideItemTooltip;
         _hideItemInfoPanel = hideItemInfoPanel;
         _hideContextMenu = hideContextMenu;
+        _isCountDragWindowOpen = isCountDragWindowOpen;
+        _cancelCountDragWindow = cancelCountDragWindow;
         _dragItemIcon = dragItemIcon;
         _releaseDraggedItem = releaseDraggedItem;
         _rotateSelectedItem = rotateSelectedItem;
@@ -45,6 +49,12 @@ internal sealed class InventoryUpdateController
     {
         if (_isOpen() && _playerInput.IsEscapePressed())
         {
+            if (_isCountDragWindowOpen())
+            {
+                _cancelCountDragWindow();
+                return;
+            }
+
             if (_isItemInfoPanelOpen())
             {
                 _hideItemInfoPanel();
@@ -66,6 +76,11 @@ internal sealed class InventoryUpdateController
             return;
         }
 
+        if (_isCountDragWindowOpen())
+        {
+            return;
+        }
+
         if (_isItemInfoPanelOpen())
         {
             HideItemInteractionUi();
@@ -83,6 +98,11 @@ internal sealed class InventoryUpdateController
         if (_playerInput.IsInventoryPrimaryActionReleased())
         {
             _releaseDraggedItem();
+
+            if (_isCountDragWindowOpen())
+            {
+                return;
+            }
         }
 
         if (_playerInput.IsInventoryRotatePressed())
