@@ -849,7 +849,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: f9c3b2819a824d2cb976aa10c4627e41, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::BootstrapLoadingController
-  _gameSceneName: Test
+  _gameSceneName: MainMenu
   _titleText: {fileID: 182611673}
   _titleCanvasGroup: {fileID: 182611675}
   _progressText: {fileID: 2060579809}
