@@ -179,8 +179,8 @@ MonoBehaviour:
       m_Calls: []
   m_text: New Text
   m_isRightToLeft: 0
-  m_fontAsset: {fileID: 11400000, guid: 3dd8eb48e7a28584cba86429b7013306, type: 2}
-  m_sharedMaterial: {fileID: 2067308906423154948, guid: 3dd8eb48e7a28584cba86429b7013306, type: 2}
+  m_fontAsset: {fileID: 11400000, guid: 3b371cb6383fbce4f989694e8daf9b59, type: 2}
+  m_sharedMaterial: {fileID: -7224779496788105734, guid: 3b371cb6383fbce4f989694e8daf9b59, type: 2}
   m_fontSharedMaterials: []
   m_fontMaterial: {fileID: 0}
   m_fontMaterials: []
@@ -771,25 +771,6 @@ MonoBehaviour:
   m_BlockingMask:
     serializedVersion: 2
     m_Bits: 4294967295
---- !u!114 &906170513
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 906170508}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: f9c3b2819a824d2cb976aa10c4627e41, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::BootstrapLoadingController
-  _gameSceneName: Test
-  _titleText: {fileID: 182611673}
-  _titleCanvasGroup: {fileID: 182611675}
-  _progressText: {fileID: 2060579809}
-  _fillImage: {fileID: 1213523197}
-  _continueTextMinimumAlpha: 0.25
-  _continueTextBlinkCycleSeconds: 1.2
 --- !u!114 &906170510
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -830,7 +811,7 @@ Canvas:
   m_OverrideSorting: 0
   m_OverridePixelPerfect: 0
   m_SortingBucketNormalizedSize: 0
-  m_VertexColorAlwaysGammaSpace: 0
+  m_VertexColorAlwaysGammaSpace: 1
   m_AdditionalShaderChannelsFlag: 25
   m_UpdateRectTransformForStandalone: 0
   m_SortingLayerID: 0
@@ -856,6 +837,23 @@ RectTransform:
   m_AnchoredPosition: {x: 0, y: 0}
   m_SizeDelta: {x: 0, y: 0}
   m_Pivot: {x: 0, y: 0}
+--- !u!114 &906170513
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 906170508}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f9c3b2819a824d2cb976aa10c4627e41, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::BootstrapLoadingController
+  _gameSceneName: Test
+  _titleText: {fileID: 182611673}
+  _titleCanvasGroup: {fileID: 182611675}
+  _progressText: {fileID: 2060579809}
+  _fillImage: {fileID: 1213523197}
 --- !u!1 &1213523195
 GameObject:
   m_ObjectHideFlags: 0
@@ -1230,8 +1228,8 @@ MonoBehaviour:
       m_Calls: []
   m_text: 100%
   m_isRightToLeft: 0
-  m_fontAsset: {fileID: 11400000, guid: 3dd8eb48e7a28584cba86429b7013306, type: 2}
-  m_sharedMaterial: {fileID: 2067308906423154948, guid: 3dd8eb48e7a28584cba86429b7013306, type: 2}
+  m_fontAsset: {fileID: 11400000, guid: 3b371cb6383fbce4f989694e8daf9b59, type: 2}
+  m_sharedMaterial: {fileID: -7224779496788105734, guid: 3b371cb6383fbce4f989694e8daf9b59, type: 2}
   m_fontSharedMaterials: []
   m_fontMaterial: {fileID: 0}
   m_fontMaterials: []

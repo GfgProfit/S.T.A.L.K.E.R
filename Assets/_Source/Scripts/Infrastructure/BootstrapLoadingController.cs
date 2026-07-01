@@ -16,8 +16,6 @@ public sealed class BootstrapLoadingController : MonoBehaviour
     [SerializeField] private CanvasGroup _titleCanvasGroup;
     [SerializeField] private TMP_Text _progressText;
     [SerializeField] private Image _fillImage;
-    [SerializeField] [Range(0f, 1f)] private float _continueTextMinimumAlpha = 0.25f;
-    [SerializeField] [Min(0.1f)] private float _continueTextBlinkCycleSeconds = 1.2f;
 
     private void Start()
     {
