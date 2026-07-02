@@ -182,6 +182,17 @@ public sealed class FirstPersonWeaponRuntimeController : MonoBehaviour
             return;
         }
 
+        if (Cursor.lockState != CursorLockMode.Locked)
+        {
+            if (_isAiming)
+            {
+                UpdateAimState(true);
+            }
+
+            UpdateAmmoHud();
+            return;
+        }
+
         if (_isReloading || _isClearingJam)
         {
             UpdateAmmoHud();

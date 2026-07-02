@@ -1,4 +1,5 @@
 using DG.Tweening;
+using System;
 using System.Collections.Generic;
 using TMPro;
 using UnityEngine;
@@ -17,34 +18,70 @@ public class HorizontalSelector : MonoBehaviour
     [SerializeField] private float _animationDuration = 0.2f;
 
     public int Index { get; set; } = 0;
+    public event Action<int> IndexChanged;
 
     [SerializeField] private List<string> _contents;
     private readonly List<Image> _viewItems = new();
+    private bool _isSetup;
+    private bool _isSubscribed;
 
     private void Start()
     {
-        _leftArrowButton.OnClick.AddListener(() => DecrementIndex());
-        _rightArrowButton.OnClick.AddListener(() => IncrementIndex());
+        SubscribeArrows();
 
-        Setup(_contents);
+        if (_isSetup == false)
+        {
+            Setup(_contents);
+        }
+    }
+
+    private void OnDestroy()
+    {
+        UnsubscribeArrows();
+        _currentContentText?.rectTransform.DOKill();
     }
 
     public void Setup(List<string> contents)
     {
-        _contents = contents;
+        _contents = contents ?? new List<string>();
+        _isSetup = true;
+        ClampIndex();
 
         Apply();
         CreateViewItemLines();
         SelectViewItem();
     }
 
+    public void SetIndex(int index, bool notify = false)
+    {
+        Index = index;
+        ClampIndex();
+        Apply();
+        SelectViewItem();
+
+        if (notify)
+        {
+            NotifyIndexChanged();
+        }
+    }
+
     public string GetContentByIndex()
     {
+        if (_contents == null || _contents.Count == 0)
+        {
+            return string.Empty;
+        }
+
         return _contents[Index];
     }
 
     private void IncrementIndex()
     {
+        if (_contents == null || _contents.Count == 0)
+        {
+            return;
+        }
+
         Index++;
 
         if (Index >= _contents.Count)
@@ -54,10 +91,16 @@ public class HorizontalSelector : MonoBehaviour
 
         SelectViewItem();
         AnimateRightContentItem();
+        NotifyIndexChanged();
     }
 
     private void DecrementIndex()
     {
+        if (_contents == null || _contents.Count == 0)
+        {
+            return;
+        }
+
         Index--;
 
         if (Index < 0)
@@ -67,15 +110,28 @@ public class HorizontalSelector : MonoBehaviour
 
         SelectViewItem();
         AnimateLeftContentItem();
+        NotifyIndexChanged();
     }
 
     private void Apply()
     {
-        _currentContentText.text = _contents[Index];
+        if (_currentContentText == null)
+        {
+            return;
+        }
+
+        _currentContentText.text = GetContentByIndex();
     }
 
     private void CreateViewItemLines()
     {
+        ClearViewItemLines();
+
+        if (_horizontalLayoutGroup == null || _itemPrefab == null || _contents == null || _contents.Count == 0)
+        {
+            return;
+        }
+
         RectTransform rectTransform = _horizontalLayoutGroup.GetComponent<RectTransform>();
         float containerWidth = rectTransform.rect.width;
 
@@ -108,6 +164,11 @@ public class HorizontalSelector : MonoBehaviour
     {
         for (int i = 0; i < _viewItems.Count; i++)
         {
+            if (_viewItems[i] == null)
+            {
+                continue;
+            }
+
             if (i == Index)
             {
                 Image viewItem = _viewItems[i];
@@ -125,7 +186,13 @@ public class HorizontalSelector : MonoBehaviour
 
     private void AnimateLeftContentItem()
     {
+        if (_currentContentText == null)
+        {
+            return;
+        }
+
         RectTransform contentTextTransform = _currentContentText.rectTransform;
+        contentTextTransform.DOKill();
 
         contentTextTransform.DOLocalMoveX(-350, _animationDuration)
             .OnComplete(() =>
@@ -138,7 +205,13 @@ public class HorizontalSelector : MonoBehaviour
 
     private void AnimateRightContentItem()
     {
+        if (_currentContentText == null)
+        {
+            return;
+        }
+
         RectTransform contentTextTransform = _currentContentText.rectTransform;
+        contentTextTransform.DOKill();
 
         contentTextTransform.DOLocalMoveX(350, _animationDuration)
             .OnComplete(() =>
@@ -147,5 +220,78 @@ public class HorizontalSelector : MonoBehaviour
                 contentTextTransform.DOLocalMoveX(0, _animationDuration);
                 Apply();
             }).SetEase(Ease.OutBack);
+    }
+
+    private void SubscribeArrows()
+    {
+        if (_isSubscribed)
+        {
+            return;
+        }
+
+        if (_leftArrowButton != null)
+        {
+            _leftArrowButton.OnClick.AddListener(DecrementIndex);
+        }
+
+        if (_rightArrowButton != null)
+        {
+            _rightArrowButton.OnClick.AddListener(IncrementIndex);
+        }
+
+        _isSubscribed = true;
+    }
+
+    private void UnsubscribeArrows()
+    {
+        if (_isSubscribed == false)
+        {
+            return;
+        }
+
+        if (_leftArrowButton != null)
+        {
+            _leftArrowButton.OnClick.RemoveListener(DecrementIndex);
+        }
+
+        if (_rightArrowButton != null)
+        {
+            _rightArrowButton.OnClick.RemoveListener(IncrementIndex);
+        }
+
+        _isSubscribed = false;
+    }
+
+    private void ClampIndex()
+    {
+        if (_contents == null || _contents.Count == 0)
+        {
+            Index = 0;
+            return;
+        }
+
+        Index = Mathf.Clamp(Index, 0, _contents.Count - 1);
+    }
+
+    private void ClearViewItemLines()
+    {
+        for (int i = 0; i < _viewItems.Count; i++)
+        {
+            if (_viewItems[i] == null)
+            {
+                continue;
+            }
+
+            _viewItems[i].DOKill();
+            _viewItems[i].rectTransform.DOKill();
+            Destroy(_viewItems[i].gameObject);
+        }
+
+        _viewItems.Clear();
+    }
+
+    private void NotifyIndexChanged()
+    {
+        IndexChanged?.Invoke(Index);
     }
 }

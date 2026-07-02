@@ -34,7 +34,7 @@ public class InventoryItemContextMenu : MonoBehaviour, IView<InventoryItemContex
     [SerializeField] private TMP_Text _equipButtonText;
     [SerializeField] private Button _unequipButton;
     [SerializeField] private TMP_Text _unequipButtonText;
-    [SerializeField] private string _inspectButtonLabel = "\u041e\u0441\u043c\u043e\u0442\u0440\u0435\u0442\u044c";
+    [SerializeField] private string _inspectButtonLabel = "Осмотреть";
     [SerializeField] private string _unloadButtonLabel = "Разрядить";
     [SerializeField] private string _equipPrimaryWeaponButtonLabel = "Экипировать в основной слот";
     [SerializeField] private string _equipSecondaryWeaponButtonLabel = "Экипировать во вторичный слот";
@@ -44,7 +44,6 @@ public class InventoryItemContextMenu : MonoBehaviour, IView<InventoryItemContex
     [SerializeField] private Button _dropStackButton;
     [SerializeField] private TMP_Text _dropStackButtonText;
     [SerializeField] [Min(0f)] private float _closeRadius = 220f;
-    [SerializeField] private bool _showCloseRadiusInEditor = true;
     [SerializeField] private Color _closeRadiusEditorColor = new(1f, 0.65f, 0f, 0.9f);
 
     private Action _onUse;
@@ -577,7 +576,7 @@ public class InventoryItemContextMenu : MonoBehaviour, IView<InventoryItemContex
 #if UNITY_EDITOR
     private void OnDrawGizmosSelected()
     {
-        if (_showCloseRadiusInEditor == false || _closeRadius <= 0f)
+        if (_closeRadius <= 0f)
         {
             return;
         }

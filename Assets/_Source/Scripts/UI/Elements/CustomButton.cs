@@ -20,25 +20,41 @@ public class CustomButton : MonoBehaviour, IPointerClickHandler, IPointerEnterHa
 
     [field: SerializeField] public UnityEvent OnClick { get; private set; } = new UnityEvent();
 
-    private void Start() => _buttonText.text = _titleText;
+    private void Start()
+    {
+        if (_buttonText != null)
+        {
+            _buttonText.text = _titleText;
+        }
+    }
 
     private void OnEnable()
     {
-        _buttonFadeImage.color = new Color(255.0f, 255.0f, 255.0f, 0.0f);
-        _buttonImage.color = new Color(0.0f, 0.0f, 0.0f, 0.588f);
-        _buttonText.color = Color.white;
-        _buttonText.text = _titleText;
-        _upLineImage.rectTransform.localPosition = new Vector3(255.0f, 23.5f, 0);
-        _downLineImage.rectTransform.localPosition = new Vector3(-255.0f, -23.5f, 0);
-        _upLineImage.fillAmount = 0;
-        _downLineImage.fillAmount = 0;
+        ResetToDefaultState();
     }
 
     private void OnDisable()
     {
-        _buttonFadeImage.color = new Color(0.0f, 0.0f, 0.0f, 0.0f);
+        KillTweens();
+        ResetToDefaultState();
+    }
+
+    private void OnDestroy()
+    {
+        KillTweens();
+    }
+
+    private void ResetToDefaultState()
+    {
+        if (HasRequiredReferences() == false)
+        {
+            return;
+        }
+
+        _buttonFadeImage.color = new Color(255.0f, 255.0f, 255.0f, 0.0f);
         _buttonImage.color = new Color(0.0f, 0.0f, 0.0f, 0.588f);
         _buttonText.color = Color.white;
+        _buttonText.text = _titleText;
         _upLineImage.rectTransform.localPosition = new Vector3(255.0f, 23.5f, 0);
         _downLineImage.rectTransform.localPosition = new Vector3(-255.0f, -23.5f, 0);
         _upLineImage.fillAmount = 0;
@@ -68,6 +84,12 @@ public class CustomButton : MonoBehaviour, IPointerClickHandler, IPointerEnterHa
 
     private void PlayClickAnimations()
     {
+        if (HasRequiredReferences() == false)
+        {
+            return;
+        }
+
+        KillTweens();
         float halfDuration = _animationsDuration / 2.0f;
 
         AnimateColorPingPong(_buttonFadeImage, Color.gray, Color.white, halfDuration);
@@ -79,6 +101,12 @@ public class CustomButton : MonoBehaviour, IPointerClickHandler, IPointerEnterHa
 
     private void PlayEnterAnimations()
     {
+        if (HasRequiredReferences() == false)
+        {
+            return;
+        }
+
+        KillTweens();
         _buttonFadeImage.DOFade(1.0f, _animationsDuration).SetEase(Ease.OutBack);
         _buttonImage.DOFade(0.0f, _animationsDuration).SetEase(Ease.OutBack);
         _buttonText.DOColor(Color.black, _animationsDuration).SetEase(Ease.OutBack);
@@ -92,6 +120,12 @@ public class CustomButton : MonoBehaviour, IPointerClickHandler, IPointerEnterHa
 
     private void ResetToExitState()
     {
+        if (HasRequiredReferences() == false)
+        {
+            return;
+        }
+
+        KillTweens();
         _buttonFadeImage.DOFade(0, _animationsDuration).SetEase(Ease.OutBack);
         _buttonImage.DOFade(0.588f, _animationsDuration).SetEase(Ease.OutBack);
         _buttonText.DOColor(Color.white, _animationsDuration).SetEase(Ease.OutBack);
@@ -122,5 +156,41 @@ public class CustomButton : MonoBehaviour, IPointerClickHandler, IPointerEnterHa
         image.DOFillAmount(from, halfDuration)
              .OnComplete(() => image.DOFillAmount(to, halfDuration))
              .SetEase(Ease.OutBack);
+    }
+
+    private bool HasRequiredReferences()
+    {
+        return _buttonImage != null && _buttonFadeImage != null && _upLineImage != null && _downLineImage != null && _buttonText != null;
+    }
+
+    private void KillTweens()
+    {
+        if (_buttonImage != null)
+        {
+            DOTween.Kill(_buttonImage);
+        }
+
+        if (_buttonFadeImage != null)
+        {
+            DOTween.Kill(_buttonFadeImage);
+        }
+
+        if (_buttonText != null)
+        {
+            DOTween.Kill(_buttonText);
+            DOTween.Kill(_buttonText.rectTransform);
+        }
+
+        if (_upLineImage != null)
+        {
+            DOTween.Kill(_upLineImage);
+            DOTween.Kill(_upLineImage.rectTransform);
+        }
+
+        if (_downLineImage != null)
+        {
+            DOTween.Kill(_downLineImage);
+            DOTween.Kill(_downLineImage.rectTransform);
+        }
     }
 }
