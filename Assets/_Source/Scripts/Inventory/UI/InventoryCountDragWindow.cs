@@ -21,6 +21,7 @@ public sealed class InventoryCountDragWindow : MonoBehaviour, IScrollHandler
 
     private Action<int> _apply;
     private Action _cancel;
+    private Action _closed;
     private ItemData _itemData;
     private int _minCount = 1;
     private int _maxCount = 1;
@@ -103,10 +104,21 @@ public sealed class InventoryCountDragWindow : MonoBehaviour, IScrollHandler
 
     public void Hide()
     {
+        bool wasOpen = gameObject.activeSelf;
         _apply = null;
         _cancel = null;
         _itemData = null;
         gameObject.SetActive(false);
+
+        if (wasOpen)
+        {
+            _closed?.Invoke();
+        }
+    }
+
+    public void SetClosedHandler(Action closed)
+    {
+        _closed = closed;
     }
 
     public void OnScroll(PointerEventData eventData)

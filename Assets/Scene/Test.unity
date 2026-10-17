@@ -6878,6 +6878,67 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 323776688}
   m_CullTransparentMesh: 1
+--- !u!1 &330255587
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 330255588}
+  - component: {fileID: 330255589}
+  m_Layer: 0
+  m_Name: Pause Manager
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &330255588
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 330255587}
+  serializedVersion: 2
+  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 602623717}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &330255589
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 330255587}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ea218e83bac34da1a77d9d491f0e1632, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::PauseMenuController
+  _pausePanel: {fileID: 6769992425626399454}
+  _pauseMenuPanel: {fileID: 1951762099394266153}
+  _optionsMenuPanel: {fileID: 6350653067880426797}
+  _exitModalWindow: {fileID: 362333876}
+  _windowManager: {fileID: 1469833079}
+  _disableWhileOpen:
+  - {fileID: 602623714}
+  - {fileID: 602623720}
+  - {fileID: 602623711}
+  - {fileID: 602623722}
+  - {fileID: 1178330747}
+  - {fileID: 1178330748}
+  - {fileID: 1919033786}
+  - {fileID: 1284813552}
+  - {fileID: 4431891814500254998}
+  _disableChildrenWhileOpen: []
+  _unlockCursorWhileOpen: 1
 --- !u!1 &331770558
 GameObject:
   m_ObjectHideFlags: 0
@@ -12905,6 +12966,8 @@ Transform:
   - {fileID: 853287341}
   - {fileID: 869059591}
   - {fileID: 734797341}
+  - {fileID: 1469833078}
+  - {fileID: 330255588}
   - {fileID: 3948230477463134126}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
@@ -12980,7 +13043,8 @@ MonoBehaviour:
   _itemInfoPanel: {fileID: 2010338236}
   _itemTooltip: {fileID: 1807875129}
   _itemContextMenu: {fileID: 564352809}
-  _countDragWindow: {fileID: 0}
+  _countDragWindow: {fileID: 1940828696}
+  _windowManager: {fileID: 1469833079}
   _closedSlotPrefab: {fileID: 7039134793815377571, guid: aa9dbe456d8ccf8499b6d334af9b97de, type: 3}
   _initialInventoryItems: []
   _quickUseSlotBindings:
@@ -17836,7 +17900,6 @@ GameObject:
   - component: {fileID: 853287344}
   - component: {fileID: 853287343}
   - component: {fileID: 853287342}
-  - component: {fileID: 912345678901234567}
   m_Layer: 5
   m_Name: Canvas
   m_TagString: Untagged
@@ -22977,7 +23040,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 2945968059448162860, guid: 06295ba1fac18bb47a624007e74799c5, type: 3}
       propertyPath: <OnClick>k__BackingField.m_PersistentCalls.m_Calls.Array.data[0].m_Mode
-      value: 6
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 2945968059448162860, guid: 06295ba1fac18bb47a624007e74799c5, type: 3}
       propertyPath: <OnClick>k__BackingField.m_PersistentCalls.m_Calls.Array.data[1].m_Mode
@@ -22986,7 +23049,7 @@ PrefabInstance:
     - target: {fileID: 2945968059448162860, guid: 06295ba1fac18bb47a624007e74799c5, type: 3}
       propertyPath: <OnClick>k__BackingField.m_PersistentCalls.m_Calls.Array.data[0].m_Target
       value: 
-      objectReference: {fileID: 362333876}
+      objectReference: {fileID: 330255589}
     - target: {fileID: 2945968059448162860, guid: 06295ba1fac18bb47a624007e74799c5, type: 3}
       propertyPath: <OnClick>k__BackingField.m_PersistentCalls.m_Calls.Array.data[1].m_Target
       value: 
@@ -23001,7 +23064,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 2945968059448162860, guid: 06295ba1fac18bb47a624007e74799c5, type: 3}
       propertyPath: <OnClick>k__BackingField.m_PersistentCalls.m_Calls.Array.data[0].m_MethodName
-      value: SetActive
+      value: CloseExitModalWindow
       objectReference: {fileID: 0}
     - target: {fileID: 2945968059448162860, guid: 06295ba1fac18bb47a624007e74799c5, type: 3}
       propertyPath: <OnClick>k__BackingField.m_PersistentCalls.m_Calls.Array.data[1].m_MethodName
@@ -23009,7 +23072,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 2945968059448162860, guid: 06295ba1fac18bb47a624007e74799c5, type: 3}
       propertyPath: <OnClick>k__BackingField.m_PersistentCalls.m_Calls.Array.data[0].m_TargetAssemblyTypeName
-      value: UnityEngine.GameObject, UnityEngine
+      value: PauseMenuController, Assembly-CSharp
       objectReference: {fileID: 0}
     - target: {fileID: 2945968059448162860, guid: 06295ba1fac18bb47a624007e74799c5, type: 3}
       propertyPath: <OnClick>k__BackingField.m_PersistentCalls.m_Calls.Array.data[1].m_TargetAssemblyTypeName
@@ -29260,6 +29323,56 @@ Transform:
   - {fileID: 2255409617232703640}
   m_Father: {fileID: 1253276226}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!1 &1469833077
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1469833078}
+  - component: {fileID: 1469833079}
+  m_Layer: 0
+  m_Name: UI Window Manager
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &1469833078
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1469833077}
+  serializedVersion: 2
+  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 602623717}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &1469833079
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1469833077}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 6a9ad823ae7642dbbb11345cc6a2056a, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::UIWindowManager
+  _handleEscapeInput: 1
+  _manageCursor: 1
+  _manageGameplayInput: 1
+  _playerController: {fileID: 602623714}
+  _disableWhileGameplayInputBlocked: []
+  _disableChildrenWhileGameplayInputBlocked: []
 --- !u!1 &1473224758
 GameObject:
   m_ObjectHideFlags: 0
@@ -33794,7 +33907,7 @@ PrefabInstance:
     - target: {fileID: 2945968059448162860, guid: 06295ba1fac18bb47a624007e74799c5, type: 3}
       propertyPath: <OnClick>k__BackingField.m_PersistentCalls.m_Calls.Array.data[0].m_Target
       value: 
-      objectReference: {fileID: 912345678901234567}
+      objectReference: {fileID: 330255589}
     - target: {fileID: 2945968059448162860, guid: 06295ba1fac18bb47a624007e74799c5, type: 3}
       propertyPath: <OnClick>k__BackingField.m_PersistentCalls.m_Calls.Array.data[0].m_CallState
       value: 2
@@ -38055,6 +38168,7 @@ GameObject:
   - component: {fileID: 1940828693}
   - component: {fileID: 1940828695}
   - component: {fileID: 1940828694}
+  - component: {fileID: 1940828696}
   m_Layer: 5
   m_Name: Count Drag Window
   m_TagString: Untagged
@@ -38126,6 +38240,30 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1940828692}
   m_CullTransparentMesh: 1
+--- !u!114 &1940828696
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1940828692}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 9e0ff7dc5f2c4f94aab6115a8e4f50aa, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::InventoryCountDragWindow
+  _itemNameText: {fileID: 433036669}
+  _selectedItemsWeightText: {fileID: 794414125}
+  _countInputField: {fileID: 879606179}
+  _minusButton: {fileID: 1440078049}
+  _plusButton: {fileID: 836976769}
+  _countScrollbar: {fileID: 1028805152}
+  _minCountText: {fileID: 1457137133}
+  _maxCountText: {fileID: 361590049}
+  _halfCountButton: {fileID: 476099864}
+  _allCountButton: {fileID: 429555850}
+  _cancelCountButton: {fileID: 1912751654}
+  _applyCountButton: {fileID: 2018020968}
 --- !u!1 &1952792009
 GameObject:
   m_ObjectHideFlags: 0
@@ -47283,33 +47421,6 @@ MonoBehaviour:
   m_FillOrigin: 0
   m_UseSpriteMesh: 0
   m_PixelsPerUnitMultiplier: 1
---- !u!114 &912345678901234567
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 853287340}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: ea218e83bac34da1a77d9d491f0e1632, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::PauseMenuController
-  _pausePanel: {fileID: 6769992425626399454}
-  _inventoryController: {fileID: 602623720}
-  _blockingWindows: []
-  _disableWhileOpen:
-  - {fileID: 602623714}
-  - {fileID: 602623720}
-  - {fileID: 602623711}
-  - {fileID: 602623722}
-  - {fileID: 1178330747}
-  - {fileID: 1178330748}
-  - {fileID: 1919033786}
-  - {fileID: 1284813552}
-  - {fileID: 4431891814500254998}
-  _disableChildrenWhileOpen: []
-  _unlockCursorWhileOpen: 1
 --- !u!1 &914449611564502552
 GameObject:
   m_ObjectHideFlags: 0
@@ -55219,11 +55330,11 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 2945968059448162860, guid: 06295ba1fac18bb47a624007e74799c5, type: 3}
       propertyPath: <OnClick>k__BackingField.m_PersistentCalls.m_Calls.Array.size
-      value: 2
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 2945968059448162860, guid: 06295ba1fac18bb47a624007e74799c5, type: 3}
       propertyPath: <OnClick>k__BackingField.m_PersistentCalls.m_Calls.Array.data[0].m_Mode
-      value: 6
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 2945968059448162860, guid: 06295ba1fac18bb47a624007e74799c5, type: 3}
       propertyPath: <OnClick>k__BackingField.m_PersistentCalls.m_Calls.Array.data[1].m_Mode
@@ -55232,7 +55343,7 @@ PrefabInstance:
     - target: {fileID: 2945968059448162860, guid: 06295ba1fac18bb47a624007e74799c5, type: 3}
       propertyPath: <OnClick>k__BackingField.m_PersistentCalls.m_Calls.Array.data[0].m_Target
       value: 
-      objectReference: {fileID: 1951762099394266153}
+      objectReference: {fileID: 330255589}
     - target: {fileID: 2945968059448162860, guid: 06295ba1fac18bb47a624007e74799c5, type: 3}
       propertyPath: <OnClick>k__BackingField.m_PersistentCalls.m_Calls.Array.data[1].m_Target
       value: 
@@ -55247,7 +55358,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 2945968059448162860, guid: 06295ba1fac18bb47a624007e74799c5, type: 3}
       propertyPath: <OnClick>k__BackingField.m_PersistentCalls.m_Calls.Array.data[0].m_MethodName
-      value: SetActive
+      value: CloseOptionsMenu
       objectReference: {fileID: 0}
     - target: {fileID: 2945968059448162860, guid: 06295ba1fac18bb47a624007e74799c5, type: 3}
       propertyPath: <OnClick>k__BackingField.m_PersistentCalls.m_Calls.Array.data[1].m_MethodName
@@ -55255,7 +55366,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 2945968059448162860, guid: 06295ba1fac18bb47a624007e74799c5, type: 3}
       propertyPath: <OnClick>k__BackingField.m_PersistentCalls.m_Calls.Array.data[0].m_TargetAssemblyTypeName
-      value: UnityEngine.GameObject, UnityEngine
+      value: PauseMenuController, Assembly-CSharp
       objectReference: {fileID: 0}
     - target: {fileID: 2945968059448162860, guid: 06295ba1fac18bb47a624007e74799c5, type: 3}
       propertyPath: <OnClick>k__BackingField.m_PersistentCalls.m_Calls.Array.data[1].m_TargetAssemblyTypeName
@@ -55263,7 +55374,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 2945968059448162860, guid: 06295ba1fac18bb47a624007e74799c5, type: 3}
       propertyPath: <OnClick>k__BackingField.m_PersistentCalls.m_Calls.Array.data[0].m_Arguments.m_BoolArgument
-      value: 1
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 2945968059448162860, guid: 06295ba1fac18bb47a624007e74799c5, type: 3}
       propertyPath: <OnClick>k__BackingField.m_PersistentCalls.m_Calls.Array.data[0].m_Arguments.m_ObjectArgumentAssemblyTypeName
@@ -72904,11 +73015,19 @@ PrefabInstance:
       value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 2945968059448162860, guid: 06295ba1fac18bb47a624007e74799c5, type: 3}
+      propertyPath: <OnClick>k__BackingField.m_PersistentCalls.m_Calls.Array.data[1].m_Mode
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 2945968059448162860, guid: 06295ba1fac18bb47a624007e74799c5, type: 3}
       propertyPath: <OnClick>k__BackingField.m_PersistentCalls.m_Calls.Array.data[0].m_Target
       value: 
-      objectReference: {fileID: 912345678901234567}
+      objectReference: {fileID: 330255589}
     - target: {fileID: 2945968059448162860, guid: 06295ba1fac18bb47a624007e74799c5, type: 3}
       propertyPath: <OnClick>k__BackingField.m_PersistentCalls.m_Calls.Array.data[0].m_CallState
+      value: 2
+      objectReference: {fileID: 0}
+    - target: {fileID: 2945968059448162860, guid: 06295ba1fac18bb47a624007e74799c5, type: 3}
+      propertyPath: <OnClick>k__BackingField.m_PersistentCalls.m_Calls.Array.data[1].m_CallState
       value: 2
       objectReference: {fileID: 0}
     - target: {fileID: 2945968059448162860, guid: 06295ba1fac18bb47a624007e74799c5, type: 3}
@@ -72917,6 +73036,10 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 2945968059448162860, guid: 06295ba1fac18bb47a624007e74799c5, type: 3}
       propertyPath: <OnClick>k__BackingField.m_PersistentCalls.m_Calls.Array.data[0].m_TargetAssemblyTypeName
+      value: PauseMenuController, Assembly-CSharp
+      objectReference: {fileID: 0}
+    - target: {fileID: 2945968059448162860, guid: 06295ba1fac18bb47a624007e74799c5, type: 3}
+      propertyPath: <OnClick>k__BackingField.m_PersistentCalls.m_Calls.Array.data[1].m_TargetAssemblyTypeName
       value: PauseMenuController, Assembly-CSharp
       objectReference: {fileID: 0}
     - target: {fileID: 2945968059448162860, guid: 06295ba1fac18bb47a624007e74799c5, type: 3}
@@ -84498,11 +84621,11 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 2945968059448162860, guid: 06295ba1fac18bb47a624007e74799c5, type: 3}
       propertyPath: <OnClick>k__BackingField.m_PersistentCalls.m_Calls.Array.size
-      value: 2
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 2945968059448162860, guid: 06295ba1fac18bb47a624007e74799c5, type: 3}
       propertyPath: <OnClick>k__BackingField.m_PersistentCalls.m_Calls.Array.data[0].m_Mode
-      value: 6
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 2945968059448162860, guid: 06295ba1fac18bb47a624007e74799c5, type: 3}
       propertyPath: <OnClick>k__BackingField.m_PersistentCalls.m_Calls.Array.data[1].m_Mode
@@ -84511,7 +84634,7 @@ PrefabInstance:
     - target: {fileID: 2945968059448162860, guid: 06295ba1fac18bb47a624007e74799c5, type: 3}
       propertyPath: <OnClick>k__BackingField.m_PersistentCalls.m_Calls.Array.data[0].m_Target
       value: 
-      objectReference: {fileID: 1951762099394266153}
+      objectReference: {fileID: 330255589}
     - target: {fileID: 2945968059448162860, guid: 06295ba1fac18bb47a624007e74799c5, type: 3}
       propertyPath: <OnClick>k__BackingField.m_PersistentCalls.m_Calls.Array.data[1].m_Target
       value: 
@@ -84526,7 +84649,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 2945968059448162860, guid: 06295ba1fac18bb47a624007e74799c5, type: 3}
       propertyPath: <OnClick>k__BackingField.m_PersistentCalls.m_Calls.Array.data[0].m_MethodName
-      value: SetActive
+      value: OpenOptionsMenu
       objectReference: {fileID: 0}
     - target: {fileID: 2945968059448162860, guid: 06295ba1fac18bb47a624007e74799c5, type: 3}
       propertyPath: <OnClick>k__BackingField.m_PersistentCalls.m_Calls.Array.data[1].m_MethodName
@@ -84534,7 +84657,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 2945968059448162860, guid: 06295ba1fac18bb47a624007e74799c5, type: 3}
       propertyPath: <OnClick>k__BackingField.m_PersistentCalls.m_Calls.Array.data[0].m_TargetAssemblyTypeName
-      value: UnityEngine.GameObject, UnityEngine
+      value: PauseMenuController, Assembly-CSharp
       objectReference: {fileID: 0}
     - target: {fileID: 2945968059448162860, guid: 06295ba1fac18bb47a624007e74799c5, type: 3}
       propertyPath: <OnClick>k__BackingField.m_PersistentCalls.m_Calls.Array.data[1].m_TargetAssemblyTypeName
@@ -92750,27 +92873,27 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 2945968059448162860, guid: 06295ba1fac18bb47a624007e74799c5, type: 3}
       propertyPath: <OnClick>k__BackingField.m_PersistentCalls.m_Calls.Array.data[0].m_Mode
-      value: 6
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 2945968059448162860, guid: 06295ba1fac18bb47a624007e74799c5, type: 3}
       propertyPath: <OnClick>k__BackingField.m_PersistentCalls.m_Calls.Array.data[0].m_Target
       value: 
-      objectReference: {fileID: 362333876}
+      objectReference: {fileID: 330255589}
     - target: {fileID: 2945968059448162860, guid: 06295ba1fac18bb47a624007e74799c5, type: 3}
       propertyPath: <OnClick>k__BackingField.m_PersistentCalls.m_Calls.Array.data[0].m_CallState
       value: 2
       objectReference: {fileID: 0}
     - target: {fileID: 2945968059448162860, guid: 06295ba1fac18bb47a624007e74799c5, type: 3}
       propertyPath: <OnClick>k__BackingField.m_PersistentCalls.m_Calls.Array.data[0].m_MethodName
-      value: SetActive
+      value: OpenExitModalWindow
       objectReference: {fileID: 0}
     - target: {fileID: 2945968059448162860, guid: 06295ba1fac18bb47a624007e74799c5, type: 3}
       propertyPath: <OnClick>k__BackingField.m_PersistentCalls.m_Calls.Array.data[0].m_TargetAssemblyTypeName
-      value: UnityEngine.GameObject, UnityEngine
+      value: PauseMenuController, Assembly-CSharp
       objectReference: {fileID: 0}
     - target: {fileID: 2945968059448162860, guid: 06295ba1fac18bb47a624007e74799c5, type: 3}
       propertyPath: <OnClick>k__BackingField.m_PersistentCalls.m_Calls.Array.data[0].m_Arguments.m_BoolArgument
-      value: 1
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 2945968059448162860, guid: 06295ba1fac18bb47a624007e74799c5, type: 3}
       propertyPath: <OnClick>k__BackingField.m_PersistentCalls.m_Calls.Array.data[0].m_Arguments.m_ObjectArgumentAssemblyTypeName

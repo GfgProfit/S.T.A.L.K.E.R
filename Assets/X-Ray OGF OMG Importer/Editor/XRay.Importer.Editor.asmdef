@@ -1,0 +1,27 @@
+{
+    "name": "XRay.Importer.Editor",
+    "rootNamespace": "XRay.Importer.Editor",
+    "references": [
+        "XRay.Importer.Core",
+        "XRay.Importer.Runtime",
+        "Unity.RenderPipelines.HighDefinition.Runtime",
+        "Unity.RenderPipelines.Core.Runtime"
+    ],
+    "includePlatforms": [
+        "Editor"
+    ],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": false,
+    "defineConstraints": [],
+    "versionDefines": [
+        {
+            "name": "com.unity.render-pipelines.high-definition",
+            "expression": "",
+            "define": "XRAY_HDRP"
+        }
+    ],
+    "noEngineReferences": false
+}

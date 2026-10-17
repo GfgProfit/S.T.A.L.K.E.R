@@ -6,15 +6,19 @@ internal sealed class InventoryOpenStateController
     private readonly PlayerController _playerController;
     private readonly bool _unlockCursorWhileOpen;
     private readonly bool _disablePlayerControlsWhileOpen;
+    private readonly bool _manageCursor;
+    private readonly bool _managePlayerControls;
     private readonly Func<bool> _tryStashSelectedItem;
     private readonly Action _applyWeightMovementState;
     private readonly Action _handleClosed;
 
-    public InventoryOpenStateController(PlayerController playerController, bool unlockCursorWhileOpen, bool disablePlayerControlsWhileOpen, Func<bool> tryStashSelectedItem, Action applyWeightMovementState, Action handleClosed)
+    public InventoryOpenStateController(PlayerController playerController, bool unlockCursorWhileOpen, bool disablePlayerControlsWhileOpen, bool manageCursor, bool managePlayerControls, Func<bool> tryStashSelectedItem, Action applyWeightMovementState, Action handleClosed)
     {
         _playerController = playerController;
         _unlockCursorWhileOpen = unlockCursorWhileOpen;
         _disablePlayerControlsWhileOpen = disablePlayerControlsWhileOpen;
+        _manageCursor = manageCursor;
+        _managePlayerControls = managePlayerControls;
         _tryStashSelectedItem = tryStashSelectedItem;
         _applyWeightMovementState = applyWeightMovementState;
         _handleClosed = handleClosed;
@@ -52,7 +56,7 @@ internal sealed class InventoryOpenStateController
 
     private void ApplyCursorState()
     {
-        if (_unlockCursorWhileOpen == false)
+        if (_manageCursor == false || _unlockCursorWhileOpen == false)
         {
             return;
         }
@@ -63,7 +67,7 @@ internal sealed class InventoryOpenStateController
 
     private void ApplyPlayerControlsState()
     {
-        if (_disablePlayerControlsWhileOpen == false || _playerController == null)
+        if (_managePlayerControls == false || _disablePlayerControlsWhileOpen == false || _playerController == null)
         {
             return;
         }

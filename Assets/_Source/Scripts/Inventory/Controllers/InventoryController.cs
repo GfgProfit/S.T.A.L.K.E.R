@@ -6,6 +6,22 @@ using NaughtyAttributes;
 using TMPro;
 using UnityEngine;
 
+internal readonly struct InventoryCountDragOpenData
+{
+    public InventoryCountDragOpenData(InventoryItem item, int maxCount, Action<int> apply, Action cancel)
+    {
+        Item = item;
+        MaxCount = maxCount;
+        Apply = apply;
+        Cancel = cancel;
+    }
+
+    public InventoryItem Item { get; }
+    public int MaxCount { get; }
+    public Action<int> Apply { get; }
+    public Action Cancel { get; }
+}
+
 public class InventoryController : MonoBehaviour
 {
     [SerializeField] [BoxGroup("Items")] private InventoryItem _itemPrefab;
@@ -39,6 +55,7 @@ public class InventoryController : MonoBehaviour
     [SerializeField] [BoxGroup("UI")] private ItemTooltip _itemTooltip;
     [SerializeField] [BoxGroup("UI")] private InventoryItemContextMenu _itemContextMenu;
     [SerializeField] [BoxGroup("UI")] private InventoryCountDragWindow _countDragWindow;
+    [SerializeField] [BoxGroup("UI Navigation")] private UIWindowManager _windowManager;
     [SerializeField] [BoxGroup("Grids")] private GameObject _closedSlotPrefab;
     [SerializeField] [BoxGroup("Items")] private List<InventoryItem> _initialInventoryItems = new();
 
@@ -90,6 +107,13 @@ public class InventoryController : MonoBehaviour
     private InventoryGrid _selectedItemGrid;
     private int _activeWeaponSlotIndex = -1;
     private CancellationTokenSource _miniActionTextCancellation;
+    private IUIWindow _inventoryWindow;
+    private IUIWindow _itemInfoWindow;
+    private IUIWindow _contextMenuWindow;
+    private IUIWindow _countDragWindowWindow;
+    private ItemTooltipData _pendingItemInfoData;
+    private InventoryContextMenuOpenData _pendingContextMenuData;
+    private InventoryCountDragOpenData _pendingCountDragData;
 
     public InventoryGrid SelectedItemGrid
     {
@@ -246,19 +270,19 @@ public class InventoryController : MonoBehaviour
 
     private InventoryEquipmentSlotService CreateEquipmentSlotService() => new(_equipmentSlotGrids, _slottedItemGrids, _defaultItemGrid, InsertItem, TryDetachItemFromGrid, RegisterInventoryItem, RefreshWeightState, () => _closedSlotPrefab);
     private InventoryEquipmentActionService CreateEquipmentActionService() => new(_equipmentSlotGrids, _defaultItemGrid, InsertItem, TryDetachItemFromGrid, TryPrepareSlotRestrictionsForPlacement, RegisterInventoryItem, RefreshWeightState);
-    private InventoryContextMenuController CreateContextMenuController() => new(_itemContextMenu, PlayerInput, () => _selectedItemGrid, () => _dragState.SelectedItem, DragController.GetTileGridPosition, HideItemTooltip, ShowItemInfoPanel, TryUseContextMenuItem, TryUnloadContextMenuWeapon, CanEquipPrimaryContextMenuWeapon, TryEquipPrimaryContextMenuWeapon, CanEquipSecondaryContextMenuWeapon, TryEquipSecondaryContextMenuWeapon, CanEquipContextMenuItem, TryEquipContextMenuItem, CanUnequipContextMenuItem, TryUnequipContextMenuItem, _equipmentSlotGrids, TryAttachContextMenuModule, TryDetachWeaponModule, TryDropItem);
+    private InventoryContextMenuController CreateContextMenuController() => new(_itemContextMenu, PlayerInput, () => _selectedItemGrid, () => _dragState.SelectedItem, DragController.GetTileGridPosition, HideItemTooltip, ShowContextMenu, HideContextMenu, ShowItemInfoPanel, TryUseContextMenuItem, TryUnloadContextMenuWeapon, CanEquipPrimaryContextMenuWeapon, TryEquipPrimaryContextMenuWeapon, CanEquipSecondaryContextMenuWeapon, TryEquipSecondaryContextMenuWeapon, CanEquipContextMenuItem, TryEquipContextMenuItem, CanUnequipContextMenuItem, TryUnequipContextMenuItem, _equipmentSlotGrids, TryAttachContextMenuModule, TryDetachWeaponModule, TryDropItem);
     private InventoryItemDropProcessor CreateDropProcessor() => new(TrySpawnDroppedWorldItem, TryDetachItemFromGrid, DestroyInventoryItem, RefreshWeightState);
     private InventoryWeightStateController CreateWeightStateController() => new(_itemRegistry, _equipmentSlotGrids, EquipmentSlotService, SetWeightViewModelState, RenderCharacterStatsInfo, _playerController, _playerStats, _hidePlayerStatsInfoWhenEmpty, _maxCarryWeight, _movementBlockExtraWeight);
     private InventoryHoverInfoController CreateHoverInfoController() => new(_inventoryHighlight, _itemTooltip, IsContextMenuOpen, _itemCompatibilityService);
     private InventoryItemCompatibilityService CreateItemCompatibilityService() => new(_itemRegistry, new IInventoryItemCompatibilityProvider[] { new WeaponAmmoInventoryCompatibilityProvider(), new WeaponModuleInventoryCompatibilityProvider() }, _settings.CompatibleItemHighlightColor);
     private InventoryWeaponModuleService CreateWeaponModuleService() => new(TryReturnItemToInventoryOrDrop, TryUnloadContextMenuWeapon);
     private InventoryDragPlacementService CreateDragPlacementService() => new(_dragState, ItemFactory, _itemRegistry, CanDetachItemWithSlotRestrictions, TryPrepareSlotRestrictionsForPlacement, TryInstallWeaponModule, HandleWeaponModulesChanged, RefreshWeightState);
-    private InventoryDragController CreateDragController() => new(_dragState, DragPlacementService, PlayerInput, _countDragWindow, _canvasTransform, () => _selectedItemGrid, CanDetachItemWithSlotRestrictions, HideContextMenu, HideItemTooltip, RefreshWeightState);
-    private InventoryOpenStateController CreateOpenStateController() => new(_playerController, _unlockCursorWhileOpen, _disablePlayerControlsWhileOpen, TryStashSelectedItem, ApplyWeightMovementState, HandleInventoryClosed);
+    private InventoryDragController CreateDragController() => new(_dragState, DragPlacementService, PlayerInput, IsCountDragWindowOpen, ShowCountDragWindow, CancelCountDragWindow, HideCountDragWindow, _canvasTransform, () => _selectedItemGrid, CanDetachItemWithSlotRestrictions, HideContextMenu, HideItemTooltip, RefreshWeightState);
+    private InventoryOpenStateController CreateOpenStateController() => new(_playerController, _unlockCursorWhileOpen, _disablePlayerControlsWhileOpen, _windowManager == null, _windowManager == null, TryStashSelectedItem, ApplyWeightMovementState, HandleInventoryClosed);
     private InventoryItemPlacementService CreateItemPlacementService() => new(ItemFactory, _itemRegistry, TryPrepareSlotRestrictionsForPlacement, RefreshWeightState);
     private InventoryHoveredItemActionController CreateHoveredItemActionController() => new(PlayerInput, _dragState, () => _selectedItemGrid, DragController.GetTileGridPosition, IsContextMenuOpen, TryDropItem, HoverInfoController, HideItemTooltip);
     private InventoryQuickUseService CreateQuickUseService() => new(_quickUseSlotBindings, TryDetachItemFromGrid, DestroyInventoryItem, RefreshWeightState);
-    private InventoryUpdateController CreateUpdateController() => new(PlayerInput, () => IsOpen, IsItemInfoPanelOpen, () => _selectedItemGrid, HoverInfoController, ContextMenuController, ToggleInventory, CloseInventory, HideItemTooltip, HideItemInfoPanel, HideContextMenu, DragController.IsCountDragWindowOpen, DragController.CancelCountDragWindow, DragController.ItemIconDrag, DragController.ReleaseDraggedItem, DragController.RotateSelectedItem, TryHandleHoveredItemDropInput, HandleHighlight, DragController.BeginDrag);
+    private InventoryUpdateController CreateUpdateController() => new(PlayerInput, () => IsOpen, IsItemInfoPanelOpen, () => _selectedItemGrid, HoverInfoController, ContextMenuController, ToggleInventory, HideItemTooltip, HideItemInfoPanel, HideContextMenu, DragController.IsCountDragWindowOpen, DragController.ItemIconDrag, DragController.ReleaseDraggedItem, DragController.RotateSelectedItem, TryHandleHoveredItemDropInput, HandleHighlight, DragController.BeginDrag);
 
     private void Awake()
     {
@@ -270,6 +294,8 @@ public class InventoryController : MonoBehaviour
         _itemTooltip = ResolveItemTooltip();
         _countDragWindow = ResolveCountDragWindow();
         _itemTooltip?.SetPlayerInput(PlayerInput);
+        ConfigureWindowCallbacks();
+        CreateInventoryWindows();
 
         _itemFactory = new InventoryItemFactory(_itemPrefab);
         _equipmentSlotService = CreateEquipmentSlotService();
@@ -292,7 +318,7 @@ public class InventoryController : MonoBehaviour
         _contextMenuController.Initialize();
         BindQuickUseSlots();
         RegisterExistingInventoryItems();
-        SetInventoryOpen(_openOnStart, true);
+        ApplyInitialInventoryOpenState();
         _inventoryView.Bind(_viewModel);
         _miniActionTextView.Bind(_miniActionTextViewModel);
         RefreshWeightState();
@@ -321,6 +347,38 @@ public class InventoryController : MonoBehaviour
         _inventoryView?.Dispose();
         _miniActionTextViewModel?.Dispose();
         _viewModel?.Dispose();
+    }
+
+    private void ConfigureWindowCallbacks()
+    {
+        _itemInfoPanel?.SetCloseAction(HideItemInfoPanel);
+        _itemInfoPanel?.SetClosedHandler(ForgetItemInfoWindow);
+        _itemContextMenu?.SetClosedHandler(ForgetContextMenuWindow);
+        _countDragWindow?.SetClosedHandler(ForgetCountDragWindow);
+    }
+
+    private void CreateInventoryWindows()
+    {
+        _inventoryWindow = new DelegateUIWindow("Inventory Panel", UIWindowType.Root, () => IsOpen, () => SetInventoryOpenDirect(true, false), () => SetInventoryOpenDirect(false, false), BringInventoryWindowToFront, null, _unlockCursorWhileOpen, _disablePlayerControlsWhileOpen);
+        _itemInfoWindow = new DelegateUIWindow("Item Info Panel", UIWindowType.SubWindow, () => _itemInfoPanel != null && _itemInfoPanel.IsOpen, ShowPendingItemInfoPanel, HideItemInfoPanelDirect, BringItemInfoWindowToFront, _inventoryWindow);
+        _contextMenuWindow = new DelegateUIWindow("Inventory Item Context Menu", UIWindowType.ContextMenu, () => _itemContextMenu != null && _itemContextMenu.IsOpen, ShowPendingContextMenu, HideContextMenuDirect, BringContextMenuToFront, _inventoryWindow);
+        _countDragWindowWindow = new DelegateUIWindow("Count Drag Window", UIWindowType.Modal, IsCountDragWindowOpen, ShowPendingCountDragWindow, CancelCountDragWindowDirect, BringCountDragWindowToFront, _inventoryWindow);
+    }
+
+    private void ApplyInitialInventoryOpenState()
+    {
+        if (_windowManager == null || _inventoryWindow == null)
+        {
+            SetInventoryOpenDirect(_openOnStart, true);
+            return;
+        }
+
+        SetInventoryOpenDirect(false, true);
+
+        if (_openOnStart)
+        {
+            _windowManager.Open(_inventoryWindow);
+        }
     }
 
     public bool TryInsertItem(ItemData itemData) => TryInsertItem(itemData, 1);
@@ -780,8 +838,20 @@ public class InventoryController : MonoBehaviour
     private bool CanDetachItemWithSlotRestrictions(InventoryGrid sourceGrid, InventoryItem item) => EquipmentSlotService.CanDetachItemWithSlotRestrictions(sourceGrid, item);
     private void ApplyWeightMovementState() => WeightStateController.ApplyMovementState();
     private void HideItemTooltip() => HoverInfoController.HideItemTooltip();
-    private bool IsItemInfoPanelOpen() => _itemInfoPanel != null && (_itemInfoPanel.IsOpen || _itemInfoPanel.WasClosedByEscapeThisFrame);
-    private void HideItemInfoPanel() => _itemInfoPanel?.Hide();
+    private bool IsItemInfoPanelOpen() => _itemInfoPanel != null && _itemInfoPanel.IsOpen;
+    private void HideItemInfoPanel()
+    {
+        if (_windowManager != null && _itemInfoWindow != null)
+        {
+            _windowManager.Close(_itemInfoWindow);
+            return;
+        }
+
+        HideItemInfoPanelDirect();
+    }
+
+    private void HideItemInfoPanelDirect() => _itemInfoPanel?.Hide();
+
     private void ShowItemInfoPanel(InventoryItem item)
     {
         if (_itemInfoPanel == null)
@@ -789,7 +859,26 @@ public class InventoryController : MonoBehaviour
             return;
         }
 
-        _itemInfoPanel.Show(CreateTooltipData(item));
+        _pendingItemInfoData = CreateTooltipData(item);
+
+        if (_windowManager == null || _itemInfoWindow == null)
+        {
+            ShowPendingItemInfoPanel();
+            return;
+        }
+
+        _windowManager.Close(_contextMenuWindow);
+        _windowManager.Open(_itemInfoWindow);
+    }
+
+    private void ShowPendingItemInfoPanel()
+    {
+        if (_itemInfoPanel == null || _pendingItemInfoData.IsValid == false)
+        {
+            return;
+        }
+
+        _itemInfoPanel.Show(_pendingItemInfoData);
     }
 
     private ItemTooltip ResolveItemTooltip()
@@ -806,12 +895,7 @@ public class InventoryController : MonoBehaviour
             return null;
         }
 
-        if (tooltipTransform.TryGetComponent(out _itemTooltip) == false)
-        {
-            _itemTooltip = tooltipTransform.gameObject.AddComponent<ItemTooltip>();
-        }
-
-        return _itemTooltip;
+        return tooltipTransform.TryGetComponent(out _itemTooltip) ? _itemTooltip : null;
     }
 
     private InventoryCountDragWindow ResolveCountDragWindow()
@@ -828,12 +912,7 @@ public class InventoryController : MonoBehaviour
             return null;
         }
 
-        if (windowTransform.TryGetComponent(out _countDragWindow) == false)
-        {
-            _countDragWindow = windowTransform.gameObject.AddComponent<InventoryCountDragWindow>();
-        }
-
-        return _countDragWindow;
+        return windowTransform.TryGetComponent(out _countDragWindow) ? _countDragWindow : null;
     }
 
     private static Transform FindChildRecursive(Transform root, string childName)
@@ -874,6 +953,7 @@ public class InventoryController : MonoBehaviour
     }
 
     private bool IsContextMenuOpen() => ContextMenuController.IsOpen;
+    private bool IsCountDragWindowOpen() => _countDragWindow != null && _countDragWindow.IsOpen;
     private InventoryGrid GetInsertionGrid() => _selectedItemGrid != null ? _selectedItemGrid : _defaultItemGrid;
     private void DestroyInventoryItem(InventoryItem item) => DragController.DestroyInventoryItem(item);
     private bool TryUseContextMenuItem(InventoryGrid grid, InventoryItem item)
@@ -1136,11 +1216,93 @@ public class InventoryController : MonoBehaviour
         return equippedArmor == null || equippedArmor.CanEquipHelmet;
     }
 
-    private void HideContextMenu() => ContextMenuController.Hide();
+    private void ShowContextMenu(InventoryContextMenuOpenData openData)
+    {
+        _pendingContextMenuData = openData;
+
+        if (_windowManager != null && _contextMenuWindow != null)
+        {
+            _windowManager.Open(_contextMenuWindow);
+            return;
+        }
+
+        ShowPendingContextMenu();
+    }
+
+    private void ShowPendingContextMenu()
+    {
+        _itemContextMenu?.Show(_pendingContextMenuData.CanUse, _pendingContextMenuData.ShowUnload, _pendingContextMenuData.CanUnload, _pendingContextMenuData.CanEquipPrimaryWeapon, _pendingContextMenuData.CanEquipSecondaryWeapon, _pendingContextMenuData.CanEquip, _pendingContextMenuData.CanUnequip, _pendingContextMenuData.CanDropStack, _pendingContextMenuData.ModuleActions, _pendingContextMenuData.ScreenPosition);
+    }
+
+    private void HideContextMenu()
+    {
+        if (_windowManager != null && _contextMenuWindow != null)
+        {
+            _windowManager.Close(_contextMenuWindow);
+            return;
+        }
+
+        HideContextMenuDirect();
+    }
+
+    private void HideContextMenuDirect() => _itemContextMenu?.Hide();
+
+    private bool ShowCountDragWindow(InventoryItem item, int maxCount, Action<int> apply, Action cancel)
+    {
+        if (_countDragWindow == null)
+        {
+            return false;
+        }
+
+        _pendingCountDragData = new(item, maxCount, apply, cancel);
+
+        if (_windowManager == null || _countDragWindowWindow == null)
+        {
+            ShowPendingCountDragWindow();
+            return _countDragWindow.IsOpen;
+        }
+
+        return _windowManager.Open(_countDragWindowWindow);
+    }
+
+    private void ShowPendingCountDragWindow()
+    {
+        _countDragWindow?.Show(_pendingCountDragData.Item, _pendingCountDragData.MaxCount, _pendingCountDragData.Apply, _pendingCountDragData.Cancel);
+    }
+
+    private void CancelCountDragWindow()
+    {
+        if (_windowManager != null && _countDragWindowWindow != null)
+        {
+            _windowManager.Close(_countDragWindowWindow);
+            return;
+        }
+
+        CancelCountDragWindowDirect();
+    }
+
+    private void CancelCountDragWindowDirect() => _countDragWindow?.Cancel();
+
+    private void HideCountDragWindow()
+    {
+        if (_windowManager != null && _countDragWindowWindow != null)
+        {
+            _windowManager.Forget(_countDragWindowWindow);
+        }
+
+        _countDragWindow?.Hide();
+    }
+
+    private void BringInventoryWindowToFront() => _inventoryRoot?.transform.SetAsLastSibling();
+    private void BringItemInfoWindowToFront() => _itemInfoPanel?.transform.SetAsLastSibling();
+    private void BringContextMenuToFront() => _itemContextMenu?.transform.SetAsLastSibling();
+    private void BringCountDragWindowToFront() => _countDragWindow?.transform.SetAsLastSibling();
+
+    private void ForgetItemInfoWindow() => _windowManager?.Forget(_itemInfoWindow);
+    private void ForgetContextMenuWindow() => _windowManager?.Forget(_contextMenuWindow);
+    private void ForgetCountDragWindow() => _windowManager?.Forget(_countDragWindowWindow);
 
     private void ToggleInventory() => ToggleInventoryAsync(destroyCancellationToken).Forget(Debug.LogException);
-
-    private void CloseInventory() => SetInventoryOpen(false, false);
 
     private async UniTask ToggleInventoryAsync(CancellationToken cancellationToken)
     {
@@ -1150,12 +1312,40 @@ public class InventoryController : MonoBehaviour
     private UniTask ToggleInventoryCoreAsync(CancellationToken cancellationToken)
     {
         cancellationToken.ThrowIfCancellationRequested();
+
+        if (_windowManager != null && _inventoryWindow != null)
+        {
+            _windowManager.Toggle(_inventoryWindow);
+            _viewModel.SetOpenState(OpenStateController.IsOpen);
+            return UniTask.CompletedTask;
+        }
+
         OpenStateController.Toggle();
         _viewModel.SetOpenState(OpenStateController.IsOpen);
         return UniTask.CompletedTask;
     }
 
     private void SetInventoryOpen(bool isOpen, bool force)
+    {
+        if (_windowManager != null && _inventoryWindow != null && force == false)
+        {
+            if (isOpen)
+            {
+                _windowManager.Open(_inventoryWindow);
+            }
+            else
+            {
+                _windowManager.Close(_inventoryWindow);
+            }
+
+            _viewModel?.SetOpenState(OpenStateController.IsOpen);
+            return;
+        }
+
+        SetInventoryOpenDirect(isOpen, force);
+    }
+
+    private void SetInventoryOpenDirect(bool isOpen, bool force)
     {
         OpenStateController.SetOpen(isOpen, force);
         _viewModel?.SetOpenState(OpenStateController.IsOpen);
@@ -1164,11 +1354,23 @@ public class InventoryController : MonoBehaviour
     private void HandleInventoryClosed()
     {
         SelectedItemGrid = null;
-        DragController.CancelCountDragWindow();
         HoverInfoController.HideHighlight();
         HideItemTooltip();
-        HideItemInfoPanel();
-        HideContextMenu();
+
+        if (_windowManager != null)
+        {
+            _windowManager.Forget(_countDragWindowWindow);
+            _windowManager.Forget(_itemInfoWindow);
+            _windowManager.Forget(_contextMenuWindow);
+            _countDragWindow?.Hide();
+            HideItemInfoPanelDirect();
+            HideContextMenuDirect();
+            return;
+        }
+
+        DragController.CancelCountDragWindow();
+        HideItemInfoPanelDirect();
+        HideContextMenuDirect();
     }
 
     private bool TryStashSelectedItem() => DragController.ReturnDraggedItemToOrigin();

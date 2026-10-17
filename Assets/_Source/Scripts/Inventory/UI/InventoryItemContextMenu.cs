@@ -68,6 +68,7 @@ public class InventoryItemContextMenu : MonoBehaviour, IView<InventoryItemContex
     private IDisposable _canDropStackSubscription;
     private readonly List<Button> _moduleActionButtons = new();
     private readonly List<Button> _layoutButtons = new();
+    private Action _closed;
 
     public bool IsOpen => gameObject.activeSelf;
 
@@ -185,6 +186,11 @@ public class InventoryItemContextMenu : MonoBehaviour, IView<InventoryItemContex
         }
 
         _viewModel.Hide();
+    }
+
+    public void SetClosedHandler(Action closed)
+    {
+        _closed = closed;
     }
 
     public bool ContainsScreenPoint(Vector2 screenPoint) => IsOpen && Positioner.ContainsScreenPoint(screenPoint);
@@ -320,7 +326,16 @@ public class InventoryItemContextMenu : MonoBehaviour, IView<InventoryItemContex
         await command.ExecuteAsync(cancellationToken);
     }
 
-    private void SetVisible(bool visible) => gameObject.SetActive(visible);
+    private void SetVisible(bool visible)
+    {
+        bool wasOpen = gameObject.activeSelf;
+        gameObject.SetActive(visible);
+
+        if (wasOpen && visible == false)
+        {
+            _closed?.Invoke();
+        }
+    }
 
     private void SetUseButtonVisible(bool visible) => SetButtonVisible(_useButton, _useButtonText, visible);
     private void SetUnloadButtonVisible(bool visible) => SetButtonVisible(_unloadButton, _unloadButtonText, visible);

@@ -6,7 +6,10 @@ internal sealed class InventoryDragController
     private readonly InventoryDragState _dragState;
     private readonly InventoryDragPlacementService _dragPlacementService;
     private readonly IInventoryInput _playerInput;
-    private readonly InventoryCountDragWindow _countDragWindow;
+    private readonly Func<bool> _isCountDragWindowOpen;
+    private readonly Func<InventoryItem, int, Action<int>, Action, bool> _showCountDragWindow;
+    private readonly Action _cancelCountDragWindow;
+    private readonly Action _hideCountDragWindow;
     private readonly Transform _canvasTransform;
     private readonly Func<InventoryGrid> _getSelectedItemGrid;
     private readonly Func<InventoryGrid, InventoryItem, bool> _canDetachItemWithSlotRestrictions;
@@ -20,12 +23,15 @@ internal sealed class InventoryDragController
     private InventoryGrid _pendingCountDragTargetGrid;
     private Vector2Int _pendingCountDragTargetPosition;
 
-    public InventoryDragController(InventoryDragState dragState, InventoryDragPlacementService dragPlacementService, IInventoryInput playerInput, InventoryCountDragWindow countDragWindow, Transform canvasTransform, Func<InventoryGrid> getSelectedItemGrid, Func<InventoryGrid, InventoryItem, bool> canDetachItemWithSlotRestrictions, Action hideContextMenu, Action hideItemTooltip, Action refreshWeightState)
+    public InventoryDragController(InventoryDragState dragState, InventoryDragPlacementService dragPlacementService, IInventoryInput playerInput, Func<bool> isCountDragWindowOpen, Func<InventoryItem, int, Action<int>, Action, bool> showCountDragWindow, Action cancelCountDragWindow, Action hideCountDragWindow, Transform canvasTransform, Func<InventoryGrid> getSelectedItemGrid, Func<InventoryGrid, InventoryItem, bool> canDetachItemWithSlotRestrictions, Action hideContextMenu, Action hideItemTooltip, Action refreshWeightState)
     {
         _dragState = dragState;
         _dragPlacementService = dragPlacementService;
         _playerInput = playerInput;
-        _countDragWindow = countDragWindow;
+        _isCountDragWindowOpen = isCountDragWindowOpen;
+        _showCountDragWindow = showCountDragWindow;
+        _cancelCountDragWindow = cancelCountDragWindow;
+        _hideCountDragWindow = hideCountDragWindow;
         _canvasTransform = canvasTransform;
         _getSelectedItemGrid = getSelectedItemGrid;
         _canDetachItemWithSlotRestrictions = canDetachItemWithSlotRestrictions;
@@ -107,12 +113,12 @@ internal sealed class InventoryDragController
     public bool TryGetStackMergeTarget(InventoryGrid targetGrid, Vector2Int tileGridPosition, out InventoryItem targetStack) => _dragPlacementService.TryGetStackMergeTarget(targetGrid, tileGridPosition, out targetStack);
     public void DestroyInventoryItem(InventoryItem item) => _dragPlacementService.DestroyInventoryItem(item);
     public bool ReturnDraggedItemToOrigin() => _dragPlacementService.ReturnDraggedItemToOrigin();
-    public bool IsCountDragWindowOpen() => _countDragWindow != null && _countDragWindow.IsOpen;
+    public bool IsCountDragWindowOpen() => _isCountDragWindowOpen != null && _isCountDragWindowOpen();
     public void CancelCountDragWindow()
     {
-        if (_countDragWindow != null && _countDragWindow.IsOpen)
+        if (IsCountDragWindowOpen())
         {
-            _countDragWindow.Cancel();
+            _cancelCountDragWindow?.Invoke();
             return;
         }
 
@@ -140,7 +146,7 @@ internal sealed class InventoryDragController
 
     private bool TryOpenCountDragWindow(InventoryGrid targetGrid, Vector2Int tileGridPosition)
     {
-        if (_countDragWindow == null || _playerInput.IsInventoryCountDragModifierHeld() == false || _dragPlacementService.CanOpenCountDragWindow(targetGrid, tileGridPosition) == false)
+        if (_showCountDragWindow == null || _playerInput.IsInventoryCountDragModifierHeld() == false || _dragPlacementService.CanOpenCountDragWindow(targetGrid, tileGridPosition) == false)
         {
             return false;
         }
@@ -153,11 +159,17 @@ internal sealed class InventoryDragController
         }
 
         CapturePendingCountDrag(selectedItem, targetGrid, tileGridPosition);
-        _countDragWindow.Show(selectedItem, selectedItem.CurrentAmount, ApplyPendingCountDrag, CancelPendingCountDrag);
+        bool windowOpened = _showCountDragWindow(selectedItem, selectedItem.CurrentAmount, ApplyPendingCountDrag, CancelPendingCountDrag);
+
+        if (windowOpened == false)
+        {
+            ClearPendingCountDrag();
+            return false;
+        }
 
         if (ReturnDraggedItemToOrigin() == false)
         {
-            _countDragWindow.Hide();
+            _hideCountDragWindow?.Invoke();
             ClearPendingCountDrag();
             return false;
         }

@@ -2,6 +2,34 @@ using System;
 using System.Collections.Generic;
 using UnityEngine;
 
+internal readonly struct InventoryContextMenuOpenData
+{
+    public InventoryContextMenuOpenData(bool canUse, bool showUnload, bool canUnload, bool canEquipPrimaryWeapon, bool canEquipSecondaryWeapon, bool canEquip, bool canUnequip, bool canDropStack, IReadOnlyList<InventoryContextMenuAction> moduleActions, Vector2 screenPosition)
+    {
+        CanUse = canUse;
+        ShowUnload = showUnload;
+        CanUnload = canUnload;
+        CanEquipPrimaryWeapon = canEquipPrimaryWeapon;
+        CanEquipSecondaryWeapon = canEquipSecondaryWeapon;
+        CanEquip = canEquip;
+        CanUnequip = canUnequip;
+        CanDropStack = canDropStack;
+        ModuleActions = moduleActions;
+        ScreenPosition = screenPosition;
+    }
+
+    public bool CanUse { get; }
+    public bool ShowUnload { get; }
+    public bool CanUnload { get; }
+    public bool CanEquipPrimaryWeapon { get; }
+    public bool CanEquipSecondaryWeapon { get; }
+    public bool CanEquip { get; }
+    public bool CanUnequip { get; }
+    public bool CanDropStack { get; }
+    public IReadOnlyList<InventoryContextMenuAction> ModuleActions { get; }
+    public Vector2 ScreenPosition { get; }
+}
+
 internal sealed class InventoryContextMenuController
 {
     private const string DETACH_MODULE_LABEL_FORMAT = "\u041e\u0442\u0441\u043e\u0435\u0434\u0438\u043d\u0438\u0442\u044c: {0}";
@@ -13,6 +41,8 @@ internal sealed class InventoryContextMenuController
     private readonly Func<InventoryItem> _getSelectedItem;
     private readonly Func<Vector2Int> _getTileGridPosition;
     private readonly Action _hideItemTooltip;
+    private readonly Action<InventoryContextMenuOpenData> _showContextMenu;
+    private readonly Action _hideContextMenu;
     private readonly Action<InventoryItem> _showItemInfoPanel;
     private readonly Func<InventoryGrid, InventoryItem, bool> _useItem;
     private readonly Func<InventoryGrid, InventoryItem, bool> _unloadWeapon;
@@ -31,7 +61,7 @@ internal sealed class InventoryContextMenuController
     private InventoryGrid _contextMenuGrid;
     private InventoryItem _contextMenuItem;
 
-    public InventoryContextMenuController(InventoryItemContextMenu contextMenu, IInventoryInput playerInput, Func<InventoryGrid> getSelectedGrid, Func<InventoryItem> getSelectedItem, Func<Vector2Int> getTileGridPosition, Action hideItemTooltip, Action<InventoryItem> showItemInfoPanel, Func<InventoryGrid, InventoryItem, bool> useItem, Func<InventoryGrid, InventoryItem, bool> unloadWeapon, Func<InventoryGrid, InventoryItem, bool> canEquipPrimaryWeapon, Func<InventoryGrid, InventoryItem, bool> equipPrimaryWeapon, Func<InventoryGrid, InventoryItem, bool> canEquipSecondaryWeapon, Func<InventoryGrid, InventoryItem, bool> equipSecondaryWeapon, Func<InventoryGrid, InventoryItem, bool> canEquipItem, Func<InventoryGrid, InventoryItem, bool> equipItem, Func<InventoryGrid, InventoryItem, bool> canUnequipItem, Func<InventoryGrid, InventoryItem, bool> unequipItem, IReadOnlyList<EquipmentSlotGrid> equipmentSlotGrids, Func<InventoryGrid, InventoryItem, EquipmentSlotGrid, bool> attachWeaponModule, Func<InventoryGrid, InventoryItem, ItemData, bool> detachWeaponModule, Func<InventoryGrid, InventoryItem, bool, bool> dropItem)
+    public InventoryContextMenuController(InventoryItemContextMenu contextMenu, IInventoryInput playerInput, Func<InventoryGrid> getSelectedGrid, Func<InventoryItem> getSelectedItem, Func<Vector2Int> getTileGridPosition, Action hideItemTooltip, Action<InventoryContextMenuOpenData> showContextMenu, Action hideContextMenu, Action<InventoryItem> showItemInfoPanel, Func<InventoryGrid, InventoryItem, bool> useItem, Func<InventoryGrid, InventoryItem, bool> unloadWeapon, Func<InventoryGrid, InventoryItem, bool> canEquipPrimaryWeapon, Func<InventoryGrid, InventoryItem, bool> equipPrimaryWeapon, Func<InventoryGrid, InventoryItem, bool> canEquipSecondaryWeapon, Func<InventoryGrid, InventoryItem, bool> equipSecondaryWeapon, Func<InventoryGrid, InventoryItem, bool> canEquipItem, Func<InventoryGrid, InventoryItem, bool> equipItem, Func<InventoryGrid, InventoryItem, bool> canUnequipItem, Func<InventoryGrid, InventoryItem, bool> unequipItem, IReadOnlyList<EquipmentSlotGrid> equipmentSlotGrids, Func<InventoryGrid, InventoryItem, EquipmentSlotGrid, bool> attachWeaponModule, Func<InventoryGrid, InventoryItem, ItemData, bool> detachWeaponModule, Func<InventoryGrid, InventoryItem, bool, bool> dropItem)
     {
         _contextMenu = contextMenu;
         _playerInput = playerInput;
@@ -39,6 +69,8 @@ internal sealed class InventoryContextMenuController
         _getSelectedItem = getSelectedItem;
         _getTileGridPosition = getTileGridPosition;
         _hideItemTooltip = hideItemTooltip;
+        _showContextMenu = showContextMenu;
+        _hideContextMenu = hideContextMenu;
         _showItemInfoPanel = showItemInfoPanel;
         _useItem = useItem;
         _unloadWeapon = unloadWeapon;
@@ -104,7 +136,15 @@ internal sealed class InventoryContextMenuController
 
     public void Hide()
     {
-        _contextMenu?.Hide();
+        if (_hideContextMenu != null)
+        {
+            _hideContextMenu();
+        }
+        else
+        {
+            _contextMenu?.Hide();
+        }
+
         _contextMenuGrid = null;
         _contextMenuItem = null;
     }
@@ -133,7 +173,16 @@ internal sealed class InventoryContextMenuController
 
         _hideItemTooltip();
         bool canUnloadWeapon = CanUnloadWeapon(item);
-        _contextMenu.Show(CanUseItem(item), canUnloadWeapon, canUnloadWeapon, CanEquipPrimaryWeapon(selectedGrid, item), CanEquipSecondaryWeapon(selectedGrid, item), CanEquipItem(selectedGrid, item), CanUnequipItem(selectedGrid, item), CanDropStack(item), BuildModuleActions(item), _playerInput.GetPointerPosition());
+        InventoryContextMenuOpenData openData = new(CanUseItem(item), canUnloadWeapon, canUnloadWeapon, CanEquipPrimaryWeapon(selectedGrid, item), CanEquipSecondaryWeapon(selectedGrid, item), CanEquipItem(selectedGrid, item), CanUnequipItem(selectedGrid, item), CanDropStack(item), BuildModuleActions(item), _playerInput.GetPointerPosition());
+
+        if (_showContextMenu != null)
+        {
+            _showContextMenu(openData);
+        }
+        else
+        {
+            _contextMenu.Show(openData.CanUse, openData.ShowUnload, openData.CanUnload, openData.CanEquipPrimaryWeapon, openData.CanEquipSecondaryWeapon, openData.CanEquip, openData.CanUnequip, openData.CanDropStack, openData.ModuleActions, openData.ScreenPosition);
+        }
     }
 
     private void UseContextMenuItem()

@@ -91,11 +91,11 @@ public class ItemInfoPanel : MonoBehaviour, IView<ItemTooltipViewModel>, IBeginD
     private bool _closeButtonSubscribed;
     private bool _isDragging;
     private bool _hasArmorClassInfo;
-    private int _closedByEscapeFrame = -1;
+    private Action _closeAction;
+    private Action _closed;
     private Vector2 _dragPointerOffset;
 
     public bool IsOpen => gameObject.activeSelf;
-    public bool WasClosedByEscapeThisFrame => _closedByEscapeFrame == Time.frameCount;
 
     private IInventoryInput PlayerInput
     {
@@ -126,13 +126,6 @@ public class ItemInfoPanel : MonoBehaviour, IView<ItemTooltipViewModel>, IBeginD
 
     private void Update()
     {
-        if (PlayerInput.IsEscapePressed())
-        {
-            _closedByEscapeFrame = Time.frameCount;
-            Hide();
-            return;
-        }
-
         RefreshArmorClassVisibility();
     }
 
@@ -175,6 +168,16 @@ public class ItemInfoPanel : MonoBehaviour, IView<ItemTooltipViewModel>, IBeginD
         _viewModel.Hide();
     }
 
+    public void SetCloseAction(Action closeAction)
+    {
+        _closeAction = closeAction;
+    }
+
+    public void SetClosedHandler(Action closed)
+    {
+        _closed = closed;
+    }
+
     public void OnBeginDrag(PointerEventData eventData)
     {
         ResolveOptionalReferences();
@@ -212,7 +215,7 @@ public class ItemInfoPanel : MonoBehaviour, IView<ItemTooltipViewModel>, IBeginD
 
         if (IsCloseButtonScreenPoint(eventData.position, eventData.pressEventCamera))
         {
-            Hide();
+            RequestClose();
         }
     }
 
@@ -376,7 +379,18 @@ public class ItemInfoPanel : MonoBehaviour, IView<ItemTooltipViewModel>, IBeginD
         _closeButtonSubscribed = false;
     }
 
-    private void HandleCloseClicked() => Hide();
+    private void HandleCloseClicked() => RequestClose();
+
+    private void RequestClose()
+    {
+        if (_closeAction != null)
+        {
+            _closeAction();
+            return;
+        }
+
+        Hide();
+    }
 
     private bool CanDragFromEvent(PointerEventData eventData)
     {
@@ -561,6 +575,8 @@ public class ItemInfoPanel : MonoBehaviour, IView<ItemTooltipViewModel>, IBeginD
 
     private void SetVisible(bool visible)
     {
+        bool wasOpen = gameObject.activeSelf;
+
         if (visible == false)
         {
             _hasArmorClassInfo = false;
@@ -568,6 +584,11 @@ public class ItemInfoPanel : MonoBehaviour, IView<ItemTooltipViewModel>, IBeginD
         }
 
         gameObject.SetActive(visible);
+
+        if (wasOpen && visible == false)
+        {
+            _closed?.Invoke();
+        }
 
         if (visible)
         {
